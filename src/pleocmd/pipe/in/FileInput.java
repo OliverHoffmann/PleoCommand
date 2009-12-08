@@ -1,0 +1,66 @@
+package pleocmd.pipe.in;
+
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+import pleocmd.Log;
+import pleocmd.exc.InputException;
+import pleocmd.pipe.Config;
+import pleocmd.pipe.ConfigEnum;
+import pleocmd.pipe.ConfigPath;
+import pleocmd.pipe.Data;
+
+public final class FileInput extends Input {
+
+	private File file;
+
+	private ReadType type;
+
+	private DataInputStream in;
+
+	public FileInput() {
+		super(new Config().addV(
+				new ConfigPath("File", ConfigPath.PathType.FileForReading))
+				.addV(new ConfigEnum("ReadType", ReadType.values())));
+	}
+
+	@Override
+	protected void configured0() {
+		file = new File(((ConfigPath) getConfig().get(0)).getContent());
+		type = ReadType.values()[((ConfigEnum) getConfig().get(1)).getContent()];
+	}
+
+	@Override
+	protected void init0() throws IOException {
+		Log.detail("Opening file " + file + " for input");
+		in = new DataInputStream(new FileInputStream(file));
+	}
+
+	@Override
+	protected void close0() throws IOException {
+		Log.detail("Closing file " + file);
+		in.close();
+		in = null;
+	}
+
+	@Override
+	protected boolean canReadData0() throws IOException {
+		return in.available() > 0;
+	}
+
+	@Override
+	protected Data readData0() throws InputException, IOException {
+		switch (type) {
+		case Ascii:
+			return Data.createFromAscii(in);
+		case Binary:
+			return Data.createFromBinary(in);
+		default:
+			throw new InputException(this, true,
+					"Internal error: Invalid read-type");
+		}
+	}
+
+}

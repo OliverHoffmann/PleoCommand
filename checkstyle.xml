@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE module
+	PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.1//EN"
+	"http://www.puppycrawl.com/dtds/configuration_1_1.dtd">
+
+<module name="Checker">
+
+	<module name="TreeWalker">
+		<property name="tabWidth" value="4" />
+
+		<!-- Annotations -->
+
+		<!-- Block Checks -->
+		<module name="AvoidNestedBlocks" />
+
+		<!-- Class Design -->
+		<module name="VisibilityModifier" />
+		<module name="FinalClass" />
+		<module name="InterfaceIsType" />
+		<module name="HideUtilityClassConstructor" />
+		<module name="DesignForExtension" />
+		<module name="MutableException">
+			<!-- <property name="format" value="^.*$" /> -->
+		</module>
+		<module name="ThrowsCount">
+			<property name="max" value="2" />
+		</module>
+
+		<!-- Coding -->
+		<module name="CovariantEquals" />
+		<module name="EqualsAvoidNull" />
+		<module name="EqualsHashCode" />
+		<module name="FinalLocalVariable" />
+		<module name="InnerAssignment" />
+		<!-- <module name="MagicNumber" /> -->
+		<module name="MissingSwitchDefault" />
+		<module name="ModifiedControlVariable" />
+		<!-- <module name="RedundantThrows" />  -->
+		<module name="SimplifyBooleanExpression" />
+		<module name="SimplifyBooleanReturn" />
+		<module name="StringLiteralEquality" />
+		<!-- <module name="NestedIfDepth" /> -->
+		<!-- <module name="NestedTryDepth" /> -->
+		<module name="NoClone" />
+		<!-- <module name="NoFinalizer" /> -->
+		<module name="SuperClone" />
+		<module name="SuperFinalize" />
+		<module name="IllegalCatch" />
+		<module name="IllegalThrows" />
+		<module name="PackageDeclaration" />
+		<module name="JUnitTestCase" />
+		<!-- <module name="ReturnCount" /> -->
+		<module name="IllegalType">
+			<property name="ignoredMethodNames" value="" />
+		</module>
+		<module name="DeclarationOrder" />
+		<module name="ParameterAssignment" />
+		<module name="ExplicitInitialization" />
+		<module name="DefaultComesLast" />
+		<!-- <module name="MissingCtor" /> -->
+		<module name="FallThrough" />
+		<!-- <module name="MultipleStringLiterals" /> -->
+		<!-- <module name="MultipleVariableDeclarations" />  -->
+		<module name="UnnecessaryParentheses" />
+		<!--- ....... -->
+
+		<!-- Imports -->
+		<module name="AvoidStarImport" />
+		<module name="AvoidStaticImport" />
+		<module name="IllegalImport" />
+		<module name="RedundantImport" />
+		<module name="UnusedImports" />
+		<module name="ImportOrder" />
+
+		<!-- Javadoc Comments -->
+
+		<!-- Metrics -->
+		<!-- <module name="BooleanExpressionComplexity" /> -->
+		<!-- <module name="ClassDataAbstractionCoupling" /> -->
+		<!-- <module name="ClassFanOutComplexity" /> -->
+		<!-- <module name="CyclomaticComplexity" /> -->
+		<!-- <module name="NPathComplexity" /> -->
+		<!-- <module name="JavaNCSS" /> -->
+
+		<!-- Miscellaneous -->
+		<!-- <module name="UncommentedMain" /> -->
+		<module name="UpperEll" />
+		<module name="ArrayTypeStyle" />
+		<module name="FinalParameters" />
+		<module name="Regexp">
+			<property name="format" value="System\.out\.print" />
+			<property name="illegalPattern" value="true" />
+		</module>
+		<module name="Regexp">
+			<property name="format" value="printStackTrace" />
+			<property name="illegalPattern" value="true" />
+		</module>
+
+		<!-- Modifiers -->
+		<module name="ModifierOrder" />
+		<module name="RedundantModifier" />
+
+		<!-- Naming Conventions -->
+		<!-- <module name="AbstractClassName" /> -->
+		<module name="ClassTypeParameterName" />
+		<module name="ConstantName" />
+		<module name="LocalFinalVariableName" />
+		<module name="LocalVariableName" />
+		<module name="MemberName" />
+		<module name="MethodName" />
+		<module name="MethodTypeParameterName" />
+		<module name="PackageName" />
+		<module name="ParameterName" />
+		<module name="StaticVariableName" />
+		<module name="TypeName" />
+
+		<!-- Regexp -->
+
+		<!-- Size Violations -->
+		<!-- <module name="ExecutableStatementCount" /> -->
+		<!-- <module name="MethodLength" /> -->
+		<!-- <module name="AnonInnerLength" /> -->
+		<module name="ParameterNumber" />
+		<module name="OuterTypeNumber" />
+
+		<!-- Whitespace -->
+
+	</module>
+
+	<!-- Duplicate Code -->
+	<module name="StrictDuplicateCode" />
+
+	<!-- Header -->
+
+	<!-- Miscellaneous -->
+	<module name="NewlineAtEndOfFile" />
+
+	<!-- Size Violations -->
+	<module name="FileLength" />
+
+	<module name="SuppressionFilter">
+		<property name="file" value="suppressions.xml" />
+	</module>
+
+</module>

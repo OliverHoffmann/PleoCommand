@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="PleoCommand" default="build" basedir=".">
+
+	<property name="verb" value="no" />
+
+	<property name="src" location="src" />
+	<property name="bin" location="bin" />
+	<property name="lib" location="lib" />
+
+	<taskdef resource="checkstyletask.properties"
+	         classpath="${lib}/checkstyle-all-5.0.jar" />
+
+	<taskdef name="jsmoothgen"
+	         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
+	         classpath="${lib}/jsmoothgen-ant.jar" />
+
+	<target name="clean">
+		<delete dir="${bin}" verbose="${verb}" />
+		<delete file="${ant.project.name}.jar" verbose="${verb}" />
+	</target>
+
+	<target name="build">
+		<checkstyle config="checkstyle.xml" failonviolation="false">
+			<fileset dir="${src}" includes="**/*.java" />
+		</checkstyle>
+		<mkdir dir="${bin}" />
+		<javac srcdir="${src}"
+		       destdir="${bin}"
+		       verbose="${verb}"
+		       classpath="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
+	</target>
+
+	<target name="dist" depends="build">
+		<delete file="${ant.project.name}.jar" verbose="${verb}" />
+		<jar jarfile="${ant.project.name}.jar"
+		     basedir="${bin}"
+		     duplicate="fail"
+		     strict="warn">
+			<manifest>
+				<attribute name="Implementation-Vendor" value="${user.name}" />
+				<attribute name="Implementation-Title"
+				           value="${ant.project.name}" />
+				<attribute name="Implementation-Version"
+				           value="0.1 @ ${java.vm.name} ${os.name}-${os.version}" />
+				<attribute name="Main-Class" value="pleocmd.Main" />
+			</manifest>
+		</jar>
+		<echoxml file="${bin}/${ant.project.name}.jsmooth">
+			<jsmoothproject>
+				<classPath>/usr/share/rxtx-2/lib/RXTXcomm.jar</classPath>
+				<executableName>${ant.project.name}.exe</executableName>
+				<mainClassName>pleocmd.Main</mainClassName>
+				<minimumVersion>1.5</minimumVersion>
+				<skeletonName>Windowed Wrapper</skeletonName>
+			</jsmoothproject>
+		</echoxml>
+		<jsmoothgen skeletonroot="${lib}/skeletons"
+		            verbose="${verb}"
+		            project="${bin}/${ant.project.name}.jsmooth" />
+	</target>
+
+	<target name="rebuild" depends="clean,build">
+	</target>
+
+</project>
