@@ -4,9 +4,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -18,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 
 import pleocmd.Log;
+import pleocmd.StandardInput;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 
@@ -40,6 +45,10 @@ public final class GUIFrame extends JFrame {
 
 	private final JTextField consoleInput;
 
+	private final JButton btnStart;
+
+	private Thread pipeThread;
+
 	private GUIFrame() {
 		// this two lines should be the first to avoid missing some log entries
 		logModel = new LogTableModel();
@@ -53,7 +62,7 @@ public final class GUIFrame extends JFrame {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				close();
+				exit();
 			}
 		});
 
@@ -75,7 +84,7 @@ public final class GUIFrame extends JFrame {
 		btnCfgChange.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				config();
+				changeConfig();
 			}
 		});
 		add(btnCfgChange, gbc);
@@ -83,15 +92,8 @@ public final class GUIFrame extends JFrame {
 		final JButton btnCfgSave = new JButton("Save To ...");
 		btnCfgSave.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final JFileChooser fc = new JFileChooser();
-				if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
-					try {
-						pipe.writeToFile(fc.getSelectedFile());
-					} catch (final IOException exc) {
-						Log.error(exc);
-					}
+				writeConfigToFile();
 			}
 		});
 		add(btnCfgSave, gbc);
@@ -103,18 +105,8 @@ public final class GUIFrame extends JFrame {
 		final JButton btnCfgLoad = new JButton("Load From ...");
 		btnCfgLoad.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final JFileChooser fc = new JFileChooser();
-				if (fc.showOpenDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
-					try {
-						pipe.readFromFile(fc.getSelectedFile());
-						updatePipeLabel();
-					} catch (final IOException exc) {
-						Log.error(exc);
-					} catch (final PipeException exc) {
-						Log.error(exc);
-					}
+				readConfigFromFile();
 			}
 		});
 		add(btnCfgLoad, gbc);
@@ -137,21 +129,11 @@ public final class GUIFrame extends JFrame {
 
 		++gbc.gridy;
 		gbc.gridx = 0;
-		final JButton btnStart = new JButton("Start");
+		btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				// TODO put in extra thread
-				try {
-					pipe.configuredAll();
-					pipe.initializeAll();
-				} catch (final PipeException exc) {
-					Log.error(exc);
-					return;
-				}
-				pipe.pipeAllData();
-				pipe.closeAll();
+				startPipeThread();
 			}
 		});
 		add(btnStart, gbc);
@@ -159,15 +141,8 @@ public final class GUIFrame extends JFrame {
 		final JButton btnLogSave = new JButton("Save To ...");
 		btnLogSave.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final JFileChooser fc = new JFileChooser();
-				if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
-					try {
-						logModel.writeToFile(fc.getSelectedFile());
-					} catch (final IOException exc) {
-						Log.error(exc);
-					}
+				writeLogToFile();
 			}
 		});
 		add(btnLogSave, gbc);
@@ -179,9 +154,8 @@ public final class GUIFrame extends JFrame {
 		final JButton btnLogClear = new JButton("Clear");
 		btnLogClear.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				logModel.clear();
+				clearLog();
 			}
 		});
 		add(btnLogClear, gbc);
@@ -190,6 +164,12 @@ public final class GUIFrame extends JFrame {
 		gbc.gridx = 0;
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		consoleInput = new JTextField();
+		consoleInput.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyPressed(final KeyEvent e) {
+				if (e.getKeyCode() == KeyEvent.VK_ENTER) putConsoleInput();
+			}
+		});
 		add(consoleInput, gbc);
 		gbc.gridwidth = 1;
 
@@ -199,7 +179,7 @@ public final class GUIFrame extends JFrame {
 		btnSendEOS.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				// TODO
+				closeConsoleInput();
 			}
 		});
 		add(btnSendEOS, gbc);
@@ -208,7 +188,7 @@ public final class GUIFrame extends JFrame {
 		btnConsoleRead.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				// TODO
+				readConsoleInputFromFile();
 			}
 		});
 		add(btnConsoleRead, gbc);
@@ -221,7 +201,7 @@ public final class GUIFrame extends JFrame {
 		btnExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				close();
+				exit();
 			}
 		});
 		add(btnExit, gbc);
@@ -239,6 +219,7 @@ public final class GUIFrame extends JFrame {
 		} catch (final PipeException e) {
 			Log.error(e);
 		}
+		updatePipeLabel();
 
 		Log.detail("GUI-Frame created");
 		setVisible(true);
@@ -253,14 +234,6 @@ public final class GUIFrame extends JFrame {
 		return guiFrame != null;
 	}
 
-	public boolean config() {
-		Log.detail("GUI-Frame starts configuration");
-		final boolean ok = new ConfigFrame(pipe).isOkPressed();
-		Log.detail("GUI-Frame is done with configuration: " + ok);
-		updatePipeLabel();
-		return ok;
-	}
-
 	private void updatePipeLabel() {
 		pipeLabel.setText(String.format(
 				"Pipe has %d input%s, %d converter and %d output%s", pipe
@@ -271,7 +244,118 @@ public final class GUIFrame extends JFrame {
 				pipe.getOutputList().size() == 1 ? "" : "s"));
 	}
 
-	public void close() {
+	public boolean changeConfig() {
+		Log.detail("GUI-Frame starts configuration");
+		final boolean ok = new ConfigFrame(pipe).isOkPressed();
+		Log.detail("GUI-Frame is done with configuration: " + ok);
+		updatePipeLabel();
+		return ok;
+	}
+
+	public void writeConfigToFile() {
+		final JFileChooser fc = new JFileChooser();
+		if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
+			try {
+				pipe.writeToFile(fc.getSelectedFile());
+			} catch (final IOException exc) {
+				Log.error(exc);
+			}
+	}
+
+	public void readConfigFromFile() {
+		final JFileChooser fc = new JFileChooser();
+		if (fc.showOpenDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
+			try {
+				pipe.readFromFile(fc.getSelectedFile());
+				updatePipeLabel();
+			} catch (final IOException exc) {
+				Log.error(exc);
+			} catch (final PipeException exc) {
+				Log.error(exc);
+			}
+	}
+
+	public void startPipeThread() {
+		if (pipeThread != null)
+			throw new IllegalStateException("Pipe-Thread already running");
+		btnStart.setEnabled(false);
+		pipeThread = new Thread("Pipe-Thread") {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void run() {
+				try {
+					StandardInput.the().close();
+					StandardInput.the().resetCache();
+					pipe.configuredAll();
+					pipe.initializeAll();
+					pipe.pipeAllData();
+					pipe.closeAll();
+				} catch (final Throwable t) {
+					Log.error(t);
+				}
+				synchronized (this) {
+					pipeThread = null;
+					btnStart.setEnabled(true);
+				}
+			}
+		};
+		pipeThread.start();
+	}
+
+	public void writeLogToFile() {
+		final JFileChooser fc = new JFileChooser();
+		if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
+			try {
+				logModel.writeToFile(fc.getSelectedFile());
+			} catch (final IOException exc) {
+				Log.error(exc);
+			}
+	}
+
+	public void clearLog() {
+		logModel.clear();
+	}
+
+	public void addLog(final Log log) {
+		logModel.addLog(log);
+	}
+
+	public void putConsoleInput() {
+		try {
+			StandardInput.the().put(
+					(consoleInput.getText() + "\n").getBytes("ISO-8859-1"));
+		} catch (final IOException exc) {
+			Log.error(exc);
+		}
+	}
+
+	public void closeConsoleInput() {
+		try {
+			StandardInput.the().close();
+		} catch (final IOException exc) {
+			Log.error(exc);
+		}
+	}
+
+	public void readConsoleInputFromFile() {
+		final JFileChooser fc = new JFileChooser();
+		if (fc.showOpenDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
+			readConsoleInputFromFile(fc.getSelectedFile());
+	}
+
+	public void readConsoleInputFromFile(final File file) {
+		try {
+			final BufferedReader in = new BufferedReader(new FileReader(file));
+			String line;
+			while ((line = in.readLine()) != null)
+				StandardInput.the().put((line + '\n').getBytes("ISO-8859-1"));
+			in.close();
+		} catch (final IOException exc) {
+			Log.error(exc);
+		}
+	}
+
+	public void exit() {
 		Log.detail("GUI-Frame has been closed");
 		try {
 			pipe.writeToFile(new File(System.getProperty("user.home")
@@ -281,10 +365,6 @@ public final class GUIFrame extends JFrame {
 		}
 		guiFrame = null;
 		dispose();
-	}
-
-	public LogTableModel getLogTableModel() {
-		return logModel;
 	}
 
 }

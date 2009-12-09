@@ -31,6 +31,8 @@ public final class Pipe {
 
 	private final List<Converter> converterList = new ArrayList<Converter>();
 
+	private int inputPosition;
+
 	public List<Input> getInputList() {
 		return Collections.unmodifiableList(inputList);
 	}
@@ -59,11 +61,12 @@ public final class Pipe {
 		Log.detail("Reading one data block from input");
 		Input in;
 		while (true) {
-			if (inputList.isEmpty()) {
+			assert inputPosition <= inputList.size();
+			if (inputPosition >= inputList.size()) {
 				Log.detail("InputList is empty");
 				return null;
 			}
-			in = inputList.get(0);
+			in = inputList.get(inputPosition);
 			try {
 				if (in.canReadData()) {
 					final Data res = in.readData();
@@ -75,9 +78,9 @@ public final class Pipe {
 			} catch (final InputException e) {
 				Log.error(e);
 				if (e.isPermanent()) {
-					Log.detail("Removing no longer working input " + in);
+					Log.detail("Skipping no longer working input " + in);
 					in.tryClose();
-					inputList.remove(0);
+					++inputPosition;
 				} else
 					Log.detail("Skipping one data block from input " + in);
 				// try next data packet / try from next input
@@ -87,7 +90,7 @@ public final class Pipe {
 			// switch to the next one
 			Log.detail("Switching to next input");
 			in.tryClose();
-			inputList.remove(0);
+			++inputPosition;
 			// try data packet from next input
 		}
 	}
@@ -202,6 +205,7 @@ public final class Pipe {
 		inputList.clear();
 		outputList.clear();
 		converterList.clear();
+		inputPosition = 0;
 	}
 
 	public void writeToFile(final File file) throws IOException {

@@ -3,6 +3,7 @@ package pleocmd.pipe.in;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import pleocmd.StandardInput;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.ConfigEnum;
@@ -33,16 +34,18 @@ public final class ConsoleInput extends Input {
 
 	@Override
 	protected boolean canReadData0() throws IOException {
-		return System.in.available() > 0;
+		return StandardInput.the().available() > 0;
 	}
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
 		switch (type) {
 		case Ascii:
-			return Data.createFromAscii(new DataInputStream(System.in));
+			return Data
+					.createFromAscii(new DataInputStream(StandardInput.the()));
 		case Binary:
-			return Data.createFromBinary(new DataInputStream(System.in));
+			return Data.createFromBinary(new DataInputStream(StandardInput
+					.the()));
 		default:
 			throw new InputException(this, true,
 					"Internal error: Invalid read-type");

@@ -1,8 +1,10 @@
 package pleocmd.pipe.out;
 
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.ConfigEnum;
@@ -36,21 +38,28 @@ public final class ConsoleOutput extends Output {
 	@Override
 	protected void writeCommand0(final Command command) throws OutputException,
 			IOException {
+
 		switch (type) {
-		case DataBinary:
-			command.getData().writeToBinary(new DataOutputStream(System.out));
+		case DataBinary: {
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			command.getData().writeToAscii(new DataOutputStream(out));
+			Log.consoleOut(new String(out.toByteArray(), "ISO-8859-1"));
 			break;
-		case DataAscii:
-			command.getData().writeToAscii(new DataOutputStream(System.out));
+		}
+		case DataAscii: {
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			command.getData().writeToAscii(new DataOutputStream(out));
+			Log.consoleOut(new String(out.toByteArray(), "ISO-8859-1"));
 			break;
+		}
 		case DataHumanReadable:
-			System.out.println(command.getData());
+			Log.consoleOut(command.getData().toString());
 			break;
 		case Command:
-			System.out.println(command.asPleoMonitorCommand());
+			Log.consoleOut(command.asPleoMonitorCommand().toString());
 			break;
 		case CommandHumanReadable:
-			System.out.println(command);
+			Log.consoleOut(command.toString());
 			break;
 		default:
 			throw new OutputException(this, true,

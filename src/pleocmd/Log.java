@@ -5,7 +5,7 @@ import pleocmd.itfc.gui.GUIFrame;
 public final class Log {
 
 	public enum Type {
-		Detail, Info, Warn, Error
+		Detail, Info, Warn, Error, Console
 	}
 
 	private static final boolean PRINT_DETAIL = true;
@@ -39,13 +39,14 @@ public final class Log {
 		case Detail:
 			return "#A0A0A0"; // gray
 		case Info:
-			return "#000000"; // black
+			return "#0000FF"; // blue
 		case Warn:
 			return "#FFA020"; // orange
 		case Error:
 			return "#FF0000"; // red
+		case Console:
 		default:
-			return "#000000";
+			return "#000000"; // black
 		}
 	}
 
@@ -59,6 +60,8 @@ public final class Log {
 			return "WRN";
 		case Error:
 			return "ERR";
+		case Console:
+			return " > ";
 		default:
 			return "!?!";
 		}
@@ -69,11 +72,19 @@ public final class Log {
 		return String.format("%s %-50s %s", getTypeShortString(), caller, msg);
 	}
 
+	/**
+	 * Print messages to the GUI's log, if any, or otherwise to the standard
+	 * error.<br>
+	 * Always print messages of type Console to the standard output (instead of
+	 * standard error) no matter if a GUI exists or not.
+	 */
 	private void process() {
-		if (type != Type.Detail || PRINT_DETAIL) if (GUIFrame.hasGUI())
-			GUIFrame.the().getLogTableModel().addLog(this);
-		else
-			System.err.println(toString());
+		if (type != Type.Detail || PRINT_DETAIL) {
+			if (type == Type.Console) System.out.println(getMsg());
+			if (GUIFrame.hasGUI())
+				GUIFrame.the().addLog(this);
+			else if (type != Type.Console) System.err.println(toString());
+		}
 	}
 
 	public static void detail(final String msg) {
@@ -90,6 +101,10 @@ public final class Log {
 
 	public static void error(final String msg) {
 		msg(Type.Error, msg);
+	}
+
+	public static void consoleOut(final String msg) {
+		msg(Type.Console, msg);
 	}
 
 	public static void error(final Throwable throwable) {
