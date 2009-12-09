@@ -36,11 +36,14 @@ public final class GUIFrame extends JFrame {
 
 	private final JTable logTable;
 
+	private final LogTableModel logModel;
+
 	private final JTextField consoleInput;
 
 	private GUIFrame() {
 		// this two lines should be the first to avoid missing some log entries
-		logTable = new JTable(new LogTableModel());
+		logModel = new LogTableModel();
+		logTable = new JTable(logModel);
 		guiFrame = this;
 
 		Log.detail("Creating GUI-Frame");
@@ -80,6 +83,7 @@ public final class GUIFrame extends JFrame {
 		final JButton btnCfgSave = new JButton("Save To ...");
 		btnCfgSave.addActionListener(new ActionListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
 				final JFileChooser fc = new JFileChooser();
 				if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
@@ -136,7 +140,9 @@ public final class GUIFrame extends JFrame {
 		final JButton btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
+				// TODO put in extra thread
 				try {
 					pipe.configuredAll();
 					pipe.initializeAll();
@@ -153,7 +159,15 @@ public final class GUIFrame extends JFrame {
 		final JButton btnLogSave = new JButton("Save To ...");
 		btnLogSave.addActionListener(new ActionListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
+				final JFileChooser fc = new JFileChooser();
+				if (fc.showSaveDialog(GUIFrame.this) == JFileChooser.APPROVE_OPTION)
+					try {
+						logModel.writeToFile(fc.getSelectedFile());
+					} catch (final IOException exc) {
+						Log.error(exc);
+					}
 			}
 		});
 		add(btnLogSave, gbc);
@@ -165,7 +179,9 @@ public final class GUIFrame extends JFrame {
 		final JButton btnLogClear = new JButton("Clear");
 		btnLogClear.addActionListener(new ActionListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
+				logModel.clear();
 			}
 		});
 		add(btnLogClear, gbc);
@@ -183,6 +199,7 @@ public final class GUIFrame extends JFrame {
 		btnSendEOS.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
+				// TODO
 			}
 		});
 		add(btnSendEOS, gbc);
@@ -191,6 +208,7 @@ public final class GUIFrame extends JFrame {
 		btnConsoleRead.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
+				// TODO
 			}
 		});
 		add(btnConsoleRead, gbc);
@@ -266,7 +284,7 @@ public final class GUIFrame extends JFrame {
 	}
 
 	public LogTableModel getLogTableModel() {
-		return (LogTableModel) logTable.getModel();
+		return logModel;
 	}
 
 }

@@ -61,7 +61,7 @@ public final class BinaryDataValue extends Value {
 		return val;
 	}
 
-	public static boolean isValidChar(final byte b) {
+	public static boolean isValidChar(@SuppressWarnings("unused") final byte b) {
 		return true;
 	}
 

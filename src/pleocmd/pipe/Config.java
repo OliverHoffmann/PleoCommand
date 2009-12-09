@@ -34,6 +34,8 @@ public final class Config extends AbstractList<ConfigValue> {
 	 * Should only be called in a constructor of a subclass of {@link PipePart}.
 	 */
 	public Config() {
+		assert new Throwable().getStackTrace()[1].getClassName().startsWith(
+				getClass().getPackage().getName() + ".");
 	}
 
 	@Override

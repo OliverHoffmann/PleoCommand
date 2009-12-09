@@ -30,6 +30,7 @@ public final class ConsoleOutput extends Output {
 
 	@Override
 	protected void close0() {
+		// nothing to do
 	}
 
 	@Override

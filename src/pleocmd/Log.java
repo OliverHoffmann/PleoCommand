@@ -4,30 +4,92 @@ import pleocmd.itfc.gui.GUIFrame;
 
 public final class Log {
 
-	public enum MsgType {
+	public enum Type {
 		Detail, Info, Warn, Error
 	}
 
 	private static final boolean PRINT_DETAIL = true;
 
-	private Log() {
+	private final Type type;
 
+	private final String caller;
+
+	private final String msg;
+
+	private Log(final Type type, final String caller, final String msg) {
+		this.type = type;
+		this.caller = caller;
+		this.msg = msg;
+	}
+
+	public Type getType() {
+		return type;
+	}
+
+	public String getCaller() {
+		return caller;
+	}
+
+	public String getMsg() {
+		return msg;
+	}
+
+	public String getTypeColor() {
+		switch (type) {
+		case Detail:
+			return "#A0A0A0"; // gray
+		case Info:
+			return "#000000"; // black
+		case Warn:
+			return "#FFA020"; // orange
+		case Error:
+			return "#FF0000"; // red
+		default:
+			return "#000000";
+		}
+	}
+
+	public String getTypeShortString() {
+		switch (type) {
+		case Detail:
+			return "DTL";
+		case Info:
+			return "INF";
+		case Warn:
+			return "WRN";
+		case Error:
+			return "ERR";
+		default:
+			return "!?!";
+		}
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s %-50s %s", getTypeShortString(), caller, msg);
+	}
+
+	private void process() {
+		if (type != Type.Detail || PRINT_DETAIL) if (GUIFrame.hasGUI())
+			GUIFrame.the().getLogTableModel().addLog(this);
+		else
+			System.err.println(toString());
 	}
 
 	public static void detail(final String msg) {
-		msg(MsgType.Detail, msg);
+		msg(Type.Detail, msg);
 	}
 
 	public static void info(final String msg) {
-		msg(MsgType.Info, msg);
+		msg(Type.Info, msg);
 	}
 
 	public static void warn(final String msg) {
-		msg(MsgType.Warn, msg);
+		msg(Type.Warn, msg);
 	}
 
 	public static void error(final String msg) {
-		msg(MsgType.Error, msg);
+		msg(Type.Error, msg);
 	}
 
 	public static void error(final Throwable throwable) {
@@ -43,7 +105,7 @@ public final class Log {
 			sb.append(" caused by ");
 		}
 
-		msg(MsgType.Error, getCallersName(t, 0), sb.toString());
+		new Log(Type.Error, getCallersName(t, 0), sb.toString()).process();
 	}
 
 	private static String getCallersName(final int stepsBack) {
@@ -57,36 +119,8 @@ public final class Log {
 				+ "." + st[stepsBack].getMethodName() + "()";
 	}
 
-	private static void msg(final MsgType type, final String msg) {
-		msg(type, getCallersName(3), msg);
-	}
-
-	private static void msg(final MsgType type, final String caller,
-			final String msg) {
-		if (GUIFrame.hasGUI()) {
-			GUIFrame.the().getLogTableModel().addLog(type, caller, msg);
-			return;
-		}
-		String s;
-		switch (type) {
-		case Detail:
-			if (!PRINT_DETAIL) return;
-			s = "DTL";
-			break;
-		case Info:
-			s = "INF";
-			break;
-		case Warn:
-			s = "WRN";
-			break;
-		case Error:
-			s = "ERR";
-			break;
-		default:
-			s = "!?!";
-			break;
-		}
-		System.err.println(String.format("%s %-50s %s", s, caller, msg));
+	private static void msg(final Type type, final String msg) {
+		new Log(type, getCallersName(3), msg).process();
 	}
 
 }

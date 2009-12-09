@@ -7,10 +7,6 @@ public final class CommandLine {
 
 	private static CommandLine commandLine;
 
-	private CommandLine() {
-
-	}
-
 	public static CommandLine the() {
 		if (commandLine == null) commandLine = new CommandLine();
 		return commandLine;

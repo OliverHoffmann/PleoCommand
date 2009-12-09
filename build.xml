@@ -20,14 +20,14 @@
 	</target>
 
 	<target name="build">
-		<checkstyle config="checkstyle.xml" failonviolation="false">
-			<fileset dir="${src}" includes="**/*.java" />
-		</checkstyle>
 		<mkdir dir="${bin}" />
 		<javac srcdir="${src}"
 		       destdir="${bin}"
 		       verbose="${verb}"
 		       classpath="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
+		<checkstyle config="checkstyle.xml" failonviolation="false">
+			<fileset dir="${src}" includes="**/*.java" />
+		</checkstyle>
 	</target>
 
 	<target name="dist" depends="build">

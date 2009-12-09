@@ -167,7 +167,6 @@ public final class PleoCommunication implements SerialPortEventListener {
 	@SuppressWarnings("unchecked")
 	public static CommPortIdentifier getPort(final String name)
 			throws IOException {
-		final List<CommPortIdentifier> h = new ArrayList<CommPortIdentifier>();
 		final Enumeration<CommPortIdentifier> ports = CommPortIdentifier
 				.getPortIdentifiers();
 		while (ports.hasMoreElements()) {
