@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.cvt.EmotionConverter;
@@ -71,7 +72,8 @@ public final class ConfigFrame extends JDialog {
 		bottom.add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
 
-		final JButton btnOK = new JButton("OK");
+		final JButton btnOK = new JButton("OK", IconLoader
+				.getIcon("dialog-ok.png"));
 		btnOK.addActionListener(new ActionListener() {
 			@Override
 			@SuppressWarnings("synthetic-access")
@@ -91,7 +93,8 @@ public final class ConfigFrame extends JDialog {
 		bottom.add(btnOK, gbc);
 		getRootPane().setDefaultButton(btnOK);
 
-		final JButton btnCancel = new JButton("Cancel");
+		final JButton btnCancel = new JButton("Cancel", IconLoader
+				.getIcon("dialog-cancel.png"));
 		btnCancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {

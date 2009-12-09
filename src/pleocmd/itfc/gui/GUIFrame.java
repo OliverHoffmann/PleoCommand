@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -24,6 +25,7 @@ import javax.swing.JTextField;
 import pleocmd.Log;
 import pleocmd.StandardInput;
 import pleocmd.exc.PipeException;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 
 /**
@@ -80,7 +82,8 @@ public final class GUIFrame extends JFrame {
 
 		++gbc.gridy;
 		gbc.gridx = 0;
-		final JButton btnCfgChange = new JButton("Change");
+		final JButton btnCfgChange = new JButton("Change", IconLoader
+				.getIcon("document-edit.png"));
 		btnCfgChange.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -89,7 +92,8 @@ public final class GUIFrame extends JFrame {
 		});
 		add(btnCfgChange, gbc);
 		++gbc.gridx;
-		final JButton btnCfgSave = new JButton("Save To ...");
+		final JButton btnCfgSave = new JButton("Save To ...", IconLoader
+				.getIcon("document-save-as.png"));
 		btnCfgSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -102,7 +106,8 @@ public final class GUIFrame extends JFrame {
 		add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
 		++gbc.gridx;
-		final JButton btnCfgLoad = new JButton("Load From ...");
+		final JButton btnCfgLoad = new JButton("Load From ...", IconLoader
+				.getIcon("document-open.png"));
 		btnCfgLoad.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -129,7 +134,7 @@ public final class GUIFrame extends JFrame {
 
 		++gbc.gridy;
 		gbc.gridx = 0;
-		btnStart = new JButton("Start");
+		btnStart = new JButton("Start", IconLoader.getIcon("arrow-right.png"));
 		btnStart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -138,7 +143,8 @@ public final class GUIFrame extends JFrame {
 		});
 		add(btnStart, gbc);
 		++gbc.gridx;
-		final JButton btnLogSave = new JButton("Save To ...");
+		final JButton btnLogSave = new JButton("Save To ...", IconLoader
+				.getIcon("document-save-as.png"));
 		btnLogSave.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -151,7 +157,8 @@ public final class GUIFrame extends JFrame {
 		add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
 		++gbc.gridx;
-		final JButton btnLogClear = new JButton("Clear");
+		final JButton btnLogClear = new JButton("Clear", IconLoader
+				.getIcon("archive-remove.png"));
 		btnLogClear.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -175,7 +182,8 @@ public final class GUIFrame extends JFrame {
 
 		++gbc.gridy;
 		gbc.gridx = 0;
-		final JButton btnSendEOS = new JButton("Send EOS");
+		final JButton btnSendEOS = new JButton("Send EOS", IconLoader
+				.getIcon("media-playback-stop.png"));
 		btnSendEOS.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -184,7 +192,8 @@ public final class GUIFrame extends JFrame {
 		});
 		add(btnSendEOS, gbc);
 		++gbc.gridx;
-		final JButton btnConsoleRead = new JButton("Read From ...");
+		final JButton btnConsoleRead = new JButton("Read From ...", IconLoader
+				.getIcon("document-import.png"));
 		btnConsoleRead.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -197,7 +206,8 @@ public final class GUIFrame extends JFrame {
 		add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
 		++gbc.gridx;
-		final JButton btnExit = new JButton("Exit");
+		final JButton btnExit = new JButton("Exit", IconLoader
+				.getIcon("application-exit.png"));
 		btnExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -275,7 +285,7 @@ public final class GUIFrame extends JFrame {
 			}
 	}
 
-	public void startPipeThread() {
+	public synchronized void startPipeThread() {
 		if (pipeThread != null)
 			throw new IllegalStateException("Pipe-Thread already running");
 		btnStart.setEnabled(false);
@@ -293,10 +303,15 @@ public final class GUIFrame extends JFrame {
 				} catch (final Throwable t) {
 					Log.error(t);
 				}
-				synchronized (this) {
+				synchronized (GUIFrame.this) {
 					pipeThread = null;
-					btnStart.setEnabled(true);
 				}
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						btnStart.setEnabled(true);
+					}
+				});
 			}
 		};
 		pipeThread.start();
@@ -317,7 +332,15 @@ public final class GUIFrame extends JFrame {
 	}
 
 	public void addLog(final Log log) {
-		logModel.addLog(log);
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void run() {
+				logModel.addLog(log);
+				logTable.scrollRectToVisible(logTable.getCellRect(logModel
+						.getRowCount() - 1, 0, true));
+			}
+		});
 	}
 
 	public void putConsoleInput() {

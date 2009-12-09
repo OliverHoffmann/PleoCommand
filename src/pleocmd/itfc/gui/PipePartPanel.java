@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.util.List;
 
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -17,13 +16,12 @@ import javax.swing.JPopupMenu;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.PipePart;
 
 public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private static final long serialVersionUID = 1806583246927239923L;
-
-	private static final String ICON_PATH = "/usr/share/icons/oxygen/16x16/actions/";
 
 	private final DefaultListModel listmodel;
 
@@ -35,6 +33,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		gbc.gridwidth = 8;
+		// TODO replace with JTable
 		listmodel = new DefaultListModel(); // TODO display more than just the
 		// component's name (part of config, ...)
 		final JList list = new JList(listmodel);
@@ -45,8 +44,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		gbc.gridy = 1;
 
 		gbc.gridx = 0;
-		final JButton add = new JButton("Add", new ImageIcon(ICON_PATH
-				+ "list-add.png"));
+		final JButton add = new JButton("Add", IconLoader
+				.getIcon("list-add.png"));
 		add.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e1) {
@@ -87,8 +86,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		gbc.gridx = 1;
 		add(add, gbc);
 
-		final JButton remove = new JButton("Remove", new ImageIcon(ICON_PATH
-				+ "list-remove.png"));
+		final JButton remove = new JButton("Remove", IconLoader
+				.getIcon("list-remove.png"));
 		gbc.gridx = 2;
 		add(remove, gbc);
 		remove.addActionListener(new ActionListener() {
@@ -100,8 +99,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			}
 		});
 
-		final JButton modify = new JButton("Modify", new ImageIcon(ICON_PATH
-				+ "document-edit.png"));
+		final JButton modify = new JButton("Modify", IconLoader
+				.getIcon("document-edit.png"));
 		gbc.gridx = 3;
 		add(modify, gbc);
 		modify.addActionListener(new ActionListener() {
@@ -119,8 +118,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			}
 		});
 
-		final JButton up = new JButton("Up", new ImageIcon(ICON_PATH
-				+ "arrow-up.png"));
+		final JButton up = new JButton("Up", IconLoader.getIcon("arrow-up.png"));
 		gbc.gridx = 4;
 		add(up, gbc);
 		up.addActionListener(new ActionListener() {
@@ -135,8 +133,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			}
 		});
 
-		final JButton down = new JButton("Down", new ImageIcon(ICON_PATH
-				+ "arrow-down.png"));
+		final JButton down = new JButton("Down", IconLoader
+				.getIcon("arrow-down.png"));
 		gbc.gridx = 5;
 		add(down, gbc);
 		down.addActionListener(new ActionListener() {
@@ -155,8 +153,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		gbc.weightx = 1.0;
 		add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
-		final JButton clear = new JButton("Clear", new ImageIcon(ICON_PATH
-				+ "archive-remove.png"));
+		final JButton clear = new JButton("Clear", IconLoader
+				.getIcon("archive-remove.png"));
 		gbc.gridx = 7;
 		add(clear, gbc);
 		clear.addActionListener(new ActionListener() {
