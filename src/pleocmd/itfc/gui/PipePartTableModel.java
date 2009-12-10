@@ -7,13 +7,14 @@ import javax.swing.table.AbstractTableModel;
 
 import pleocmd.pipe.PipePart;
 
-public class PipePartTableModel<E extends PipePart> extends AbstractTableModel {
+public final class PipePartTableModel<E extends PipePart> extends
+		AbstractTableModel {
 
 	private static final long serialVersionUID = -815026047488409255L;
 
 	private final List<E> list = new ArrayList<E>();
 
-	private int maxConfigs = 0;
+	private int maxConfigs;
 
 	@Override
 	public int getColumnCount() {

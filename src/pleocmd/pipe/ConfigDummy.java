@@ -4,7 +4,7 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.io.IOException;
 
-public class ConfigDummy extends ConfigValue {
+public final class ConfigDummy extends ConfigValue {
 
 	public ConfigDummy() {
 		super("");

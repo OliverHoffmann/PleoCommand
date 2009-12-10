@@ -6,12 +6,21 @@
 <suppressions>
 
 	<!-- Needed there because it's the only way to print error during app exit -->
-	<suppress checks="Regexp" files="GUIFrame.java" lines="250-280" />
+	<suppress id="SystemPrintCheck" files="GUIFrame.java" lines="380-400" />
+
+	<!-- This is the only class where data gets written to stdout/stderr -->
+	<suppress id="SystemPrintCheck" files="Log.java" />
+
+	<!-- This is the only class where data gets read from stdin -->
+	<suppress id="SystemPrintCheck" files="StandardInput.java" />
+
+	<!-- Need to catch Throwable at end of thread -->
+	<suppress checks="IllegalCatch" files="GUIFrame.java" lines="300-320" />
 
 	<!-- Need to declare Throwable in finalize() -->
 	<suppress checks="IllegalThrows" files="PipePart.java" lines="110-130" />
 
-	<!-- Need to be overridable -->
+	<!-- as...() methods need to be overridable -->
 	<suppress checks="DesignForExtension" files="Value.java" lines="15-35" />
 
 </suppressions>

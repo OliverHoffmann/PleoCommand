@@ -4,9 +4,13 @@
 	"http://www.puppycrawl.com/dtds/configuration_1_1.dtd">
 
 <module name="Checker">
+	<property name="charset" value="UTF-8" />
+	<property name="localeCountry" value="EN" />
+	<property name="localeLanguage" value="en" />
 
 	<module name="TreeWalker">
 		<property name="tabWidth" value="4" />
+		<property name="cacheFile" value="bin/checkstyle.cache" />
 
 		<!-- Annotations -->
 
@@ -88,7 +92,8 @@
 		<module name="ArrayTypeStyle" />
 		<module name="FinalParameters" />
 		<module name="Regexp">
-			<property name="format" value="System\.out\.print" />
+			<property name="id" value="SystemPrintCheck" />
+			<property name="format" value="\WSystem\.(in|out|err)\W" />
 			<property name="illegalPattern" value="true" />
 		</module>
 		<module name="Regexp">
