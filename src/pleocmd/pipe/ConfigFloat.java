@@ -37,7 +37,7 @@ public final class ConfigFloat extends ConfigValue {
 	}
 
 	@Override
-	public String toString() {
+	public String getContentAsString() {
 		return String.valueOf(content);
 	}
 

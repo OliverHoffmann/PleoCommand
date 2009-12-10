@@ -43,6 +43,11 @@ public final class Config extends AbstractList<ConfigValue> {
 		return list.get(index);
 	}
 
+	public ConfigValue getSafe(final int index) {
+		if (index < 0 || index >= list.size()) return new ConfigDummy();
+		return list.get(index);
+	}
+
 	@Override
 	public int size() {
 		return list.size();
@@ -160,7 +165,7 @@ public final class Config extends AbstractList<ConfigValue> {
 			out.write(v.getLabel());
 			out.write(':');
 			out.write(' ');
-			out.write(v.toString());
+			out.write(v.getContentAsString());
 			out.write('\n');
 		}
 	}

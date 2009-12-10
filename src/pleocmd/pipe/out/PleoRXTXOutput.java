@@ -35,7 +35,7 @@ public final class PleoRXTXOutput extends Output {
 
 	@Override
 	protected void configured0() {
-		device = getConfig().get(0).toString();
+		device = getConfig().get(0).getContentAsString();
 	}
 
 	@Override

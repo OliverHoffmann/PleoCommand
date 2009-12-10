@@ -24,7 +24,7 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public String toString() {
+	public String getContentAsString() {
 		return content;
 	}
 

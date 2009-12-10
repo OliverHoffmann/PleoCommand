@@ -16,8 +16,7 @@ public abstract class ConfigValue {
 		return label;
 	}
 
-	@Override
-	public abstract String toString();
+	public abstract String getContentAsString();
 
 	public abstract void insertGUIComponents(final Container cntr,
 			final GridBagConstraints gbc);
@@ -25,5 +24,12 @@ public abstract class ConfigValue {
 	public abstract void setFromGUIComponents(final Container cntr);
 
 	protected abstract void setFromString(String content) throws IOException;
+
+	@Override
+	public final String toString() {
+		final String str = getContentAsString();
+		return str == null ? getLabel() : getLabel() + ": "
+				+ getContentAsString();
+	}
 
 }

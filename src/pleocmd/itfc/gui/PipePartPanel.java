@@ -4,15 +4,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
@@ -23,9 +22,17 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private static final long serialVersionUID = 1806583246927239923L;
 
-	private final DefaultListModel listmodel;
+	private final JTable table;
+
+	private final PipePartTableModel<E> tableModel;
+
+	private final Class<E>[] availableParts;
+
+	private final JButton btnAdd;
 
 	public PipePartPanel(final Class<E>[] availableParts) {
+		this.availableParts = availableParts;
+
 		setLayout(new GridBagLayout());
 		final GridBagConstraints gbc = ConfigFrame.initGBC();
 		gbc.gridx = 0;
@@ -33,58 +40,28 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		gbc.weightx = 1.0;
 		gbc.weighty = 1.0;
 		gbc.gridwidth = 8;
-		// TODO replace with JTable
-		listmodel = new DefaultListModel(); // TODO display more than just the
-		// component's name (part of config, ...)
-		final JList list = new JList(listmodel);
-		add(list, gbc);
+		tableModel = new PipePartTableModel<E>();
+		table = new JTable(tableModel);
+		table.getTableHeader().setVisible(false);
+		table.setShowGrid(false);
+		table.setColumnSelectionAllowed(false);
+		add(new JScrollPane(table), gbc);
 		gbc.gridwidth = 1;
 		gbc.weightx = 0.0;
 		gbc.weighty = 0.0;
 		gbc.gridy = 1;
 
 		gbc.gridx = 0;
-		final JButton add = new JButton("Add", IconLoader
-				.getIcon("list-add.png"));
-		add.addActionListener(new ActionListener() {
+		btnAdd = new JButton("Add", IconLoader.getIcon("list-add.png"));
+		btnAdd.addActionListener(new ActionListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e1) {
-				final JPopupMenu menu = new JPopupMenu();
-				for (final Class<E> part : availableParts) {
-					final JMenuItem item = new JMenuItem(part.getSimpleName());
-					menu.add(item);
-					item.addActionListener(new ActionListener() {
-						@Override
-						@SuppressWarnings("synthetic-access")
-						public void actionPerformed(final ActionEvent e2) {
-							E pp;
-							try {
-								pp = part.newInstance();
-							} catch (final InstantiationException e) {
-								Log.error(e);
-								return;
-							} catch (final IllegalAccessException e) {
-								Log.error(e);
-								return;
-							}
-							try {
-								if (pp.getConfig().readFromGUI("Add"))
-									listmodel.addElement(pp);
-								else
-									pp.tryClose();
-							} catch (final PipeException e) {
-								Log.error(e);
-								pp.tryClose();
-								return;
-							}
-						}
-					});
-				}
-				menu.show(add, add.getWidth() / 2, add.getHeight());
+				showAddPPMenu();
 			}
 		});
 		gbc.gridx = 1;
-		add(add, gbc);
+		add(btnAdd, gbc);
 
 		final JButton remove = new JButton("Remove", IconLoader
 				.getIcon("list-remove.png"));
@@ -92,10 +69,9 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		add(remove, gbc);
 		remove.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings( { "unchecked", "synthetic-access" })
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				for (final int idx : list.getSelectedIndices())
-					((E) listmodel.remove(idx)).tryClose();
+				removePipeParts(table.getSelectedRows());
 			}
 		});
 
@@ -105,16 +81,10 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		add(modify, gbc);
 		modify.addActionListener(new ActionListener() {
 			@Override
-			@SuppressWarnings( { "unchecked", "synthetic-access" })
+			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final int idx = list.getSelectedIndex();
-				if (idx != -1)
-					try {
-						((E) listmodel.get(idx)).getConfig().readFromGUI(
-								"Configure");
-					} catch (final PipeException exc) {
-						Log.error(exc);
-					}
+				final int idx = table.getSelectedRow();
+				if (idx != -1) modifyPipePart(idx);
 			}
 		});
 
@@ -125,11 +95,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final int idx = list.getSelectedIndex();
-				if (idx > 0) {
-					listmodel.insertElementAt(listmodel.remove(idx), idx - 1);
-					list.setSelectedIndex(idx - 1);
-				}
+				final int idx = table.getSelectedRow();
+				if (idx > 0) movePipePartUp(idx, idx - 1);
 			}
 		});
 
@@ -141,11 +108,9 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final int idx = list.getSelectedIndex();
-				if (idx != -1 && idx < listmodel.size() - 1) {
-					listmodel.insertElementAt(listmodel.remove(idx), idx + 1);
-					list.setSelectedIndex(idx + 1);
-				}
+				final int idx = table.getSelectedRow();
+				if (idx != -1 && idx < tableModel.getRowCount() - 1)
+					movePipePartUp(idx, idx + 1);
 			}
 		});
 
@@ -161,27 +126,72 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				listmodel.clear();
+				tableModel.clear();
 			}
 		});
 	}
 
-	public int getPipePartCount() {
-		return listmodel.getSize();
+	private void showAddPPMenu() {
+		final JPopupMenu menu = new JPopupMenu();
+		for (final Class<E> part : availableParts) {
+			final JMenuItem item = new JMenuItem(part.getSimpleName());
+			menu.add(item);
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					addPipePart(part);
+				}
+
+			});
+		}
+		menu.show(btnAdd, btnAdd.getWidth() / 2, btnAdd.getHeight());
 	}
 
-	@SuppressWarnings("unchecked")
-	public E getPipePart(final int index) {
-		return (E) listmodel.getElementAt(index);
+	public void addPipePart(final Class<E> part) {
+		E pp;
+		try {
+			pp = part.newInstance();
+		} catch (final InstantiationException e) {
+			Log.error(e);
+			return;
+		} catch (final IllegalAccessException e) {
+			Log.error(e);
+			return;
+		}
+		try {
+			if (pp.getConfig().readFromGUI("Add"))
+				tableModel.addPipePart(pp);
+			else
+				pp.tryClose();
+		} catch (final PipeException e) {
+			Log.error(e);
+			pp.tryClose();
+			return;
+		}
 	}
 
-	public void addPipePart(final E pp) {
-		listmodel.addElement(pp);
+	public void removePipeParts(final int[] indices) {
+		for (final int idx : indices)
+			tableModel.removePipePart(idx).tryClose();
 	}
 
-	public void addPipeParts(final List<E> list) {
-		for (final E pp : list)
-			addPipePart(pp);
+	public void modifyPipePart(final int index) {
+		try {
+			tableModel.getPipePart(index).getConfig().readFromGUI("Configure");
+		} catch (final PipeException exc) {
+			Log.error(exc);
+		}
+	}
+
+	public void movePipePartUp(final int indexOld, final int indexNew) {
+		tableModel
+				.insertPipePart(tableModel.removePipePart(indexOld), indexNew);
+		table.getSelectionModel().clearSelection();
+		table.getSelectionModel().setSelectionInterval(indexNew, indexNew);
+	}
+
+	public PipePartTableModel<E> getTableModel() {
+		return tableModel;
 	}
 
 }

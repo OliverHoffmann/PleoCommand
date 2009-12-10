@@ -52,9 +52,9 @@ public final class ConfigFrame extends JDialog {
 				(Class<Output>[]) new Class<?>[] { FileOutput.class,
 						ConsoleOutput.class, PleoRXTXOutput.class });
 
-		pppInput.addPipeParts(pipe.getInputList());
-		pppConverter.addPipeParts(pipe.getConverterList());
-		pppOutput.addPipeParts(pipe.getOutputList());
+		pppInput.getTableModel().addPipeParts(pipe.getInputList());
+		pppConverter.getTableModel().addPipeParts(pipe.getConverterList());
+		pppOutput.getTableModel().addPipeParts(pipe.getOutputList());
 
 		// Add components
 		final JTabbedPane tabs = new JTabbedPane();
@@ -78,13 +78,15 @@ public final class ConfigFrame extends JDialog {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
+				// TODO move this code? depends mostly on PipePartTableModel
 				pipe.reset();
-				for (int i = 0; i < pppInput.getPipePartCount(); ++i)
-					pipe.addInput(pppInput.getPipePart(i));
-				for (int i = 0; i < pppConverter.getPipePartCount(); ++i)
-					pipe.addConverter(pppConverter.getPipePart(i));
-				for (int i = 0; i < pppOutput.getPipePartCount(); ++i)
-					pipe.addOutput(pppOutput.getPipePart(i));
+				for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
+					pipe.addInput(pppInput.getTableModel().getPipePart(i));
+				for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
+					pipe.addConverter(pppConverter.getTableModel().getPipePart(
+							i));
+				for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
+					pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
 				okPressed = true;
 				dispose();
 			}

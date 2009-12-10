@@ -40,7 +40,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	public String toString() {
+	public String getContentAsString() {
 		return content;
 	}
 

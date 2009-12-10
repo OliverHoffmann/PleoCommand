@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
@@ -128,7 +129,10 @@ public final class GUIFrame extends JFrame {
 				.setMaxWidth(200);
 		logTable.getTableHeader().setVisible(false);
 		logTable.setShowGrid(false);
-		add(new JScrollPane(logTable), gbc);
+		logTable.setEnabled(false);
+		add(new JScrollPane(logTable,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), gbc);
 		gbc.gridwidth = 1;
 		gbc.weighty = 0.0;
 

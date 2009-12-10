@@ -42,7 +42,7 @@ public final class ConfigEnum extends ConfigValue {
 	}
 
 	@Override
-	public String toString() {
+	public String getContentAsString() {
 		return identifiers.get(content);
 	}
 
