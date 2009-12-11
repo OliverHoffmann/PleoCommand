@@ -10,10 +10,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.swing.AbstractListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -27,12 +31,24 @@ public class MainInputPanel extends JPanel {
 
 	private final JTextField consoleInput;
 
+	private final HistoryListModel historyListModel;
+
 	public MainInputPanel() {
 		setLayout(new GridBagLayout());
 		final GridBagConstraints gbc = ConfigFrame.initGBC();
 		gbc.weightx = 0.0;
 		gbc.gridy = 0;
 		gbc.gridx = 0;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
+
+		historyListModel = new HistoryListModel();
+		final JList historyList = new JList(historyListModel);
+		gbc.weighty = 1.0;
+		add(historyList, gbc);
+		gbc.weighty = 0.0;
+
+		++gbc.gridy;
+
 		consoleInput = new JTextField();
 		consoleInput.addKeyListener(new KeyAdapter() {
 			@Override
@@ -40,13 +56,10 @@ public class MainInputPanel extends JPanel {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) putConsoleInput();
 			}
 		});
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.weighty = 1.0;
 		add(consoleInput, gbc);
-		gbc.gridwidth = 1;
-		gbc.weighty = 0.0;
 
 		++gbc.gridy;
+		gbc.gridwidth = 1;
 
 		gbc.gridx = 0;
 		final JButton btnSendEOS = new JButton("Send EOS", IconLoader
@@ -79,6 +92,8 @@ public class MainInputPanel extends JPanel {
 		try {
 			StandardInput.the().put(
 					(consoleInput.getText() + "\n").getBytes("ISO-8859-1"));
+			historyListModel.add(consoleInput.getText());
+			consoleInput.setText("");
 		} catch (final IOException exc) {
 			Log.error(exc);
 		}
@@ -108,6 +123,29 @@ public class MainInputPanel extends JPanel {
 		} catch (final IOException exc) {
 			Log.error(exc);
 		}
+	}
+
+	class HistoryListModel extends AbstractListModel {
+
+		private static final long serialVersionUID = 4510015901086617192L;
+
+		private final List<String> history = new ArrayList<String>();
+
+		@Override
+		public int getSize() {
+			return history.size();
+		}
+
+		@Override
+		public Object getElementAt(final int index) {
+			return history.get(index);
+		}
+
+		public void add(final String line) {
+			history.add(line);
+			fireIntervalAdded(this, history.size() - 1, history.size() - 1);
+		}
+
 	}
 
 }
