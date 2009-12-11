@@ -3,7 +3,7 @@ package pleocmd;
 import java.io.IOException;
 import java.io.InputStream;
 
-import pleocmd.itfc.gui.GUIFrame;
+import pleocmd.itfc.gui.MainFrame;
 
 /**
  * In console mode, the standard input gets simply wrapped by this class.<br>
@@ -65,7 +65,7 @@ public final class StandardInput extends InputStream {
 
 	@Override
 	public int available() throws IOException {
-		if (GUIFrame.hasGUI()) while (true) {
+		if (MainFrame.hasGUI()) while (true) {
 			// check if read catches up write?
 			int avail;
 			synchronized (this) {
@@ -93,7 +93,7 @@ public final class StandardInput extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		if (GUIFrame.hasGUI()) {
+		if (MainFrame.hasGUI()) {
 			while (true) {
 				// check if read catches up write?
 				synchronized (this) {
@@ -121,7 +121,7 @@ public final class StandardInput extends InputStream {
 
 	@Override
 	public void close() throws IOException {
-		if (GUIFrame.hasGUI())
+		if (MainFrame.hasGUI())
 			synchronized (this) {
 				cacheClosed = true;
 			}
@@ -130,7 +130,7 @@ public final class StandardInput extends InputStream {
 	}
 
 	public void put(final byte b) throws IOException {
-		assert GUIFrame.hasGUI();
+		assert MainFrame.hasGUI();
 		if (cacheClosed) throw new IOException("StandardInput is closed");
 		synchronized (this) {
 			cache[cachePosWrite] = b;

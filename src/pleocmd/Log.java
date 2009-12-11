@@ -1,6 +1,6 @@
 package pleocmd;
 
-import pleocmd.itfc.gui.GUIFrame;
+import pleocmd.itfc.gui.MainFrame;
 
 public final class Log {
 
@@ -81,8 +81,8 @@ public final class Log {
 	private void process() {
 		if (type != Type.Detail || PRINT_DETAIL) {
 			if (type == Type.Console) System.out.println(getMsg());
-			if (GUIFrame.hasGUI())
-				GUIFrame.the().addLog(this);
+			if (MainFrame.hasGUI())
+				MainFrame.the().addLog(this);
 			else if (type != Type.Console) System.err.println(toString());
 		}
 	}
