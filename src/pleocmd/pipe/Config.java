@@ -72,6 +72,9 @@ public final class Config extends AbstractList<ConfigValue> {
 	}
 
 	public boolean readFromGUI(final String prefix) throws PipeException {
+		// no need to configure if no values assigned
+		if (isEmpty()) return true;
+
 		final JDialog dlg = new JDialog();
 		dlg.setLayout(new BorderLayout());
 		dlg.setTitle(prefix + " " + owner);
