@@ -20,7 +20,7 @@ import pleocmd.StandardInput;
 import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 
-public class MainLogPanel extends JPanel {
+public final class MainLogPanel extends JPanel {
 
 	private static final long serialVersionUID = -6921879308383765734L;
 
@@ -58,7 +58,7 @@ public class MainLogPanel extends JPanel {
 		gbc.weighty = 1.0;
 		add(new JScrollPane(logTable,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER), gbc);
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
 		gbc.gridwidth = 1;
 		gbc.weighty = 0.0;
 

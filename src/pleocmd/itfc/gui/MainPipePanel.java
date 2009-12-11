@@ -17,7 +17,7 @@ import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 
-public class MainPipePanel extends JPanel {
+public final class MainPipePanel extends JPanel {
 
 	private static final long serialVersionUID = 5361715509143723415L;
 

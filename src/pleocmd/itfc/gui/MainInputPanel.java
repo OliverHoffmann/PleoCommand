@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -19,15 +20,19 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.ScrollPaneConstants;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
 import pleocmd.itfc.gui.icons.IconLoader;
 
-public class MainInputPanel extends JPanel {
+public final class MainInputPanel extends JPanel {
 
 	private static final long serialVersionUID = 8130292678723649962L;
+
+	private final JList historyList;
 
 	private final JTextField consoleInput;
 
@@ -42,9 +47,11 @@ public class MainInputPanel extends JPanel {
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 
 		historyListModel = new HistoryListModel();
-		final JList historyList = new JList(historyListModel);
+		historyList = new JList(historyListModel);
 		gbc.weighty = 1.0;
-		add(historyList, gbc);
+		add(new JScrollPane(historyList,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
 		gbc.weighty = 0.0;
 
 		++gbc.gridy;
@@ -86,6 +93,19 @@ public class MainInputPanel extends JPanel {
 		++gbc.gridx;
 		gbc.weightx = 1.0;
 		add(new JLabel(), gbc);
+		gbc.weightx = 0.0;
+
+		++gbc.gridx;
+		final JButton btnConsoleClear = new JButton("Clear History", IconLoader
+				.getIcon("archive-remove.png"));
+		btnConsoleClear.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				clearHistory();
+			}
+		});
+		add(btnConsoleClear, gbc);
+
 	}
 
 	public void putConsoleInput() {
@@ -93,6 +113,15 @@ public class MainInputPanel extends JPanel {
 			StandardInput.the().put(
 					(consoleInput.getText() + "\n").getBytes("ISO-8859-1"));
 			historyListModel.add(consoleInput.getText());
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				@SuppressWarnings("synthetic-access")
+				public void run() {
+					final int size = historyListModel.getSize() - 1;
+					historyList.scrollRectToVisible(historyList.getCellBounds(
+							size, size));
+				}
+			});
 			consoleInput.setText("");
 		} catch (final IOException exc) {
 			Log.error(exc);
@@ -125,6 +154,10 @@ public class MainInputPanel extends JPanel {
 		}
 	}
 
+	public void clearHistory() {
+		historyListModel.clear();
+	}
+
 	class HistoryListModel extends AbstractListModel {
 
 		private static final long serialVersionUID = 4510015901086617192L;
@@ -144,6 +177,12 @@ public class MainInputPanel extends JPanel {
 		public void add(final String line) {
 			history.add(line);
 			fireIntervalAdded(this, history.size() - 1, history.size() - 1);
+		}
+
+		public void clear() {
+			final int size = history.size();
+			history.clear();
+			fireIntervalRemoved(this, 0, size - 1);
 		}
 
 	}
