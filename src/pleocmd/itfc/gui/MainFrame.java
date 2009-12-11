@@ -19,7 +19,7 @@ import pleocmd.pipe.Pipe;
 /**
  * @author oliver
  */
-public final class GUIFrame extends JFrame {
+public final class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 7174844214646208915L;
 
@@ -27,7 +27,7 @@ public final class GUIFrame extends JFrame {
 			.getProperty("user.home")
 			+ "/.pleocommand.pipe");
 
-	private static GUIFrame guiFrame;
+	private static MainFrame guiFrame;
 
 	private final Pipe pipe = new Pipe();
 
@@ -39,7 +39,7 @@ public final class GUIFrame extends JFrame {
 
 	private final JSplitPane splitPane;
 
-	private GUIFrame() {
+	private MainFrame() {
 		guiFrame = this;
 
 		mainPipePanel = new MainPipePanel(pipe);
@@ -93,8 +93,8 @@ public final class GUIFrame extends JFrame {
 		setVisible(true);
 	}
 
-	public static GUIFrame the() {
-		if (guiFrame == null) new GUIFrame();
+	public static MainFrame the() {
+		if (guiFrame == null) new MainFrame();
 		return guiFrame;
 	}
 
