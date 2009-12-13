@@ -67,11 +67,15 @@ public final class ConfigFrame extends JDialog {
 		bottom.setLayout(new GridBagLayout());
 		add(bottom, BorderLayout.SOUTH);
 		final GridBagConstraints gbc = initGBC();
+		gbc.gridy = 0;
 		gbc.gridx = 0;
+		gbc.gridwidth = 1;
+
 		gbc.weightx = 1.0;
 		bottom.add(new JLabel(), gbc);
 		gbc.weightx = 0.0;
 
+		++gbc.gridx;
 		final JButton btnOK = new JButton("OK", IconLoader
 				.getIcon("dialog-ok.png"));
 		btnOK.addActionListener(new ActionListener() {
@@ -91,10 +95,10 @@ public final class ConfigFrame extends JDialog {
 				dispose();
 			}
 		});
-		gbc.gridx = 1;
 		bottom.add(btnOK, gbc);
 		getRootPane().setDefaultButton(btnOK);
 
+		++gbc.gridx;
 		final JButton btnCancel = new JButton("Cancel", IconLoader
 				.getIcon("dialog-cancel.png"));
 		btnCancel.addActionListener(new ActionListener() {
@@ -103,7 +107,6 @@ public final class ConfigFrame extends JDialog {
 				dispose();
 			}
 		});
-		gbc.gridx = 2;
 		bottom.add(btnCancel, gbc);
 
 		// Center window on screen
@@ -111,7 +114,6 @@ public final class ConfigFrame extends JDialog {
 		setLocationRelativeTo(null);
 
 		Log.detail("Config-Frame created");
-		okPressed = false;
 		setModal(true);
 		setVisible(true);
 	}

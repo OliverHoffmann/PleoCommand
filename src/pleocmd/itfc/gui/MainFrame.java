@@ -7,9 +7,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JSplitPane;
 
 import pleocmd.Log;
@@ -61,9 +63,11 @@ public final class MainFrame extends JFrame {
 		final GridBagConstraints gbc = ConfigFrame.initGBC();
 		gbc.gridy = 0;
 		gbc.weighty = 0.0;
+		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		add(mainPipePanel, gbc);
 
 		++gbc.gridy;
+
 		gbc.weighty = 1.0;
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
 				mainLogPanel, mainInputPanel);
@@ -72,6 +76,12 @@ public final class MainFrame extends JFrame {
 
 		++gbc.gridy;
 		gbc.weighty = 0.0;
+		gbc.gridwidth = 1;
+
+		gbc.weightx = 1.0;
+		add(new JLabel(), gbc);
+		gbc.weightx = 0.0;
+
 		final JButton btnExit = new JButton("Exit", IconLoader
 				.getIcon("application-exit.png"));
 		btnExit.addActionListener(new ActionListener() {
@@ -90,6 +100,8 @@ public final class MainFrame extends JFrame {
 		mainPipePanel.readConfigFromFile(PIPE_CONFIG_FILE);
 
 		Log.detail("GUI-Frame created");
+		new CommandSequenceEditorFrame(new File("/tmp/test.txt")); // TODO
+																	// remove
 		setVisible(true);
 	}
 
@@ -104,6 +116,10 @@ public final class MainFrame extends JFrame {
 
 	public void addLog(final Log log) {
 		mainLogPanel.addLog(log);
+	}
+
+	public List<String> getHistory() {
+		return mainInputPanel.getHistory();
 	}
 
 	public void exit() {
