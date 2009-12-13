@@ -11,6 +11,8 @@ import pleocmd.itfc.gui.MainFrame;
  * check terminology (Value, Data, Block, Command, Sequence)<br>
  * dblclick on pipepart should call "Modify"<br>
  * disable "Modify" if nothing to configure<br>
+ * set filetypes for open/save dialogs<br>
+ * dbl-click on history entry to put it into input field<br>
  */
 
 public final class Main {

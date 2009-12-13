@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
@@ -158,6 +159,10 @@ public final class MainInputPanel extends JPanel {
 		historyListModel.clear();
 	}
 
+	public List<String> getHistory() {
+		return historyListModel.getAll();
+	}
+
 	class HistoryListModel extends AbstractListModel {
 
 		private static final long serialVersionUID = 4510015901086617192L;
@@ -183,6 +188,10 @@ public final class MainInputPanel extends JPanel {
 			final int size = history.size();
 			history.clear();
 			fireIntervalRemoved(this, 0, size - 1);
+		}
+
+		public List<String> getAll() {
+			return Collections.unmodifiableList(history);
 		}
 
 	}
