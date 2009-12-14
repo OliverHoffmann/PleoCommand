@@ -225,7 +225,9 @@ public final class Pipe {
 		out.close();
 	}
 
-	public void readFromFile(final File file) throws IOException, PipeException {
+	public boolean readFromFile(final File file) throws IOException,
+			PipeException {
+		boolean skipped = false;
 		reset();
 		final BufferedReader in = new BufferedReader(new FileReader(file));
 		while (true) {
@@ -267,7 +269,16 @@ public final class Pipe {
 				throw new PipeException(null, true, "PipePart with name " + cn
 						+ " cannot be accessed");
 			}
-			pp.getConfig().readFromFile(in);
+			try {
+				pp.getConfig().readFromFile(in);
+			} catch (final IOException e) {
+				// skip this pipe part and try to read the next one
+				Log.error(String.format("Skipped reading %s from file:", cn));
+				Log.error(e);
+				in.reset();
+				skipped = true;
+				continue;
+			}
 			if (pp instanceof Input)
 				inputList.add((Input) pp);
 			else if (pp instanceof Converter)
@@ -279,5 +290,6 @@ public final class Pipe {
 						+ " is not of any known type");
 		}
 		in.close();
+		return !skipped;
 	}
 }
