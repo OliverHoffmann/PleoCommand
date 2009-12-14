@@ -121,12 +121,12 @@ public final class MainPipePanel extends JPanel {
 	public void readConfigFromFile(final File file) {
 		try {
 			pipe.readFromFile(file);
-			updatePipeLabel();
 		} catch (final IOException exc) {
 			Log.error(exc);
 		} catch (final PipeException exc) {
 			Log.error(exc);
 		}
+		updatePipeLabel();
 	}
 
 }
