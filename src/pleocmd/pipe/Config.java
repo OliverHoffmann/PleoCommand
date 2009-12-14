@@ -149,6 +149,7 @@ public final class Config extends AbstractList<ConfigValue> {
 	public void readFromFile(final BufferedReader in) throws IOException,
 			PipeException {
 		for (final ConfigValue v : list) {
+			in.mark(10240);
 			final String line = in.readLine().trim();
 			final int idx = line.indexOf(':');
 			if (idx == -1)
