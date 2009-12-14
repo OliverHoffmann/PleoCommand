@@ -11,4 +11,9 @@ public final class ConverterException extends PipeException {
 		super(sender, permanent, message);
 	}
 
+	public ConverterException(final Converter sender, final boolean permanent,
+			final String message, final Throwable cause) {
+		super(sender, permanent, message, cause);
+	}
+
 }
