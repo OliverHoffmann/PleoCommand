@@ -29,34 +29,33 @@ import javax.swing.text.StyledDocument;
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.itfc.gui.icons.IconLoader;
-import pleocmd.pipe.CommandSequenceMap;
-import pleocmd.pipe.cmd.Command;
-import pleocmd.pipe.cmd.PleoMonitorCommand;
+import pleocmd.pipe.Data;
+import pleocmd.pipe.DataSequenceMap;
 import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 
-public final class CommandSequenceEditorFrame extends JDialog {
+public final class DataSequenceEditorFrame extends JDialog {
 
 	private static final long serialVersionUID = -5729115559356740425L;
 
 	private final File file;
 
-	private final CommandSequenceMap map = new CommandSequenceMap();
+	private final DataSequenceMap map = new DataSequenceMap();
 
 	private final JComboBox cbTrigger;
 
-	private final JTextPane tpCommands;
+	private final JTextPane tpDataSequence;
 
 	private final DefaultComboBoxModel cbModel;
 
 	private List<Output> playOutputList;
 
-	public CommandSequenceEditorFrame(final File file) {
+	public DataSequenceEditorFrame(final File file) {
 		this.file = file;
 
-		Log.detail("Creating CmdSeqEditor-Frame");
-		setTitle("Edit Command Sequence");
+		Log.detail("Creating DataSequenceEditorFrame");
+		setTitle("Edit Data Sequence");
 		setLayout(new GridBagLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		final GridBagConstraints gbc = ConfigFrame.initGBC();
@@ -96,9 +95,9 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 		++gbc.gridy;
 
-		tpCommands = new JTextPane();
+		tpDataSequence = new JTextPane();
 		gbc.weighty = 1.0;
-		add(new JScrollPane(tpCommands), gbc);
+		add(new JScrollPane(tpDataSequence), gbc);
 		gbc.weighty = 0.0;
 
 		++gbc.gridy;
@@ -236,18 +235,18 @@ public final class CommandSequenceEditorFrame extends JDialog {
 		map.reset();
 		addSequenceListFromFile(file);
 
-		Log.detail("CmdSeqEditor-Frame created");
+		Log.detail("DataSequenceEditorFrame created");
 		setModal(true);
 		setVisible(true);
 	}
 
 	public void addFromInputHistory() {
 		try {
-			final StyledDocument doc = tpCommands.getStyledDocument();
+			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
-					tpCommands.getCaretPosition()).getEndOffset();
-			for (final String command : MainFrame.the().getHistory())
-				doc.insertString(offset, command + "\n", null);
+					tpDataSequence.getCaretPosition()).getEndOffset();
+			for (final String data : MainFrame.the().getHistory())
+				doc.insertString(offset, data + "\n", null);
 		} catch (final BadLocationException e) {
 			Log.error(e);
 		}
@@ -275,9 +274,9 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 	public void addSequenceFromFile(final File fileToAdd) {
 		try {
-			final StyledDocument doc = tpCommands.getStyledDocument();
+			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
-					tpCommands.getCaretPosition()).getEndOffset();
+					tpDataSequence.getCaretPosition()).getEndOffset();
 			final BufferedReader in = new BufferedReader(new FileReader(
 					fileToAdd));
 			String line;
@@ -310,16 +309,15 @@ public final class CommandSequenceEditorFrame extends JDialog {
 		 */
 	}
 
-	public void play(final String command) {
+	public void play(final Data data) {
 		if (playOutputList == null) {
 			playOutputList = new ArrayList<Output>(2);
 			playOutputList.add(new ConsoleOutput());
 			playOutputList.add(new PleoRXTXOutput());
 		}
-		final Command cmd = new PleoMonitorCommand(null, command);
 		try {
 			for (final Output out : playOutputList)
-				out.writeCommand(cmd);
+				out.write(data);
 		} catch (final OutputException e) {
 			Log.error(e);
 		}
@@ -357,17 +355,18 @@ public final class CommandSequenceEditorFrame extends JDialog {
 	private void writeTextPaneToMap(final Object triggerName) {
 		try {
 			if (triggerName == null) {
-				if (tpCommands.getDocument().getLength() == 0) return;
+				if (tpDataSequence.getDocument().getLength() == 0) return;
 				throw new IOException("No name selected in ComboBox");
 			}
-			map.clearCommands(triggerName.toString());
+			map.clearDataList(triggerName.toString());
 			final BufferedReader in = new BufferedReader(new StringReader(
-					tpCommands.getText()));
+					tpDataSequence.getText()));
 			String line;
 			while ((line = in.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && line.charAt(0) != '#')
-					map.addCommand(triggerName.toString(), line);
+					map.addData(triggerName.toString(), Data
+							.createFromAscii(line));
 			}
 			in.close();
 		} catch (final IOException e) {
@@ -377,15 +376,14 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 	private void updateTextPaneFromMap(final Object triggerName) {
 		try {
-			final StyledDocument doc = tpCommands.getStyledDocument();
+			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			doc.remove(0, doc.getLength());
 			if (triggerName != null) {
-				final List<Command> commands = map.getCommands(triggerName
+				final List<Data> dataList = map.getDataList(triggerName
 						.toString());
-				if (commands != null)
-					for (final Command command : commands)
-						doc.insertString(doc.getLength(), command
-								.asPleoMonitorCommand()
+				if (dataList != null)
+					for (final Data data : dataList)
+						doc.insertString(doc.getLength(), data.toString()
 								+ "\n", null);
 			}
 		} catch (final BadLocationException e) {

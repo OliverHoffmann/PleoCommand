@@ -10,7 +10,7 @@ import pleocmd.exc.OutputException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.ConfigEnum;
 import pleocmd.pipe.ConfigPath;
-import pleocmd.pipe.cmd.Command;
+import pleocmd.pipe.Data;
 
 public final class FileOutput extends Output {
 
@@ -47,23 +47,17 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
-	protected void writeCommand0(final Command command) throws OutputException,
-			IOException {
+	protected void write0(final Data data) throws OutputException, IOException {
 		switch (type) {
 		case DataBinary:
-			command.getData().writeToBinary(out);
+			data.writeToBinary(out);
 			break;
 		case DataAscii:
-			command.getData().writeToAscii(out);
+			data.writeToAscii(out);
 			break;
-		case DataHumanReadable:
-			out.write(command.getData().toString().getBytes());
-			break;
-		case Command:
-			out.write(command.asPleoMonitorCommand().getBytes());
-			break;
-		case CommandHumanReadable:
-			out.write(command.toString().getBytes());
+		case PleoMonitorCommands:
+			if ("PMC".equals(data.getSafe(0).asString()))
+				Log.consoleOut(data.getSafe(1).asString());
 			break;
 		default:
 			throw new OutputException(this, true,

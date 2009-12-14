@@ -7,7 +7,6 @@ import pleocmd.exc.ConverterException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cmd.Command;
 
 /**
  * @author oliver
@@ -31,17 +30,17 @@ public abstract class Converter extends PipePart {
 	public abstract boolean canHandleData(final Data data)
 			throws ConverterException;
 
-	public final List<Command> convertToCommand(final Data data)
+	public final List<Data> convert(final Data data)
 			throws ConverterException {
 		switch (getState()) {
 		case Initialized:
-			return convertToCommand0(data);
+			return convert0(data);
 		default:
 			throw new ConverterException(this, true, "Not initialized");
 		}
 	}
 
-	protected abstract List<Command> convertToCommand0(final Data data)
+	protected abstract List<Data> convert0(final Data data)
 			throws ConverterException;
 
 }

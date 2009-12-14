@@ -12,7 +12,7 @@ import pleocmd.api.PleoCommunication;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.ConfigEnum;
-import pleocmd.pipe.cmd.Command;
+import pleocmd.pipe.Data;
 
 public final class PleoRXTXOutput extends Output {
 
@@ -53,13 +53,14 @@ public final class PleoRXTXOutput extends Output {
 	}
 
 	@Override
-	protected void writeCommand0(final Command command) throws OutputException,
-			IOException {
-		pc.send(command.asPleoMonitorCommand());
-		try {
-			pc.readAnswer();
-		} catch (final TimeoutException e) {
-			throw new OutputException(this, true, "Cannot read answer", e);
+	protected void write0(final Data data) throws OutputException, IOException {
+		if ("PMC".equals(data.getSafe(0).asString())) {
+			pc.send(data.getSafe(1).asString());
+			try {
+				pc.readAnswer();
+			} catch (final TimeoutException e) {
+				throw new OutputException(this, true, "Cannot read answer", e);
+			}
 		}
 	}
 

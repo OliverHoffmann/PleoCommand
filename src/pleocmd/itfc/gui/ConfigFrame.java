@@ -18,7 +18,6 @@ import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.cvt.EmotionConverter;
-import pleocmd.pipe.cvt.PleoMonitorCMDConverter;
 import pleocmd.pipe.cvt.SimpleConverter;
 import pleocmd.pipe.in.ConsoleInput;
 import pleocmd.pipe.in.FileInput;
@@ -47,7 +46,7 @@ public final class ConfigFrame extends JDialog {
 						ConsoleInput.class, TcpIpInput.class });
 		final PipePartPanel<Converter> pppConverter = new PipePartPanel<Converter>(
 				(Class<Converter>[]) new Class<?>[] { SimpleConverter.class,
-						EmotionConverter.class, PleoMonitorCMDConverter.class });
+						EmotionConverter.class });
 		final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
 				(Class<Output>[]) new Class<?>[] { FileOutput.class,
 						ConsoleOutput.class, PleoRXTXOutput.class });

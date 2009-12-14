@@ -4,8 +4,8 @@ import java.io.IOException;
 
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.Config;
+import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cmd.Command;
 
 /**
  * @author oliver
@@ -25,15 +25,14 @@ public abstract class Output extends PipePart {
 	@Override
 	protected abstract void close0() throws OutputException, IOException;
 
-	public final void writeCommand(final Command command)
-			throws OutputException {
+	public final void write(final Data data) throws OutputException {
 		switch (getState()) {
 		case Initialized:
 			try {
-				writeCommand0(command);
+				write0(data);
 			} catch (final IOException e) {
-				throw new OutputException(this, false, "Cannot write command",
-						e);
+				throw new OutputException(this, false,
+						"Cannot write data block", e);
 			}
 			break;
 		default:
@@ -41,7 +40,7 @@ public abstract class Output extends PipePart {
 		}
 	}
 
-	protected abstract void writeCommand0(Command command)
-			throws OutputException, IOException;
+	protected abstract void write0(Data data) throws OutputException,
+			IOException;
 
 }

@@ -1,7 +1,9 @@
 package pleocmd.pipe;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -163,8 +165,11 @@ public final class Data extends AbstractList<Value> {
 	 * S: 12345678 | 100 | F: 100 | Bx: F0DD35007E | Sx: 48454C4C4F<br>
 	 * 
 	 * @param in
-	 *            Input Stream with text data
-	 * @return Data read from stream.
+	 *            Input Stream with text data in ISO-8859-1 encoding.
+	 * @return New {@link Data} block read from stream.
+	 * @throws IOException
+	 *             On read errors, unexpected end of input or invalid data
+	 *             format.
 	 */
 	public static Data createFromAscii(final DataInput in) throws IOException {
 		final List<Value> content = new ArrayList<Value>();
@@ -287,6 +292,23 @@ public final class Data extends AbstractList<Value> {
 	}
 
 	/**
+	 * The same as {@link #createFromAscii(DataInput)} but uses a string as
+	 * source.
+	 * 
+	 * @param string
+	 *            {@link String} to read the data block from (optionally with
+	 *            line-break)
+	 * @return New {@link Data} block read from {@link String}.
+	 * @throws IOException
+	 *             On unexpected end of input or invalid data format.
+	 * @see {@link #createFromAscii(DataInput)}
+	 */
+	public static Data createFromAscii(final String string) throws IOException {
+		return createFromAscii(new DataInputStream(new ByteArrayInputStream(
+				(string + '\n').getBytes("ISO-8859-1"))));
+	}
+
+	/**
 	 * @param data
 	 * @param len
 	 * @return 1 till 5 for Integer, Double, Hex, String or Binary
@@ -390,13 +412,14 @@ public final class Data extends AbstractList<Value> {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder();
-		sb.append(String.format("[0x%02X]", flags));
-		for (final Value value : values) {
-			sb.append(" - ");
-			sb.append(value);
+		final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
+		try {
+			writeToAscii(new DataOutputStream(out));
+			return out.toString("ISO-8859-1");
+		} catch (final IOException e) {
+			Log.error(e);
+			return "S:" + e.getMessage() + "\n";
 		}
-		return sb.toString();
 	}
 
 }

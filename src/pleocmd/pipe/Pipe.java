@@ -15,7 +15,6 @@ import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
-import pleocmd.pipe.cmd.Command;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -95,14 +94,30 @@ public final class Pipe {
 		}
 	}
 
-	private List<Command> convertDataToCommandList(final Data data) {
-		Log.detail("Converting data block to command(s)");
+	/**
+	 * Converts one {@link Data} object to a list of {@link Data} objects if a
+	 * fitting {@link Converter} could be found. Otherwise the {@link Data}
+	 * object itself is returned.
+	 * 
+	 * @param data
+	 *            The {@link Data} object to be converted.
+	 * @return A single-element list holding the data object given by
+	 *         <b>data</b> if no fitting {@link Converter} could be found or a
+	 *         list of new {@link Data} objects returned by the first fitting
+	 *         {@link Converter}.
+	 */
+	private List<Data> convertDataToDataList(final Data data) {
+		Log.detail("Converting data block to list of data blocks");
 		for (int i = 0; i < converterList.size(); ++i) {
 			final Converter cvt = converterList.get(i);
 			try {
 				if (cvt.canHandleData(data)) {
 					Log.detail("Converting with " + cvt);
-					return cvt.convertToCommand(data);
+					final List<Data> newDatas = cvt.convert(data);
+					final List<Data> res = new ArrayList<Data>(newDatas.size());
+					for (final Data newData : newDatas)
+						res.addAll(convertDataToDataList(newData));
+					return res;
 				}
 			} catch (final ConverterException e) {
 				Log.error(e);
@@ -116,18 +131,19 @@ public final class Pipe {
 							+ " for one data block " + data);
 			}
 		}
-		Log.error("No fitting Converter found for " + data.toString());
-		return null;
+		final List<Data> res = new ArrayList<Data>(1);
+		res.add(data);
+		return res;
 	}
 
-	private void writeAllCommands(final List<Command> list) {
-		Log.detail("Writing " + list.size() + " command(s) to "
+	private void writeAllData(final List<Data> list) {
+		Log.detail("Writing " + list.size() + " data block(s) to "
 				+ outputList.size() + " output(s)");
-		for (final Command cmd : list)
+		for (final Data data : list)
 			for (int i = 0; i < outputList.size(); ++i) {
 				final Output out = outputList.get(i);
 				try {
-					out.writeCommand(cmd);
+					out.write(data);
 				} catch (final OutputException e) {
 					Log.error(e);
 					if (e.isPermanent()) {
@@ -137,22 +153,21 @@ public final class Pipe {
 						--i;
 					} else
 						Log.detail("Skipping output " + out
-								+ " for one command " + cmd);
+								+ " for one data block " + data);
 				}
 			}
 	}
 
 	public boolean pipeData() {
-		// read next Data
+		// read next data block ...
 		final Data data = getFromInput();
 		if (data == null) return false; // marks end of all inputs
 
-		// convert it
-		final List<Command> cmdlist = convertDataToCommandList(data);
-		if (cmdlist == null) return true;
+		// ... convert it ...
+		final List<Data> dataList = convertDataToDataList(data);
 
-		// and send all commands to all connected outputs
-		writeAllCommands(cmdlist);
+		// ... and send all data blocks to all connected outputs
+		writeAllData(dataList);
 		return true;
 	}
 
@@ -234,7 +249,8 @@ public final class Pipe {
 			String line = in.readLine();
 			if (line == null) break;
 			line = line.trim();
-			if (!line.endsWith(":")) throw new IOException("");
+			if (!line.endsWith(":"))
+				throw new IOException("Missing ':' at end of line");
 			final String cn = line.substring(0, line.length() - 1);
 			final String pckName = getClass().getPackage().getName();
 			String fcn;
@@ -270,6 +286,7 @@ public final class Pipe {
 						+ " cannot be accessed");
 			}
 			try {
+				in.mark(0);
 				pp.getConfig().readFromFile(in);
 			} catch (final IOException e) {
 				// skip this pipe part and try to read the next one

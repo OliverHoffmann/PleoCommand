@@ -5,22 +5,22 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
-import pleocmd.pipe.CommandSequenceMap;
 import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigCmdSeq;
+import pleocmd.pipe.ConfigDataSeq;
 import pleocmd.pipe.Data;
-import pleocmd.pipe.cmd.Command;
+import pleocmd.pipe.DataSequenceMap;
 
 public final class SimpleConverter extends Converter {
 
-	private final CommandSequenceMap map = new CommandSequenceMap();
+	private final DataSequenceMap map = new DataSequenceMap();
 
 	public SimpleConverter() {
-		super(new Config().addV(new ConfigCmdSeq("Commands")));
+		super(new Config().addV(new ConfigDataSeq("Sequence-File")));
 	}
 
 	@Override
 	protected void configured0() {
+		// nothing to do
 	}
 
 	@Override
@@ -40,18 +40,17 @@ public final class SimpleConverter extends Converter {
 	}
 
 	@Override
-	protected List<Command> convertToCommand0(final Data data)
-			throws ConverterException {
+	protected List<Data> convert0(final Data data) throws ConverterException {
 		final String tn = data.getSafe(1).asString();
 		if (tn == null)
 			throw new ConverterException(this, false, String
 					.format("Invalid data: First value must "
 							+ "be a non-empty string"));
 		try {
-			return map.findCommands(tn);
+			return map.findDataList(tn);
 		} catch (final IndexOutOfBoundsException e) {
 			throw new ConverterException(this, false,
-					"Cannot convert simple command", e);
+					"Cannot convert simple data", e);
 		}
 	}
 }

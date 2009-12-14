@@ -13,15 +13,15 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import pleocmd.itfc.gui.CommandSequenceEditorFrame;
+import pleocmd.itfc.gui.DataSequenceEditorFrame;
 
-public final class ConfigCmdSeq extends ConfigValue {
+public final class ConfigDataSeq extends ConfigValue {
 
 	private String content;
 
 	private JTextField tf;
 
-	public ConfigCmdSeq(final String label) {
+	public ConfigDataSeq(final String label) {
 		super(label);
 	}
 
@@ -65,7 +65,7 @@ public final class ConfigCmdSeq extends ConfigValue {
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
 				if (!tf.getText().isEmpty())
-					new CommandSequenceEditorFrame(new File(tf.getText()));
+					new DataSequenceEditorFrame(new File(tf.getText()));
 			}
 		});
 		cntr.add(btnEdit, gbc);
