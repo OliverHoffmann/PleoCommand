@@ -10,6 +10,8 @@ import java.io.IOException;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 import pleocmd.itfc.gui.CommandSequenceEditorFrame;
 
@@ -62,10 +64,32 @@ public final class ConfigCmdSeq extends ConfigValue {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				new CommandSequenceEditorFrame(new File(content));
+				if (!tf.getText().isEmpty())
+					new CommandSequenceEditorFrame(new File(tf.getText()));
 			}
 		});
 		cntr.add(btnEdit, gbc);
+
+		btnEdit.setEnabled(!tf.getText().isEmpty());
+		tf.getDocument().addDocumentListener(new DocumentListener() {
+
+			@Override
+			public void changedUpdate(final DocumentEvent e) {
+				// just ignore this
+			}
+
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void insertUpdate(final DocumentEvent e) {
+				btnEdit.setEnabled(!tf.getText().isEmpty());
+			}
+
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void removeUpdate(final DocumentEvent e) {
+				btnEdit.setEnabled(!tf.getText().isEmpty());
+			}
+		});
 	}
 
 	@Override
