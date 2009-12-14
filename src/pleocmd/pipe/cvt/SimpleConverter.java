@@ -1,32 +1,36 @@
 package pleocmd.pipe.cvt;
 
-import java.util.ArrayList;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import pleocmd.exc.ConverterException;
+import pleocmd.pipe.CommandSequenceMap;
 import pleocmd.pipe.Config;
+import pleocmd.pipe.ConfigCmdSeq;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.cmd.Command;
-import pleocmd.pipe.cmd.PleoMonitorCommand;
 
 public final class SimpleConverter extends Converter {
 
+	private final CommandSequenceMap map = new CommandSequenceMap();
+
 	public SimpleConverter() {
-		super(new Config());
+		super(new Config().addV(new ConfigCmdSeq("Commands")));
 	}
 
 	@Override
 	protected void configured0() {
-		// nothing to do
 	}
 
 	@Override
-	protected void init0() {
-		// nothing to do
+	protected void init0() throws IOException {
+		map.loadFromFile(new File(getConfig().get(0).getContentAsString()));
 	}
 
 	@Override
 	protected void close0() {
-		// nothing to do
+		map.reset();
 	}
 
 	@Override
@@ -36,17 +40,18 @@ public final class SimpleConverter extends Converter {
 	}
 
 	@Override
-	protected List<Command> convertToCommand0(final Data data) {
-		final List<Command> res = new ArrayList<Command>(1);
-		String s = data.getSafe(1).asString();
-		if (s == null) return res;
-		s = s.toUpperCase();
-		if (s.equals("HEAD-NOD"))
-			res.add(new PleoMonitorCommand(data, "JOINT RANGE 12 2 10 -10"));
-		else if (s.equals("HEAD-SHAKE"))
-			res.add(new PleoMonitorCommand(data, "JOINT RANGE 11 2 30 -30"));
-		// TODO replace with a table (written from file)
-		return res;
+	protected List<Command> convertToCommand0(final Data data)
+			throws ConverterException {
+		final String tn = data.getSafe(1).asString();
+		if (tn == null)
+			throw new ConverterException(this, false, String
+					.format("Invalid data: First value must "
+							+ "be a non-empty string"));
+		try {
+			return map.findCommands(tn);
+		} catch (final IndexOutOfBoundsException e) {
+			throw new ConverterException(this, false,
+					"Cannot convert simple command", e);
+		}
 	}
-
 }

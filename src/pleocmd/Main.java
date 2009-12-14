@@ -13,6 +13,8 @@ import pleocmd.itfc.gui.MainFrame;
  * disable "Modify" if nothing to configure<br>
  * set filetypes for open/save dialogs<br>
  * dbl-click on history entry to put it into input field<br>
+ * term: loadFrom / readFrom<br>
+ * checkstyle: no exception handling in pipe's, only pass them thru<br>
  */
 
 public final class Main {

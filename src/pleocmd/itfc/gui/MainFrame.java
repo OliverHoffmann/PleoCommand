@@ -100,8 +100,6 @@ public final class MainFrame extends JFrame {
 		mainPipePanel.readConfigFromFile(PIPE_CONFIG_FILE);
 
 		Log.detail("GUI-Frame created");
-		new CommandSequenceEditorFrame(new File("/tmp/test.txt")); // TODO
-																	// remove
 		setVisible(true);
 	}
 

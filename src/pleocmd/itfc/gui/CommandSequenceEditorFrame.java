@@ -9,15 +9,11 @@ import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.Vector;
-import java.util.Map.Entry;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -25,6 +21,7 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
@@ -32,6 +29,7 @@ import javax.swing.text.StyledDocument;
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.itfc.gui.icons.IconLoader;
+import pleocmd.pipe.CommandSequenceMap;
 import pleocmd.pipe.cmd.Command;
 import pleocmd.pipe.cmd.PleoMonitorCommand;
 import pleocmd.pipe.out.ConsoleOutput;
@@ -44,7 +42,7 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 	private final File file;
 
-	private final Map<String, List<String>> map = new TreeMap<String, List<String>>();
+	private final CommandSequenceMap map = new CommandSequenceMap();
 
 	private final JComboBox cbTrigger;
 
@@ -77,8 +75,10 @@ public final class CommandSequenceEditorFrame extends JDialog {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				if ("comboBoxEdited".equals(e.getActionCommand()))
+				if ("comboBoxEdited".equals(e.getActionCommand())) {
+					map.addTrigger(cbTrigger.getSelectedItem().toString());
 					updateComboBoxModel();
+				}
 			}
 
 		});
@@ -98,7 +98,7 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 		tpCommands = new JTextPane();
 		gbc.weighty = 1.0;
-		add(tpCommands, gbc);
+		add(new JScrollPane(tpCommands), gbc);
 		gbc.weighty = 0.0;
 
 		++gbc.gridy;
@@ -233,6 +233,7 @@ public final class CommandSequenceEditorFrame extends JDialog {
 		setSize(700, 400);
 		setLocationRelativeTo(null);
 
+		map.reset();
 		addSequenceListFromFile(file);
 
 		Log.detail("CmdSeqEditor-Frame created");
@@ -241,19 +242,15 @@ public final class CommandSequenceEditorFrame extends JDialog {
 	}
 
 	public void addFromInputHistory() {
-		final Object triggerName = cbTrigger.getSelectedItem();
-		writeTextPaneToMap(triggerName);
-		List<String> trigger = map.get(triggerName);
-		if (trigger == null) {
-			trigger = new ArrayList<String>();
-			map.put((String) triggerName, trigger);
+		try {
+			final StyledDocument doc = tpCommands.getStyledDocument();
+			final int offset = doc.getParagraphElement(
+					tpCommands.getCaretPosition()).getEndOffset();
+			for (final String command : MainFrame.the().getHistory())
+				doc.insertString(offset, command + "\n", null);
+		} catch (final BadLocationException e) {
+			Log.error(e);
 		}
-		for (String command : MainFrame.the().getHistory()) {
-			command = command.trim();
-			if (!command.isEmpty()) trigger.add(command);
-			// TODO insert at cursor position, not at end of list
-		}
-		updateTextPaneFromMap(triggerName);
 	}
 
 	public void addFromFile() {
@@ -267,88 +264,50 @@ public final class CommandSequenceEditorFrame extends JDialog {
 
 	public void addSequenceListFromFile(final File fileToAdd) {
 		try {
-			final BufferedReader in = new BufferedReader(new FileReader(
-					fileToAdd));
-			String line;
-			List<String> trigger = null;
-			while ((line = in.readLine()) != null) {
-				line = line.trim();
-				if (line.length() >= 2 && line.charAt(0) == '['
-						&& line.charAt(line.length() - 1) == ']') {
-					final String tn = line.substring(1, line.length() - 1);
-					trigger = map.get(tn);
-					if (trigger == null) {
-						trigger = new ArrayList<String>();
-						map.put(tn, trigger);
-					}
-				} else {
-					if (line.isEmpty() || line.charAt(0) == '#') continue;
-					if (trigger == null)
-						throw new IOException("Cannot load command sequence: "
-								+ "Expected trigger name in [...]");
-					trigger.add(line);
-					// TODO insert at cursor position, not at end of list
-				}
-			}
-			in.close();
+			map.addFromFile(fileToAdd);
 		} catch (final IOException e) {
 			Log.error(e);
 		}
 
 		// pass changes to JComboBox and JTextPane
 		updateComboBoxModel();
-		updateTextPaneFromMap(cbTrigger.getSelectedItem());
 	}
 
 	public void addSequenceFromFile(final File fileToAdd) {
-		final Object triggerName = cbTrigger.getSelectedItem();
-		writeTextPaneToMap(triggerName);
 		try {
+			final StyledDocument doc = tpCommands.getStyledDocument();
+			final int offset = doc.getParagraphElement(
+					tpCommands.getCaretPosition()).getEndOffset();
 			final BufferedReader in = new BufferedReader(new FileReader(
 					fileToAdd));
 			String line;
-			List<String> trigger = map.get(triggerName);
-			if (trigger == null) {
-				trigger = new ArrayList<String>();
-				map.put((String) triggerName, trigger);
-			}
-			while ((line = in.readLine()) != null) {
-				line = line.trim();
-				if (line.length() >= 2 && line.charAt(0) == '['
-						&& line.charAt(line.length() - 1) == ']')
-					throw new IOException("Expected commands of exactly "
-							+ "one sequence, but found a "
-							+ "sequence list identifier");
-				if (line.isEmpty() || line.charAt(0) == '#') continue;
-				trigger.add(line);
-				// TODO insert at cursor position, not at end of list
-			}
+			while ((line = in.readLine()) != null)
+				doc.insertString(offset, line.trim() + "\n", null);
 			in.close();
 		} catch (final IOException e) {
 			Log.error(e);
+		} catch (final BadLocationException e) {
+			Log.error(e);
 		}
-		updateTextPaneFromMap(triggerName);
 	}
 
 	public void playSelected() {
-		final Object triggerName = cbTrigger.getSelectedItem();
-		writeTextPaneToMap(triggerName);
-		if (triggerName != null) {
-			final List<String> trigger = map.get(triggerName);
-			// TODO only play selected
-			if (trigger != null) for (final String command : trigger)
-				play(command);
-		}
+		/*
+		 * final Object triggerName = cbTrigger.getSelectedItem();
+		 * writeTextPaneToMap(triggerName); if (triggerName != null) { final
+		 * List<String> trigger = map.get(triggerName); // TODO only play
+		 * selected if (trigger != null) for (final String command : trigger)
+		 * play(command); }
+		 */
 	}
 
 	public void playAll() {
-		final Object triggerName = cbTrigger.getSelectedItem();
-		writeTextPaneToMap(triggerName);
-		if (triggerName != null) {
-			final List<String> trigger = map.get(triggerName);
-			if (trigger != null) for (final String command : trigger)
-				play(command);
-		}
+		/*
+		 * final Object triggerName = cbTrigger.getSelectedItem();
+		 * writeTextPaneToMap(triggerName); if (triggerName != null) { final
+		 * List<String> trigger = map.get(triggerName); if (trigger != null) for
+		 * (final String command : trigger) play(command); }
+		 */
 	}
 
 	public void play(final String command) {
@@ -379,17 +338,7 @@ public final class CommandSequenceEditorFrame extends JDialog {
 	public void saveChanges() {
 		writeTextPaneToMap(cbTrigger.getSelectedItem());
 		try {
-			final FileWriter out = new FileWriter(file);
-			for (final Entry<String, List<String>> trigger : map.entrySet()) {
-				out.write("[");
-				out.write(trigger.getKey());
-				out.write("]\n");
-				for (final String command : trigger.getValue()) {
-					out.write(command);
-					out.write("\n");
-				}
-			}
-			out.close();
+			map.writeToFile(file);
 		} catch (final IOException e) {
 			Log.error(e);
 		}
@@ -398,29 +347,27 @@ public final class CommandSequenceEditorFrame extends JDialog {
 	private void updateComboBoxModel() {
 		final Object lastSelected = cbTrigger.getSelectedItem();
 		cbModel.removeAllElements();
-		for (final String trigger : map.keySet())
+		for (final String trigger : map.getAllTriggers())
 			cbModel.addElement(trigger);
 		if (lastSelected == null || cbModel.getIndexOf(lastSelected) >= 0)
 			cbTrigger.setSelectedItem(lastSelected);
+		updateTextPaneFromMap(cbTrigger.getSelectedItem());
 	}
 
 	private void writeTextPaneToMap(final Object triggerName) {
 		try {
-			if (triggerName == null)
+			if (triggerName == null) {
+				if (tpCommands.getDocument().getLength() == 0) return;
 				throw new IOException("No name selected in ComboBox");
-			List<String> trigger = map.get(triggerName);
-			if (trigger == null) {
-				trigger = new ArrayList<String>();
-				map.put((String) triggerName, trigger);
 			}
-			trigger.clear();
+			map.clearCommands(triggerName.toString());
 			final BufferedReader in = new BufferedReader(new StringReader(
 					tpCommands.getText()));
 			String line;
 			while ((line = in.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && line.charAt(0) != '#')
-					trigger.add(line);
+					map.addCommand(triggerName.toString(), line);
 			}
 			in.close();
 		} catch (final IOException e) {
@@ -431,11 +378,15 @@ public final class CommandSequenceEditorFrame extends JDialog {
 	private void updateTextPaneFromMap(final Object triggerName) {
 		try {
 			final StyledDocument doc = tpCommands.getStyledDocument();
-			doc.remove(0, doc.getLength() - 1);
+			doc.remove(0, doc.getLength());
 			if (triggerName != null) {
-				final List<String> trigger = map.get(triggerName);
-				if (trigger != null) for (final String command : trigger)
-					doc.insertString(doc.getLength(), command + "\n", null);
+				final List<Command> commands = map.getCommands(triggerName
+						.toString());
+				if (commands != null)
+					for (final Command command : commands)
+						doc.insertString(doc.getLength(), command
+								.asPleoMonitorCommand()
+								+ "\n", null);
 			}
 		} catch (final BadLocationException e) {
 			Log.error(e);

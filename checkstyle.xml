@@ -23,9 +23,9 @@
 		<module name="InterfaceIsType" />
 		<module name="HideUtilityClassConstructor" />
 		<module name="DesignForExtension" />
-		<module name="MutableException">
-			<!-- <property name="format" value="^.*$" /> -->
-		</module>
+		<!-- <module name="MutableException">
+			<property name="format" value="^.*$" />
+		</module> -->
 		<module name="ThrowsCount">
 			<property name="max" value="2" />
 		</module>
