@@ -6,6 +6,10 @@ import java.io.IOException;
 
 public final class IntValue extends Value {
 
+	public static final char TYPE_CHAR = 'I';
+
+	public static final ValueType RECOMMENDED_TYPE = ValueType.Int64;
+
 	private long val;
 
 	protected IntValue(final ValueType type) {
@@ -90,6 +94,11 @@ public final class IntValue extends Value {
 
 	public static boolean isValidChar(final byte b) {
 		return b >= '0' && b <= '9' || b == '-';
+	}
+
+	@Override
+	public boolean mustWriteAsciiAsHex() {
+		return false;
 	}
 
 }

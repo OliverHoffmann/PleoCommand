@@ -7,6 +7,29 @@ import java.io.UnsupportedEncodingException;
 
 public final class StringValue extends Value {
 
+	public static final char TYPE_CHAR = 'S';
+
+	public static final ValueType RECOMMENDED_TYPE = ValueType.NullTermString;
+
+	private static final int[] ASCII_TABLE = { // 
+	/**//**/0, 0, 0, 0, 0, 0, 0, 0, // 00 - 07
+			0, 0, 0, 0, 0, 0, 0, 0, // 08 - 0F
+			0, 0, 0, 0, 0, 0, 0, 0, // 10 - 17
+			0, 0, 0, 0, 0, 0, 0, 0, // 18 - 1F
+			0, 1, 1, 1, 1, 1, 1, 1, // 20 - 27
+			1, 1, 1, 1, 1, 1, 1, 1, // 28 - 2F
+			1, 1, 1, 1, 1, 1, 1, 1, // 30 - 37
+			1, 1, 0, 1, 1, 1, 1, 1, // 38 - 3F
+			1, 1, 1, 1, 1, 1, 1, 1, // 40 - 47
+			1, 1, 1, 1, 1, 1, 1, 1, // 48 - 4F
+			1, 1, 1, 1, 1, 1, 1, 1, // 50 - 57
+			1, 1, 1, 1, 1, 1, 1, 1, // 58 - 5F
+			1, 1, 1, 1, 1, 1, 1, 1, // 60 - 67
+			1, 1, 1, 1, 1, 1, 1, 1, // 68 - 6F
+			1, 1, 1, 1, 1, 1, 1, 1, // 70 - 77
+			1, 1, 1, 1, 0, 1, 0, 0, // 78 - 7F
+	};
+
 	private String val;
 
 	protected StringValue(final ValueType type) {
@@ -90,6 +113,26 @@ public final class StringValue extends Value {
 
 	public static boolean isValidChar(final byte b) {
 		return b >= 0x20 && b <= 0x7E || b == 0x09;
+	}
+
+	@Override
+	public boolean mustWriteAsciiAsHex() {
+		for (int i = 0; i < val.length(); ++i)
+			if (ASCII_TABLE[val.charAt(i)] == 0) switch (val.charAt(i)) {
+			case 0x20:
+				// whitespace is disallowed only on the end of the string
+				if (i == 0 || i == val.length() - 1) return true;
+				break;
+			case 0x3A:
+				// ':' is disallowed only when ambiguous (position 1 and 2)
+				if (i == 1 || i == 2) return true;
+				break;
+			default:
+				// the character is invalid =>
+				// we must write the string in hexadecimal form
+				return true;
+			}
+		return false;
 	}
 
 }

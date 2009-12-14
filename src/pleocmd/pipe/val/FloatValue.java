@@ -6,6 +6,10 @@ import java.io.IOException;
 
 public final class FloatValue extends Value {
 
+	public static final char TYPE_CHAR = 'F';
+
+	public static final ValueType RECOMMENDED_TYPE = ValueType.Float64;
+
 	private double val;
 
 	protected FloatValue(final ValueType type) {
@@ -89,6 +93,11 @@ public final class FloatValue extends Value {
 
 	public static boolean isValidChar(final byte b) {
 		return IntValue.isValidChar(b) || b == '.' || b == 'E' || b == 'e';
+	}
+
+	@Override
+	public boolean mustWriteAsciiAsHex() {
+		return false;
 	}
 
 }

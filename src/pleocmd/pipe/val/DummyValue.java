@@ -32,6 +32,11 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
+	public boolean mustWriteAsciiAsHex() {
+		throw new UnsupportedOperationException("This is a dummy value");
+	}
+
+	@Override
 	public String toString() {
 		return null;
 	}

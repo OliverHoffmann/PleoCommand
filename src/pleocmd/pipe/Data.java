@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.Log;
-import pleocmd.pipe.val.BinaryDataValue;
+import pleocmd.pipe.val.BinaryValue;
 import pleocmd.pipe.val.DummyValue;
 import pleocmd.pipe.val.FloatValue;
 import pleocmd.pipe.val.IntValue;
@@ -247,23 +247,7 @@ public final class Data extends AbstractList<Value> {
 				break;
 			case ':':
 				if (type == null && (buflen == 1 || buflen == 2)) {
-					switch (buf[0]) {
-					case 'I':
-						type = ValueType.Int64;
-						break;
-					case 'F':
-						type = ValueType.Float64;
-						break;
-					case 'S':
-						type = ValueType.NullTermString;
-						break;
-					case 'B':
-						type = ValueType.Data;
-						break;
-					default:
-						throw new IOException(String.format(
-								"Invalid type identifier: 0x%02X", buf[0]));
-					}
+					type = Value.detectFromTypeChar((char) buf[0]);
 					if (buflen == 2) {
 						if (buf[1] != 'x')
 							throw new IOException(String.format(
@@ -328,7 +312,7 @@ public final class Data extends AbstractList<Value> {
 				res = Math.max(res, 3);
 			else if (StringValue.isValidChar(b))
 				res = Math.max(res, 4);
-			else if (BinaryDataValue.isValidChar(b)) res = Math.max(res, 5);
+			else if (BinaryValue.isValidChar(b)) res = Math.max(res, 5);
 		}
 		Log.detail("Autodetecting resulted in " + res);
 		return res == 0 ? 5 : res;
@@ -366,32 +350,14 @@ public final class Data extends AbstractList<Value> {
 			}
 			first = false;
 
+			final boolean hex = value.mustWriteAsciiAsHex();
 			// write the field type identifier (and modifier if needed)
-			boolean hex;
-			switch (value.getType()) {
-			case Int8:
-			case Int32:
-			case Int64:
-				out.writeByte('I');
-				hex = false;
-				break;
-			case Float32:
-			case Float64:
-				out.writeByte('F');
-				hex = false;
-				break;
-			case UTFString:
-			case NullTermString:
-				out.writeByte('S');
-				hex = true; // TODO should depend on content
-				break;
-			default:
-				out.writeByte('B');
-				hex = true;
+			if (hex) {
+				out.writeByte(Value.getAsciiTypeChar(value));
+				out.writeByte('x');
+				out.writeByte(':');
+				out.writeByte(' ');
 			}
-			if (hex) out.writeByte('x');
-			out.writeByte(':');
-			out.writeByte(' ');
 
 			// write the field content in decimal or hex
 			if (hex) {

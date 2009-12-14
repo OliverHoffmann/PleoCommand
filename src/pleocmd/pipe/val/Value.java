@@ -45,9 +45,29 @@ public abstract class Value {
 		case NullTermString:
 			return new StringValue(type);
 		case Data:
-			return new BinaryDataValue(type);
+			return new BinaryValue(type);
 		default:
 			return null;
+		}
+	}
+
+	public static ValueType detectFromTypeChar(final char c) throws IOException {
+		if (c == IntValue.TYPE_CHAR) return IntValue.RECOMMENDED_TYPE;
+		if (c == FloatValue.TYPE_CHAR) return FloatValue.RECOMMENDED_TYPE;
+		if (c == StringValue.TYPE_CHAR) return StringValue.RECOMMENDED_TYPE;
+		if (c == BinaryValue.TYPE_CHAR) return BinaryValue.RECOMMENDED_TYPE;
+		throw new IOException(String.format("Invalid type identifier: 0x%02X",
+				c));
+	}
+
+	public static int getAsciiTypeChar(final Value value) {
+		try {
+			return (Character) value.getClass().getDeclaredField("TYPE_CHAR")
+					.get(null);
+		} catch (final Exception e) {
+			throw new RuntimeException(
+					"Internal error: Cannot access field TYPE_CHAR "
+							+ "of a subclass of Value", e);
 		}
 	}
 
@@ -62,5 +82,7 @@ public abstract class Value {
 
 	@Override
 	public abstract String toString();
+
+	public abstract boolean mustWriteAsciiAsHex();
 
 }

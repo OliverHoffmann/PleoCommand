@@ -5,11 +5,15 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.Arrays;
 
-public final class BinaryDataValue extends Value {
+public final class BinaryValue extends Value {
+
+	public static final char TYPE_CHAR = 'B';
+
+	public static final ValueType RECOMMENDED_TYPE = ValueType.Data;
 
 	private byte[] val;
 
-	protected BinaryDataValue(final ValueType type) {
+	protected BinaryValue(final ValueType type) {
 		super(type);
 		assert type == ValueType.Data;
 	}
@@ -62,6 +66,11 @@ public final class BinaryDataValue extends Value {
 	}
 
 	public static boolean isValidChar(@SuppressWarnings("unused") final byte b) {
+		return true;
+	}
+
+	@Override
+	public boolean mustWriteAsciiAsHex() {
 		return true;
 	}
 
