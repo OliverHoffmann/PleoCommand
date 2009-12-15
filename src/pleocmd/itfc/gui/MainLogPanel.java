@@ -66,6 +66,7 @@ public final class MainLogPanel extends JPanel {
 				.setMaxWidth(200);
 		logTable.getTableHeader().setVisible(false);
 		logTable.setShowGrid(false);
+		logTable.setEnabled(false);
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		gbc.weighty = 1.0;
 		add(new JScrollPane(logTable,
@@ -116,13 +117,13 @@ public final class MainLogPanel extends JPanel {
 
 	private String getBacktrace(final int index) {
 		final Throwable bt = logModel.getLogAt(index).getBacktrace();
-		if (bt == null) return "";
+		if (bt == null) return null;
 		final StringWriter sw = new StringWriter();
 		final PrintWriter pw = new PrintWriter(sw);
 		bt.printStackTrace(pw);
 		pw.flush();
-		return String.format("<html>%s</html>", sw.toString().replace("\n",
-				"<br>"));
+		return String.format("<html>%s</html>", sw.toString().replace("<",
+				"&lt;").replace("\n", "<br>"));
 	}
 
 	public synchronized void startPipeThread() {
