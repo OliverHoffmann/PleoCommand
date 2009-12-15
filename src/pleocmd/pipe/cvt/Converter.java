@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
+import pleocmd.exc.PipeException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
@@ -30,13 +31,13 @@ public abstract class Converter extends PipePart {
 	public abstract boolean canHandleData(final Data data)
 			throws ConverterException;
 
-	public final List<Data> convert(final Data data)
-			throws ConverterException {
-		switch (getState()) {
-		case Initialized:
+	public final List<Data> convert(final Data data) throws ConverterException {
+		try {
+			ensureInitialized();
 			return convert0(data);
-		default:
-			throw new ConverterException(this, true, "Not initialized");
+		} catch (final PipeException e) {
+			throw new ConverterException(this, true,
+					"Cannot convert data block", e);
 		}
 	}
 

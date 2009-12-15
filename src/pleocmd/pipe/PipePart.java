@@ -5,13 +5,7 @@ import java.io.IOException;
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
 
-public abstract class PipePart {
-
-	public enum State {
-		Constructing, Contructed, Configured, Initialized
-	}
-
-	private State state = State.Constructing;
+public abstract class PipePart extends StateHandling {
 
 	private final Config config;
 
@@ -23,7 +17,11 @@ public abstract class PipePart {
 	public PipePart(final Config emptyConfig) {
 		config = emptyConfig;
 		config.setOwner(this);
-		state = State.Contructed;
+		try {
+			setState(State.Constructed);
+		} catch (final PipeException e) {
+			Log.error(e);
+		}
 	}
 
 	/**
@@ -35,48 +33,25 @@ public abstract class PipePart {
 	 * @see #getConfig()
 	 */
 	public final void configured() throws PipeException {
-		switch (state) {
-		case Constructing:
-			throw new PipeException(this, true, "Constructing");
-		case Contructed:
-		case Configured:
-			try {
-				configured0();
-			} catch (final IOException e) {
-				throw new PipeException(this, true, e, "Cannot configure");
-			}
-			state = State.Configured;
-			break;
-		case Initialized:
-			throw new PipeException(this, true, "Already initialized");
-		default:
-			throw new PipeException(this, true,
-					"Internal error: Unknown state: %s", state);
+		ensureConstructed();
+		try {
+			configured0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot configure");
 		}
+		setState(State.Configured);
 	}
 
 	protected abstract void configured0() throws PipeException, IOException;
 
 	public final void init() throws PipeException {
-		switch (state) {
-		case Constructing:
-			throw new PipeException(this, true, "Constructing");
-		case Contructed:
-			throw new PipeException(this, true, "Not configured");
-		case Configured:
-			try {
-				init0();
-			} catch (final IOException e) {
-				throw new PipeException(this, true, e, "Cannot initialize");
-			}
-			state = State.Initialized;
-			break;
-		case Initialized:
-			throw new PipeException(this, true, "Already initialized");
-		default:
-			throw new PipeException(this, true,
-					"Internal error: Unknown state: %s", state);
+		ensureConfigured();
+		try {
+			init0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot initialize");
 		}
+		setState(State.Initialized);
 	}
 
 	protected abstract void init0() throws PipeException, IOException;
@@ -85,28 +60,18 @@ public abstract class PipePart {
 		try {
 			close();
 		} catch (final PipeException e) {
-			Log.error(e);
+			Log.error(e, "Cannot close '%s'", getClass().getSimpleName());
 		}
 	}
 
 	public final void close() throws PipeException {
-		switch (state) {
-		case Constructing:
-		case Contructed:
-		case Configured:
-			throw new PipeException(this, true, "Not initialized");
-		case Initialized:
-			try {
-				close0();
-			} catch (final IOException e) {
-				throw new PipeException(this, true, e, "Cannot close");
-			}
-			state = State.Configured;
-			break;
-		default:
-			throw new PipeException(this, true,
-					"Internal error: Unknown state: %s", state);
+		ensureInitialized();
+		try {
+			close0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot close");
 		}
+		setState(State.Configured);
 	}
 
 	protected abstract void close0() throws PipeException, IOException;
@@ -120,19 +85,7 @@ public abstract class PipePart {
 	@Override
 	protected final void finalize() throws Throwable { // CS_IGNORE
 		try {
-			switch (state) {
-			case Constructing:
-			case Contructed:
-			case Configured:
-				break;
-			case Initialized:
-				Log.error("Destroying PipePart which "
-						+ "has not been closed before");
-				break;
-			default:
-				throw new PipeException(this, true,
-						"Internal error: Unknown state: %s", state);
-			}
+			ensureNoLongerInitialized();
 		} finally {
 			super.finalize();
 		}
@@ -141,10 +94,6 @@ public abstract class PipePart {
 	@Override
 	public final String toString() {
 		return getClass().getSimpleName();
-	}
-
-	public final State getState() {
-		return state;
 	}
 
 	public final Config getConfig() {

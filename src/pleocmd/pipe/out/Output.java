@@ -3,6 +3,7 @@ package pleocmd.pipe.out;
 import java.io.IOException;
 
 import pleocmd.exc.OutputException;
+import pleocmd.exc.PipeException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
@@ -26,17 +27,15 @@ public abstract class Output extends PipePart {
 	protected abstract void close0() throws OutputException, IOException;
 
 	public final void write(final Data data) throws OutputException {
-		switch (getState()) {
-		case Initialized:
-			try {
-				write0(data);
-			} catch (final IOException e) {
-				throw new OutputException(this, false, e,
-						"Cannot write data block '%s'", data);
-			}
-			break;
-		default:
-			throw new OutputException(this, true, "Not initialized");
+		try {
+			ensureInitialized();
+			write0(data);
+		} catch (final IOException e) {
+			throw new OutputException(this, false, e,
+					"Cannot write data block '%s'", data);
+		} catch (final PipeException e) {
+			throw new OutputException(this, true, e,
+					"Cannot write data block '%s'", data);
 		}
 	}
 

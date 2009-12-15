@@ -106,8 +106,10 @@ public final class MainPipePanel extends JPanel {
 	public void writeConfigToFile(final File file) {
 		try {
 			pipe.writeToFile(file);
-		} catch (final IOException exc) {
-			Log.error(exc);
+		} catch (final IOException e) {
+			Log.error(e);
+		} catch (final PipeException e) {
+			Log.error(e);
 		}
 	}
 
@@ -120,10 +122,10 @@ public final class MainPipePanel extends JPanel {
 	public void readConfigFromFile(final File file) {
 		try {
 			pipe.readFromFile(file);
-		} catch (final IOException exc) {
-			Log.error(exc);
-		} catch (final PipeException exc) {
-			Log.error(exc);
+		} catch (final IOException e) {
+			Log.error(e);
+		} catch (final PipeException e) {
+			Log.error(e);
 		}
 		updatePipeLabel();
 	}

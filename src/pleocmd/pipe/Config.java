@@ -57,16 +57,21 @@ public final class Config extends AbstractList<ConfigValue> {
 		if (this.owner != null)
 			throw new IllegalStateException(
 					"Config's owner has already been assigned");
-		if (owner.getState() != PipePart.State.Constructing)
-			throw new IllegalStateException(
-					"New Config's owner has already finished constructing");
+		try {
+			owner.ensureConstructing();
+		} catch (final PipeException e) {
+			throw new IllegalStateException("Cannot set Config's owner", e);
+		}
 		this.owner = owner;
 	}
 
 	public Config addV(final ConfigValue value) {
-		if (owner != null && owner.getState() != PipePart.State.Constructing)
+		try {
+			if (owner != null) owner.ensureConstructing();
+		} catch (final PipeException e) {
 			throw new IllegalStateException(
-					"Config's owner has already finished constructing");
+					"Cannot add ConfigValue to configuration", e);
+		}
 		list.add(value);
 		return this;
 	}

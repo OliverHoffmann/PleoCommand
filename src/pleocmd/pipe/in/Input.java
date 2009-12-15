@@ -3,6 +3,7 @@ package pleocmd.pipe.in;
 import java.io.IOException;
 
 import pleocmd.exc.InputException;
+import pleocmd.exc.PipeException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
@@ -26,16 +27,15 @@ public abstract class Input extends PipePart {
 	protected abstract void close0() throws InputException, IOException;
 
 	public final boolean canReadData() throws InputException {
-		switch (getState()) {
-		case Initialized:
-			try {
-				return canReadData0();
-			} catch (final IOException e) {
-				throw new InputException(this, false, e,
-						"Cannot check for available data blocks");
-			}
-		default:
-			throw new InputException(this, true, "Not initialized");
+		try {
+			ensureInitialized();
+			return canReadData0();
+		} catch (final IOException e) {
+			throw new InputException(this, false, e,
+					"Cannot check for available data blocks");
+		} catch (final PipeException e) {
+			throw new InputException(this, true, e,
+					"Cannot check for available data blocks");
 		}
 	}
 
@@ -43,16 +43,13 @@ public abstract class Input extends PipePart {
 			IOException;
 
 	public final Data readData() throws InputException {
-		switch (getState()) {
-		case Initialized:
-			try {
-				return readData0();
-			} catch (final IOException e) {
-				throw new InputException(this, false, e,
-						"Cannot read data block");
-			}
-		default:
-			throw new InputException(this, true, "Not initialized");
+		try {
+			ensureInitialized();
+			return readData0();
+		} catch (final IOException e) {
+			throw new InputException(this, false, e, "Cannot read data block");
+		} catch (final PipeException e) {
+			throw new InputException(this, true, e, "Cannot read data block");
 		}
 	}
 

@@ -14,6 +14,7 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
+import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
@@ -132,14 +133,18 @@ public final class ConfigFrame extends JDialog {
 	}
 
 	private void applyChanges() {
-		pipe.reset();
-		for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
-			pipe.addInput(pppInput.getTableModel().getPipePart(i));
-		for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
-			pipe.addConverter(pppConverter.getTableModel().getPipePart(i));
-		for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
-			pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
-		Log.detail("Applied Config-Frame");
+		try {
+			pipe.reset();
+			for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
+				pipe.addInput(pppInput.getTableModel().getPipePart(i));
+			for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
+				pipe.addConverter(pppConverter.getTableModel().getPipePart(i));
+			for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
+				pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
+			Log.detail("Applied Config-Frame");
+		} catch (final PipeException e) {
+			Log.error(e);
+		}
 	}
 
 	public static GridBagConstraints initGBC() {

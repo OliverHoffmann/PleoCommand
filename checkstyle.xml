@@ -3,6 +3,8 @@
 	PUBLIC "-//Puppy Crawl//DTD Check Configuration 1.1//EN"
 	"http://www.puppycrawl.com/dtds/configuration_1_1.dtd">
 
+<!-- Contains all CheckStyle 5 checks that can not be handled directly by Eclipse -->
+
 <module name="Checker">
 	<property name="charset" value="UTF-8" />
 	<property name="localeCountry" value="EN" />
@@ -38,7 +40,6 @@
 		<module name="FinalLocalVariable" />
 		<module name="InnerAssignment" />
 		<!-- <module name="MagicNumber" /> -->
-		<module name="MissingSwitchDefault" />
 		<module name="ModifiedControlVariable" />
 		<module name="RedundantThrows" />
 		<module name="SimplifyBooleanExpression" />
@@ -88,7 +89,9 @@
 			<property name="max" value="4" />
 		</module>
 		<!-- <module name="ClassDataAbstractionCoupling" /> -->
-		<module name="ClassFanOutComplexity" />
+		<module name="ClassFanOutComplexity">
+			<property name="max" value="25" />
+		</module>
 		<!-- <module name="CyclomaticComplexity" /> -->
 		<module name="NPathComplexity" />
 		<!-- <module name="JavaNCSS" /> -->
