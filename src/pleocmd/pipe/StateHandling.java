@@ -1,5 +1,6 @@
 package pleocmd.pipe;
 
+import pleocmd.Log;
 import pleocmd.exc.PipeException;
 
 public class StateHandling {
@@ -57,7 +58,19 @@ public class StateHandling {
 		if (!checkValidChange(this.state, state))
 			throw new PipeException(null, true,
 					"Cannot change state from '%s' to '%s'", this.state, state);
+		Log.detail("'%s' changed state: '%s' => '%s'", getClass()
+				.getSimpleName(), this.state, state);
 		this.state = state;
+	}
+
+	private void throwException(final String msg) throws PipeException {
+		throw new PipeException(null, true, "'%s' is in a wrong state: %s",
+				getClass().getSimpleName(), msg);
+	}
+
+	private void throwUnknownState() throws PipeException {
+		throw new PipeException(null, true, "'%s' is in an unknown state: %s",
+				getClass().getSimpleName(), state);
 	}
 
 	public final void ensureConstructing() throws PipeException {
@@ -67,41 +80,44 @@ public class StateHandling {
 		case Constructed:
 		case Configured:
 		case Initialized:
-			throw new PipeException(null, true, "Already constructed");
+			throwException("Already constructed");
+			//$FALL-THROUGH$ does never occur
 		default:
-			throw new PipeException(null, true,
-					"Internal error: Unknown state: %s", state);
+			throwUnknownState();
 		}
 	}
 
 	public final void ensureConstructed() throws PipeException {
 		switch (state) {
 		case Constructing:
-			throw new PipeException(null, true, "Constructing");
+			throwException("Constructing");
+			//$FALL-THROUGH$ does never occur
 		case Constructed:
 		case Configured:
 			break;
 		case Initialized:
-			throw new PipeException(null, true, "Already initialized");
+			throwException("Already initialized");
+			//$FALL-THROUGH$ does never occur
 		default:
-			throw new PipeException(null, true,
-					"Internal error: Unknown state: %s", state);
+			throwUnknownState();
 		}
 	}
 
 	public final void ensureConfigured() throws PipeException {
 		switch (state) {
 		case Constructing:
-			throw new PipeException(null, true, "Constructing");
+			throwException("Constructing");
+			//$FALL-THROUGH$ does never occur
 		case Constructed:
-			throw new PipeException(null, true, "Not configured");
+			throwException("Not configured");
+			//$FALL-THROUGH$ does never occur
 		case Configured:
 			break;
 		case Initialized:
-			throw new PipeException(null, true, "Already initialized");
+			throwException("Already initialized");
+			//$FALL-THROUGH$ does never occur
 		default:
-			throw new PipeException(null, true,
-					"Internal error: Unknown state: %s", state);
+			throwUnknownState();
 		}
 	}
 
@@ -110,12 +126,12 @@ public class StateHandling {
 		case Constructing:
 		case Constructed:
 		case Configured:
-			throw new PipeException(null, true, "Not initialized");
+			throwException("Not initialized");
+			//$FALL-THROUGH$ does never occur
 		case Initialized:
 			break;
 		default:
-			throw new PipeException(null, true,
-					"Internal error: Unknown state: %s", state);
+			throwUnknownState();
 		}
 	}
 
@@ -126,10 +142,10 @@ public class StateHandling {
 		case Configured:
 			break;
 		case Initialized:
-			throw new PipeException(null, true, "Still initialized");
+			throwException("Still initialized");
+			//$FALL-THROUGH$ does never occur
 		default:
-			throw new PipeException(null, true,
-					"Internal error: Unknown state: %s", state);
+			throwUnknownState();
 		}
 	}
 
