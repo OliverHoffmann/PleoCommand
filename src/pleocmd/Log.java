@@ -130,8 +130,11 @@ public final class Log {
 
 	public static void error(final Throwable throwable, final String msg,
 			final Object... args) {
-		final StringBuilder sb = new StringBuilder(args.length == 0 ? msg
-				: String.format(msg, args));
+		final StringBuilder sb = new StringBuilder();
+		if (!msg.isEmpty()) {
+			sb.append(args.length == 0 ? msg : String.format(msg, args));
+			sb.append(": ");
+		}
 		Throwable t = throwable;
 		while (true) {
 			sb.append(t.getClass().getSimpleName());
