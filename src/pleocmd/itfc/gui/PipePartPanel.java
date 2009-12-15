@@ -160,31 +160,21 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 	}
 
 	public void addPipePart(final Class<E> part) {
-		E pp;
 		try {
-			pp = part.newInstance();
+			final E pp = part.newInstance();
+			if (pp.getConfig().readFromGUI("Add")) tableModel.addPipePart(pp);
 		} catch (final InstantiationException e) {
 			Log.error(e);
-			return;
 		} catch (final IllegalAccessException e) {
 			Log.error(e);
-			return;
-		}
-		try {
-			if (pp.getConfig().readFromGUI("Add"))
-				tableModel.addPipePart(pp);
-			else
-				pp.tryClose();
 		} catch (final PipeException e) {
 			Log.error(e);
-			pp.tryClose();
-			return;
 		}
 	}
 
 	public void removePipeParts(final int[] indices) {
 		for (final int idx : indices)
-			tableModel.removePipePart(idx).tryClose();
+			tableModel.removePipePart(idx);
 	}
 
 	public void modifyPipePart(final int index) {

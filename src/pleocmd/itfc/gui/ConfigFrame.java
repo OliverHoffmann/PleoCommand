@@ -32,27 +32,35 @@ public final class ConfigFrame extends JDialog {
 
 	private static final long serialVersionUID = -1967218353263515865L;
 
-	private boolean okPressed;
+	@SuppressWarnings("unchecked")
+	private final PipePartPanel<Input> pppInput = new PipePartPanel<Input>(
+			(Class<Input>[]) new Class<?>[] { FileInput.class,
+					ConsoleInput.class, TcpIpInput.class });
 
 	@SuppressWarnings("unchecked")
+	private final PipePartPanel<Converter> pppConverter = new PipePartPanel<Converter>(
+			(Class<Converter>[]) new Class<?>[] { SimpleConverter.class,
+					EmotionConverter.class });
+
+	@SuppressWarnings("unchecked")
+	private final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
+			(Class<Output>[]) new Class<?>[] { FileOutput.class,
+					ConsoleOutput.class, PleoRXTXOutput.class });
+
+	private final Pipe pipe;
+
 	public ConfigFrame(final Pipe pipe) {
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
 		setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		final PipePartPanel<Input> pppInput = new PipePartPanel<Input>(
-				(Class<Input>[]) new Class<?>[] { FileInput.class,
-						ConsoleInput.class, TcpIpInput.class });
-		final PipePartPanel<Converter> pppConverter = new PipePartPanel<Converter>(
-				(Class<Converter>[]) new Class<?>[] { SimpleConverter.class,
-						EmotionConverter.class });
-		final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
-				(Class<Output>[]) new Class<?>[] { FileOutput.class,
-						ConsoleOutput.class, PleoRXTXOutput.class });
-
+		this.pipe = pipe;
+		pppInput.getTableModel().clear();
 		pppInput.getTableModel().addPipeParts(pipe.getInputList());
+		pppConverter.getTableModel().clear();
 		pppConverter.getTableModel().addPipeParts(pipe.getConverterList());
+		pppOutput.getTableModel().clear();
 		pppOutput.getTableModel().addPipeParts(pipe.getOutputList());
 
 		// Add components
@@ -81,21 +89,26 @@ public final class ConfigFrame extends JDialog {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				// TODO move this code? depends mostly on PipePartTableModel
-				pipe.reset();
-				for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
-					pipe.addInput(pppInput.getTableModel().getPipePart(i));
-				for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
-					pipe.addConverter(pppConverter.getTableModel().getPipePart(
-							i));
-				for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
-					pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
-				okPressed = true;
+				applyChanges();
 				dispose();
 			}
+
 		});
 		bottom.add(btnOK, gbc);
 		getRootPane().setDefaultButton(btnOK);
+
+		++gbc.gridx;
+		final JButton btnApply = new JButton("Apply", IconLoader
+				.getIcon("dialog-ok-apply.png"));
+		btnApply.addActionListener(new ActionListener() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void actionPerformed(final ActionEvent e) {
+				applyChanges();
+			}
+
+		});
+		bottom.add(btnApply, gbc);
 
 		++gbc.gridx;
 		final JButton btnCancel = new JButton("Cancel", IconLoader
@@ -103,6 +116,7 @@ public final class ConfigFrame extends JDialog {
 		btnCancel.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
+				Log.detail("Canceled Config-Frame");
 				dispose();
 			}
 		});
@@ -117,8 +131,15 @@ public final class ConfigFrame extends JDialog {
 		setVisible(true);
 	}
 
-	public boolean isOkPressed() {
-		return okPressed;
+	private void applyChanges() {
+		pipe.reset();
+		for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
+			pipe.addInput(pppInput.getTableModel().getPipePart(i));
+		for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
+			pipe.addConverter(pppConverter.getTableModel().getPipePart(i));
+		for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
+			pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
+		Log.detail("Applied Config-Frame");
 	}
 
 	public static GridBagConstraints initGBC() {

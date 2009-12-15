@@ -90,12 +90,11 @@ public final class MainPipePanel extends JPanel {
 				pipe.getOutputList().size() == 1 ? "" : "s"));
 	}
 
-	public boolean changeConfig() {
+	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		final boolean ok = new ConfigFrame(pipe).isOkPressed();
-		Log.detail("GUI-Frame is done with configuration: %s", ok);
+		new ConfigFrame(pipe);
+		Log.detail("GUI-Frame is done with configuration");
 		updatePipeLabel();
-		return ok;
 	}
 
 	public void writeConfigToFile() {

@@ -222,7 +222,6 @@ public final class Pipe {
 	}
 
 	public void reset() {
-		closeAll();
 		inputList.clear();
 		outputList.clear();
 		converterList.clear();
