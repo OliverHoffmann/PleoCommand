@@ -9,14 +9,13 @@ import pleocmd.itfc.gui.MainFrame;
  * TODO: <br>
  * implement DataFilter<br>
  * check terminology (Value, Data, Block, Sequence)<br>
- * dblclick on pipepart should call "Modify"<br>
- * disable "Modify" if nothing to configure<br>
  * set filetypes for open/save dialogs<br>
- * dbl-click on history entry to put it into input field<br>
  * term: loadFrom / readFrom<br>
  * checkstyle: no exception handling in pipe's, only pass them thru<br>
  * exit while pipe is running?<br>
  * detect endless looping in convert()<br>
+ * introduce priority system<br>
+ * split pipe in 3 threads: in, cvt and out<br>
  */
 
 public final class Main {

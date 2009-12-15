@@ -4,6 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -45,6 +47,16 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		table.getTableHeader().setVisible(false);
 		table.setShowGrid(false);
 		table.setColumnSelectionAllowed(false);
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void mouseClicked(final MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					final int idx = table.getSelectedRow();
+					if (idx != -1) modifyPipePart(idx);
+				}
+			}
+		});
 		add(new JScrollPane(table), gbc);
 		gbc.gridwidth = 1;
 		gbc.weightx = 0.0;

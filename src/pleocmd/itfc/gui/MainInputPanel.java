@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -54,6 +56,17 @@ public final class MainInputPanel extends JPanel {
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
 		gbc.weighty = 0.0;
+		historyList.addMouseListener(new MouseAdapter() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void mouseClicked(final MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					final int idx = historyList.getSelectedIndex();
+					if (idx != -1)
+						putInput(historyListModel.getElementAt(idx).toString());
+				}
+			}
+		});
 
 		++gbc.gridy;
 
@@ -110,10 +123,14 @@ public final class MainInputPanel extends JPanel {
 	}
 
 	public void putConsoleInput() {
+		putInput(consoleInput.getText());
+		consoleInput.setText("");
+	}
+
+	public void putInput(final String input) {
 		try {
-			StandardInput.the().put(
-					(consoleInput.getText() + "\n").getBytes("ISO-8859-1"));
-			historyListModel.add(consoleInput.getText());
+			StandardInput.the().put((input + "\n").getBytes("ISO-8859-1"));
+			historyListModel.add(input);
 			EventQueue.invokeLater(new Runnable() {
 				@Override
 				@SuppressWarnings("synthetic-access")
@@ -123,7 +140,6 @@ public final class MainInputPanel extends JPanel {
 							size, size));
 				}
 			});
-			consoleInput.setText("");
 		} catch (final IOException exc) {
 			Log.error(exc);
 		}
