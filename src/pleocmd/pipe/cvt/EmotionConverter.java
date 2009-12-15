@@ -20,6 +20,7 @@ public final class EmotionConverter extends Converter {
 
 	@Override
 	protected void configured0() {
+		// nothing to do
 	}
 
 	@Override
