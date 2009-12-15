@@ -68,7 +68,6 @@
 		<module name="ExplicitInitialization" />
 		<module name="DefaultComesLast" />
 		<!-- <module name="MissingCtor" /> -->
-		<module name="FallThrough" />
 		<!-- <module name="MultipleStringLiterals" /> -->
 		<!-- <module name="MultipleVariableDeclarations" />  -->
 		<module name="UnnecessaryParentheses" />
@@ -80,7 +79,6 @@
 		<module name="IllegalImport" />
 		<module name="RedundantImport" />
 		<module name="UnusedImports" />
-		<module name="ImportOrder" />
 
 		<!-- Javadoc Comments -->
 
