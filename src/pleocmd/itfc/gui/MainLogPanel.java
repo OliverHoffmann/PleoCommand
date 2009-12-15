@@ -5,7 +5,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -44,7 +47,17 @@ public final class MainLogPanel extends JPanel {
 		gbc.gridx = 0;
 
 		logModel = new LogTableModel();
-		logTable = new JTable(logModel);
+		logTable = new JTable(logModel) {
+
+			private static final long serialVersionUID = 1128237812769648620L;
+
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public String getToolTipText(final MouseEvent event) {
+				return getBacktrace(rowAtPoint(event.getPoint()));
+			}
+
+		};
 		logTable.getTableHeader().getColumnModel().getColumn(0).setMinWidth(50);
 		logTable.getTableHeader().getColumnModel().getColumn(0).setMaxWidth(50);
 		logTable.getTableHeader().getColumnModel().getColumn(1)
@@ -53,7 +66,6 @@ public final class MainLogPanel extends JPanel {
 				.setMaxWidth(200);
 		logTable.getTableHeader().setVisible(false);
 		logTable.setShowGrid(false);
-		logTable.setEnabled(false);
 		gbc.gridwidth = GridBagConstraints.REMAINDER;
 		gbc.weighty = 1.0;
 		add(new JScrollPane(logTable,
@@ -100,6 +112,17 @@ public final class MainLogPanel extends JPanel {
 			}
 		});
 		add(btnLogClear, gbc);
+	}
+
+	private String getBacktrace(final int index) {
+		final Throwable bt = logModel.getLogAt(index).getBacktrace();
+		if (bt == null) return "";
+		final StringWriter sw = new StringWriter();
+		final PrintWriter pw = new PrintWriter(sw);
+		bt.printStackTrace(pw);
+		pw.flush();
+		return String.format("<html>%s</html>", sw.toString().replace("\n",
+				"<br>"));
 	}
 
 	public synchronized void startPipeThread() {

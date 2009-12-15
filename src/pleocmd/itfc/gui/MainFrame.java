@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JSplitPane;
+import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
 import pleocmd.itfc.gui.icons.IconLoader;
@@ -43,6 +44,10 @@ public final class MainFrame extends JFrame {
 
 	private MainFrame() {
 		guiFrame = this;
+
+		ToolTipManager.sharedInstance().setInitialDelay(50);
+		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+		ToolTipManager.sharedInstance().setReshowDelay(Integer.MAX_VALUE);
 
 		mainPipePanel = new MainPipePanel(pipe);
 		mainLogPanel = new MainLogPanel(pipe);

@@ -16,10 +16,15 @@ public final class Log {
 
 	private final String msg;
 
-	private Log(final Type type, final String caller, final String msg) {
+	private final Throwable backtrace;
+
+	private Log(final Type type, final String caller, final String msg,
+			final Throwable backtrace) {
 		this.type = type;
 		this.caller = caller;
 		this.msg = msg;
+		this.backtrace = backtrace;
+		process();
 	}
 
 	public Type getType() {
@@ -32,6 +37,10 @@ public final class Log {
 
 	public String getMsg() {
 		return msg;
+	}
+
+	public Throwable getBacktrace() {
+		return backtrace;
 	}
 
 	public String getTypeColor() {
@@ -101,7 +110,7 @@ public final class Log {
 	private static void msg(final Type type, final String msg,
 			final Object... args) {
 		new Log(type, getCallersName(3), args.length == 0 ? msg : String
-				.format(msg, args)).process();
+				.format(msg, args), null);
 	}
 
 	public static void detail(final String msg, final Object... args) {
@@ -146,7 +155,7 @@ public final class Log {
 			sb.append(" caused by ");
 		}
 
-		new Log(Type.Error, getCallersName(t, 0), sb.toString()).process();
+		new Log(Type.Error, getCallersName(t, 0), sb.toString(), throwable);
 	}
 
 }

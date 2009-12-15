@@ -60,4 +60,8 @@ public final class LogTableModel extends AbstractTableModel {
 		out.close();
 	}
 
+	public Log getLogAt(final int index) {
+		return list.get(index);
+	}
+
 }
