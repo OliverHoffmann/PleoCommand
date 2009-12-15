@@ -93,7 +93,7 @@ public final class MainPipePanel extends JPanel {
 	public boolean changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
 		final boolean ok = new ConfigFrame(pipe).isOkPressed();
-		Log.detail("GUI-Frame is done with configuration: " + ok);
+		Log.detail("GUI-Frame is done with configuration: %s", ok);
 		updatePipeLabel();
 		return ok;
 	}

@@ -23,6 +23,14 @@ import pleocmd.Log;
 
 public final class PleoCommunication implements SerialPortEventListener {
 
+	private static final int OPEN_TIMEOUT = 5000;
+
+	private static final int ANSWER_TIMEOUT_1 = 6000;
+
+	private static final int ANSWER_TIMEOUT_N = 3000;
+
+	private static final int BAUDRATE = 115200;
+
 	private final CommPortIdentifier portID;
 
 	private SerialPort port;
@@ -37,8 +45,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 
 	public PleoCommunication(final CommPortIdentifier portID) {
 		this.portID = portID;
-		Log.detail("Bound to port " + portID.getName() + " owned by "
-				+ portID.getCurrentOwner());
+		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(), portID
+				.getCurrentOwner());
 	}
 
 	public void close() {
@@ -59,11 +67,11 @@ public final class PleoCommunication implements SerialPortEventListener {
 		close();
 		Log.detail("Connecting");
 		try {
-			port = (SerialPort) portID.open("PleoCommand", 5000);
+			port = (SerialPort) portID.open("PleoCommand", OPEN_TIMEOUT);
 		} catch (final PortInUseException e) {
 			throw new IOException("Port already in use");
 		}
-		Log.info("Connected to port " + port);
+		Log.info("Connected to port '%s'", port);
 		in = port.getInputStream();
 		out = port.getOutputStream();
 		try {
@@ -73,19 +81,19 @@ public final class PleoCommunication implements SerialPortEventListener {
 		}
 		port.notifyOnDataAvailable(true);
 		try {
-			port.setSerialPortParams(115200, SerialPort.DATABITS_8,
+			port.setSerialPortParams(BAUDRATE, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-			Log.detail("Done initializing " + port + " with "
-					+ port.getBaudRate() + " " + +port.getDataBits() + " "
-					+ port.getStopBits() + " " + port.getParity() + " @ div "
-					+ " EOI " + port.getEndOfInputChar() + " flowctrl "
-					+ port.getFlowControlMode() + " in_size "
-					+ port.getInputBufferSize() + " out_size "
-					+ port.getOutputBufferSize() + " parity_err "
-					+ port.getParityErrorChar() + " rcv_framing "
-					+ port.getReceiveFramingByte() + " rcv_trshld "
-					+ port.getReceiveThreshold() + " rcv_timeout "
-					+ port.getReceiveTimeout());
+			Log.detail(String.format(
+					"Done initializing '%s' with %d %d %d %d @ "
+							+ "EOI %d flowctrl %d in_size %d out_size %d "
+							+ "parity_err %d rcv_framing %d rcv_trshld %d "
+							+ "rcv_timeout %d", port, port.getBaudRate(), port
+							.getDataBits(), port.getStopBits(), port
+							.getParity(), port.getEndOfInputChar(), port
+							.getFlowControlMode(), port.getInputBufferSize(),
+					port.getOutputBufferSize(), port.getParityErrorChar(), port
+							.getReceiveFramingByte(), port
+							.getReceiveThreshold(), port.getReceiveTimeout()));
 		} catch (final UnsupportedCommOperationException e) {
 			throw new IOException("Cannot set serial-port parameters");
 		}
@@ -96,7 +104,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE)
 			try {
 				final int avail = in.available();
-				Log.detail("Reading " + avail + " bytes");
+				Log.detail("Reading %d available bytes", avail);
 				if (avail <= 0)
 					throw new RuntimeException(
 							"DATA_AVAILABLE Event but no data in input-stream!");
@@ -104,7 +112,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 				final int read = in.read(buf);
 				inBuffer.append(new String(buf, 0, read, "ISO-8859-1"));
 				inBufferLastRead = System.currentTimeMillis();
-				Log.detail("Received " + read + " bytes");
+				Log.detail("Received %d bytes", read);
 			} catch (final UnsupportedEncodingException e) {
 				throw new RuntimeException("Default code-table missing!");
 			} catch (final IOException e) {
@@ -116,28 +124,32 @@ public final class PleoCommunication implements SerialPortEventListener {
 	public void send(final String command) throws IOException {
 		inBuffer.delete(0, Integer.MAX_VALUE);
 		inBuffer.trimToSize();
-		// add additional 3 seconds to wait-time in readAnswer() before the
+		// add additional seconds to wait-time in readAnswer() before the
 		// first packet of data has been received
-		inBufferLastRead = System.currentTimeMillis() + 3000;
+		inBufferLastRead = System.currentTimeMillis() + ANSWER_TIMEOUT_1
+				- ANSWER_TIMEOUT_N;
 		out.write((command + "\n").getBytes("ISO-8859-1"));
 		out.flush();
-		Log.detail("Sent " + command);
+		Log.detail("Sent '%s'", command);
 	}
 
 	public String readAnswer() throws TimeoutException {
 		// wait until "> " has been received which marks the end of the answer
 		Log.detail("Reading answer");
+		int cnt = 0;
 		while (inBuffer.length() < 2
 				|| inBuffer.charAt(inBuffer.length() - 2) != '>'
 				|| inBuffer.charAt(inBuffer.length() - 1) != ' ') {
-			Log.detail("Waiting for end of answer "
-					+ (System.currentTimeMillis() - inBufferLastRead) + " ms");
-			if (System.currentTimeMillis() - inBufferLastRead > 3000) //
-				// no response within 3 seconds
+			final long wait = System.currentTimeMillis() - inBufferLastRead;
+			if (++cnt % 4 == 0)
+				Log.detail("Waiting for answer since %d ms - got %d chars yet",
+						wait, inBuffer.length());
+			if (wait > ANSWER_TIMEOUT_N) //
+				// no response within a few seconds =>
 				// handle as unexpected end of received data
-				throw new TimeoutException(
-						"Timeout in reading answer from Pleo via port "
-								+ portID.getName());
+				throw new TimeoutException(String.format(
+						"Timeout in reading answer from Pleo via port '%s'",
+						portID.getName()));
 			try {
 				Thread.sleep(50);
 			} catch (final InterruptedException e) {
@@ -145,7 +157,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 				return null;
 			}
 		}
-		Log.detail("Received answer with length " + inBuffer.length());
+		Log.detail("Received answer with a length of %d chars", inBuffer
+				.length());
 		return inBuffer.toString();
 	}
 
@@ -157,7 +170,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		while (ports.hasMoreElements()) {
 			final CommPortIdentifier port = ports.nextElement();
 			if (port.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-				Log.detail("Found port " + port.getName());
+				Log.detail("Found port '%s'", port.getName());
 				h.add(port);
 			}
 		}

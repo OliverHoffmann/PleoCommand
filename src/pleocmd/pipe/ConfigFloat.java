@@ -58,8 +58,8 @@ public final class ConfigFloat extends ConfigValue {
 		try {
 			setContent(Double.valueOf(content));
 		} catch (final NumberFormatException e) {
-			throw new IOException("Invalid number for  " + getLabel() + ": "
-					+ content);
+			throw new IOException(String.format(
+					"Invalid number for '%s': '%s'", getLabel(), content));
 		}
 	}
 

@@ -77,7 +77,7 @@ public final class Config extends AbstractList<ConfigValue> {
 
 		final JDialog dlg = new JDialog();
 		dlg.setLayout(new BorderLayout());
-		dlg.setTitle(prefix + " " + owner);
+		dlg.setTitle(String.format("%s %s", prefix, owner));
 		final JPanel main = new JPanel();
 		main.setLayout(new GridBagLayout());
 		dlg.add(main, BorderLayout.CENTER);
@@ -93,12 +93,11 @@ public final class Config extends AbstractList<ConfigValue> {
 			v.insertGUIComponents(main, gbc);
 			++y;
 		}
-		{
-			final GridBagConstraints gbc = ConfigFrame.initGBC();
-			gbc.gridy = y;
-			gbc.gridwidth = GridBagConstraints.REMAINDER;
-			main.add(new JLabel(), gbc);
-		}
+
+		final GridBagConstraints gbcAlignment = ConfigFrame.initGBC();
+		gbcAlignment.gridy = y;
+		gbcAlignment.gridwidth = GridBagConstraints.REMAINDER;
+		main.add(new JLabel(), gbcAlignment);
 
 		final JPanel bottom = new JPanel();
 		bottom.setLayout(new GridBagLayout());
@@ -153,11 +152,13 @@ public final class Config extends AbstractList<ConfigValue> {
 			final String line = in.readLine().trim();
 			final int idx = line.indexOf(':');
 			if (idx == -1)
-				throw new IOException("Missing ':' delimiter in " + line);
+				throw new IOException(String.format(
+						"Missing ':' delimiter in '%s'", line));
 			final String label = line.substring(0, idx).trim();
 			if (!label.equals(v.getLabel()))
-				throw new IOException("Wrong configuration value " + label
-						+ " - excepted " + v.getLabel());
+				throw new IOException(String.format(
+						"Wrong configuration value '%s' - excepted '%s'",
+						label, v.getLabel()));
 			v.setFromString(line.substring(idx + 1).trim());
 		}
 		owner.configured();

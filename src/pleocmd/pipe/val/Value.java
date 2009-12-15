@@ -64,10 +64,10 @@ public abstract class Value {
 		try {
 			return (Character) value.getClass().getDeclaredField("TYPE_CHAR")
 					.get(null);
-		} catch (final Exception e) {
+		} catch (final Throwable t) {
 			throw new RuntimeException(
 					"Internal error: Cannot access field TYPE_CHAR "
-							+ "of a subclass of Value", e);
+							+ "of a subclass of Value", t);
 		}
 	}
 

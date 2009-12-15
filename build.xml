@@ -27,6 +27,10 @@
 		       classpath="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
 		<checkstyle config="checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
+			<classpath>
+				<pathelement path="${java.class.path}/" />
+				<pathelement path="${bin}" />
+			</classpath>
 		</checkstyle>
 	</target>
 

@@ -34,8 +34,8 @@ public final class LogTableModel extends AbstractTableModel {
 		case 1:
 			return list.get(rowIndex).getCaller();
 		case 2:
-			return "<html><span color=" + list.get(rowIndex).getTypeColor()
-					+ ">" + list.get(rowIndex).getMsg() + "</span></html>";
+			return String.format("<html><span color=%s>%s</span></html>", list
+					.get(rowIndex).getTypeColor(), list.get(rowIndex).getMsg());
 		default:
 			return "???";
 		}

@@ -43,14 +43,14 @@ public final class SimpleConverter extends Converter {
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		final String tn = data.getSafe(1).asString();
 		if (tn == null)
-			throw new ConverterException(this, false, String
-					.format("Invalid data: First value must "
-							+ "be a non-empty string"));
+			throw new ConverterException(this, false,
+					"Invalid data: Second value must be a non-empty "
+							+ "string: '%s'", data);
 		try {
 			return map.findDataList(tn);
 		} catch (final IndexOutOfBoundsException e) {
-			throw new ConverterException(this, false,
-					"Cannot convert simple data", e);
+			throw new ConverterException(this, false, e,
+					"Cannot convert simple-data '%s'", data);
 		}
 	}
 }

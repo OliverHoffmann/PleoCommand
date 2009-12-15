@@ -15,12 +15,35 @@
 	<suppress id="SystemPrintCheck" files="StandardInput.java" />
 
 	<!-- Need to catch Throwable at end of thread -->
-	<suppress checks="IllegalCatch" files="GUIFrame.java" lines="300-320" />
+	<suppress checks="IllegalCatch" files="MainLogPanel.java" lines="100-150" />
+
+	<!-- Catch everything that may go wrong here -->
+	<suppress checks="IllegalCatch" files="Value.java" lines="40-100" />
 
 	<!-- Need to declare Throwable in finalize() -->
+	<suppress checks="NoFinalizer" files="PipePart.java" lines="110-130" />
 	<suppress checks="IllegalThrows" files="PipePart.java" lines="110-130" />
 
-	<!-- as...() methods need to be overridable -->
+	<!-- Contains only GUI component creation -->
+	<suppress checks="ExecutableStatementCount"
+	          files="DataSequenceEditorFrame.java" />
+
+	<!-- The class this one relies on are mainly GUI components -->
+	<suppress checks="ClassFanOutComplexity"
+	          files="DataSequenceEditorFrame.java" />
+
+	<!-- All as...() converter methods need to be overridable -->
 	<suppress checks="DesignForExtension" files="Value.java" lines="15-35" />
+
+	<!-- Optimized for speed and simpleness, so needs to modify i and j 
+	 inside hex conversion code -->
+	<suppress checks="ModifiedControlVariable"
+	          files="Data.java"
+	          lines="200-260" />
+
+	<!-- Well documented -->
+	<suppress checks="ModifiedControlVariable"
+	          files="Pipe.java"
+	          lines="110-180" />
 
 </suppressions>

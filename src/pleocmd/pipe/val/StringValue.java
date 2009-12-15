@@ -93,7 +93,7 @@ public final class StringValue extends Value {
 
 	@Override
 	public String toString() {
-		return '\"' + val + '\"';
+		return String.format("'%s'", val);
 	}
 
 	@Override

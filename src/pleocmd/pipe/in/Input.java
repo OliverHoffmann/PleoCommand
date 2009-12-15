@@ -31,8 +31,8 @@ public abstract class Input extends PipePart {
 			try {
 				return canReadData0();
 			} catch (final IOException e) {
-				throw new InputException(this, false,
-						"Cannot check for available data blocks", e);
+				throw new InputException(this, false, e,
+						"Cannot check for available data blocks");
 			}
 		default:
 			throw new InputException(this, true, "Not initialized");
@@ -48,8 +48,8 @@ public abstract class Input extends PipePart {
 			try {
 				return readData0();
 			} catch (final IOException e) {
-				throw new InputException(this, false, "Cannot read data block",
-						e);
+				throw new InputException(this, false, e,
+						"Cannot read data block");
 			}
 		default:
 			throw new InputException(this, true, "Not initialized");

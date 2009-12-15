@@ -25,13 +25,32 @@ public final class Data extends AbstractList<Value> {
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+	private static final int[] VALID_CHAR_TABLE = { // 
+	/**//**/0, 0, 0, 0, 0, 0, 0, 0, // 00 - 07
+			0, 0, 0, 0, 0, 0, 0, 0, // 08 - 0F
+			0, 0, 0, 0, 0, 0, 0, 0, // 10 - 17
+			0, 0, 0, 0, 0, 0, 0, 0, // 18 - 1F
+			0, 0, 0, 0, 0, 0, 0, 0, // 20 - 27
+			0, 0, 0, 0, 0, 0, 0, 0, // 28 - 2F
+			1, 1, 1, 1, 1, 1, 1, 1, // 30 - 37
+			1, 1, 0, 0, 0, 0, 0, 0, // 38 - 3F
+			0, 1, 1, 1, 1, 1, 1, 0, // 40 - 47
+			0, 0, 0, 0, 0, 0, 0, 0, // 48 - 4F
+			0, 0, 0, 0, 0, 0, 0, 0, // 50 - 57
+			0, 0, 0, 0, 0, 0, 0, 0, // 58 - 5F
+			0, 1, 1, 1, 1, 1, 1, 0, // 60 - 67
+			0, 0, 0, 0, 0, 0, 0, 0, // 68 - 6F
+			0, 0, 0, 0, 0, 0, 0, 0, // 70 - 77
+			0, 0, 0, 0, 0, 0, 0, 0, // 78 - 7F
+	};
+
 	private final int flags;
 
 	private final List<Value> values;
 
 	private Data(final int flags, final List<Value> content) {
-		Log.detail("New Data with " + content.size() + " values - flags: 0x"
-				+ Integer.toHexString(flags));
+		Log.detail("New Data with flags 0x%02X and %d value(s)", flags, content
+				.size());
 		this.flags = flags;
 		values = content;
 	}
@@ -137,8 +156,8 @@ public final class Data extends AbstractList<Value> {
 		final int hdr = in.readInt();
 		final int flags = hdr >> 27 & 0x1F;
 		final int cnt = (hdr >> 24 & 0x07) + 1;
-		Log.detail("Header is " + Integer.toHexString(hdr) + " => flags: 0x"
-				+ Integer.toHexString(flags) + " cnt: " + cnt);
+		Log.detail("Header is 0x%08X => flags: 0x%02X count: %d", hdr, flags,
+				cnt);
 		final List<Value> content = new ArrayList<Value>(cnt);
 		for (int i = 0; i < cnt; ++i) {
 			final ValueType type = ValueType.values()[hdr >> i * 3 & 0x07];
@@ -210,8 +229,7 @@ public final class Data extends AbstractList<Value> {
 						break;
 					default:
 						throw new RuntimeException(
-								"Internal error: detectDataType()"
-										+ " returned wrong value");
+								"Internal error: detectDataType() returned wrong value");
 					}
 				}
 				// create fitting value
@@ -219,7 +237,7 @@ public final class Data extends AbstractList<Value> {
 				if (val == null)
 					throw new IOException("Internal error: Invalid value type");
 				if (isHex) {
-					Log.detail("Converting hex data with length " + buflen);
+					Log.detail("Converting hex data with length %d", buflen);
 					if (buflen % 2 != 0)
 						throw new IOException(
 								"Internal error: Broken hexadecimal data");
@@ -256,7 +274,7 @@ public final class Data extends AbstractList<Value> {
 					} else
 						isHex = false;
 					buflen = 0;
-					Log.detail("Forced type " + type + " hex: " + isHex);
+					Log.detail("Forced type %s - hex: %s", type, isHex);
 					break;
 				}
 				// treat (second) ':' on other positions as a normal character
@@ -299,22 +317,20 @@ public final class Data extends AbstractList<Value> {
 	 */
 	private static int detectDataType(final byte[] data, final int len) {
 		int res = 0;
-		Log.detail("Autodetecting data type of " + len + " bytes");
+		Log.detail("Autodetecting data type of %d bytes", len);
 		for (int i = 0; i < len; ++i) {
 			final byte b = data[i];
 			if (IntValue.isValidChar(b))
 				res = Math.max(res, 1);
 			else if (FloatValue.isValidChar(b))
 				res = Math.max(res, 2);
-			else if (len % 2 == 0
-					&& (b >= '0' && b <= '9' || b >= 'A' && b <= 'F' || b >= 'a'
-							&& b <= 'f'))
+			else if (len % 2 == 0 && VALID_CHAR_TABLE[b] == 1)
 				res = Math.max(res, 3);
 			else if (StringValue.isValidChar(b))
 				res = Math.max(res, 4);
 			else if (BinaryValue.isValidChar(b)) res = Math.max(res, 5);
 		}
-		Log.detail("Autodetecting resulted in " + res);
+		Log.detail("Autodetecting resulted in %d", res);
 		return res == 0 ? 5 : res;
 	}
 
@@ -384,7 +400,7 @@ public final class Data extends AbstractList<Value> {
 			return out.toString("ISO-8859-1");
 		} catch (final IOException e) {
 			Log.error(e);
-			return "S:" + e.getMessage() + "\n";
+			return String.format("S:%1\n", e.getMessage());
 		}
 	}
 

@@ -63,9 +63,10 @@ public final class ConfigEnum extends ConfigValue {
 	protected void setFromString(final String content) throws IOException {
 		final int idx = identifiers.indexOf(content);
 		if (idx == -1)
-			throw new IOException("Invalid enum constant for  " + getLabel()
-					+ ": " + content + " - must be one of "
-					+ Arrays.toString(identifiers.toArray()));
+			throw new IOException(String.format(
+					"Invalid enumeration constant for '%s': "
+							+ "'%s' - must be one of %s", getLabel(), content,
+					Arrays.toString(identifiers.toArray())));
 		setContent(idx);
 	}
 

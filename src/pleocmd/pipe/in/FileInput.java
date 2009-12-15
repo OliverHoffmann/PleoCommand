@@ -34,13 +34,13 @@ public final class FileInput extends Input {
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file " + file + " for input");
+		Log.detail("Opening file '%s' for input", file);
 		in = new DataInputStream(new FileInputStream(file));
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		Log.detail("Closing file " + file);
+		Log.detail("Closing file '%s'", file);
 		in.close();
 		in = null;
 	}
@@ -59,7 +59,7 @@ public final class FileInput extends Input {
 			return Data.createFromBinary(in);
 		default:
 			throw new InputException(this, true,
-					"Internal error: Invalid read-type");
+					"Internal error: Invalid read-type: %s", type);
 		}
 	}
 

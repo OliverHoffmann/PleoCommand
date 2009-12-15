@@ -56,28 +56,31 @@ public final class ConfigPath extends ConfigValue {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
-				final JFileChooser fc = new JFileChooser(getContent());
-				switch (getType()) {
-				case FileForReading:
-					if (fc.showOpenDialog(cntr.getParent()) == JFileChooser.APPROVE_OPTION)
-						tf.setText(fc.getSelectedFile().getPath());
-					break;
-				case FileForWriting:
-					if (fc.showSaveDialog(cntr.getParent()) == JFileChooser.APPROVE_OPTION)
-						tf.setText(fc.getSelectedFile().getPath());
-					break;
-				case Directory:
-					fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-					if (fc.showOpenDialog(cntr.getParent()) == JFileChooser.APPROVE_OPTION)
-						tf.setText(fc.getSelectedFile().getPath());
-					break;
-				default:
-					throw new RuntimeException(
-							"Internal error: Invalid PathType");
-				}
+				selectPath(cntr.getParent());
 			}
 		});
 		cntr.add(btn, gbc);
+	}
+
+	private void selectPath(final Container parent) {
+		final JFileChooser fc = new JFileChooser(getContent());
+		switch (getType()) {
+		case FileForReading:
+			if (fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
+				tf.setText(fc.getSelectedFile().getPath());
+			break;
+		case FileForWriting:
+			if (fc.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION)
+				tf.setText(fc.getSelectedFile().getPath());
+			break;
+		case Directory:
+			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+			if (fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
+				tf.setText(fc.getSelectedFile().getPath());
+			break;
+		default:
+			throw new RuntimeException("Internal error: Invalid PathType");
+		}
 	}
 
 	@Override

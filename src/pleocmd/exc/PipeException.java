@@ -11,15 +11,15 @@ public class PipeException extends Exception {
 	private final boolean permanent;
 
 	public PipeException(final PipePart sender, final boolean permanent,
-			final String message) {
-		super(message);
+			final String message, final Object... args) {
+		super(String.format(message, args));
 		this.sender = sender;
 		this.permanent = permanent;
 	}
 
 	public PipeException(final PipePart sender, final boolean permanent,
-			final String message, final Throwable cause) {
-		super(message, cause);
+			final Throwable cause, final String message, final Object... args) {
+		super(String.format(message, args), cause);
 		this.sender = sender;
 		this.permanent = permanent;
 	}

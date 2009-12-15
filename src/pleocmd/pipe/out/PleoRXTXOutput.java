@@ -40,14 +40,14 @@ public final class PleoRXTXOutput extends Output {
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Initializing PleoRXTXOutput for device " + device);
+		Log.detail("Initializing PleoRXTXOutput for device '%s'", device);
 		pc = new PleoCommunication(PleoCommunication.getPort(device));
 		pc.init();
 	}
 
 	@Override
 	protected void close0() {
-		Log.detail("Closing PleoRXTXOutput " + pc + " for device " + device);
+		Log.detail("Closing PleoRXTXOutput '%s' for device '%s'", pc, device);
 		pc.close();
 		pc = null;
 	}
@@ -59,9 +59,9 @@ public final class PleoRXTXOutput extends Output {
 			try {
 				pc.readAnswer();
 			} catch (final TimeoutException e) {
-				throw new OutputException(this, true, "Cannot read answer", e);
+				throw new OutputException(this, true, e,
+						"Cannot read answer for command '%s'", data);
 			}
 		}
 	}
-
 }

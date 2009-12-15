@@ -87,28 +87,51 @@ public final class Log {
 		}
 	}
 
-	public static void detail(final String msg) {
-		msg(Type.Detail, msg);
+	private static String getCallersName(final int stepsBack) {
+		return getCallersName(new Throwable(), stepsBack);
 	}
 
-	public static void info(final String msg) {
-		msg(Type.Info, msg);
+	private static String getCallersName(final Throwable t, final int stepsBack) {
+		final StackTraceElement[] st = t.getStackTrace();
+		return String.format("%s.%s()", st.length < stepsBack ? "???"
+				: st[stepsBack].getClassName().replaceFirst("^.*\\.([^.]*)$",
+						"$1"), st[stepsBack].getMethodName());
 	}
 
-	public static void warn(final String msg) {
-		msg(Type.Warn, msg);
+	private static void msg(final Type type, final String msg,
+			final Object... args) {
+		new Log(type, getCallersName(3), args.length == 0 ? msg : String
+				.format(msg, args)).process();
 	}
 
-	public static void error(final String msg) {
-		msg(Type.Error, msg);
+	public static void detail(final String msg, final Object... args) {
+		msg(Type.Detail, msg, args);
 	}
 
-	public static void consoleOut(final String msg) {
-		msg(Type.Console, msg);
+	public static void info(final String msg, final Object... args) {
+		msg(Type.Info, msg, args);
+	}
+
+	public static void warn(final String msg, final Object... args) {
+		msg(Type.Warn, msg, args);
+	}
+
+	public static void error(final String msg, final Object... args) {
+		msg(Type.Error, msg, args);
+	}
+
+	public static void consoleOut(final String msg, final Object... args) {
+		msg(Type.Console, msg, args);
 	}
 
 	public static void error(final Throwable throwable) {
-		final StringBuilder sb = new StringBuilder();
+		error(throwable, "");
+	}
+
+	public static void error(final Throwable throwable, final String msg,
+			final Object... args) {
+		final StringBuilder sb = new StringBuilder(args.length == 0 ? msg
+				: String.format(msg, args));
 		Throwable t = throwable;
 		while (true) {
 			sb.append(t.getClass().getSimpleName());
@@ -121,21 +144,6 @@ public final class Log {
 		}
 
 		new Log(Type.Error, getCallersName(t, 0), sb.toString()).process();
-	}
-
-	private static String getCallersName(final int stepsBack) {
-		return getCallersName(new Throwable(), stepsBack);
-	}
-
-	private static String getCallersName(final Throwable t, final int stepsBack) {
-		final StackTraceElement[] st = t.getStackTrace();
-		return st.length < stepsBack ? "???" : st[stepsBack].getClassName()
-				.replaceFirst("^.*\\.([^.]*)$", "$1")
-				+ "." + st[stepsBack].getMethodName() + "()";
-	}
-
-	private static void msg(final Type type, final String msg) {
-		new Log(type, getCallersName(3), msg).process();
 	}
 
 }

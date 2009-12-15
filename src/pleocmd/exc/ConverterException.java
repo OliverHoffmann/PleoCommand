@@ -7,13 +7,13 @@ public final class ConverterException extends PipeException {
 	private static final long serialVersionUID = -2310364749103278117L;
 
 	public ConverterException(final Converter sender, final boolean permanent,
-			final String message) {
-		super(sender, permanent, message);
+			final String message, final Object... args) {
+		super(sender, permanent, message, args);
 	}
 
 	public ConverterException(final Converter sender, final boolean permanent,
-			final String message, final Throwable cause) {
-		super(sender, permanent, message, cause);
+			final Throwable cause, final String message, final Object... args) {
+		super(sender, permanent, cause, message, args);
 	}
 
 }

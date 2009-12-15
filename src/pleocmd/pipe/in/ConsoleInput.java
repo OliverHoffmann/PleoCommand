@@ -48,7 +48,7 @@ public final class ConsoleInput extends Input {
 					.the()));
 		default:
 			throw new InputException(this, true,
-					"Internal error: Invalid read-type");
+					"Internal error: Invalid read-type: %s", type);
 		}
 	}
 

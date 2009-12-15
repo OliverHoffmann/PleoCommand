@@ -110,28 +110,33 @@ public final class MainLogPanel extends JPanel {
 			@Override
 			@SuppressWarnings("synthetic-access")
 			public void run() {
-				try {
-					StandardInput.the().close();
-					StandardInput.the().resetCache();
-					pipe.configuredAll();
-					pipe.initializeAll();
-					pipe.pipeAllData();
-					pipe.closeAll();
-				} catch (final Throwable t) {
-					Log.error(t);
-				}
+				pipeCore();
 				synchronized (MainLogPanel.this) {
 					pipeThread = null;
 				}
-				EventQueue.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						btnStart.setEnabled(true);
-					}
-				});
 			}
 		};
 		pipeThread.start();
+	}
+
+	private void pipeCore() {
+		try {
+			StandardInput.the().close();
+			StandardInput.the().resetCache();
+			pipe.configuredAll();
+			pipe.initializeAll();
+			pipe.pipeAllData();
+			pipe.closeAll();
+		} catch (final Throwable t) {
+			Log.error(t);
+		}
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void run() {
+				btnStart.setEnabled(true);
+			}
+		});
 	}
 
 	public void writeLogToFile() {

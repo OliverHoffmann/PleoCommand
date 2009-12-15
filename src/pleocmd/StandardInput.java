@@ -73,7 +73,7 @@ public final class StandardInput extends InputStream {
 			}
 			if (avail < 0) avail += cache.length; // Java's mod is not a mod :(
 			if (avail > 0) {
-				Log.detail(String.format("%d bytes available", avail));
+				Log.detail("%d bytes available", avail);
 				return avail;
 			}
 			synchronized (this) {

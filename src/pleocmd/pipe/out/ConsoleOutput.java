@@ -52,7 +52,7 @@ public final class ConsoleOutput extends Output {
 			break;
 		default:
 			throw new OutputException(this, true,
-					"Internal error: Invalid print-type");
+					"Internal error: Invalid print-type: %s", type);
 		}
 	}
 

@@ -39,14 +39,18 @@
 		<!-- <module name="MagicNumber" /> -->
 		<module name="MissingSwitchDefault" />
 		<module name="ModifiedControlVariable" />
-		<!-- <module name="RedundantThrows" />  -->
+		<module name="RedundantThrows" />
 		<module name="SimplifyBooleanExpression" />
 		<module name="SimplifyBooleanReturn" />
 		<module name="StringLiteralEquality" />
-		<!-- <module name="NestedIfDepth" /> -->
-		<!-- <module name="NestedTryDepth" /> -->
+		<module name="NestedIfDepth">
+			<property name="max" value="3" />
+		</module>
+		<module name="NestedTryDepth">
+			<property name="max" value="3" />
+		</module>
 		<module name="NoClone" />
-		<!-- <module name="NoFinalizer" /> -->
+		<module name="NoFinalizer" />
 		<module name="SuperClone" />
 		<module name="SuperFinalize" />
 		<module name="IllegalCatch" />
@@ -79,11 +83,13 @@
 		<!-- Javadoc Comments -->
 
 		<!-- Metrics -->
-		<!-- <module name="BooleanExpressionComplexity" /> -->
+		<module name="BooleanExpressionComplexity">
+			<property name="max" value="4" />
+		</module>
 		<!-- <module name="ClassDataAbstractionCoupling" /> -->
-		<!-- <module name="ClassFanOutComplexity" /> -->
+		<module name="ClassFanOutComplexity" />
 		<!-- <module name="CyclomaticComplexity" /> -->
-		<!-- <module name="NPathComplexity" /> -->
+		<module name="NPathComplexity" />
 		<!-- <module name="JavaNCSS" /> -->
 
 		<!-- Miscellaneous -->
@@ -100,6 +106,23 @@
 			<property name="format" value="printStackTrace" />
 			<property name="illegalPattern" value="true" />
 		</module>
+		<!--
+		<module name="DescendantToken">
+			<property name="tokens" value="PLUS" />
+			<property name="limitedTokens" value="STRING_LITERAL, IDENT" />
+			<property name="maximumNumber" value="0" />
+			<property name="maximumDepth" value="1" />
+			<property name="maximumMessage"
+			          value="Building strings without String.format?" />
+		</module> -->
+		<!--
+		<module name="DescendantToken">
+			<property name="tokens" value="EXPR" />
+			<property name="limitedTokens" value="TYPECAST" />
+			<property name="maximumNumber" value="0" />
+			<property name="maximumMessage" 
+			          value="Info: Typecast" />
+		</module> -->
 
 		<!-- Modifiers -->
 		<module name="ModifierOrder" />
@@ -122,9 +145,11 @@
 		<!-- Regexp -->
 
 		<!-- Size Violations -->
-		<!-- <module name="ExecutableStatementCount" /> -->
+		<module name="ExecutableStatementCount">
+			<property name="max" value="50" />
+		</module>
 		<!-- <module name="MethodLength" /> -->
-		<!-- <module name="AnonInnerLength" /> -->
+		<module name="AnonInnerLength" />
 		<module name="ParameterNumber" />
 		<module name="OuterTypeNumber" />
 
@@ -133,7 +158,7 @@
 	</module>
 
 	<!-- Duplicate Code -->
-	<module name="StrictDuplicateCode" />
+	<!-- <module name="StrictDuplicateCode" /> -->
 
 	<!-- Header -->
 

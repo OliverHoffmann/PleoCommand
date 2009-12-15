@@ -77,11 +77,11 @@ public final class Pipe {
 			} catch (final InputException e) {
 				Log.error(e);
 				if (e.isPermanent()) {
-					Log.detail("Skipping no longer working input " + in);
+					Log.detail("Skipping no longer working input '%s'", in);
 					in.tryClose();
 					++inputPosition;
 				} else
-					Log.detail("Skipping one data block from input " + in);
+					Log.detail("Skipping one data block from input '%s'", in);
 				// try next data packet / try from next input
 				continue;
 			}
@@ -112,7 +112,7 @@ public final class Pipe {
 			final Converter cvt = converterList.get(i);
 			try {
 				if (cvt.canHandleData(data)) {
-					Log.detail("Converting with " + cvt);
+					Log.detail("Converting with '%s'", cvt);
 					final List<Data> newDatas = cvt.convert(data);
 					final List<Data> res = new ArrayList<Data>(newDatas.size());
 					for (final Data newData : newDatas)
@@ -122,13 +122,17 @@ public final class Pipe {
 			} catch (final ConverterException e) {
 				Log.error(e);
 				if (e.isPermanent()) {
-					Log.detail("Removing no longer working converter " + cvt);
+					Log
+							.detail(
+									"Removing no longer working converter '%s'",
+									cvt);
 					cvt.tryClose();
 					converterList.remove(i);
-					--i;
+					--i; // undo the ++i of the next loop iteration
 				} else
-					Log.detail("Skipping converter " + cvt
-							+ " for one data block " + data);
+					Log.detail(
+							"Skipping converter '%s' for one data block '%s'",
+							cvt, data);
 			}
 		}
 		final List<Data> res = new ArrayList<Data>(1);
@@ -137,8 +141,8 @@ public final class Pipe {
 	}
 
 	private void writeAllData(final List<Data> list) {
-		Log.detail("Writing " + list.size() + " data block(s) to "
-				+ outputList.size() + " output(s)");
+		Log.detail("Writing %d data block(s) to %d output(s)", list.size(),
+				outputList.size());
 		for (final Data data : list)
 			for (int i = 0; i < outputList.size(); ++i) {
 				final Output out = outputList.get(i);
@@ -147,13 +151,15 @@ public final class Pipe {
 				} catch (final OutputException e) {
 					Log.error(e);
 					if (e.isPermanent()) {
-						Log.detail("Removing no longer working output " + out);
+						Log.detail("Removing no longer working output '%s'",
+								out);
 						out.tryClose();
 						outputList.remove(i);
-						--i;
+						--i; // undo the ++i of the next loop iteration
 					} else
-						Log.detail("Skipping output " + out
-								+ " for one data block " + data);
+						Log.detail(
+								"Skipping output '%s' for one data block '%s'",
+								out, data);
 				}
 			}
 	}
@@ -175,7 +181,7 @@ public final class Pipe {
 		int count = 0;
 		while (pipeData())
 			++count;
-		Log.detail("Piped " + count + " data blocks");
+		Log.detail("Piped %d data blocks", count);
 		return count;
 	}
 
@@ -226,15 +232,18 @@ public final class Pipe {
 	public void writeToFile(final File file) throws IOException {
 		final Writer out = new FileWriter(file);
 		for (final PipePart pp : inputList) {
-			out.write(pp.getClass().getSimpleName() + ":\n");
+			out.write(pp.getClass().getSimpleName());
+			out.write(":\n");
 			pp.getConfig().writeToFile(out);
 		}
 		for (final PipePart pp : converterList) {
-			out.write(pp.getClass().getSimpleName() + ":\n");
+			out.write(pp.getClass().getSimpleName());
+			out.write(":\n");
 			pp.getConfig().writeToFile(out);
 		}
 		for (final PipePart pp : outputList) {
-			out.write(pp.getClass().getSimpleName() + ":\n");
+			out.write(pp.getClass().getSimpleName());
+			out.write(":\n");
 			pp.getConfig().writeToFile(out);
 		}
 		out.close();
@@ -257,40 +266,39 @@ public final class Pipe {
 			PipePart pp;
 			try {
 				try {
-					fcn = pckName + ".in." + cn;
+					fcn = String.format("%s.in.%s", pckName, cn);
 					pp = (PipePart) getClass().getClassLoader().loadClass(fcn)
 							.newInstance();
 				} catch (final ClassNotFoundException e1) {
 					try {
-						fcn = pckName + ".cvt." + cn;
+						fcn = String.format("%s.cvt.%s", pckName, cn);
 						pp = (PipePart) getClass().getClassLoader().loadClass(
 								fcn).newInstance();
 					} catch (final ClassNotFoundException e2) {
 						try {
-							fcn = pckName + ".out." + cn;
+							fcn = String.format("%s.out.%s", pckName, cn);
 							pp = (PipePart) getClass().getClassLoader()
 									.loadClass(fcn).newInstance();
 						} catch (final ClassNotFoundException e3) {
 							throw new PipeException(null, true,
-									"No PipePart with name " + cn
-											+ " in any known package under "
-											+ pckName + " exists");
+									"Cannot find PipePart with class-name '%s' in any "
+											+ "package under '%s'", cn, pckName);
 						}
 					}
 				}
 			} catch (final InstantiationException e) {
-				throw new PipeException(null, true, "PipePart with name " + cn
-						+ " cannot be instantiated");
+				throw new PipeException(null, true, e,
+						"Cannot create PipePart of class '%s'", cn);
 			} catch (final IllegalAccessException e) {
-				throw new PipeException(null, true, "PipePart with name " + cn
-						+ " cannot be accessed");
+				throw new PipeException(null, true, e,
+						"Cannot create PipePart of class '%s'", cn);
 			}
 			try {
 				in.mark(0);
 				pp.getConfig().readFromFile(in);
 			} catch (final IOException e) {
 				// skip this pipe part and try to read the next one
-				Log.error(String.format("Skipped reading %s from file:", cn));
+				Log.error(String.format("Skipped reading '%s' from file:", cn));
 				Log.error(e);
 				in.reset();
 				skipped = true;
@@ -303,8 +311,9 @@ public final class Pipe {
 			else if (pp instanceof Output)
 				outputList.add((Output) pp);
 			else
-				throw new PipeException(pp, true, "PipePart with name " + cn
-						+ " is not of any known type");
+				throw new PipeException(pp, true,
+						"Cannot create PipePart of class '%s': "
+								+ "Unknown super class", cn);
 		}
 		in.close();
 		return !skipped;

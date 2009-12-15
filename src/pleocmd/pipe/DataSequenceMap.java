@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
+
+import pleocmd.exc.ConverterException;
 
 public final class DataSequenceMap {
 
@@ -39,14 +40,14 @@ public final class DataSequenceMap {
 	}
 
 	public List<Data> findDataList(final String trigger)
-			throws IndexOutOfBoundsException {
+			throws ConverterException {
 		List<Data> res = getDataList(trigger);
 		if (res == null) res = getDataList(trigger.toUpperCase());
 		if (res == null) res = getDataList(trigger.toLowerCase());
 		if (res == null)
-			throw new IndexOutOfBoundsException(String.format(
+			throw new ConverterException(null, false,
 					"Cannot find any data assigned to the trigger '%s'",
-					trigger));
+					trigger);
 		return Collections.unmodifiableList(res);
 	}
 
@@ -71,7 +72,7 @@ public final class DataSequenceMap {
 
 	public void writeToFile(final File file) throws IOException {
 		final FileWriter out = new FileWriter(file);
-		for (final Entry<String, List<Data>> trigger : map.entrySet()) {
+		for (final Map.Entry<String, List<Data>> trigger : map.entrySet()) {
 			out.write("[");
 			out.write(trigger.getKey());
 			out.write("]\n");
@@ -119,7 +120,7 @@ public final class DataSequenceMap {
 	}
 
 	public void addFromMap(final DataSequenceMap other) {
-		for (final Entry<String, List<Data>> entry : other.map.entrySet()) {
+		for (final Map.Entry<String, List<Data>> entry : other.map.entrySet()) {
 			List<Data> dataList = map.get(entry.getKey());
 			if (dataList == null) {
 				dataList = new ArrayList<Data>(entry.getValue().size());

@@ -59,8 +59,8 @@ public final class ConfigInt extends ConfigValue {
 		try {
 			setContent(Long.valueOf(content));
 		} catch (final NumberFormatException e) {
-			throw new IOException("Invalid number for  " + getLabel() + ": "
-					+ content);
+			throw new IOException(String.format(
+					"Invalid number for '%s': '%s'", getLabel(), content));
 		}
 	}
 

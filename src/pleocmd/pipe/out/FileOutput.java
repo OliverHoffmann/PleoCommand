@@ -35,13 +35,13 @@ public final class FileOutput extends Output {
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file " + file + " for output of type " + type);
+		Log.detail("Opening file '%s' for output of type %s", file, type);
 		out = new DataOutputStream(new FileOutputStream(file));
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		Log.detail("Closing file " + file);
+		Log.detail("Closing file '%s'", file);
 		out.close();
 		out = null;
 	}
@@ -61,7 +61,7 @@ public final class FileOutput extends Output {
 			break;
 		default:
 			throw new OutputException(this, true,
-					"Internal error: Invalid print-type");
+					"Internal error: Invalid print-type: %s", type);
 		}
 	}
 

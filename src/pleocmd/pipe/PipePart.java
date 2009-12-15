@@ -43,14 +43,15 @@ public abstract class PipePart {
 			try {
 				configured0();
 			} catch (final IOException e) {
-				throw new PipeException(this, true, "Cannot configure", e);
+				throw new PipeException(this, true, e, "Cannot configure");
 			}
 			state = State.Configured;
 			break;
 		case Initialized:
 			throw new PipeException(this, true, "Already initialized");
 		default:
-			throw new PipeException(this, true, "Internal error: Unknown state");
+			throw new PipeException(this, true,
+					"Internal error: Unknown state: %s", state);
 		}
 	}
 
@@ -66,14 +67,15 @@ public abstract class PipePart {
 			try {
 				init0();
 			} catch (final IOException e) {
-				throw new PipeException(this, true, "Cannot initialize", e);
+				throw new PipeException(this, true, e, "Cannot initialize");
 			}
 			state = State.Initialized;
 			break;
 		case Initialized:
 			throw new PipeException(this, true, "Already initialized");
 		default:
-			throw new PipeException(this, true, "Internal error: Unknown state");
+			throw new PipeException(this, true,
+					"Internal error: Unknown state: %s", state);
 		}
 	}
 
@@ -97,12 +99,13 @@ public abstract class PipePart {
 			try {
 				close0();
 			} catch (final IOException e) {
-				throw new PipeException(this, true, "Cannot close", e);
+				throw new PipeException(this, true, e, "Cannot close");
 			}
 			state = State.Configured;
 			break;
 		default:
-			throw new PipeException(this, true, "Internal error: Unknown state");
+			throw new PipeException(this, true,
+					"Internal error: Unknown state: %s", state);
 		}
 	}
 
@@ -127,7 +130,7 @@ public abstract class PipePart {
 				break;
 			default:
 				throw new PipeException(this, true,
-						"Internal error: Unknown state");
+						"Internal error: Unknown state: %s", state);
 			}
 		} finally {
 			super.finalize();

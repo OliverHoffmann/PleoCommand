@@ -31,8 +31,8 @@ public abstract class Output extends PipePart {
 			try {
 				write0(data);
 			} catch (final IOException e) {
-				throw new OutputException(this, false,
-						"Cannot write data block", e);
+				throw new OutputException(this, false, e,
+						"Cannot write data block '%s'", data);
 			}
 			break;
 		default:
