@@ -127,7 +127,7 @@ public final class Pipe {
 									"Removing no longer working converter '%s'",
 									cvt);
 					cvt.tryClose();
-					converterList.remove(i);
+					converterList.remove(i); // TODO don't remove from list
 					--i; // undo the ++i of the next loop iteration
 				} else
 					Log.detail(
@@ -154,7 +154,7 @@ public final class Pipe {
 						Log.detail("Removing no longer working output '%s'",
 								out);
 						out.tryClose();
-						outputList.remove(i);
+						outputList.remove(i); // TODO don't remove from list
 						--i; // undo the ++i of the next loop iteration
 					} else
 						Log.detail(

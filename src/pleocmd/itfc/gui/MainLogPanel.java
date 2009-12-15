@@ -127,7 +127,7 @@ public final class MainLogPanel extends JPanel {
 			pipe.initializeAll();
 			pipe.pipeAllData();
 			pipe.closeAll();
-		} catch (final Throwable t) {
+		} catch (final Throwable t) { // CS_IGNORE
 			Log.error(t);
 		}
 		EventQueue.invokeLater(new Runnable() {

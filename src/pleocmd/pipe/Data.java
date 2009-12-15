@@ -243,12 +243,12 @@ public final class Data extends AbstractList<Value> {
 								"Internal error: Broken hexadecimal data");
 					final byte[] buf2 = new byte[buflen / 2];
 					for (int i = 0, j = 0; i < buflen;) {
-						final int d1 = Character.digit(buf[i++], 16);
-						final int d2 = Character.digit(buf[i++], 16);
+						final int d1 = Character.digit(buf[i++], 16); // CS_IGNORE
+						final int d2 = Character.digit(buf[i++], 16); // CS_IGNORE
 						if (d1 == -1 || d2 == -1)
 							throw new IOException(
 									"Internal error: Broken hexadecimal data");
-						buf2[j++] = (byte) (d1 << 4 | d2);
+						buf2[j++] = (byte) (d1 << 4 | d2); // CS_IGNORE
 					}
 					val.readFromAscii(buf2, buf2.length);
 				} else

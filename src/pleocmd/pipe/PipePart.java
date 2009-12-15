@@ -116,8 +116,9 @@ public abstract class PipePart {
 		init();
 	}
 
+	// CS_IGNORE_NEXT This is the only finalize()
 	@Override
-	protected final void finalize() throws Throwable {
+	protected final void finalize() throws Throwable { // CS_IGNORE
 		try {
 			switch (state) {
 			case Constructing:

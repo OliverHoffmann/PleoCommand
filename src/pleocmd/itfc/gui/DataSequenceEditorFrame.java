@@ -35,6 +35,7 @@ import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 
+// CS_IGNORE_NEXT The classes this one relies on are mainly GUI components
 public final class DataSequenceEditorFrame extends JDialog {
 
 	private static final long serialVersionUID = -5729115559356740425L;
@@ -51,6 +52,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	private List<Output> playOutputList;
 
+	// CS_IGNORE_NEXT Contains only GUI component creation
 	public DataSequenceEditorFrame(final File file) {
 		this.file = file;
 

@@ -88,7 +88,7 @@ public final class StandardInput extends InputStream {
 				throw new IOException("Interrupted while waiting for input", e);
 			}
 		}
-		return System.in.available();
+		return System.in.available(); // CS_IGNORE
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public final class StandardInput extends InputStream {
 				return b;
 			}
 		}
-		return System.in.read();
+		return System.in.read(); // CS_IGNORE
 	}
 
 	@Override
@@ -126,7 +126,7 @@ public final class StandardInput extends InputStream {
 				cacheClosed = true;
 			}
 		else
-			System.in.close();
+			System.in.close(); // CS_IGNORE
 	}
 
 	public void put(final byte b) throws IOException {

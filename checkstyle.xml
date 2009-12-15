@@ -11,6 +11,7 @@
 	<module name="TreeWalker">
 		<property name="tabWidth" value="4" />
 		<property name="cacheFile" value="bin/checkstyle.cache" />
+		<module name="FileContentsHolder" />
 
 		<!-- Annotations -->
 
@@ -168,8 +169,27 @@
 	<!-- Size Violations -->
 	<module name="FileLength" />
 
+	<!-- Filter -->
 	<module name="SuppressionFilter">
 		<property name="file" value="suppressions.xml" />
+	</module>
+	<module name="SuppressionCommentFilter">
+		<property name="offCommentFormat" value="CS_IGNORE_BEGIN" />
+		<property name="onCommentFormat" value="CS_IGNORE_END" />
+	</module>
+	<module name="SuppressWithNearbyCommentFilter">
+		<property name="commentFormat" value="CS_IGNORE" />
+		<property name="checkFormat" value=".*" />
+	</module>
+	<module name="SuppressWithNearbyCommentFilter">
+		<property name="commentFormat" value="CS_IGNORE_PREV" />
+		<property name="checkFormat" value=".*" />
+		<property name="influenceFormat" value="-1" />
+	</module>
+	<module name="SuppressWithNearbyCommentFilter">
+		<property name="commentFormat" value="CS_IGNORE_NEXT" />
+		<property name="checkFormat" value=".*" />
+		<property name="influenceFormat" value="1" />
 	</module>
 
 </module>

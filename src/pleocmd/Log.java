@@ -80,10 +80,10 @@ public final class Log {
 	 */
 	private void process() {
 		if (type != Type.Detail || PRINT_DETAIL) {
-			if (type == Type.Console) System.out.println(getMsg());
+			if (type == Type.Console) System.out.println(getMsg()); // CS_IGNORE
 			if (MainFrame.hasGUI())
 				MainFrame.the().addLog(this);
-			else if (type != Type.Console) System.err.println(toString());
+			else if (type != Type.Console) System.err.println(toString()); // CS_IGNORE
 		}
 	}
 

@@ -16,6 +16,8 @@ public abstract class Value {
 		return type;
 	}
 
+	// CS_IGNORE_BEGIN This 4 methods need to be overridable
+
 	public Long asLong() {
 		return null;
 	}
@@ -31,6 +33,8 @@ public abstract class Value {
 	public byte[] asByteArray() {
 		return null;
 	}
+
+	// CS_IGNORE_END
 
 	public static Value createForType(final ValueType type) {
 		switch (type) {
@@ -65,6 +69,7 @@ public abstract class Value {
 			return (Character) value.getClass().getDeclaredField("TYPE_CHAR")
 					.get(null);
 		} catch (final Throwable t) {
+			// CS_IGNORE_PREV Catch everything that may go wrong here
 			throw new RuntimeException(
 					"Internal error: Cannot access field TYPE_CHAR "
 							+ "of a subclass of Value", t);
