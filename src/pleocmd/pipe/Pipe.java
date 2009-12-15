@@ -245,6 +245,9 @@ public final class Pipe extends StateHandling {
 		Log.detail("Closing all output");
 		for (final PipePart pp : outputList)
 			if (!ignoredOutputs.contains(pp)) pp.tryClose();
+		inputPosition = 0;
+		ignoredConverter.clear();
+		ignoredOutputs.clear();
 		setState(State.Configured);
 	}
 
@@ -253,9 +256,6 @@ public final class Pipe extends StateHandling {
 		inputList.clear();
 		converterList.clear();
 		outputList.clear();
-		inputPosition = 0;
-		ignoredConverter.clear();
-		ignoredOutputs.clear();
 	}
 
 	public void writeToFile(final File file) throws IOException, PipeException {
