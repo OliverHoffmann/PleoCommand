@@ -343,7 +343,8 @@ public final class Data extends AbstractList<Value> {
 			value.writeToBinary(out);
 	}
 
-	public void writeToAscii(final DataOutput out) throws IOException {
+	public void writeToAscii(final DataOutput out, final boolean writeLF)
+			throws IOException {
 		Log.detail("Writing data to ASCII output stream");
 		if (flags != 0)
 			throw new IOException("Cannot write flags for ASCII data");
@@ -381,18 +382,18 @@ public final class Data extends AbstractList<Value> {
 		}
 
 		// write the final block delimiter
-		out.writeByte('\n');
+		if (writeLF) out.writeByte('\n');
 	}
 
 	@Override
 	public String toString() {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
 		try {
-			writeToAscii(new DataOutputStream(out));
+			writeToAscii(new DataOutputStream(out), false);
 			return out.toString("ISO-8859-1");
 		} catch (final IOException e) {
 			Log.error(e);
-			return String.format("S:%1\n", e.getMessage());
+			return String.format("S:%1", e.getMessage());
 		}
 	}
 

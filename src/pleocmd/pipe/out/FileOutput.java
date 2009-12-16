@@ -53,7 +53,7 @@ public final class FileOutput extends Output {
 			data.writeToBinary(out);
 			break;
 		case DataAscii:
-			data.writeToAscii(out);
+			data.writeToAscii(out, true);
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))
