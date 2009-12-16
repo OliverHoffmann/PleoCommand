@@ -1,7 +1,5 @@
 package pleocmd;
 
-import java.awt.EventQueue;
-
 import pleocmd.itfc.cli.CommandLine;
 import pleocmd.itfc.gui.MainFrame;
 
@@ -28,11 +26,18 @@ public final class Main {
 		if (args.length > 0)
 			CommandLine.the().parse(args);
 		else
-			EventQueue.invokeLater(new Runnable() {
+			new Thread(new ThreadGroup("Exception-handling Group") {
+				@Override
+				public void uncaughtException(final Thread thread,
+						final Throwable throwable) {
+					Log.error(throwable);
+				}
+			}, "GUI-Thread") {
+				@Override
 				public void run() {
 					MainFrame.the();
 				}
-			});
+			}.start();
 	}
 
 }
