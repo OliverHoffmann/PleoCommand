@@ -25,7 +25,7 @@ public final class EmotionConverter extends Converter {
 
 	@Override
 	protected void init0() throws IOException {
-		map.loadFromFile(new File(getConfig().get(0).getContentAsString()));
+		map.readFromFile(new File(getConfig().get(0).getContentAsString()));
 	}
 
 	@Override

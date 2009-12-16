@@ -84,7 +84,7 @@ public final class DataSequenceMap {
 		out.close();
 	}
 
-	public void loadFromFile(final File file) throws IOException {
+	public void readFromFile(final File file) throws IOException {
 		reset();
 		addFromFile(file);
 	}
@@ -106,7 +106,7 @@ public final class DataSequenceMap {
 			} else {
 				if (line.isEmpty() || line.charAt(0) == '#') continue;
 				if (dataList == null)
-					throw new IOException("Cannot load data sequence: "
+					throw new IOException("Cannot read data sequence: "
 							+ "Expected trigger name in [...]");
 				dataList.add(Data.createFromAscii(line));
 			}

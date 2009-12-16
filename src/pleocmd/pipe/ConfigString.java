@@ -1,9 +1,8 @@
 package pleocmd.pipe;
 
-import java.awt.Container;
-import java.awt.GridBagConstraints;
-
 import javax.swing.JTextField;
+
+import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigString extends ConfigValue {
 
@@ -29,14 +28,13 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		tf = new JTextField(content, 50);
-		cntr.add(tf, gbc);
+		lay.add(tf, true);
 	}
 
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		setContent(tf.getText());
 	}
 

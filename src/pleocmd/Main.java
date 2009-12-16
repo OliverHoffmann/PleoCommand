@@ -6,16 +6,15 @@ import pleocmd.itfc.cli.CommandLine;
 import pleocmd.itfc.gui.MainFrame;
 
 /**
- * TODO: <br>
- * implement DataFilter<br>
- * check terminology (Value, Data, Block, Sequence)<br>
- * set filetypes for open/save dialogs<br>
- * term: loadFrom / readFrom<br>
- * checkstyle: no exception handling in pipe's, only pass them thru<br>
- * exit while pipe is running?<br>
- * detect endless looping in convert()<br>
+ * TODO: List of tasks:<br>
  * introduce priority system<br>
  * split pipe in 3 threads: in, cvt and out<br>
+ * exit while pipe is running?<br>
+ * detect endless looping in convert()<br>
+ * checkstyle: no exception handling in pipe's, only pass them thru<br>
+ * implement DataFilter<br>
+ * check terminology (Value, Data, Block, Sequence)<br>
+ * add javadoc<br>
  */
 
 public final class Main {

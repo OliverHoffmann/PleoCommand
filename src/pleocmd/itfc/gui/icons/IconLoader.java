@@ -12,9 +12,17 @@ public final class IconLoader {
 	}
 
 	public static Icon getIcon(final String name) {
-		final URL url = IconLoader.class.getResource(name);
-		if (url == null) return new ImageIcon();
+		if (name == null) return getMissingIcon();
+		final URL url = IconLoader.class.getResource(name.contains(".") ? name
+				: name + ".png");
+		if (url == null) return getMissingIcon();
 		return new ImageIcon(url, name);
+	}
+
+	public static Icon getMissingIcon() {
+		final URL url = IconLoader.class.getResource("image-missing.png");
+		if (url == null) return new ImageIcon();
+		return new ImageIcon(url, "Missing an icon file in current classpath");
 	}
 
 }

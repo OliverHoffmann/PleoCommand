@@ -1,8 +1,8 @@
 package pleocmd.pipe;
 
-import java.awt.Container;
-import java.awt.GridBagConstraints;
 import java.io.IOException;
+
+import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigDummy extends ConfigValue {
 
@@ -11,13 +11,12 @@ public final class ConfigDummy extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		throw new IllegalStateException("Dummy Configuration");
 	}
 
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		throw new IllegalStateException("Dummy Configuration");
 	}
 

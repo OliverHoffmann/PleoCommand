@@ -1,8 +1,8 @@
 package pleocmd.pipe;
 
-import java.awt.Container;
-import java.awt.GridBagConstraints;
 import java.io.IOException;
+
+import pleocmd.itfc.gui.Layouter;
 
 public abstract class ConfigValue {
 
@@ -18,10 +18,9 @@ public abstract class ConfigValue {
 
 	public abstract String getContentAsString();
 
-	public abstract void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc);
+	public abstract void insertGUIComponents(final Layouter lay);
 
-	public abstract void setFromGUIComponents(final Container cntr);
+	public abstract void setFromGUIComponents();
 
 	protected abstract void setFromString(String content) throws IOException;
 

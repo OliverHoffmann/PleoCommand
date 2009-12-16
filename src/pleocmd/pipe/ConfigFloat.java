@@ -1,11 +1,11 @@
 package pleocmd.pipe;
 
-import java.awt.Container;
-import java.awt.GridBagConstraints;
 import java.io.IOException;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+
+import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigFloat extends ConfigValue {
 
@@ -42,14 +42,13 @@ public final class ConfigFloat extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		sp = new JSpinner(new SpinnerNumberModel(content, min, max, .00001));
-		cntr.add(sp, gbc);
+		lay.add(sp, true);
 	}
 
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		setContent((Double) sp.getValue());
 	}
 

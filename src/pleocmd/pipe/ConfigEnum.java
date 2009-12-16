@@ -1,7 +1,5 @@
 package pleocmd.pipe;
 
-import java.awt.Container;
-import java.awt.GridBagConstraints;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,6 +7,8 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JComboBox;
+
+import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigEnum extends ConfigValue {
 
@@ -47,15 +47,14 @@ public final class ConfigEnum extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		cb = new JComboBox(identifiers.toArray());
 		cb.setSelectedIndex(content);
-		cntr.add(cb, gbc);
+		lay.add(cb, true);
 	}
 
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		setContent(cb.getSelectedIndex());
 	}
 

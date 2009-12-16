@@ -1,21 +1,11 @@
 package pleocmd.itfc.gui;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
-import pleocmd.itfc.gui.icons.IconLoader;
+import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.cvt.EmotionConverter;
@@ -29,7 +19,7 @@ import pleocmd.pipe.out.FileOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 
-public final class ConfigFrame extends JDialog {
+public final class PipePartConfigFrame extends JDialog {
 
 	private static final long serialVersionUID = -1967218353263515865L;
 
@@ -50,10 +40,9 @@ public final class ConfigFrame extends JDialog {
 
 	private final Pipe pipe;
 
-	public ConfigFrame(final Pipe pipe) {
+	public PipePartConfigFrame(final Pipe pipe) {
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
-		setLayout(new BorderLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
 		this.pipe = pipe;
@@ -65,63 +54,34 @@ public final class ConfigFrame extends JDialog {
 		pppOutput.getTableModel().addPipeParts(pipe.getOutputList());
 
 		// Add components
+		final Layouter lay = new Layouter(this);
 		final JTabbedPane tabs = new JTabbedPane();
-		add(tabs, BorderLayout.CENTER);
 		tabs.addTab("Input", pppInput);
 		tabs.addTab("Converter", pppConverter);
 		tabs.addTab("Output", pppOutput);
+		lay.addWholeLine(tabs, true);
 
-		final JPanel bottom = new JPanel();
-		bottom.setLayout(new GridBagLayout());
-		add(bottom, BorderLayout.SOUTH);
-		final GridBagConstraints gbc = initGBC();
-		gbc.gridy = 0;
-		gbc.gridx = 0;
-		gbc.gridwidth = 1;
-
-		gbc.weightx = 1.0;
-		bottom.add(new JLabel(), gbc);
-		gbc.weightx = 0.0;
-
-		++gbc.gridx;
-		final JButton btnOK = new JButton("OK", IconLoader
-				.getIcon("dialog-ok.png"));
-		btnOK.addActionListener(new ActionListener() {
+		lay.addSpacer();
+		getRootPane().setDefaultButton(lay.addButton(Button.Ok, new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				applyChanges();
 				dispose();
 			}
-
-		});
-		bottom.add(btnOK, gbc);
-		getRootPane().setDefaultButton(btnOK);
-
-		++gbc.gridx;
-		final JButton btnApply = new JButton("Apply", IconLoader
-				.getIcon("dialog-ok-apply.png"));
-		btnApply.addActionListener(new ActionListener() {
+		}));
+		lay.addButton(Button.Apply, new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				applyChanges();
 			}
-
 		});
-		bottom.add(btnApply, gbc);
-
-		++gbc.gridx;
-		final JButton btnCancel = new JButton("Cancel", IconLoader
-				.getIcon("dialog-cancel.png"));
-		btnCancel.addActionListener(new ActionListener() {
+		lay.addButton(Button.Cancel, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				Log.detail("Canceled Config-Frame");
 				dispose();
 			}
 		});
-		bottom.add(btnCancel, gbc);
 
 		// Center window on screen
 		setSize(700, 400);
@@ -132,7 +92,7 @@ public final class ConfigFrame extends JDialog {
 		setVisible(true);
 	}
 
-	private void applyChanges() {
+	public void applyChanges() {
 		try {
 			pipe.reset();
 			for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
@@ -145,18 +105,6 @@ public final class ConfigFrame extends JDialog {
 		} catch (final PipeException e) {
 			Log.error(e);
 		}
-	}
-
-	public static GridBagConstraints initGBC() {
-		final GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.FIRST_LINE_START;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
-		gbc.insets = new Insets(2, 2, 2, 2);
-		gbc.weightx = 1.0;
-		gbc.weighty = 1.0;
-		return gbc;
 	}
 
 }

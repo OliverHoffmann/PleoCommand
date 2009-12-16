@@ -1,9 +1,6 @@
 package pleocmd.pipe;
 
 import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -12,8 +9,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.itfc.gui.DataSequenceEditorFrame;
+import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.Layouter.Button;
 
 public final class ConfigDataSeq extends ConfigValue {
 
@@ -39,37 +39,24 @@ public final class ConfigDataSeq extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		tf = new JTextField(content, 50);
-		gbc.gridwidth = 1;
-		cntr.add(tf, gbc);
-
-		++gbc.gridx;
-		final JButton btnBrowse = new JButton("...");
-		btnBrowse.addActionListener(new ActionListener() {
+		lay.add(tf, true);
+		lay.addButton(Button.Browse, new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
-			public void actionPerformed(final ActionEvent e) {
-				final JFileChooser fc = new JFileChooser(getContent());
-				if (fc.showSaveDialog(cntr.getParent()) == JFileChooser.APPROVE_OPTION)
-					tf.setText(fc.getSelectedFile().getPath());
+			public void run() {
+				selectPath(lay.getContainer().getParent());
 			}
 		});
-		cntr.add(btnBrowse, gbc);
-
-		++gbc.gridx;
-		final JButton btnEdit = new JButton("Edit");
-		btnEdit.addActionListener(new ActionListener() {
-			@Override
-			@SuppressWarnings("synthetic-access")
-			public void actionPerformed(final ActionEvent e) {
-				if (!tf.getText().isEmpty())
-					new DataSequenceEditorFrame(new File(tf.getText()));
-			}
-		});
-		cntr.add(btnEdit, gbc);
-
+		final JButton btnEdit = lay.addButton(Button.Modify,
+				"Modifies the contents of the selected file", new Runnable() {
+					@Override
+					public void run() {
+						if (!getTf().getText().isEmpty())
+							new DataSequenceEditorFrame(new File(getTf()
+									.getText()));
+					}
+				});
 		btnEdit.setEnabled(!tf.getText().isEmpty());
 		tf.getDocument().addDocumentListener(new DocumentListener() {
 
@@ -79,21 +66,32 @@ public final class ConfigDataSeq extends ConfigValue {
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void insertUpdate(final DocumentEvent e) {
-				btnEdit.setEnabled(!tf.getText().isEmpty());
+				btnEdit.setEnabled(!getTf().getText().isEmpty());
 			}
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void removeUpdate(final DocumentEvent e) {
-				btnEdit.setEnabled(!tf.getText().isEmpty());
+				btnEdit.setEnabled(!getTf().getText().isEmpty());
 			}
 		});
 	}
 
+	protected void selectPath(final Container parent) {
+		final JFileChooser fc = new JFileChooser(getContent());
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"CommandSequenceList", "csl"));
+		if (fc.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION)
+			tf.setText(fc.getSelectedFile().getPath());
+	}
+
+	protected JTextField getTf() {
+		return tf;
+	}
+
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		setContent(tf.getText());
 	}
 

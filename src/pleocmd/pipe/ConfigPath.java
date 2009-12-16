@@ -1,14 +1,13 @@
 package pleocmd.pipe;
 
 import java.awt.Container;
-import java.awt.GridBagConstraints;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+
+import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.Layouter.Button;
 
 public final class ConfigPath extends ConfigValue {
 
@@ -45,25 +44,20 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Container cntr,
-			final GridBagConstraints gbc) {
+	public void insertGUIComponents(final Layouter lay) {
 		tf = new JTextField(content, 50);
-		gbc.gridwidth = 1;
-		cntr.add(tf, gbc);
-		++gbc.gridx;
-		final JButton btn = new JButton("...");
-		btn.addActionListener(new ActionListener() {
+		lay.add(tf, true);
+		lay.addButton(Button.Browse, new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
-			public void actionPerformed(final ActionEvent e) {
-				selectPath(cntr.getParent());
+			public void run() {
+				selectPath(lay.getContainer().getParent());
 			}
 		});
-		cntr.add(btn, gbc);
 	}
 
-	private void selectPath(final Container parent) {
+	protected void selectPath(final Container parent) {
 		final JFileChooser fc = new JFileChooser(getContent());
+		// TODO file extensioon?
 		switch (getType()) {
 		case FileForReading:
 			if (fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
@@ -84,7 +78,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	public void setFromGUIComponents(final Container cntr) {
+	public void setFromGUIComponents() {
 		setContent(tf.getText());
 	}
 

@@ -1,7 +1,5 @@
 package pleocmd.itfc.gui;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -16,19 +14,19 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
-import pleocmd.itfc.gui.icons.IconLoader;
+import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.DataSequenceMap;
 import pleocmd.pipe.out.ConsoleOutput;
@@ -58,15 +56,10 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 		Log.detail("Creating DataSequenceEditorFrame");
 		setTitle("Edit Data Sequence");
-		setLayout(new GridBagLayout());
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		final GridBagConstraints gbc = ConfigFrame.initGBC();
-		gbc.gridy = 0;
-		gbc.gridx = 0;
-		gbc.weighty = 0.0;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
 
 		// Add components
+		final Layouter lay = new Layouter(this);
 		cbModel = new DefaultComboBoxModel(new Vector<String>());
 		cbTrigger = new JComboBox(cbModel);
 		cbTrigger.setEditable(true);
@@ -74,10 +67,10 @@ public final class DataSequenceEditorFrame extends JDialog {
 		cbTrigger.addActionListener(new ActionListener() {
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void actionPerformed(final ActionEvent e) {
 				if ("comboBoxEdited".equals(e.getActionCommand())) {
-					map.addTrigger(cbTrigger.getSelectedItem().toString());
+					getMap().addTrigger(
+							getCBTrigger().getSelectedItem().toString());
 					updateComboBoxModel();
 				}
 			}
@@ -85,7 +78,6 @@ public final class DataSequenceEditorFrame extends JDialog {
 		});
 		cbTrigger.addItemListener(new ItemListener() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void itemStateChanged(final ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED)
 					updateTextPaneFromMap(e.getItem());
@@ -93,145 +85,86 @@ public final class DataSequenceEditorFrame extends JDialog {
 					writeTextPaneToMap(e.getItem());
 			}
 		});
-		add(cbTrigger, gbc);
-
-		++gbc.gridy;
+		lay.addWholeLine(cbTrigger, false);
 
 		tpDataSequence = new JTextPane();
-		gbc.weighty = 1.0;
-		add(new JScrollPane(tpDataSequence), gbc);
-		gbc.weighty = 0.0;
+		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
 
-		++gbc.gridy;
+		lay.addSpacer();
 
-		gbc.gridx = 0;
-		gbc.weightx = 1.0;
-		add(new JLabel(), gbc);
-		gbc.weightx = 1.0; // TODO
-		gbc.gridwidth = 2;
+		lay.setSpan(2);
+		lay.addButton("Copy From Input History", "bookmark-new.png", "",
+				new Runnable() {
+					@Override
+					public void run() {
+						addFromInputHistory();
+					}
+				});
+		lay.addButton("Add From File ...", "edit-text-frame-update.png", "",
+				new Runnable() {
+					@Override
+					public void run() {
+						addFromFile();
+					}
+				});
+		lay.setSpan(3);
+		lay.addSpacer();
+		lay.setSpan(1);
 
-		++gbc.gridx;
-		final JButton btnFromInputHist = new JButton("Copy From Input History",
-				IconLoader.getIcon("bookmark-new.png"));
-		btnFromInputHist.addActionListener(new ActionListener() {
+		lay.newLine();
+
+		lay.addSpacer();
+
+		lay.addButton("Play Selected", "unknownapp",
+				"Sends all currently selected data to "
+						+ "ConsoleOutput and PleoRXTXOutput", new Runnable() {
+					@Override
+					public void run() {
+						playSelected();
+					}
+				});
+		lay.addButton("Play All", "unknownapp",
+				"Sends all data in the list to "
+						+ "ConsoleOutput and PleoRXTXOutput", new Runnable() {
+					@Override
+					public void run() {
+						playAll();
+					}
+				});
+		lay.addButton(Button.Undo, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
-				addFromInputHistory();
-			}
-		});
-		add(btnFromInputHist, gbc);
-
-		gbc.gridx += 2;
-		final JButton btnAddFromFile = new JButton("Add From File ...",
-				IconLoader.getIcon("edit-text-frame-update.png"));
-		btnAddFromFile.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				addFromFile();
-			}
-		});
-		add(btnAddFromFile, gbc);
-
-		gbc.gridx += 3;
-		gbc.gridwidth = 3;
-		final JButton btnUnknown = new JButton("???", IconLoader
-				.getIcon("xxx.png"));
-		btnUnknown.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				// TODO ...
-			}
-		});
-		add(btnUnknown, gbc);
-
-		++gbc.gridy;
-
-		gbc.gridx = 0;
-		gbc.gridwidth = 1;
-		gbc.weightx = 1.0;
-		add(new JLabel(), gbc);
-		gbc.weightx = 1.0; // TODO
-
-		++gbc.gridx;
-		final JButton btnPlayOne = new JButton("Play Selected", IconLoader
-				.getIcon("xxx.png"));
-		btnPlayOne.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				playSelected();
-			}
-		});
-		add(btnPlayOne, gbc);
-
-		++gbc.gridx;
-		final JButton btnPlayAll = new JButton("Play All", IconLoader
-				.getIcon("xxx.png"));
-		btnPlayAll.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				playAll();
-			}
-		});
-		add(btnPlayAll, gbc);
-
-		++gbc.gridx;
-		final JButton btnUndo = new JButton("Undo", IconLoader
-				.getIcon("edit-undo.png"));
-		btnUndo.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				undo();
 			}
 		});
-		add(btnUndo, gbc);
-
-		++gbc.gridx;
-		final JButton btnRedo = new JButton("Redo", IconLoader
-				.getIcon("edit-redo.png"));
-		btnRedo.addActionListener(new ActionListener() {
+		lay.addButton(Button.Redo, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				redo();
 			}
 		});
-		add(btnRedo, gbc);
-
-		++gbc.gridx;
-		final JButton btnOK = new JButton("OK", IconLoader
-				.getIcon("dialog-ok.png"));
-		btnOK.addActionListener(new ActionListener() {
+		lay.addButton(Button.Ok, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				saveChanges();
 				dispose();
 			}
 		});
-		add(btnOK, gbc);
-
-		++gbc.gridx;
-		final JButton btnApply = new JButton("Apply", IconLoader
-				.getIcon("dialog-ok-apply.png"));
-		btnApply.addActionListener(new ActionListener() {
+		lay.addButton(Button.Apply, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				saveChanges();
 			}
 		});
-		add(btnApply, gbc);
-
-		++gbc.gridx;
-		final JButton btnCancel = new JButton("Cancel", IconLoader
-				.getIcon("dialog-cancel.png"));
-		btnCancel.addActionListener(new ActionListener() {
+		lay.addButton(Button.Cancel, new Runnable() {
 			@Override
-			public void actionPerformed(final ActionEvent e) {
+			public void run() {
 				dispose();
 			}
 		});
-		add(btnCancel, gbc);
 
 		// Center window on screen
-		setSize(700, 400);
+		setSize(800, 400);
 		setLocationRelativeTo(null);
 
 		map.reset();
@@ -240,6 +173,14 @@ public final class DataSequenceEditorFrame extends JDialog {
 		Log.detail("DataSequenceEditorFrame created");
 		setModal(true);
 		setVisible(true);
+	}
+
+	protected DataSequenceMap getMap() {
+		return map;
+	}
+
+	protected JComboBox getCBTrigger() {
+		return cbTrigger;
 	}
 
 	public void addFromInputHistory() {
@@ -256,6 +197,20 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	public void addFromFile() {
 		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"CommandSequenceList", "csl"));
+		fc.addChoosableFileFilter(new FileFilter() {
+			@Override
+			public boolean accept(final File f) {
+				return !f.getName().endsWith(".csl");
+			}
+
+			@Override
+			public String getDescription() {
+				return "Ascii-Textfile containing Data-List";
+			}
+		});
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			if (fc.getSelectedFile().getName().endsWith(".csl"))
 				addSequenceListFromFile(fc.getSelectedFile());
@@ -294,20 +249,21 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	public void playSelected() {
 		/*
-		 * final Object triggerName = cbTrigger.getSelectedItem();
-		 * writeTextPaneToMap(triggerName); if (triggerName != null) { final
-		 * List<String> trigger = map.get(triggerName); // TODO only play
-		 * selected if (trigger != null) for (final String command : trigger)
-		 * play(command); }
+		 * TODO implement play final Object triggerName =
+		 * cbTrigger.getSelectedItem(); writeTextPaneToMap(triggerName); if
+		 * (triggerName != null) { final List<String> trigger =
+		 * map.get(triggerName); if (trigger != null) for (final String command
+		 * : trigger) play(command); }
 		 */
 	}
 
 	public void playAll() {
 		/*
-		 * final Object triggerName = cbTrigger.getSelectedItem();
-		 * writeTextPaneToMap(triggerName); if (triggerName != null) { final
-		 * List<String> trigger = map.get(triggerName); if (trigger != null) for
-		 * (final String command : trigger) play(command); }
+		 * TODO implement play final Object triggerName =
+		 * cbTrigger.getSelectedItem(); writeTextPaneToMap(triggerName); if
+		 * (triggerName != null) { final List<String> trigger =
+		 * map.get(triggerName); if (trigger != null) for (final String command
+		 * : trigger) play(command); }
 		 */
 	}
 
@@ -344,17 +300,17 @@ public final class DataSequenceEditorFrame extends JDialog {
 		}
 	}
 
-	private void updateComboBoxModel() {
+	protected void updateComboBoxModel() {
 		final Object lastSelected = cbTrigger.getSelectedItem();
 		cbModel.removeAllElements();
 		for (final String trigger : map.getAllTriggers())
 			cbModel.addElement(trigger);
 		if (lastSelected == null || cbModel.getIndexOf(lastSelected) >= 0)
-			cbTrigger.setSelectedItem(lastSelected);
-		updateTextPaneFromMap(cbTrigger.getSelectedItem());
+			getCBTrigger().setSelectedItem(lastSelected);
+		updateTextPaneFromMap(getCBTrigger().getSelectedItem());
 	}
 
-	private void writeTextPaneToMap(final Object triggerName) {
+	protected void writeTextPaneToMap(final Object triggerName) {
 		try {
 			if (triggerName == null) {
 				if (tpDataSequence.getDocument().getLength() == 0) return;
@@ -376,7 +332,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 		}
 	}
 
-	private void updateTextPaneFromMap(final Object triggerName) {
+	protected void updateTextPaneFromMap(final Object triggerName) {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			doc.remove(0, doc.getLength());

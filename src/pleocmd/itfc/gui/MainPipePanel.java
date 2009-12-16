@@ -1,20 +1,16 @@
 package pleocmd.itfc.gui;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
-import pleocmd.itfc.gui.icons.IconLoader;
+import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
 public final class MainPipePanel extends JPanel {
@@ -28,56 +24,33 @@ public final class MainPipePanel extends JPanel {
 	public MainPipePanel(final Pipe pipe) {
 		this.pipe = pipe;
 
-		setLayout(new GridBagLayout());
-		final GridBagConstraints gbc = ConfigFrame.initGBC();
-		gbc.weightx = 0.0;
-		gbc.gridy = 0;
-		gbc.gridx = 0;
+		final Layouter lay = new Layouter(this);
 		pipeLabel = new JLabel();
 		updatePipeLabel();
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		add(pipeLabel, gbc);
-		gbc.gridwidth = 1;
+		lay.addWholeLine(pipeLabel, false);
 
-		++gbc.gridy;
-
-		gbc.gridx = 0;
-		final JButton btnCfgChange = new JButton("Change", IconLoader
-				.getIcon("document-edit.png"));
-		btnCfgChange.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				changeConfig();
-			}
-		});
-		add(btnCfgChange, gbc);
-
-		++gbc.gridx;
-		gbc.weightx = 1.0;
-		add(new JLabel(), gbc);
-		gbc.weightx = 0.0;
-
-		++gbc.gridx;
-		final JButton btnCfgSave = new JButton("Save To ...", IconLoader
-				.getIcon("document-save-as.png"));
-		btnCfgSave.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				writeConfigToFile();
-			}
-		});
-		add(btnCfgSave, gbc);
-
-		++gbc.gridx;
-		final JButton btnCfgLoad = new JButton("Load From ...", IconLoader
-				.getIcon("document-open.png"));
-		btnCfgLoad.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				readConfigFromFile();
-			}
-		});
-		add(btnCfgLoad, gbc);
+		lay.addButton(Button.Modify, "Modify the currently active pipe",
+				new Runnable() {
+					@Override
+					public void run() {
+						changeConfig();
+					}
+				});
+		lay.addSpacer();
+		lay.addButton(Button.SaveTo, "Save the current pipe to a file",
+				new Runnable() {
+					@Override
+					public void run() {
+						writeConfigToFile();
+					}
+				});
+		lay.addButton(Button.LoadFrom,
+				"Load a previously saved pipe from a file", new Runnable() {
+					@Override
+					public void run() {
+						readConfigFromFile();
+					}
+				});
 	}
 
 	private void updatePipeLabel() {
@@ -92,13 +65,16 @@ public final class MainPipePanel extends JPanel {
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		new ConfigFrame(pipe);
+		new PipePartConfigFrame(pipe);
 		Log.detail("GUI-Frame is done with configuration");
 		updatePipeLabel();
 	}
 
 	public void writeConfigToFile() {
 		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Pipe-Configuration", "pca"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
 			writeConfigToFile(fc.getSelectedFile());
 	}
@@ -115,6 +91,9 @@ public final class MainPipePanel extends JPanel {
 
 	public void readConfigFromFile() {
 		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Pipe-Configuration", "pca"));
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			readConfigFromFile(fc.getSelectedFile());
 	}

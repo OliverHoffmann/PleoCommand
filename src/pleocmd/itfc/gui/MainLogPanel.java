@@ -1,10 +1,6 @@
 package pleocmd.itfc.gui;
 
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,15 +8,15 @@ import java.io.StringWriter;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
-import pleocmd.itfc.gui.icons.IconLoader;
+import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
 public final class MainLogPanel extends JPanel {
@@ -40,11 +36,7 @@ public final class MainLogPanel extends JPanel {
 	public MainLogPanel(final Pipe pipe) {
 		this.pipe = pipe;
 
-		setLayout(new GridBagLayout());
-		final GridBagConstraints gbc = ConfigFrame.initGBC();
-		gbc.weightx = 0.0;
-		gbc.gridy = 0;
-		gbc.gridx = 0;
+		final Layouter lay = new Layouter(this);
 
 		logModel = new LogTableModel();
 		logTable = new JTable(logModel) {
@@ -52,7 +44,6 @@ public final class MainLogPanel extends JPanel {
 			private static final long serialVersionUID = 1128237812769648620L;
 
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public String getToolTipText(final MouseEvent event) {
 				return getBacktrace(rowAtPoint(event.getPoint()));
 			}
@@ -67,55 +58,43 @@ public final class MainLogPanel extends JPanel {
 		logTable.getTableHeader().setVisible(false);
 		logTable.setShowGrid(false);
 		logTable.setEnabled(false);
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.weighty = 1.0;
-		add(new JScrollPane(logTable,
+		lay.addWholeLine(new JScrollPane(logTable,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
-		gbc.gridwidth = 1;
-		gbc.weighty = 0.0;
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), true);
 
-		++gbc.gridy;
-
-		gbc.gridx = 0;
-		btnStart = new JButton("Start", IconLoader.getIcon("arrow-right.png"));
-		btnStart.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				startPipeThread();
-			}
-		});
-		add(btnStart, gbc);
-
-		++gbc.gridx;
-		final JButton btnLogSave = new JButton("Save To ...", IconLoader
-				.getIcon("document-save-as.png"));
-		btnLogSave.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				writeLogToFile();
-			}
-		});
-		add(btnLogSave, gbc);
-
-		++gbc.gridx;
-		gbc.weightx = 1.0;
-		add(new JLabel(), gbc);
-		gbc.weightx = 0.0;
-
-		++gbc.gridx;
-		final JButton btnLogClear = new JButton("Clear", IconLoader
-				.getIcon("archive-remove.png"));
-		btnLogClear.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				clearLog();
-			}
-		});
-		add(btnLogClear, gbc);
+		btnStart = lay.addButton("Start", "arrow-right",
+				"Starts the currently configured pipe", new Runnable() {
+					@Override
+					public void run() {
+						startPipeThread();
+					}
+				});
+		lay.addButton(Button.SaveTo, "Saves the whole log to a text file",
+				new Runnable() {
+					@Override
+					public void run() {
+						writeLogToFile();
+					}
+				});
+		lay.addSpacer();
+		lay.addButton(Button.Clear, "Empties the whole log list",
+				new Runnable() {
+					@Override
+					public void run() {
+						clearLog();
+					}
+				});
 	}
 
-	private String getBacktrace(final int index) {
+	protected JButton getBtnStart() {
+		return btnStart;
+	}
+
+	protected void resetPipeThread() {
+		pipeThread = null;
+	}
+
+	protected String getBacktrace(final int index) {
 		final Throwable bt = logModel.getLogAt(index).getBacktrace();
 		if (bt == null) return null;
 		final StringWriter sw = new StringWriter();
@@ -132,18 +111,17 @@ public final class MainLogPanel extends JPanel {
 		btnStart.setEnabled(false);
 		pipeThread = new Thread("Pipe-Thread") {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void run() {
 				pipeCore();
 				synchronized (MainLogPanel.this) {
-					pipeThread = null;
+					resetPipeThread();
 				}
 			}
 		};
 		pipeThread.start();
 	}
 
-	private void pipeCore() {
+	protected void pipeCore() {
 		try {
 			StandardInput.the().close();
 			StandardInput.the().resetCache();
@@ -156,15 +134,17 @@ public final class MainLogPanel extends JPanel {
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void run() {
-				btnStart.setEnabled(true);
+				getBtnStart().setEnabled(true);
 			}
 		});
 	}
 
 	public void writeLogToFile() {
 		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter("Ascii-Logfile",
+				"log"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) try {
 			logModel.writeToFile(fc.getSelectedFile());
 		} catch (final IOException exc) {
@@ -179,13 +159,16 @@ public final class MainLogPanel extends JPanel {
 	public void addLog(final Log log) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void run() {
-				logModel.addLog(log);
-				logTable.scrollRectToVisible(logTable.getCellRect(logModel
-						.getRowCount() - 1, 0, true));
+				addLog0(log);
 			}
 		});
+	}
+
+	protected void addLog0(final Log log) {
+		logModel.addLog(log);
+		logTable.scrollRectToVisible(logTable.getCellRect(logModel
+				.getRowCount() - 1, 0, true));
 	}
 
 }

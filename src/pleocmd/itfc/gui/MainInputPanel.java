@@ -1,10 +1,6 @@
 package pleocmd.itfc.gui;
 
 import java.awt.EventQueue;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -18,18 +14,16 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.filechooser.FileFilter;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
-import pleocmd.itfc.gui.icons.IconLoader;
 
 public final class MainInputPanel extends JPanel {
 
@@ -42,33 +36,24 @@ public final class MainInputPanel extends JPanel {
 	private final HistoryListModel historyListModel;
 
 	public MainInputPanel() {
-		setLayout(new GridBagLayout());
-		final GridBagConstraints gbc = ConfigFrame.initGBC();
-		gbc.weightx = 0.0;
-		gbc.gridy = 0;
-		gbc.gridx = 0;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
+		final Layouter lay = new Layouter(this);
 
 		historyListModel = new HistoryListModel();
-		historyList = new JList(historyListModel);
-		gbc.weighty = 1.0;
-		add(new JScrollPane(historyList,
+		historyList = new JList(getHistoryListModel());
+		lay.addWholeLine(new JScrollPane(getHistoryList(),
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), gbc);
-		gbc.weighty = 0.0;
-		historyList.addMouseListener(new MouseAdapter() {
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), true);
+		getHistoryList().addMouseListener(new MouseAdapter() {
 			@Override
-			@SuppressWarnings("synthetic-access")
 			public void mouseClicked(final MouseEvent e) {
 				if (e.getClickCount() == 2) {
-					final int idx = historyList.getSelectedIndex();
+					final int idx = getHistoryList().getSelectedIndex();
 					if (idx != -1)
-						putInput(historyListModel.getElementAt(idx).toString());
+						putInput(getHistoryListModel().getElementAt(idx)
+								.toString());
 				}
 			}
 		});
-
-		++gbc.gridy;
 
 		consoleInput = new JTextField();
 		consoleInput.addKeyListener(new KeyAdapter() {
@@ -77,49 +62,32 @@ public final class MainInputPanel extends JPanel {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) putConsoleInput();
 			}
 		});
-		add(consoleInput, gbc);
+		lay.addWholeLine(consoleInput, false);
 
-		++gbc.gridy;
-		gbc.gridwidth = 1;
-
-		gbc.gridx = 0;
-		final JButton btnSendEOS = new JButton("Send EOS", IconLoader
-				.getIcon("media-playback-stop.png"));
-		btnSendEOS.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				closeConsoleInput();
-			}
-		});
-		add(btnSendEOS, gbc);
-
-		++gbc.gridx;
-		final JButton btnConsoleRead = new JButton("Read From ...", IconLoader
-				.getIcon("document-import.png"));
-		btnConsoleRead.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				readConsoleInputFromFile();
-			}
-		});
-		add(btnConsoleRead, gbc);
-
-		++gbc.gridx;
-		gbc.weightx = 1.0;
-		add(new JLabel(), gbc);
-		gbc.weightx = 0.0;
-
-		++gbc.gridx;
-		final JButton btnConsoleClear = new JButton("Clear History", IconLoader
-				.getIcon("archive-remove.png"));
-		btnConsoleClear.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(final ActionEvent e) {
-				clearHistory();
-			}
-		});
-		add(btnConsoleClear, gbc);
-
+		lay.addButton("Send EOS", "media-playback-stop",
+				"Send end-of-stream signal", new Runnable() {
+					@Override
+					public void run() {
+						closeConsoleInput();
+					}
+				});
+		lay.addButton("Read From ...", "document-import",
+				"Uses the whole contents of a file as it was "
+						+ "entered in the input field", new Runnable() {
+					@Override
+					public void run() {
+						readConsoleInputFromFile();
+					}
+				});
+		lay.addSpacer();
+		lay.addButton("Clear History", "archive-remove",
+				"Clears the history list of recently entered input",
+				new Runnable() {
+					@Override
+					public void run() {
+						clearHistory();
+					}
+				});
 	}
 
 	public void putConsoleInput() {
@@ -130,14 +98,13 @@ public final class MainInputPanel extends JPanel {
 	public void putInput(final String input) {
 		try {
 			StandardInput.the().put((input + "\n").getBytes("ISO-8859-1"));
-			historyListModel.add(input);
+			getHistoryListModel().add(input);
 			EventQueue.invokeLater(new Runnable() {
 				@Override
-				@SuppressWarnings("synthetic-access")
 				public void run() {
-					final int size = historyListModel.getSize() - 1;
-					historyList.scrollRectToVisible(historyList.getCellBounds(
-							size, size));
+					final int size = getHistoryListModel().getSize() - 1;
+					getHistoryList().scrollRectToVisible(
+							getHistoryList().getCellBounds(size, size));
 				}
 			});
 		} catch (final IOException exc) {
@@ -155,6 +122,18 @@ public final class MainInputPanel extends JPanel {
 
 	public void readConsoleInputFromFile() {
 		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileFilter() {
+			@Override
+			public boolean accept(final File f) {
+				return true;
+			}
+
+			@Override
+			public String getDescription() {
+				return "Ascii-Textfile containing Data-List";
+			}
+		});
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			readConsoleInputFromFile(fc.getSelectedFile());
 	}
@@ -172,11 +151,19 @@ public final class MainInputPanel extends JPanel {
 	}
 
 	public void clearHistory() {
-		historyListModel.clear();
+		getHistoryListModel().clear();
 	}
 
 	public List<String> getHistory() {
-		return historyListModel.getAll();
+		return getHistoryListModel().getAll();
+	}
+
+	protected JList getHistoryList() {
+		return historyList;
+	}
+
+	protected HistoryListModel getHistoryListModel() {
+		return historyListModel;
 	}
 
 	class HistoryListModel extends AbstractListModel {

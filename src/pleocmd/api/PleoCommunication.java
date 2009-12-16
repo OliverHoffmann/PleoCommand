@@ -83,17 +83,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		try {
 			port.setSerialPortParams(BAUDRATE, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-			Log.detail(String.format(
-					"Done initializing '%s' with %d %d %d %d @ "
-							+ "EOI %d flowctrl %d in_size %d out_size %d "
-							+ "parity_err %d rcv_framing %d rcv_trshld %d "
-							+ "rcv_timeout %d", port, port.getBaudRate(), port
-							.getDataBits(), port.getStopBits(), port
-							.getParity(), port.getEndOfInputChar(), port
-							.getFlowControlMode(), port.getInputBufferSize(),
-					port.getOutputBufferSize(), port.getParityErrorChar(), port
-							.getReceiveFramingByte(), port
-							.getReceiveThreshold(), port.getReceiveTimeout()));
+			Log.detail(String.format("Done initializing %s", toString()));
 		} catch (final UnsupportedCommOperationException e) {
 			throw new IOException("Cannot set serial-port parameters");
 		}
@@ -206,8 +196,20 @@ public final class PleoCommunication implements SerialPortEventListener {
 
 	@Override
 	public String toString() {
-		// TODO Auto-generated method stub
-		return super.toString();
+		try {
+			return String.format("'%s' with %d %d %d %d @ "
+					+ "EOI %d flowctrl %d in_size %d out_size %d "
+					+ "parity_err %d rcv_framing %d rcv_trshld %d "
+					+ "rcv_timeout %d", port, port.getBaudRate(), port
+					.getDataBits(), port.getStopBits(), port.getParity(), port
+					.getEndOfInputChar(), port.getFlowControlMode(), port
+					.getInputBufferSize(), port.getOutputBufferSize(), port
+					.getParityErrorChar(), port.getReceiveFramingByte(), port
+					.getReceiveThreshold(), port.getReceiveTimeout());
+		} catch (final UnsupportedCommOperationException e) {
+			Log.error(e);
+			return "[Exception while fetching port information]";
+		}
 	}
 
 }
