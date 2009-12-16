@@ -36,8 +36,8 @@ public abstract class Converter extends PipePart {
 			ensureInitialized();
 			return convert0(data);
 		} catch (final PipeException e) {
-			throw new ConverterException(this, true,
-					"Cannot convert data block", e);
+			throw new ConverterException(this, true, e,
+					"Cannot convert data block");
 		}
 	}
 
