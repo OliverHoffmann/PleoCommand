@@ -14,6 +14,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
@@ -26,13 +28,23 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private static final long serialVersionUID = 1806583246927239923L;
 
-	private final JTable table;
+	private final Class<E>[] availableParts;
 
 	private final PipePartTableModel<E> tableModel;
 
-	private final Class<E>[] availableParts;
+	private final JTable table;
 
 	private final JButton btnAdd;
+
+	private final JButton btnRemove;
+
+	private final JButton btnModify;
+
+	private final JButton btnUp;
+
+	private final JButton btnDown;
+
+	private final JButton btnClear;
 
 	private boolean okPressed;
 
@@ -54,6 +66,13 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 				}
 			}
 		});
+		getTable().getSelectionModel().addListSelectionListener(
+				new ListSelectionListener() {
+					@Override
+					public void valueChanged(final ListSelectionEvent e) {
+						updateState();
+					}
+				});
 		lay.addWholeLine(new JScrollPane(getTable()), true);
 
 		btnAdd = lay.addButton(Button.Add, new Runnable() {
@@ -62,27 +81,27 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 				showAddPPMenu();
 			}
 		});
-		lay.addButton(Button.Remove, new Runnable() {
+		btnRemove = lay.addButton(Button.Remove, new Runnable() {
 			@Override
 			public void run() {
 				removePipeParts(getTable().getSelectedRows());
 			}
 		});
-		lay.addButton(Button.Modify, new Runnable() {
+		btnModify = lay.addButton(Button.Modify, new Runnable() {
 			@Override
 			public void run() {
 				final int idx = getTable().getSelectedRow();
 				if (idx != -1) modifyPipePart(idx);
 			}
 		});
-		lay.addButton(Button.Up, new Runnable() {
+		btnUp = lay.addButton(Button.Up, new Runnable() {
 			@Override
 			public void run() {
 				final int idx = getTable().getSelectedRow();
 				if (idx > 0) movePipePartUp(idx, idx - 1);
 			}
 		});
-		lay.addButton(Button.Down, new Runnable() {
+		btnDown = lay.addButton(Button.Down, new Runnable() {
 			@Override
 			public void run() {
 				final int idx = getTable().getSelectedRow();
@@ -91,12 +110,14 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			}
 		});
 		lay.addSpacer();
-		lay.addButton(Button.Clear, new Runnable() {
+		btnClear = lay.addButton(Button.Clear, new Runnable() {
 			@Override
 			public void run() {
 				getTableModel().clear();
 			}
 		});
+
+		updateState();
 	}
 
 	protected void showAddPPMenu() {
@@ -125,11 +146,13 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		} catch (final IllegalAccessException e) {
 			Log.error(e);
 		}
+		updateState();
 	}
 
 	public void removePipeParts(final int[] indices) {
 		for (final int idx : indices)
 			tableModel.removePipePart(idx);
+		updateState();
 	}
 
 	public void modifyPipePart(final int index) {
@@ -222,6 +245,17 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	protected JTable getTable() {
 		return table;
+	}
+
+	public void updateState() {
+		btnAdd.setEnabled(true);
+		final int foc = table.getSelectedRow();
+		final int cnt = tableModel.getRowCount();
+		btnRemove.setEnabled(table.getSelectedRowCount() > 0);
+		btnModify.setEnabled(foc != -1);
+		btnUp.setEnabled(foc > 0);
+		btnDown.setEnabled(foc != -1 && foc < cnt - 1);
+		btnClear.setEnabled(cnt > 0);
 	}
 
 }

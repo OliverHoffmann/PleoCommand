@@ -1,5 +1,6 @@
 package pleocmd;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -50,6 +51,10 @@ public final class StandardInput extends InputStream {
 		return stdin;
 	}
 
+	public synchronized boolean isClosed() {
+		return cacheClosed;
+	}
+
 	public void resetCache() {
 		synchronized (this) {
 			if (!cacheClosed)
@@ -61,6 +66,12 @@ public final class StandardInput extends InputStream {
 			cachePosWrite = 0;
 			cacheClosed = false;
 		}
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (MainFrame.hasGUI()) MainFrame.the().updateState();
+			}
+		});
 	}
 
 	@Override
@@ -127,6 +138,12 @@ public final class StandardInput extends InputStream {
 			}
 		else
 			System.in.close(); // CS_IGNORE
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (MainFrame.hasGUI()) MainFrame.the().updateState();
+			}
+		});
 	}
 
 	public void put(final byte b) throws IOException {

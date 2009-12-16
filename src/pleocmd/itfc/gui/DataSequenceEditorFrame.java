@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -42,11 +43,23 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	private final DataSequenceMap map = new DataSequenceMap();
 
+	private final DefaultComboBoxModel cbModel;
+
 	private final JComboBox cbTrigger;
 
 	private final JTextPane tpDataSequence;
 
-	private final DefaultComboBoxModel cbModel;
+	private final JButton btnCopyInput;
+
+	private final JButton btnAddFile;
+
+	private final JButton btnPlaySel;
+
+	private final JButton btnPlayAll;
+
+	private final JButton btnUndo;
+
+	private final JButton btnRedo;
 
 	private List<Output> playOutputList;
 
@@ -93,15 +106,15 @@ public final class DataSequenceEditorFrame extends JDialog {
 		lay.addSpacer();
 
 		lay.setSpan(2);
-		lay.addButton("Copy From Input History", "bookmark-new.png", "",
-				new Runnable() {
+		btnCopyInput = lay.addButton("Copy From Input History",
+				"bookmark-new.png", "", new Runnable() {
 					@Override
 					public void run() {
 						addFromInputHistory();
 					}
 				});
-		lay.addButton("Add From File ...", "edit-text-frame-update.png", "",
-				new Runnable() {
+		btnAddFile = lay.addButton("Add From File ...",
+				"edit-text-frame-update.png", "", new Runnable() {
 					@Override
 					public void run() {
 						addFromFile();
@@ -115,7 +128,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 		lay.addSpacer();
 
-		lay.addButton("Play Selected", "unknownapp",
+		btnPlaySel = lay.addButton("Play Selected", "unknownapp",
 				"Sends all currently selected data to "
 						+ "ConsoleOutput and PleoRXTXOutput", new Runnable() {
 					@Override
@@ -123,7 +136,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 						playSelected();
 					}
 				});
-		lay.addButton("Play All", "unknownapp",
+		btnPlayAll = lay.addButton("Play All", "unknownapp",
 				"Sends all data in the list to "
 						+ "ConsoleOutput and PleoRXTXOutput", new Runnable() {
 					@Override
@@ -131,13 +144,13 @@ public final class DataSequenceEditorFrame extends JDialog {
 						playAll();
 					}
 				});
-		lay.addButton(Button.Undo, new Runnable() {
+		btnUndo = lay.addButton(Button.Undo, new Runnable() {
 			@Override
 			public void run() {
 				undo();
 			}
 		});
-		lay.addButton(Button.Redo, new Runnable() {
+		btnRedo = lay.addButton(Button.Redo, new Runnable() {
 			@Override
 			public void run() {
 				redo();
@@ -169,6 +182,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 		map.reset();
 		addSequenceListFromFile(file);
+		updateState();
 
 		Log.detail("DataSequenceEditorFrame created");
 		setModal(true);
@@ -347,6 +361,16 @@ public final class DataSequenceEditorFrame extends JDialog {
 		} catch (final BadLocationException e) {
 			Log.error(e);
 		}
+	}
+
+	public void updateState() {
+		btnCopyInput.setEnabled(!MainFrame.the().getMainInputPanel()
+				.getHistory().isEmpty());
+		btnAddFile.setEnabled(true);
+		btnPlaySel.setEnabled(false);// TODO
+		btnPlayAll.setEnabled(false);// TODO
+		btnUndo.setEnabled(false);// TODO
+		btnRedo.setEnabled(false); // TODO
 	}
 
 }

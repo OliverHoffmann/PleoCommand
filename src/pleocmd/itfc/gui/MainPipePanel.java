@@ -3,6 +3,7 @@ package pleocmd.itfc.gui;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,6 +22,12 @@ public final class MainPipePanel extends JPanel {
 
 	private final JLabel pipeLabel;
 
+	private final JButton btnModify;
+
+	private final JButton btnSave;
+
+	private final JButton btnLoad;
+
 	public MainPipePanel(final Pipe pipe) {
 		this.pipe = pipe;
 
@@ -29,22 +36,22 @@ public final class MainPipePanel extends JPanel {
 		updatePipeLabel();
 		lay.addWholeLine(pipeLabel, false);
 
-		lay.addButton(Button.Modify, "Modify the currently active pipe",
-				new Runnable() {
+		btnModify = lay.addButton(Button.Modify,
+				"Modify the currently active pipe", new Runnable() {
 					@Override
 					public void run() {
 						changeConfig();
 					}
 				});
 		lay.addSpacer();
-		lay.addButton(Button.SaveTo, "Save the current pipe to a file",
-				new Runnable() {
+		btnSave = lay.addButton(Button.SaveTo,
+				"Save the current pipe to a file", new Runnable() {
 					@Override
 					public void run() {
 						writeConfigToFile();
 					}
 				});
-		lay.addButton(Button.LoadFrom,
+		btnLoad = lay.addButton(Button.LoadFrom,
 				"Load a previously saved pipe from a file", new Runnable() {
 					@Override
 					public void run() {
@@ -107,6 +114,14 @@ public final class MainPipePanel extends JPanel {
 			Log.error(e);
 		}
 		updatePipeLabel();
+	}
+
+	public void updateState() {
+		btnModify.setEnabled(!MainFrame.the().isPipeRunning());
+		btnSave.setEnabled(pipe.getInputList().isEmpty()
+				|| !pipe.getConverterList().isEmpty()
+				|| !pipe.getOutputList().isEmpty());
+		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
 	}
 
 }

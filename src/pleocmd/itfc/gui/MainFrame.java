@@ -6,6 +6,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JSplitPane;
 import javax.swing.ToolTipManager;
@@ -36,6 +37,8 @@ public final class MainFrame extends JFrame {
 	private final MainInputPanel mainInputPanel;
 
 	private final JSplitPane splitPane;
+
+	private final JButton btnExit;
 
 	private Thread pipeThread;
 
@@ -71,7 +74,7 @@ public final class MainFrame extends JFrame {
 		lay.addWholeLine(splitPane, true);
 
 		lay.addSpacer();
-		lay.addButton("Exit", "application-exit",
+		btnExit = lay.addButton("Exit", "application-exit",
 				"Cancels running pipe (if any) and exits the application",
 				new Runnable() {
 					@Override
@@ -86,6 +89,7 @@ public final class MainFrame extends JFrame {
 
 		// Load default configuration
 		mainPipePanel.readConfigFromFile(PIPE_CONFIG_FILE);
+		updateState();
 
 		Log.detail("GUI-Frame created");
 		setVisible(true);
@@ -123,23 +127,27 @@ public final class MainFrame extends JFrame {
 	public void exit() {
 		Log.detail("GUI-Frame has been closed");
 		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
-		guiFrame = null;
+		// guiFrame = null;
 		dispose();
 	}
 
 	public synchronized void startPipeThread() {
-		if (pipeThread != null)
+		if (isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread already running");
-		mainLogPanel.getBtnStart().setEnabled(false);
 		pipeThread = new Thread("Pipe-Thread") {
 			@Override
 			public void run() {
 				pipeCore();
-				synchronized (MainFrame.this) {
-					resetPipeThread();
-				}
+				resetPipeThread();
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						updateState();
+					}
+				});
 			}
 		};
+		updateState();
 		pipeThread.start();
 	}
 
@@ -154,16 +162,21 @@ public final class MainFrame extends JFrame {
 		} catch (final Throwable t) { // CS_IGNORE
 			Log.error(t);
 		}
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				getMainLogPanel().getBtnStart().setEnabled(true);
-			}
-		});
 	}
 
-	protected void resetPipeThread() {
+	public void updateState() {
+		btnExit.setEnabled(!isPipeRunning());
+		getMainPipePanel().updateState();
+		getMainLogPanel().updateState();
+		getMainInputPanel().updateState();
+	}
+
+	protected synchronized void resetPipeThread() {
 		pipeThread = null;
+	}
+
+	public synchronized boolean isPipeRunning() {
+		return pipeThread != null;
 	}
 
 }

@@ -21,11 +21,15 @@ public final class MainLogPanel extends JPanel {
 
 	private static final long serialVersionUID = -6921879308383765734L;
 
-	private final JTable logTable;
-
 	private final LogTableModel logModel;
 
+	private final JTable logTable;
+
 	private final JButton btnStart;
+
+	private final JButton btnSave;
+
+	private final JButton btnClear;
 
 	public MainLogPanel() {
 		final Layouter lay = new Layouter(this);
@@ -61,25 +65,21 @@ public final class MainLogPanel extends JPanel {
 						MainFrame.the().startPipeThread();
 					}
 				});
-		lay.addButton(Button.SaveTo, "Saves the whole log to a text file",
-				new Runnable() {
+		btnSave = lay.addButton(Button.SaveTo,
+				"Saves the whole log to a text file", new Runnable() {
 					@Override
 					public void run() {
 						writeLogToFile();
 					}
 				});
 		lay.addSpacer();
-		lay.addButton(Button.Clear, "Empties the whole log list",
+		btnClear = lay.addButton(Button.Clear, "Empties the whole log list",
 				new Runnable() {
 					@Override
 					public void run() {
 						clearLog();
 					}
 				});
-	}
-
-	public JButton getBtnStart() {
-		return btnStart;
 	}
 
 	protected String getBacktrace(final int index) {
@@ -107,6 +107,7 @@ public final class MainLogPanel extends JPanel {
 
 	public void clearLog() {
 		logModel.clear();
+		updateState();
 	}
 
 	public void addLog(final Log log) {
@@ -122,6 +123,13 @@ public final class MainLogPanel extends JPanel {
 		logModel.addLog(log);
 		logTable.scrollRectToVisible(logTable.getCellRect(logModel
 				.getRowCount() - 1, 0, true));
+		updateState();
+	}
+
+	public void updateState() {
+		btnStart.setEnabled(!MainFrame.the().isPipeRunning());
+		btnSave.setEnabled(logModel.getRowCount() > 0);
+		btnClear.setEnabled(logModel.getRowCount() > 0);
 	}
 
 }

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.AbstractListModel;
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -29,11 +30,17 @@ public final class MainInputPanel extends JPanel {
 
 	private static final long serialVersionUID = 8130292678723649962L;
 
+	private final HistoryListModel historyListModel;
+
 	private final JList historyList;
 
 	private final JTextField consoleInput;
 
-	private final HistoryListModel historyListModel;
+	private final JButton btnSendEOS;
+
+	private final JButton btnRead;
+
+	private final JButton btnClear;
 
 	public MainInputPanel() {
 		final Layouter lay = new Layouter(this);
@@ -64,14 +71,14 @@ public final class MainInputPanel extends JPanel {
 		});
 		lay.addWholeLine(consoleInput, false);
 
-		lay.addButton("Send EOS", "media-playback-stop",
+		btnSendEOS = lay.addButton("Send EOS", "media-playback-stop",
 				"Send end-of-stream signal", new Runnable() {
 					@Override
 					public void run() {
 						closeConsoleInput();
 					}
 				});
-		lay.addButton("Read From ...", "document-import",
+		btnRead = lay.addButton("Read From ...", "document-import",
 				"Uses the whole contents of a file as it was "
 						+ "entered in the input field", new Runnable() {
 					@Override
@@ -80,7 +87,7 @@ public final class MainInputPanel extends JPanel {
 					}
 				});
 		lay.addSpacer();
-		lay.addButton("Clear History", "archive-remove",
+		btnClear = lay.addButton("Clear History", "archive-remove",
 				"Clears the history list of recently entered input",
 				new Runnable() {
 					@Override
@@ -105,6 +112,7 @@ public final class MainInputPanel extends JPanel {
 					final int size = getHistoryListModel().getSize() - 1;
 					getHistoryList().scrollRectToVisible(
 							getHistoryList().getCellBounds(size, size));
+					updateState();
 				}
 			});
 		} catch (final IOException exc) {
@@ -152,6 +160,7 @@ public final class MainInputPanel extends JPanel {
 
 	public void clearHistory() {
 		getHistoryListModel().clear();
+		updateState();
 	}
 
 	public List<String> getHistory() {
@@ -197,6 +206,15 @@ public final class MainInputPanel extends JPanel {
 			return Collections.unmodifiableList(history);
 		}
 
+	}
+
+	public void updateState() {
+		final boolean ready = MainFrame.the().isPipeRunning()
+				&& !StandardInput.the().isClosed();
+		consoleInput.setEnabled(ready);
+		btnSendEOS.setEnabled(ready);
+		btnRead.setEnabled(ready);
+		btnClear.setEnabled(historyListModel.getSize() > 0);
 	}
 
 }
