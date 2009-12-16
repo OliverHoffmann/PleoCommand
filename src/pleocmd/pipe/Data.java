@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.Log;
-import pleocmd.pipe.val.BinaryValue;
 import pleocmd.pipe.val.DummyValue;
 import pleocmd.pipe.val.FloatValue;
 import pleocmd.pipe.val.IntValue;
@@ -206,31 +205,9 @@ public final class Data extends AbstractList<Value> {
 				while (buflen > 0 && buf[buflen - 1] == ' ')
 					--buflen;
 				if (type == null) {
-					// autodetect type and hex
+					// autodetect type
 					isHex = false;
-					switch (detectDataType(buf, buflen)) {
-					case 1:
-						type = ValueType.Int64;
-						break;
-					case 2:
-						type = ValueType.Float64;
-						break;
-					case 3:
-						isHex = true;
-						type = ValueType.Data;
-						System.err.println("TODO!!!");
-						// TODO
-						break;
-					case 4:
-						type = ValueType.NullTermString;
-						break;
-					case 5:
-						type = ValueType.Data;
-						break;
-					default:
-						throw new RuntimeException(
-								"Internal error: detectDataType() returned wrong value");
-					}
+					type = detectDataType(buf, buflen);
 				}
 				// create fitting value
 				final Value val = Value.createForType(type);
@@ -311,11 +288,17 @@ public final class Data extends AbstractList<Value> {
 	}
 
 	/**
+	 * Returns the most specific {@link ValueType} which can read the data.
+	 * 
 	 * @param data
+	 *            the Ascii data which should be converted
 	 * @param len
-	 * @return 1 till 5 for Integer, Double, Hex, String or Binary
+	 *            length of the data
+	 * @return one of {@link ValueType#Int64}, {@link ValueType#Float64} or
+	 *         {@link ValueType#NullTermString}
 	 */
-	private static int detectDataType(final byte[] data, final int len) {
+	private static ValueType detectDataType(final byte[] data, final int len)
+			throws IOException {
 		int res = 0;
 		Log.detail("Autodetecting data type of %d bytes", len);
 		for (int i = 0; i < len; ++i) {
@@ -324,14 +307,23 @@ public final class Data extends AbstractList<Value> {
 				res = Math.max(res, 1);
 			else if (FloatValue.isValidChar(b))
 				res = Math.max(res, 2);
-			else if (len % 2 == 0 && VALID_CHAR_TABLE[b] == 1)
-				res = Math.max(res, 3);
 			else if (StringValue.isValidChar(b))
+				res = Math.max(res, 3);
+			else
 				res = Math.max(res, 4);
-			else if (BinaryValue.isValidChar(b)) res = Math.max(res, 5);
 		}
 		Log.detail("Autodetecting resulted in %d", res);
-		return res == 0 ? 5 : res;
+		switch (res) {
+		case 1:
+			return ValueType.Int64;
+		case 2:
+			return ValueType.Float64;
+		case 0: // treat empty data as string
+		case 3:
+			return ValueType.NullTermString;
+		default:
+			throw new IOException("Cannot detect type of data");
+		}
 	}
 
 	public void writeToBinary(final DataOutput out) throws IOException {
