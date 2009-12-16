@@ -1,5 +1,8 @@
 package pleocmd;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import pleocmd.itfc.gui.MainFrame;
 
 public final class Log {
@@ -10,6 +13,9 @@ public final class Log {
 
 	private static boolean logDetailed = true;
 
+	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
+			"HH:mm:ss.SSS");
+
 	private final Type type;
 
 	private final String caller;
@@ -18,12 +24,15 @@ public final class Log {
 
 	private final Throwable backtrace;
 
+	private final long time;
+
 	private Log(final Type type, final String caller, final String msg,
 			final Throwable backtrace) {
 		this.type = type;
 		this.caller = caller;
 		this.msg = msg;
 		this.backtrace = backtrace;
+		time = System.currentTimeMillis();
 		process();
 	}
 
@@ -43,6 +52,10 @@ public final class Log {
 		return backtrace;
 	}
 
+	public long getTime() {
+		return time;
+	}
+
 	public String getTypeColor() {
 		switch (type) {
 		case Detail:
@@ -57,6 +70,10 @@ public final class Log {
 		default:
 			return "#000000"; // black
 		}
+	}
+
+	public String getFormattedTime() {
+		return DATE_FORMATTER.format(new Date(time));
 	}
 
 	public String getTypeShortString() {
@@ -78,7 +95,8 @@ public final class Log {
 
 	@Override
 	public String toString() {
-		return String.format("%s %-50s %s", getTypeShortString(), caller, msg);
+		return String.format("%s %s %-50s %s", getFormattedTime(),
+				getTypeShortString(), caller, msg);
 	}
 
 	/**

@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableColumnModel;
 
 import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter.Button;
@@ -50,13 +51,18 @@ public final class MainLogPanel extends JPanel {
 			}
 
 		};
-		logTable.getTableHeader().getColumnModel().getColumn(0).setMinWidth(50);
-		logTable.getTableHeader().getColumnModel().getColumn(0).setMaxWidth(50);
-		logTable.getTableHeader().getColumnModel().getColumn(1)
-				.setMinWidth(200);
-		logTable.getTableHeader().getColumnModel().getColumn(1)
-				.setMaxWidth(200);
-		logTable.getTableHeader().setVisible(false);
+		final TableColumnModel tcm = logTable.getTableHeader().getColumnModel();
+		tcm.getColumn(0).setHeaderValue("Time");
+		tcm.getColumn(0).setMinWidth(100);
+		tcm.getColumn(0).setMaxWidth(100);
+		tcm.getColumn(1).setHeaderValue("Type");
+		tcm.getColumn(1).setMinWidth(50);
+		tcm.getColumn(1).setMaxWidth(50);
+		tcm.getColumn(2).setHeaderValue("Source");
+		tcm.getColumn(2).setMinWidth(200);
+		tcm.getColumn(2).setMaxWidth(200);
+		tcm.getColumn(3).setHeaderValue("Message");
+		logTable.getTableHeader().setEnabled(false);
 		logTable.setShowGrid(false);
 		logTable.setEnabled(false);
 		lay.addWholeLine(new JScrollPane(logTable,
@@ -100,7 +106,7 @@ public final class MainLogPanel extends JPanel {
 		if (bt == null) return null;
 		final StringWriter sw = new StringWriter();
 		final PrintWriter pw = new PrintWriter(sw);
-		bt.printStackTrace(pw);
+		bt.printStackTrace(pw); // CS_IGNORE
 		pw.flush();
 		return String.format("<html>%s</html>", sw.toString().replace("<",
 				"&lt;").replace("\n", "<br>"));

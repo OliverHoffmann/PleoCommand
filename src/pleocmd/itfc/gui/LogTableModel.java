@@ -19,7 +19,7 @@ public final class LogTableModel extends AbstractTableModel {
 
 	@Override
 	public int getColumnCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override
@@ -31,10 +31,12 @@ public final class LogTableModel extends AbstractTableModel {
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
 		switch (columnIndex) {
 		case 0:
-			return list.get(rowIndex).getType();
+			return list.get(rowIndex).getFormattedTime();
 		case 1:
-			return list.get(rowIndex).getCaller();
+			return list.get(rowIndex).getType();
 		case 2:
+			return list.get(rowIndex).getCaller();
+		case 3:
 			return String.format("<html><span color=%s>%s</span></html>", list
 					.get(rowIndex).getTypeColor(), list.get(rowIndex).getMsg());
 		default:
