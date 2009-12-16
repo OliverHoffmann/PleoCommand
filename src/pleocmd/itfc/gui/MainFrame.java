@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -10,6 +11,7 @@ import javax.swing.JSplitPane;
 import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
+import pleocmd.StandardInput;
 import pleocmd.pipe.Pipe;
 
 /**
@@ -25,7 +27,7 @@ public final class MainFrame extends JFrame {
 
 	private static MainFrame guiFrame;
 
-	private final Pipe pipe = new Pipe();
+	private final Pipe pipe;
 
 	private final MainPipePanel mainPipePanel;
 
@@ -35,16 +37,18 @@ public final class MainFrame extends JFrame {
 
 	private final JSplitPane splitPane;
 
+	private Thread pipeThread;
+
 	private MainFrame() {
 		guiFrame = this;
+		mainLogPanel = new MainLogPanel();
+		mainInputPanel = new MainInputPanel();
+		pipe = new Pipe();
+		mainPipePanel = new MainPipePanel(pipe);
 
 		ToolTipManager.sharedInstance().setInitialDelay(50);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
 		ToolTipManager.sharedInstance().setReshowDelay(Integer.MAX_VALUE);
-
-		mainPipePanel = new MainPipePanel(pipe);
-		mainLogPanel = new MainLogPanel(pipe);
-		mainInputPanel = new MainInputPanel();
 
 		Log.detail("Creating GUI-Frame");
 		setTitle("PleoCommand");
@@ -96,12 +100,24 @@ public final class MainFrame extends JFrame {
 		return guiFrame != null;
 	}
 
-	public void addLog(final Log log) {
-		mainLogPanel.addLog(log);
+	public MainPipePanel getMainPipePanel() {
+		return mainPipePanel;
+	}
+
+	public MainLogPanel getMainLogPanel() {
+		return mainLogPanel;
+	}
+
+	public MainInputPanel getMainInputPanel() {
+		return mainInputPanel;
 	}
 
 	public List<String> getHistory() {
 		return mainInputPanel.getHistory();
+	}
+
+	public void addLog(final Log log) {
+		mainLogPanel.addLog(log);
 	}
 
 	public void exit() {
@@ -109,6 +125,45 @@ public final class MainFrame extends JFrame {
 		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
 		guiFrame = null;
 		dispose();
+	}
+
+	public synchronized void startPipeThread() {
+		if (pipeThread != null)
+			throw new IllegalStateException("Pipe-Thread already running");
+		mainLogPanel.getBtnStart().setEnabled(false);
+		pipeThread = new Thread("Pipe-Thread") {
+			@Override
+			public void run() {
+				pipeCore();
+				synchronized (MainFrame.this) {
+					resetPipeThread();
+				}
+			}
+		};
+		pipeThread.start();
+	}
+
+	protected void pipeCore() {
+		try {
+			StandardInput.the().close();
+			StandardInput.the().resetCache();
+			pipe.configuredAll();
+			pipe.initializeAll();
+			pipe.pipeAllData();
+			pipe.closeAll();
+		} catch (final Throwable t) { // CS_IGNORE
+			Log.error(t);
+		}
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				getMainLogPanel().getBtnStart().setEnabled(true);
+			}
+		});
+	}
+
+	protected void resetPipeThread() {
+		pipeThread = null;
 	}
 
 }

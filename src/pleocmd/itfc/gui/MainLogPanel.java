@@ -15,15 +15,11 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
-import pleocmd.StandardInput;
 import pleocmd.itfc.gui.Layouter.Button;
-import pleocmd.pipe.Pipe;
 
 public final class MainLogPanel extends JPanel {
 
 	private static final long serialVersionUID = -6921879308383765734L;
-
-	private final Pipe pipe;
 
 	private final JTable logTable;
 
@@ -31,11 +27,7 @@ public final class MainLogPanel extends JPanel {
 
 	private final JButton btnStart;
 
-	private Thread pipeThread;
-
-	public MainLogPanel(final Pipe pipe) {
-		this.pipe = pipe;
-
+	public MainLogPanel() {
 		final Layouter lay = new Layouter(this);
 
 		logModel = new LogTableModel();
@@ -66,7 +58,7 @@ public final class MainLogPanel extends JPanel {
 				"Starts the currently configured pipe", new Runnable() {
 					@Override
 					public void run() {
-						startPipeThread();
+						MainFrame.the().startPipeThread();
 					}
 				});
 		lay.addButton(Button.SaveTo, "Saves the whole log to a text file",
@@ -86,12 +78,8 @@ public final class MainLogPanel extends JPanel {
 				});
 	}
 
-	protected JButton getBtnStart() {
+	public JButton getBtnStart() {
 		return btnStart;
-	}
-
-	protected void resetPipeThread() {
-		pipeThread = null;
 	}
 
 	protected String getBacktrace(final int index) {
@@ -103,41 +91,6 @@ public final class MainLogPanel extends JPanel {
 		pw.flush();
 		return String.format("<html>%s</html>", sw.toString().replace("<",
 				"&lt;").replace("\n", "<br>"));
-	}
-
-	public synchronized void startPipeThread() {
-		if (pipeThread != null)
-			throw new IllegalStateException("Pipe-Thread already running");
-		btnStart.setEnabled(false);
-		pipeThread = new Thread("Pipe-Thread") {
-			@Override
-			public void run() {
-				pipeCore();
-				synchronized (MainLogPanel.this) {
-					resetPipeThread();
-				}
-			}
-		};
-		pipeThread.start();
-	}
-
-	protected void pipeCore() {
-		try {
-			StandardInput.the().close();
-			StandardInput.the().resetCache();
-			pipe.configuredAll();
-			pipe.initializeAll();
-			pipe.pipeAllData();
-			pipe.closeAll();
-		} catch (final Throwable t) { // CS_IGNORE
-			Log.error(t);
-		}
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				getBtnStart().setEnabled(true);
-			}
-		});
 	}
 
 	public void writeLogToFile() {
