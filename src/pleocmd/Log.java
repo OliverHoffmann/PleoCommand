@@ -8,7 +8,7 @@ public final class Log {
 		Detail, Info, Warn, Error, Console
 	}
 
-	private static final boolean PRINT_DETAIL = true;
+	private static boolean logDetailed = true;
 
 	private final Type type;
 
@@ -88,7 +88,7 @@ public final class Log {
 	 * standard error) no matter if a GUI exists or not.
 	 */
 	private void process() {
-		if (type != Type.Detail || PRINT_DETAIL) {
+		if (type != Type.Detail || logDetailed) {
 			if (type == Type.Console) System.out.println(getMsg()); // CS_IGNORE
 			if (MainFrame.hasGUI())
 				MainFrame.the().addLog(this);
@@ -156,6 +156,14 @@ public final class Log {
 		}
 
 		new Log(Type.Error, getCallersName(t, 0), sb.toString(), throwable);
+	}
+
+	public static void setLogDetailed(final boolean logDetailed) {
+		Log.logDetailed = logDetailed;
+	}
+
+	public static boolean isLogDetailed() {
+		return logDetailed;
 	}
 
 }

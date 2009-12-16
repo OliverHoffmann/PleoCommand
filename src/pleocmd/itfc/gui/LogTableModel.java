@@ -9,6 +9,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.Log;
+import pleocmd.Log.Type;
 
 public final class LogTableModel extends AbstractTableModel {
 
@@ -49,6 +50,20 @@ public final class LogTableModel extends AbstractTableModel {
 	public void clear() {
 		list.clear();
 		fireTableDataChanged();
+	}
+
+	public void refresh() {
+		if (!Log.isLogDetailed()) {
+			// remove all detailed logs from our list
+			final List<Log> newList = new ArrayList<Log>();
+			for (final Log log : list)
+				if (log.getType() != Type.Detail) newList.add(log);
+			if (list.size() != newList.size()) {
+				list.clear();
+				list.addAll(newList);
+				fireTableDataChanged();
+			}
+		}
 	}
 
 	public void writeToFile(final File file) throws IOException {

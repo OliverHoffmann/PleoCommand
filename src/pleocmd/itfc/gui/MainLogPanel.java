@@ -1,12 +1,15 @@
 package pleocmd.itfc.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -28,6 +31,8 @@ public final class MainLogPanel extends JPanel {
 	private final JButton btnStart;
 
 	private final JButton btnSave;
+
+	private final JCheckBox cbShowDetail;
 
 	private final JButton btnClear;
 
@@ -72,6 +77,14 @@ public final class MainLogPanel extends JPanel {
 						writeLogToFile();
 					}
 				});
+		cbShowDetail = new JCheckBox("Show detailed log", true);
+		cbShowDetail.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				refreshLogDetailState();
+			}
+		});
+		lay.add(cbShowDetail, false);
 		lay.addSpacer();
 		btnClear = lay.addButton(Button.Clear, "Empties the whole log list",
 				new Runnable() {
@@ -107,6 +120,12 @@ public final class MainLogPanel extends JPanel {
 
 	public void clearLog() {
 		logModel.clear();
+		updateState();
+	}
+
+	public void refreshLogDetailState() {
+		Log.setLogDetailed(cbShowDetail.isSelected());
+		logModel.refresh();
 		updateState();
 	}
 
