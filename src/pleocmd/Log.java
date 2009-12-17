@@ -5,6 +5,12 @@ import java.util.Date;
 
 import pleocmd.itfc.gui.MainFrame;
 
+/**
+ * Contains all relevant content of one log message (one line in log view) as
+ * well as static methods to create log messages of any {@link Type}.
+ * 
+ * @author oliver
+ */
 public final class Log {
 
 	public enum Type {
@@ -36,26 +42,48 @@ public final class Log {
 		process();
 	}
 
+	/**
+	 * @return the {@link Type} of this log entry.
+	 */
 	public Type getType() {
 		return type;
 	}
 
+	/**
+	 * @return a {@link String} describing the class and method which created
+	 *         this log entry.
+	 */
 	public String getCaller() {
 		return caller;
 	}
 
+	/**
+	 * @return a {@link String} with the message of this log entry.
+	 */
 	public String getMsg() {
 		return msg;
 	}
 
+	/**
+	 * @return the complete backtrace for this log entry if this log is an
+	 *         {@link Type#Error} or null if not.
+	 */
 	public Throwable getBacktrace() {
 		return backtrace;
 	}
 
+	/**
+	 * @return the time in milliseconds since the epoch when this log entry has
+	 *         been created.
+	 */
 	public long getTime() {
 		return time;
 	}
 
+	/**
+	 * @return a color matching the {@link Type} of this log entry.
+	 * @see #getType()
+	 */
 	public String getTypeColor() {
 		switch (type) {
 		case Detail:
@@ -72,10 +100,19 @@ public final class Log {
 		}
 	}
 
+	/**
+	 * @return the time (with milliseconds - no date), from {@link #getTime()}
+	 *         formatted as a {@link String}
+	 */
 	public String getFormattedTime() {
 		return DATE_FORMATTER.format(new Date(time));
 	}
 
+	/**
+	 * @return a three character long {@link String} matching the {@link Type}
+	 *         of this log entry.
+	 * @see #getType()
+	 */
 	public String getTypeShortString() {
 		switch (type) {
 		case Detail:
@@ -100,9 +137,9 @@ public final class Log {
 	}
 
 	/**
-	 * Print messages to the GUI's log, if any, or otherwise to the standard
-	 * error.<br>
-	 * Always print messages of type Console to the standard output (instead of
+	 * Prints messages to the GUI's log, if any, or to the standard error
+	 * otherwise.<br>
+	 * Always prints messages of type Console to the standard output (instead of
 	 * standard error) no matter if a GUI exists or not.
 	 */
 	private void process() {
@@ -131,30 +168,118 @@ public final class Log {
 				.format(msg, args), null);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Detail} which will be printed to
+	 * error output or send to the GUI.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	public static void detail(final String msg, final Object... args) {
 		msg(Type.Detail, msg, args);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Info} which will be printed to error
+	 * output or send to the GUI.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	public static void info(final String msg, final Object... args) {
 		msg(Type.Info, msg, args);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Warn} which will be printed to error
+	 * output or send to the GUI.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	public static void warn(final String msg, final Object... args) {
 		msg(Type.Warn, msg, args);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Error} which will be printed to
+	 * error output or send to the GUI.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	public static void error(final String msg, final Object... args) {
 		msg(Type.Error, msg, args);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Console} which will be printed to
+	 * standard output <b>and</b> send to the GUI.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	public static void consoleOut(final String msg, final Object... args) {
 		msg(Type.Console, msg, args);
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Error} which will be printed to
+	 * error output or send to the GUI. This message will contain a complete
+	 * backtrace.
+	 * 
+	 * @param throwable
+	 *            the {@link Exception} that occurred as a reason for this
+	 *            message.
+	 * @see #getBacktrace()
+	 */
 	public static void error(final Throwable throwable) {
 		error(throwable, "");
 	}
 
+	/**
+	 * Creates a new message of {@link Type#Error} which will be printed to
+	 * error output or send to the GUI. This message will contain a complete
+	 * backtrace.
+	 * 
+	 * @param throwable
+	 *            the {@link Exception} that occurred as a reason for this
+	 *            message.
+	 * @param msg
+	 *            an optional message prepended before the exception -
+	 *            interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero) - will be ignored if the message string is empty.
+	 * @see #getBacktrace()
+	 */
 	public static void error(final Throwable throwable, final String msg,
 			final Object... args) {
 		final StringBuilder sb = new StringBuilder();
@@ -176,10 +301,20 @@ public final class Log {
 		new Log(Type.Error, getCallersName(t, 0), sb.toString(), throwable);
 	}
 
+	/**
+	 * Sets whether messages of {@link Type#Detail} (send by
+	 * {@link #detail(String, Object...)}) should be processed or just ignored.
+	 * 
+	 * @param logDetailed
+	 *            true if {@link Type#Detail} will be processed
+	 */
 	public static void setLogDetailed(final boolean logDetailed) {
 		Log.logDetailed = logDetailed;
 	}
 
+	/**
+	 * @return true if {@link Type#Detail} will be processed
+	 */
 	public static boolean isLogDetailed() {
 		return logDetailed;
 	}
