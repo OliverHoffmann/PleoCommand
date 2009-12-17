@@ -9,7 +9,8 @@ import pleocmd.itfc.gui.MainFrame;
 /**
  * In console mode, the standard input gets simply wrapped by this class.<br>
  * In GUI mode, data coming from the GUI's {@link javax.swing.JTextField} will
- * be cached inside {@link StandardInput} to be later read by {@link #read()}.
+ * be cached inside a ring buffer of this {@link StandardInput} to later be read
+ * by {@link #read()}.
  * 
  * @author oliver
  */
@@ -42,24 +43,58 @@ public final class StandardInput extends InputStream {
 
 	private StandardInput() {
 		stdin = this;
-		cacheClosed = true;
 		resetCache();
 	}
 
+	/**
+	 * Returns or creates the singleton instance.
+	 * 
+	 * @return instance of {@link StandardInput}
+	 */
 	public static StandardInput the() {
 		if (stdin == null) new StandardInput();
 		return stdin;
 	}
 
+	/**
+	 * True if the input stream has been closed.
+	 * 
+	 * @return true if closed
+	 * @see #close()
+	 */
 	public synchronized boolean isClosed() {
 		return cacheClosed;
 	}
 
+	/**
+	 * Appends a "close" to the ring buffer in GUI mode and has no effect in
+	 * console mode.<br>
+	 * The remaining {@link #available()} data in the ring buffer can still be
+	 * {@link #read()} but no new data can be {@link #put(byte)} into it. After
+	 * no more data is {@link #available()} {@link #read()} throws an
+	 * {@link IOException}.<br>
+	 * Has no effect if the {@link StandardInput} is already closed.
+	 */
+	@Override
+	public void close() throws IOException {
+		if (MainFrame.hasGUI()) synchronized (this) {
+			cacheClosed = true;
+		}
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (MainFrame.hasGUI()) MainFrame.the().updateState();
+			}
+		});
+	}
+
+	/**
+	 * Clears and (if currently closed) reopens the input stream.<br>
+	 * All data in the ring buffer not yet read will be lost.<br>
+	 * Has no effect in console mode.
+	 */
 	public void resetCache() {
 		synchronized (this) {
-			if (!cacheClosed)
-				throw new IllegalStateException(
-						"Cannot reset - cache still open");
 			Log.detail("Resetting cache");
 			cache = new byte[8];
 			cachePosRead = 0;
@@ -74,6 +109,14 @@ public final class StandardInput extends InputStream {
 		});
 	}
 
+	/**
+	 * Returns the number of bytes ready to read via {@link #read()}.<br>
+	 * Blocks until data is available or (in GUI mode) {@link #close()} or
+	 * {@link #resetCache()} has been called.<br>
+	 * In GUI mode, it should <b>not</b> be called from the GUI thread.
+	 * 
+	 * @return available bytes
+	 */
 	@Override
 	public int available() throws IOException {
 		if (MainFrame.hasGUI()) while (true) {
@@ -102,6 +145,11 @@ public final class StandardInput extends InputStream {
 		return System.in.available(); // CS_IGNORE
 	}
 
+	/**
+	 * Reads one byte from the input stream or (in GUI mode) the ring buffer.<br>
+	 * Blocks until the byte is available.<br>
+	 * In GUI mode, it should <b>not</b> be called from the GUI thread.
+	 */
 	@Override
 	public int read() throws IOException {
 		if (MainFrame.hasGUI()) {
@@ -130,22 +178,16 @@ public final class StandardInput extends InputStream {
 		return System.in.read(); // CS_IGNORE
 	}
 
-	@Override
-	public void close() throws IOException {
-		if (MainFrame.hasGUI())
-			synchronized (this) {
-				cacheClosed = true;
-			}
-		else
-			System.in.close(); // CS_IGNORE
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				if (MainFrame.hasGUI()) MainFrame.the().updateState();
-			}
-		});
-	}
-
+	/**
+	 * Puts one byte into the ringbuffer in GUI mode, so it can be read by
+	 * {@link #read()}.<br>
+	 * Should only be called in GUI mode and from the GUI thread.
+	 * 
+	 * @param b
+	 *            byte to put into the ring buffer
+	 * @throws IOException
+	 *             if the stream has been closed
+	 */
 	public void put(final byte b) throws IOException {
 		assert MainFrame.hasGUI();
 		if (cacheClosed) throw new IOException("StandardInput is closed");
@@ -157,7 +199,8 @@ public final class StandardInput extends InputStream {
 			if (cachePosRead == cachePosWrite) {
 				// we need to increase our ring buffer:
 				// we "insert space" between the current write and
-				// read position
+				// read position so cachePosWrite stays the same as
+				// cachePosRead moves.
 				final byte[] newcache = new byte[cache.length * 2];
 				cachePosRead += newcache.length - cache.length;
 				Log.detail(String.format("Increased from %d to %d",
@@ -170,6 +213,16 @@ public final class StandardInput extends InputStream {
 		}
 	}
 
+	/**
+	 * Puts a series of bytes into the ring buffer as an atomic operation (i.e.
+	 * completely synchronized).
+	 * 
+	 * @param bytes
+	 *            data to put into the ring buffer
+	 * @throws IOException
+	 *             if the stream has been closed
+	 * @see #put(byte)
+	 */
 	public void put(final byte[] bytes) throws IOException {
 		synchronized (this) {
 			for (final byte b : bytes)
