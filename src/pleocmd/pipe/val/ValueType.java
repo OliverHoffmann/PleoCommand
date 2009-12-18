@@ -12,7 +12,7 @@ public enum ValueType {
 	}
 
 	/**
-	 * @return ID of this {@link Type} used in binary streams
+	 * @return ID of this {@link ValueType} used in binary streams
 	 */
 	public int getID() {
 		return id;

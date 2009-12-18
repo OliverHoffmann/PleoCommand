@@ -1,5 +1,6 @@
 package pleocmd.exc;
 
+import pleocmd.pipe.PipePart;
 
 /**
  * This is the central {@link Exception} class for all classes in the
@@ -22,8 +23,8 @@ public class PipeException extends Exception {
 	 *            the source of the exception or <b>null</b>
 	 * @param permanent
 	 *            if true the sender will be ignored during all further pipe
-	 *            processing (until {@link pleocmd.pipe.Pipe#closeAll()} has
-	 *            been called).
+	 *            processing (until {@link pleocmd.pipe.Pipe#close()} has been
+	 *            called).
 	 * @param message
 	 *            a message associated with this {@link Exception}. If arguments
 	 *            are available, it will be interpreted as a format String like
@@ -45,8 +46,8 @@ public class PipeException extends Exception {
 	 *            the source of the exception or <b>null</b>
 	 * @param permanent
 	 *            if true the sender will be ignored during all further pipe
-	 *            processing (until {@link pleocmd.pipe.Pipe#closeAll()} has
-	 *            been called).
+	 *            processing (until {@link pleocmd.pipe.Pipe#close()} has been
+	 *            called).
 	 * @param cause
 	 *            another {@link Exception} which caused this one
 	 * @param message
@@ -76,7 +77,7 @@ public class PipeException extends Exception {
 	/**
 	 * @return true if the cause for this {@link Exception} has a permanent
 	 *         reason. The sender then will never be called again during pipe
-	 *         processing (until {@link pleocmd.pipe.Pipe#closeAll()} has been
+	 *         processing (until {@link pleocmd.pipe.Pipe#close()} has been
 	 *         called).
 	 */
 	public final boolean isPermanent() {
