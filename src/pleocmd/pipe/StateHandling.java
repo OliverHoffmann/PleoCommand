@@ -165,7 +165,7 @@ public abstract class StateHandling {
 	/**
 	 * Ensures that this object is in a valid {@link State}.
 	 * 
-	 * @throws PipeException
+	 * @throws StateException
 	 *             if the object is already constructed
 	 */
 	public final void ensureConstructing() throws StateException {
@@ -185,7 +185,7 @@ public abstract class StateHandling {
 	/**
 	 * Ensures that this object is in a valid {@link State}.
 	 * 
-	 * @throws PipeException
+	 * @throws StateException
 	 *             if the object is being constructed or already initialized
 	 */
 	public final void ensureConstructed() throws StateException {
@@ -207,7 +207,7 @@ public abstract class StateHandling {
 	/**
 	 * Ensures that this object is in a valid {@link State}.
 	 * 
-	 * @throws PipeException
+	 * @throws StateException
 	 *             if the object is being constructed, not yet configured or
 	 *             already initialized
 	 */
@@ -232,7 +232,7 @@ public abstract class StateHandling {
 	/**
 	 * Ensures that this object is in a valid {@link State}.
 	 * 
-	 * @throws PipeException
+	 * @throws StateException
 	 *             if the object is not already initialized
 	 */
 	public final void ensureInitialized() throws StateException {
@@ -252,7 +252,7 @@ public abstract class StateHandling {
 	/**
 	 * Ensures that this object is in a valid {@link State}.
 	 * 
-	 * @throws PipeException
+	 * @throws StateException
 	 *             if the object is currently initialized
 	 */
 	public final void ensureNoLongerInitialized() throws StateException {
