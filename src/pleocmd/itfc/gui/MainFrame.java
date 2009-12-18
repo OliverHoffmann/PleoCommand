@@ -13,6 +13,7 @@ import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
+import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 
 /**
@@ -139,7 +140,11 @@ public final class MainFrame extends JFrame {
 		pipeThread = new Thread("Pipe-Thread") {
 			@Override
 			public void run() {
-				pipeCore();
+				try {
+					pipeCore();
+				} catch (final Throwable t) { // CS_IGNORE
+					Log.error(t);
+				}
 				resetPipeThread();
 				EventQueue.invokeLater(new Runnable() {
 					@Override
@@ -153,16 +158,12 @@ public final class MainFrame extends JFrame {
 		pipeThread.start();
 	}
 
-	protected void pipeCore() {
-		try {
-			StandardInput.the().resetCache();
-			pipe.configure();
-			pipe.init();
-			pipe.pipeAllData();
-			pipe.close();
-		} catch (final Throwable t) { // CS_IGNORE
-			Log.error(t);
-		}
+	protected void pipeCore() throws PipeException, InterruptedException {
+		StandardInput.the().resetCache();
+		pipe.configure();
+		pipe.init();
+		pipe.pipeAllData();
+		pipe.close();
 	}
 
 	public void updateState() {
