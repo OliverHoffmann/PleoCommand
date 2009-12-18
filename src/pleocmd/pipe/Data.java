@@ -21,6 +21,12 @@ public final class Data extends AbstractList<Value> {
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+	/**
+	 * 1 => valid decimal number<br>
+	 * 2 => valid floating point number<br>
+	 * 3 => valid string<br>
+	 * 4 => invalid
+	 */
 	private static final int[] TYPE_AUTODETECT_TABLE = { // 
 	/**//**/4, 4, 4, 4, 4, 4, 4, 4, // 00 - 07
 			4, 3, 4, 4, 4, 4, 4, 4, // 08 - 0F
@@ -56,6 +62,15 @@ public final class Data extends AbstractList<Value> {
 		return values.get(index);
 	}
 
+	/**
+	 * Returns the {@link Value} at the given position or a {@link DummyValue}
+	 * if the position is invalid.<br>
+	 * Never throws an {@link IndexOutOfBoundsException}.
+	 * 
+	 * @param index
+	 *            index of the {@link Value} to return
+	 * @return {@link Value} at this position or {@link DummyValue}
+	 */
 	public Value getSafe(final int index) {
 		return index < 0 || index >= values.size() ? new DummyValue() : values
 				.get(index);
@@ -67,7 +82,8 @@ public final class Data extends AbstractList<Value> {
 	}
 
 	/**
-	 * Reads binary data from stream. Data must have the following format:<br>
+	 * Reads binary data from stream.<br>
+	 * Data must have the following format:<br>
 	 * <table>
 	 * <tr>
 	 * <th align=left>Description</th>
@@ -146,7 +162,10 @@ public final class Data extends AbstractList<Value> {
 	 * 
 	 * @param in
 	 *            Input Stream with binary data
-	 * @return Data read from stream.
+	 * @return new {@link Data} with a list of {@link Value}s read from stream
+	 * @throws IOException
+	 *             if data could not be read from {@link DataInput}, is of an
+	 *             invalid type or is of an invalid format for its type
 	 */
 	public static Data createFromBinary(final DataInput in) throws IOException {
 		final int hdr = in.readInt();
@@ -169,22 +188,23 @@ public final class Data extends AbstractList<Value> {
 	}
 
 	/**
-	 * Reads ASCII data from stream. Data must consist of fields (separated by
-	 * '|') and followed by '\n'. Whitespaces are allowed and will be ignored.
-	 * Fields may be prefixed by a type identifier followed by ':'. Allowed type
-	 * identifiers are 'I', 'F', 'S' and 'B' for int, float, string or binary
-	 * values, optionally followed by modifier 'x' for hexadecimal data.<br>
+	 * Reads ASCII data from stream.<br>
+	 * Data must consist of fields (separated by '|') and followed by '\n'.
+	 * Whitespaces are allowed and will be ignored. Fields may be prefixed by a
+	 * type identifier followed by ':'. Allowed type identifiers are 'I', 'F',
+	 * 'S' and 'B' for int, float, string or binary values, optionally followed
+	 * by modifier 'x' for hexadecimal data.<br>
 	 * Examples:<br>
 	 * 25|7.3|Hello<br>
 	 * I:3|F:2.0|S:Some String<br>
 	 * S: 12345678 | 100 | F: 100 | Bx: F0DD35007E | Sx: 48454C4C4F<br>
 	 * 
 	 * @param in
-	 *            Input Stream with text data in ISO-8859-1 encoding.
-	 * @return New {@link Data} block read from stream.
+	 *            Input Stream with text data in ISO-8859-1 encoding
+	 * @return new {@link Data} with a list of {@link Value}s read from stream
 	 * @throws IOException
-	 *             On read errors, unexpected end of input or invalid data
-	 *             format.
+	 *             if data could not be read from {@link DataInput}, is of an
+	 *             invalid type or is of an invalid format for its type
 	 */
 	public static Data createFromAscii(final DataInput in) throws IOException {
 		final List<Value> content = new ArrayList<Value>();
@@ -272,12 +292,13 @@ public final class Data extends AbstractList<Value> {
 	 * source.
 	 * 
 	 * @param string
-	 *            {@link String} to read the data block from (optionally with
+	 *            {@link String} to read the data block from (optionally with a
 	 *            line-break)
-	 * @return new {@link Data} block read from {@link String}
+	 * @return new {@link Data} with a list of {@link Value}s read from
+	 *         {@link String}
 	 * @throws IOException
-	 *             on unexpected end of input or invalid data format
-	 * @see {@link #createFromAscii(DataInput)}
+	 *             if data could not be read from {@link DataInput}, is of an
+	 *             invalid type or is of an invalid format for its type
 	 */
 	public static Data createFromAscii(final String string) throws IOException {
 		return createFromAscii(new DataInputStream(new ByteArrayInputStream(
@@ -294,7 +315,7 @@ public final class Data extends AbstractList<Value> {
 	 * @return one of {@link ValueType#Int64}, {@link ValueType#Float64} or
 	 *         {@link ValueType#NullTermString}
 	 * @throws IOException
-	 *             if the data is not in one of the known data formats.
+	 *             if the data is not in one of the known data formats
 	 */
 	private static ValueType detectDataType(final byte[] data, final int len)
 			throws IOException {
