@@ -17,6 +17,7 @@ import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -37,6 +38,12 @@ public final class Pipe extends StateHandling {
 	private final Set<Output> ignoredOutputs = new HashSet<Output>();
 
 	private int inputPosition;
+
+	private final DataQueue dataQueue = new DataQueue();
+
+	private Thread thrInput;
+
+	private Thread thrOutput;
 
 	public Pipe() {
 		constructed();
@@ -67,6 +74,132 @@ public final class Pipe extends StateHandling {
 	public void addOutput(final Output output) {
 		// TODO add ensure...
 		outputList.add(output);
+	}
+
+	@Override
+	protected void configure0() throws PipeException {
+		Log.detail("Marking all input as configured");
+		for (final Input in : inputList)
+			in.configure();
+		Log.detail("Marking all converter as configured");
+		for (final Converter cvt : converterList)
+			cvt.configure();
+		Log.detail("Marking all output as configured");
+		for (final Output out : outputList)
+			out.configure();
+	}
+
+	@Override
+	protected void init0() throws PipeException {
+		Log.detail("Initializing all input");
+		for (final Input in : inputList)
+			in.init();
+		Log.detail("Initializing all converter");
+		for (final Converter cvt : converterList)
+			cvt.init();
+		Log.detail("Initializing all output");
+		for (final Output out : outputList)
+			out.init();
+	}
+
+	@Override
+	protected void close0() throws PipeException {
+		synchronized (this) {
+			if (thrInput != null || thrOutput != null)
+				throw new PipeException(this, false,
+						"Background threads are still alive");
+		}
+		Log.detail("Closing all input");
+		for (int i = inputPosition; i < inputList.size(); ++i)
+			inputList.get(i).tryClose();
+		Log.detail("Closing all converter");
+		for (final PipePart pp : converterList)
+			if (!ignoredConverter.contains(pp)) pp.tryClose();
+		Log.detail("Closing all output");
+		for (final PipePart pp : outputList)
+			if (!ignoredOutputs.contains(pp)) pp.tryClose();
+		inputPosition = 0;
+		ignoredConverter.clear();
+		ignoredOutputs.clear();
+	}
+
+	public void pipeAllData() throws PipeException, InterruptedException {
+		ensureInitialized();
+		dataQueue.resetCache();
+		thrInput = new Thread() {
+			@Override
+			public void run() {
+				try {
+					runInputThread();
+				} catch (final Throwable t) { // CS_IGNORE
+					Log.error(t);
+				}
+			}
+		};
+		thrOutput = new Thread() {
+			@Override
+			public void run() {
+				try {
+					runOutputThread();
+				} catch (final Throwable t) { // CS_IGNORE
+					Log.error(t);
+				}
+			}
+		};
+		thrInput.start();
+		thrOutput.start();
+
+		Log.detail("Started waiting for threads");
+		while (thrOutput.isAlive())
+			Thread.sleep(100);
+		Log.detail("Output Thread no longer alive");
+		assert !thrInput.isAlive();
+		Log.detail("Input Thread no longer alive");
+		thrInput = null;
+		thrOutput = null;
+
+		// TODO call close() here directly?
+	}
+
+	protected void runInputThread() throws StateException, IOException {
+		Log.detail("Input-Thread started");
+		int count = 0;
+		while (true) {
+			ensureInitialized();
+
+			// read next data block ...
+			final Data data = getFromInput();
+			if (data == null) break; // marks end of all inputs
+			++count;
+
+			// ... convert it ...
+			final List<Data> dataList = convertDataToDataList(data);
+
+			// ... and put it into the queue for Output classes
+			dataQueue.put(dataList);
+		}
+		Log.detail("Read %d data blocks from input", count);
+		dataQueue.close();
+		Log.detail("Input-Thread finished");
+	}
+
+	protected void runOutputThread() throws StateException,
+			InterruptedException {
+		Log.detail("Output-Thread started");
+		int count = 0;
+		while (true) {
+			ensureInitialized();
+
+			// fetch next data block ...
+			final Data data = dataQueue.get();
+			if (data == null) break;
+			++count;
+
+			// ... and send it to all currently registered outputs
+			writeDataToAllOutputs(data);
+		}
+		Log.detail("Sent %d data blocks to output", count);
+		Log.detail("Output-Thread finished");
 	}
 
 	private Data getFromInput() {
@@ -125,9 +258,9 @@ public final class Pipe extends StateHandling {
 		for (final Converter cvt : converterList)
 			if (!ignoredConverter.contains(cvt)
 					&& (res = convertOneData(data, cvt)) != null) return res;
-		// CS_IGNORE_PREV need inner assignment
 
 		// no fitting (and not ignored and working) converter found
+		Log.detail("No Converter found, returning data as is: '%s'", data);
 		res = new ArrayList<Data>(1);
 		res.add(data);
 		return res;
@@ -136,7 +269,7 @@ public final class Pipe extends StateHandling {
 	private List<Data> convertOneData(final Data data, final Converter cvt) {
 		try {
 			if (cvt.canHandleData(data)) {
-				Log.detail("Converting with '%s'", cvt);
+				Log.detail("Converting '%s' with '%s'", data, cvt);
 				final List<Data> newDatas = cvt.convert(data);
 				final List<Data> res = new ArrayList<Data>(newDatas.size());
 				for (final Data newData : newDatas)
@@ -156,12 +289,10 @@ public final class Pipe extends StateHandling {
 		return null;
 	}
 
-	private void writeAllData(final List<Data> list) {
-		Log.detail("Writing %d data block(s) to %d output(s)", list.size(),
-				outputList.size());
-		for (final Data data : list)
-			for (final Output out : outputList)
-				if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
+	private void writeDataToAllOutputs(final Data data) {
+		Log.detail("Writing data block to %d output(s)", outputList.size());
+		for (final Output out : outputList)
+			if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
 	}
 
 	private void writeToOutput(final Data data, final Output out) {
@@ -179,76 +310,14 @@ public final class Pipe extends StateHandling {
 		}
 	}
 
-	public boolean pipeData() throws PipeException {
-		ensureInitialized();
-		// read next data block ...
-		final Data data = getFromInput();
-		if (data == null) return false; // marks end of all inputs
-
-		// ... convert it ...
-		final List<Data> dataList = convertDataToDataList(data);
-
-		// ... and send all data blocks to all connected outputs
-		writeAllData(dataList);
-		return true;
-	}
-
-	public int pipeAllData() throws PipeException {
-		ensureInitialized();
-		int count = 0;
-		while (pipeData())
-			++count;
-		Log.detail("Piped %d data blocks", count);
-		return count;
-	}
-
-	@Override
-	protected void configure0() throws PipeException {
-		Log.detail("Marking all input as configured");
-		for (final Input in : inputList)
-			in.configure();
-		Log.detail("Marking all converter as configured");
-		for (final Converter cvt : converterList)
-			cvt.configure();
-		Log.detail("Marking all output as configured");
-		for (final Output out : outputList)
-			out.configure();
-	}
-
-	@Override
-	protected void init0() throws PipeException {
-		Log.detail("Initializing all input");
-		for (final Input in : inputList)
-			in.init();
-		Log.detail("Initializing all converter");
-		for (final Converter cvt : converterList)
-			cvt.init();
-		Log.detail("Initializing all output");
-		for (final Output out : outputList)
-			out.init();
-	}
-
-	@Override
-	protected void close0() throws PipeException {
-		Log.detail("Closing all input");
-		for (int i = inputPosition; i < inputList.size(); ++i)
-			inputList.get(i).tryClose();
-		Log.detail("Closing all converter");
-		for (final PipePart pp : converterList)
-			if (!ignoredConverter.contains(pp)) pp.tryClose();
-		Log.detail("Closing all output");
-		for (final PipePart pp : outputList)
-			if (!ignoredOutputs.contains(pp)) pp.tryClose();
-		inputPosition = 0;
-		ignoredConverter.clear();
-		ignoredOutputs.clear();
-	}
-
 	public void reset() throws PipeException {
 		ensureNoLongerInitialized();
 		inputList.clear();
 		converterList.clear();
 		outputList.clear();
+		assert inputPosition == 0;
+		assert ignoredConverter.isEmpty();
+		assert ignoredOutputs.isEmpty();
 	}
 
 	public void writeToFile(final File file) throws IOException, PipeException {
