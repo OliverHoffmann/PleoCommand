@@ -1,16 +1,66 @@
 package pleocmd.pipe;
 
+import java.io.IOException;
+
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 
-public class StateHandling {
+/**
+ * This class helps sub classes to deny calling methods according to a state in
+ * which the object currently is.<br>
+ * All methods which should be protected must have an appropriate ensure...()
+ * call as their first statement.
+ * 
+ * @author oliver
+ */
+public abstract class StateHandling {
 
+	/**
+	 * All valid states an object can be in.
+	 */
 	public enum State {
-		Constructing, Constructed, Configured, Initialized
+		/**
+		 * This object is currently being constructor (i.e. the constructor has
+		 * not yet be finished)
+		 */
+		Constructing,
+		/**
+		 * This object is constructed but not yet configured.
+		 */
+		Constructed,
+		/**
+		 * This object is constructed and configured and therefore ready to be
+		 * initialized.
+		 */
+		Configured,
+		/**
+		 * This object is constructed, configured and initialized and therefore
+		 * ready to be used.
+		 */
+		Initialized
 	}
 
 	private State state = State.Constructing;
 
+	/**
+	 * Must be called as the last statement in all constructors of all sub
+	 * classes.
+	 */
+	protected final void constructed() {
+		try {
+			ensureConstructing();
+			setState(State.Constructed);
+		} catch (final StateException e) {
+			Log.error(e);
+			throw new RuntimeException(
+					"Internal error: Invalid state during ctor");
+		}
+	}
+
+	/**
+	 * @return current {@link State} of this object.
+	 */
 	public final State getState() {
 		return state;
 	}
@@ -54,26 +104,71 @@ public class StateHandling {
 		return false;
 	}
 
-	protected final void setState(final State state) throws PipeException {
+	public final void configure() throws PipeException {
+		ensureConstructed();
+		try {
+			configure0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot configure '%s'",
+					getClass().getSimpleName());
+		}
+		setState(State.Configured);
+	}
+
+	protected abstract void configure0() throws PipeException, IOException;
+
+	public final void init() throws PipeException {
+		ensureConfigured();
+		try {
+			init0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot initialize '%s'",
+					getClass().getSimpleName());
+		}
+		setState(State.Initialized);
+	}
+
+	protected abstract void init0() throws PipeException, IOException;
+
+	public final void close() throws PipeException {
+		ensureInitialized();
+		try {
+			close0();
+		} catch (final IOException e) {
+			throw new PipeException(this, true, e, "Cannot close '%s'",
+					getClass().getSimpleName());
+		}
+		setState(State.Configured);
+	}
+
+	protected abstract void close0() throws PipeException, IOException;
+
+	private void setState(final State state) throws StateException {
 		if (!checkValidChange(this.state, state))
-			throw new PipeException(null, true,
+			throw new StateException(this, true,
 					"Cannot change state from '%s' to '%s'", this.state, state);
 		Log.detail("'%s' changed state: '%s' => '%s'", getClass()
 				.getSimpleName(), this.state, state);
 		this.state = state;
 	}
 
-	private void throwException(final String msg) throws PipeException {
-		throw new PipeException(null, true, "'%s' is in a wrong state: %s",
+	private void throwException(final String msg) throws StateException {
+		throw new StateException(this, true, "'%s' is in a wrong state: %s",
 				getClass().getSimpleName(), msg);
 	}
 
-	private void throwUnknownState() throws PipeException {
-		throw new PipeException(null, true, "'%s' is in an unknown state: %s",
+	private void throwUnknownState() throws StateException {
+		throw new StateException(this, true, "'%s' is in an unknown state: %s",
 				getClass().getSimpleName(), state);
 	}
 
-	public final void ensureConstructing() throws PipeException {
+	/**
+	 * Ensures that this object is in a valid {@link State}.
+	 * 
+	 * @throws PipeException
+	 *             if the object is already constructed
+	 */
+	public final void ensureConstructing() throws StateException {
 		switch (state) {
 		case Constructing:
 			break;
@@ -87,7 +182,13 @@ public class StateHandling {
 		}
 	}
 
-	public final void ensureConstructed() throws PipeException {
+	/**
+	 * Ensures that this object is in a valid {@link State}.
+	 * 
+	 * @throws PipeException
+	 *             if the object is being constructed or already initialized
+	 */
+	public final void ensureConstructed() throws StateException {
 		switch (state) {
 		case Constructing:
 			throwException("Constructing");
@@ -103,7 +204,14 @@ public class StateHandling {
 		}
 	}
 
-	public final void ensureConfigured() throws PipeException {
+	/**
+	 * Ensures that this object is in a valid {@link State}.
+	 * 
+	 * @throws PipeException
+	 *             if the object is being constructed, not yet configured or
+	 *             already initialized
+	 */
+	public final void ensureConfigured() throws StateException {
 		switch (state) {
 		case Constructing:
 			throwException("Constructing");
@@ -121,7 +229,13 @@ public class StateHandling {
 		}
 	}
 
-	public final void ensureInitialized() throws PipeException {
+	/**
+	 * Ensures that this object is in a valid {@link State}.
+	 * 
+	 * @throws PipeException
+	 *             if the object is not already initialized
+	 */
+	public final void ensureInitialized() throws StateException {
 		switch (state) {
 		case Constructing:
 		case Constructed:
@@ -135,7 +249,13 @@ public class StateHandling {
 		}
 	}
 
-	public final void ensureNoLongerInitialized() throws PipeException {
+	/**
+	 * Ensures that this object is in a valid {@link State}.
+	 * 
+	 * @throws PipeException
+	 *             if the object is currently initialized
+	 */
+	public final void ensureNoLongerInitialized() throws StateException {
 		switch (state) {
 		case Constructing:
 		case Constructed:

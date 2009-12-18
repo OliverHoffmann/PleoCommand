@@ -81,7 +81,7 @@ public final class Config extends AbstractList<ConfigValue> {
 						label, v.getLabel()));
 			v.setFromString(line.substring(idx + 1).trim());
 		}
-		owner.configured();
+		owner.configure();
 	}
 
 	public void writeToFile(final Writer out) throws IOException {

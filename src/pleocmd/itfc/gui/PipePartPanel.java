@@ -236,7 +236,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		try {
 			for (final ConfigValue v : config)
 				v.setFromGUIComponents();
-			config.getOwner().configured();
+			config.getOwner().configure();
 			okPressed = true;
 		} catch (final PipeException e) {
 			Log.error(e);

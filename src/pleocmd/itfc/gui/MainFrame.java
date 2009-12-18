@@ -92,6 +92,7 @@ public final class MainFrame extends JFrame {
 		updateState();
 
 		Log.detail("GUI-Frame created");
+		Log.info("Application started");
 		setVisible(true);
 	}
 
@@ -127,6 +128,7 @@ public final class MainFrame extends JFrame {
 	public void exit() {
 		Log.detail("GUI-Frame has been closed");
 		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
+		// TODO show message if pipe still running
 		// guiFrame = null;
 		dispose();
 	}
@@ -153,12 +155,11 @@ public final class MainFrame extends JFrame {
 
 	protected void pipeCore() {
 		try {
-			StandardInput.the().close();
 			StandardInput.the().resetCache();
-			pipe.configuredAll();
-			pipe.initializeAll();
+			pipe.configure();
+			pipe.init();
 			pipe.pipeAllData();
-			pipe.closeAll();
+			pipe.close();
 		} catch (final Throwable t) { // CS_IGNORE
 			Log.error(t);
 		}

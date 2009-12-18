@@ -27,7 +27,7 @@ public final class FileInput extends Input {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		file = new File(((ConfigPath) getConfig().get(0)).getContent());
 		type = ReadType.values()[((ConfigEnum) getConfig().get(1)).getContent()];
 	}

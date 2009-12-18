@@ -1,7 +1,5 @@
 package pleocmd.pipe;
 
-import java.io.IOException;
-
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
 
@@ -17,44 +15,8 @@ public abstract class PipePart extends StateHandling {
 	public PipePart(final Config emptyConfig) {
 		config = emptyConfig;
 		config.setOwner(this);
-		try {
-			setState(State.Constructed);
-		} catch (final PipeException e) {
-			Log.error(e);
-		}
+		constructed();
 	}
-
-	/**
-	 * Tells the {@link PipePart} to accept the configuration data currently
-	 * stored in the {@link Config}.
-	 * 
-	 * @throws PipeException
-	 *             if the data stored in {@link Config} is invalid.
-	 * @see #getConfig()
-	 */
-	public final void configured() throws PipeException {
-		ensureConstructed();
-		try {
-			configured0();
-		} catch (final IOException e) {
-			throw new PipeException(this, true, e, "Cannot configure");
-		}
-		setState(State.Configured);
-	}
-
-	protected abstract void configured0() throws PipeException, IOException;
-
-	public final void init() throws PipeException {
-		ensureConfigured();
-		try {
-			init0();
-		} catch (final IOException e) {
-			throw new PipeException(this, true, e, "Cannot initialize");
-		}
-		setState(State.Initialized);
-	}
-
-	protected abstract void init0() throws PipeException, IOException;
 
 	public final void tryClose() {
 		try {
@@ -63,18 +25,6 @@ public abstract class PipePart extends StateHandling {
 			Log.error(e, "Cannot close '%s'", getClass().getSimpleName());
 		}
 	}
-
-	public final void close() throws PipeException {
-		ensureInitialized();
-		try {
-			close0();
-		} catch (final IOException e) {
-			throw new PipeException(this, true, e, "Cannot close");
-		}
-		setState(State.Configured);
-	}
-
-	protected abstract void close0() throws PipeException, IOException;
 
 	public final void reset() throws PipeException {
 		close();

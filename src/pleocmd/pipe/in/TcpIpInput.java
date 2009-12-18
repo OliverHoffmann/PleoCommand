@@ -10,7 +10,7 @@ public final class TcpIpInput extends Input {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		// nothing to do
 	}
 

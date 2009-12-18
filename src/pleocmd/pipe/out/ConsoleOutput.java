@@ -20,7 +20,7 @@ public final class ConsoleOutput extends Output {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		type = PrintType.values()[((ConfigEnum) getConfig().get(0))
 				.getContent()];
 	}

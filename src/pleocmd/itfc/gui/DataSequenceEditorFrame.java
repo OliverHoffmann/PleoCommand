@@ -100,7 +100,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 		});
 		lay.addWholeLine(cbTrigger, false);
 
-		tpDataSequence = new JTextPane();
+		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
 		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
 
 		lay.addSpacer();

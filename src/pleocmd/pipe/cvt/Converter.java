@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
-import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
@@ -19,8 +19,7 @@ public abstract class Converter extends PipePart {
 	}
 
 	@Override
-	protected abstract void configured0() throws ConverterException,
-			IOException;
+	protected abstract void configure0() throws ConverterException, IOException;
 
 	@Override
 	protected abstract void init0() throws ConverterException, IOException;
@@ -35,13 +34,16 @@ public abstract class Converter extends PipePart {
 		try {
 			ensureInitialized();
 			return convert0(data);
-		} catch (final PipeException e) {
+		} catch (final IOException e) {
+			throw new ConverterException(this, false, e,
+					"Cannot convert data block");
+		} catch (final StateException e) {
 			throw new ConverterException(this, true, e,
 					"Cannot convert data block");
 		}
 	}
 
 	protected abstract List<Data> convert0(final Data data)
-			throws ConverterException;
+			throws ConverterException, IOException;
 
 }

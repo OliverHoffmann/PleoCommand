@@ -3,7 +3,7 @@ package pleocmd.pipe.in;
 import java.io.IOException;
 
 import pleocmd.exc.InputException;
-import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 import pleocmd.pipe.PipePart;
@@ -18,7 +18,7 @@ public abstract class Input extends PipePart {
 	}
 
 	@Override
-	protected abstract void configured0() throws InputException, IOException;
+	protected abstract void configure0() throws InputException, IOException;
 
 	@Override
 	protected abstract void init0() throws InputException, IOException;
@@ -33,7 +33,7 @@ public abstract class Input extends PipePart {
 		} catch (final IOException e) {
 			throw new InputException(this, false, e,
 					"Cannot check for available data blocks");
-		} catch (final PipeException e) {
+		} catch (final StateException e) {
 			throw new InputException(this, true, e,
 					"Cannot check for available data blocks");
 		}
@@ -48,7 +48,7 @@ public abstract class Input extends PipePart {
 			return readData0();
 		} catch (final IOException e) {
 			throw new InputException(this, false, e, "Cannot read data block");
-		} catch (final PipeException e) {
+		} catch (final StateException e) {
 			throw new InputException(this, true, e, "Cannot read data block");
 		}
 	}

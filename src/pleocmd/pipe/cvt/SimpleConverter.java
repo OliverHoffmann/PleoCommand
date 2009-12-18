@@ -19,7 +19,7 @@ public final class SimpleConverter extends Converter {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		// nothing to do
 	}
 
@@ -48,7 +48,7 @@ public final class SimpleConverter extends Converter {
 							+ "string: '%s'", data);
 		try {
 			return map.findDataList(tn);
-		} catch (final IndexOutOfBoundsException e) {
+		} catch (final ConverterException e) {
 			throw new ConverterException(this, false, e,
 					"Cannot convert simple-data '%s'", data);
 		}

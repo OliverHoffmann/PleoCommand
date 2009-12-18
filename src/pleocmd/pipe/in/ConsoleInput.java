@@ -18,7 +18,7 @@ public final class ConsoleInput extends Input {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		type = ReadType.values()[((ConfigEnum) getConfig().get(0)).getContent()];
 	}
 

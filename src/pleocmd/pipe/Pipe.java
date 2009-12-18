@@ -39,11 +39,7 @@ public final class Pipe extends StateHandling {
 	private int inputPosition;
 
 	public Pipe() {
-		try {
-			setState(State.Constructed);
-		} catch (final PipeException e) {
-			Log.error(e);
-		}
+		constructed();
 	}
 
 	public List<Input> getInputList() {
@@ -206,22 +202,21 @@ public final class Pipe extends StateHandling {
 		return count;
 	}
 
-	public void configuredAll() throws PipeException {
-		ensureConstructed();
+	@Override
+	protected void configure0() throws PipeException {
 		Log.detail("Marking all input as configured");
 		for (final Input in : inputList)
-			in.configured();
+			in.configure();
 		Log.detail("Marking all converter as configured");
 		for (final Converter cvt : converterList)
-			cvt.configured();
+			cvt.configure();
 		Log.detail("Marking all output as configured");
 		for (final Output out : outputList)
-			out.configured();
-		setState(State.Configured);
+			out.configure();
 	}
 
-	public void initializeAll() throws PipeException {
-		ensureConfigured();
+	@Override
+	protected void init0() throws PipeException {
 		Log.detail("Initializing all input");
 		for (final Input in : inputList)
 			in.init();
@@ -231,11 +226,10 @@ public final class Pipe extends StateHandling {
 		Log.detail("Initializing all output");
 		for (final Output out : outputList)
 			out.init();
-		setState(State.Initialized);
 	}
 
-	public void closeAll() throws PipeException {
-		ensureInitialized();
+	@Override
+	protected void close0() throws PipeException {
 		Log.detail("Closing all input");
 		for (int i = inputPosition; i < inputList.size(); ++i)
 			inputList.get(i).tryClose();
@@ -248,7 +242,6 @@ public final class Pipe extends StateHandling {
 		inputPosition = 0;
 		ignoredConverter.clear();
 		ignoredOutputs.clear();
-		setState(State.Configured);
 	}
 
 	public void reset() throws PipeException {
@@ -311,17 +304,17 @@ public final class Pipe extends StateHandling {
 							pp = (PipePart) getClass().getClassLoader()
 									.loadClass(fcn).newInstance();
 						} catch (final ClassNotFoundException e3) {
-							throw new PipeException(null, true,
+							throw new PipeException(null, false,
 									"Cannot find PipePart with class-name '%s' in any "
 											+ "package under '%s'", cn, pckName);
 						}
 					}
 				}
 			} catch (final InstantiationException e) {
-				throw new PipeException(null, true, e,
+				throw new PipeException(null, false, e,
 						"Cannot create PipePart of class '%s'", cn);
 			} catch (final IllegalAccessException e) {
-				throw new PipeException(null, true, e,
+				throw new PipeException(null, false, e,
 						"Cannot create PipePart of class '%s'", cn);
 			}
 			try {

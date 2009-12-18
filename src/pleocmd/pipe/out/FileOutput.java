@@ -27,7 +27,7 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
-	protected void configured0() {
+	protected void configure0() {
 		file = new File(((ConfigPath) getConfig().get(0)).getContent());
 		type = PrintType.values()[((ConfigEnum) getConfig().get(1))
 				.getContent()];
