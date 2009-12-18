@@ -3,7 +3,8 @@ package pleocmd.pipe.val;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.Arrays;
+
+import pleocmd.pipe.Data;
 
 public final class BinaryValue extends Value {
 
@@ -57,16 +58,12 @@ public final class BinaryValue extends Value {
 
 	@Override
 	public String toString() {
-		return Arrays.toString(val);
+		return Data.toHexString(val);
 	}
 
 	@Override
 	public byte[] asByteArray() {
 		return val;
-	}
-
-	public static boolean isValidChar(@SuppressWarnings("unused") final byte b) {
-		return true;
 	}
 
 	@Override

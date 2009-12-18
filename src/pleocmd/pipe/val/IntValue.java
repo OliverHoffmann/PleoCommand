@@ -92,10 +92,6 @@ public final class IntValue extends Value {
 		return String.valueOf(val);
 	}
 
-	public static boolean isValidChar(final byte b) {
-		return b >= '0' && b <= '9' || b == '-';
-	}
-
 	@Override
 	public boolean mustWriteAsciiAsHex() {
 		return false;

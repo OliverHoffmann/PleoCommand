@@ -13,9 +13,6 @@ import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.pipe.val.DummyValue;
-import pleocmd.pipe.val.FloatValue;
-import pleocmd.pipe.val.IntValue;
-import pleocmd.pipe.val.StringValue;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
@@ -24,23 +21,23 @@ public final class Data extends AbstractList<Value> {
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-	private static final int[] VALID_CHAR_TABLE = { // 
-	/**//**/0, 0, 0, 0, 0, 0, 0, 0, // 00 - 07
-			0, 0, 0, 0, 0, 0, 0, 0, // 08 - 0F
-			0, 0, 0, 0, 0, 0, 0, 0, // 10 - 17
-			0, 0, 0, 0, 0, 0, 0, 0, // 18 - 1F
-			0, 0, 0, 0, 0, 0, 0, 0, // 20 - 27
-			0, 0, 0, 0, 0, 0, 0, 0, // 28 - 2F
+	private static final int[] TYPE_AUTODETECT_TABLE = { // 
+	/**//**/4, 4, 4, 4, 4, 4, 4, 4, // 00 - 07
+			4, 3, 4, 4, 4, 4, 4, 4, // 08 - 0F
+			4, 4, 4, 4, 4, 4, 4, 4, // 10 - 17
+			4, 4, 4, 4, 4, 4, 4, 4, // 18 - 1F
+			3, 3, 3, 3, 3, 3, 3, 3, // 20 - 27
+			3, 3, 3, 3, 2, 1, 2, 3, // 28 - 2F
 			1, 1, 1, 1, 1, 1, 1, 1, // 30 - 37
-			1, 1, 0, 0, 0, 0, 0, 0, // 38 - 3F
-			0, 1, 1, 1, 1, 1, 1, 0, // 40 - 47
-			0, 0, 0, 0, 0, 0, 0, 0, // 48 - 4F
-			0, 0, 0, 0, 0, 0, 0, 0, // 50 - 57
-			0, 0, 0, 0, 0, 0, 0, 0, // 58 - 5F
-			0, 1, 1, 1, 1, 1, 1, 0, // 60 - 67
-			0, 0, 0, 0, 0, 0, 0, 0, // 68 - 6F
-			0, 0, 0, 0, 0, 0, 0, 0, // 70 - 77
-			0, 0, 0, 0, 0, 0, 0, 0, // 78 - 7F
+			1, 1, 3, 3, 3, 3, 3, 3, // 38 - 3F
+			3, 3, 3, 3, 3, 2, 3, 3, // 40 - 47
+			3, 3, 3, 3, 3, 3, 3, 3, // 48 - 4F
+			3, 3, 3, 3, 3, 3, 3, 3, // 50 - 57
+			3, 3, 3, 3, 3, 3, 3, 3, // 58 - 5F
+			3, 3, 3, 3, 3, 2, 3, 3, // 60 - 67
+			3, 3, 3, 3, 3, 3, 3, 3, // 68 - 6F
+			3, 3, 3, 3, 3, 3, 3, 3, // 70 - 77
+			3, 3, 3, 3, 4, 3, 3, 4, // 78 - 7F
 	};
 
 	private final int flags;
@@ -277,9 +274,9 @@ public final class Data extends AbstractList<Value> {
 	 * @param string
 	 *            {@link String} to read the data block from (optionally with
 	 *            line-break)
-	 * @return New {@link Data} block read from {@link String}.
+	 * @return new {@link Data} block read from {@link String}
 	 * @throws IOException
-	 *             On unexpected end of input or invalid data format.
+	 *             on unexpected end of input or invalid data format
 	 * @see {@link #createFromAscii(DataInput)}
 	 */
 	public static Data createFromAscii(final String string) throws IOException {
@@ -296,22 +293,19 @@ public final class Data extends AbstractList<Value> {
 	 *            length of the data
 	 * @return one of {@link ValueType#Int64}, {@link ValueType#Float64} or
 	 *         {@link ValueType#NullTermString}
+	 * @throws IOException
+	 *             if the data is not in one of the known data formats.
 	 */
 	private static ValueType detectDataType(final byte[] data, final int len)
 			throws IOException {
 		int res = 0;
 		Log.detail("Autodetecting data type of %d bytes", len);
-		for (int i = 0; i < len; ++i) {
-			final byte b = data[i];
-			if (IntValue.isValidChar(b))
-				res = Math.max(res, 1);
-			else if (FloatValue.isValidChar(b))
-				res = Math.max(res, 2);
-			else if (StringValue.isValidChar(b))
-				res = Math.max(res, 3);
-			else
-				res = Math.max(res, 4);
-		}
+		for (int i = 0; i < len; ++i)
+			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i]])) == 4)
+				throw new IOException(String.format(
+						"Invalid character for any known data type: 0x%02X "
+								+ "at position %d in %s", data[i], i,
+						toHexString(data)));
 		Log.detail("Autodetecting resulted in %d", res);
 		switch (res) {
 		case 1:
@@ -322,7 +316,8 @@ public final class Data extends AbstractList<Value> {
 		case 3:
 			return ValueType.NullTermString;
 		default:
-			throw new IOException("Cannot detect type of data");
+			throw new RuntimeException(
+					"Internal error: Invalid entry in TYPE_AUTODETECT_TABLE");
 		}
 	}
 
@@ -395,6 +390,15 @@ public final class Data extends AbstractList<Value> {
 			Log.error(e);
 			return String.format("S:%1", e.getMessage());
 		}
+	}
+
+	public static String toHexString(final byte[] a) {
+		final StringBuilder sb = new StringBuilder("[");
+		for (int i = 0; i < a.length; ++i) {
+			if (i > 0) sb.append(", ");
+			sb.append(a[i]);
+		}
+		return sb.append(']').toString();
 	}
 
 }

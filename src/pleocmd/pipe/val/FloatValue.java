@@ -91,10 +91,6 @@ public final class FloatValue extends Value {
 		return String.valueOf(val);
 	}
 
-	public static boolean isValidChar(final byte b) {
-		return IntValue.isValidChar(b) || b == '.' || b == 'E' || b == 'e';
-	}
-
 	@Override
 	public boolean mustWriteAsciiAsHex() {
 		return false;
