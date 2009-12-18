@@ -21,25 +21,25 @@ public final class StandardInput extends InputStream {
 	/**
 	 * This array represents a ring buffer.
 	 */
-	private byte[] cache;
+	private byte[] buffer;
 
 	/**
-	 * The position of the next byte to read from {@link #cache}.
+	 * The position of the next byte to read from {@link #buffer}.
 	 */
-	private int cachePosRead;
+	private int readPos;
 
 	/**
-	 * The position of the next byte to write to {@link #cache}.
+	 * The position of the next byte to write to {@link #buffer}.
 	 */
-	private int cachePosWrite;
+	private int writePos;
 
 	/**
 	 * Only true if the cache has been closed, i.e. the remaining data in
-	 * {@link #cache} can still be read, but no new data can be put into the
-	 * {@link #cache} and if {@link #cachePosRead} catches up
-	 * {@link #cachePosWrite} {@link #available()} will return 0.
+	 * {@link #buffer} can still be read, but no new data can be put into the
+	 * {@link #buffer} and if {@link #readPos} catches up {@link #writePos}
+	 * {@link #available()} will return 0.
 	 */
-	private boolean cacheClosed;
+	private boolean closed;
 
 	private StandardInput() {
 		stdin = this;
@@ -63,7 +63,7 @@ public final class StandardInput extends InputStream {
 	 * @see #close()
 	 */
 	public synchronized boolean isClosed() {
-		return cacheClosed;
+		return closed;
 	}
 
 	/**
@@ -78,7 +78,7 @@ public final class StandardInput extends InputStream {
 	@Override
 	public void close() throws IOException {
 		if (MainFrame.hasGUI()) synchronized (this) {
-			cacheClosed = true;
+			closed = true;
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -96,10 +96,10 @@ public final class StandardInput extends InputStream {
 	public void resetCache() {
 		synchronized (this) {
 			Log.detail("Resetting cache");
-			cache = new byte[8];
-			cachePosRead = 0;
-			cachePosWrite = 0;
-			cacheClosed = false;
+			buffer = new byte[1]; // TODO bigger default
+			readPos = 0;
+			writePos = 0;
+			closed = false;
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -123,15 +123,15 @@ public final class StandardInput extends InputStream {
 			// check if read catches up write?
 			int avail;
 			synchronized (this) {
-				avail = (cachePosWrite - cachePosRead) % cache.length;
+				avail = (writePos - readPos) % buffer.length;
 			}
-			if (avail < 0) avail += cache.length; // Java's mod is not a mod :(
+			if (avail < 0) avail += buffer.length; // Java's mod is not a mod :(
 			if (avail > 0) {
 				Log.detail("%d bytes available", avail);
 				return avail;
 			}
 			synchronized (this) {
-				if (cacheClosed)
+				if (closed)
 				// no need to wait any longer - there can never be any new data
 					return 0;
 			}
@@ -149,6 +149,8 @@ public final class StandardInput extends InputStream {
 	 * Reads one byte from the input stream or (in GUI mode) the ring buffer.<br>
 	 * Blocks until the byte is available.<br>
 	 * In GUI mode, it should <b>not</b> be called from the GUI thread.
+	 * 
+	 * @return the next byte
 	 */
 	@Override
 	public int read() throws IOException {
@@ -156,8 +158,8 @@ public final class StandardInput extends InputStream {
 			while (true) {
 				// check if read catches up write?
 				synchronized (this) {
-					if (cachePosRead != cachePosWrite) break;
-					if (cacheClosed)
+					if (readPos != writePos) break;
+					if (closed)
 						throw new IOException("StandardInput is closed");
 				}
 				// block until data available
@@ -169,9 +171,9 @@ public final class StandardInput extends InputStream {
 				}
 			}
 			synchronized (this) {
-				final int b = cache[cachePosRead];
-				Log.detail(String.format("Read from %03d %d", cachePosRead, b));
-				cachePosRead = (cachePosRead + 1) % cache.length;
+				final int b = buffer[readPos];
+				Log.detail(String.format("Read from %03d %d", readPos, b));
+				readPos = (readPos + 1) % buffer.length;
 				return b;
 			}
 		}
@@ -188,28 +190,26 @@ public final class StandardInput extends InputStream {
 	 * @throws IOException
 	 *             if the stream has been closed
 	 */
-	public void put(final byte b) throws IOException {
+	public synchronized void put(final byte b) throws IOException {
 		assert MainFrame.hasGUI();
-		if (cacheClosed) throw new IOException("StandardInput is closed");
-		synchronized (this) {
-			cache[cachePosWrite] = b;
-			Log.detail(String.format("Put at %03d %d", cachePosWrite, b));
-			cachePosWrite = (cachePosWrite + 1) % cache.length;
-			// check if write catches up read?
-			if (cachePosRead == cachePosWrite) {
-				// we need to increase our ring buffer:
-				// we "insert space" between the current write and
-				// read position so cachePosWrite stays the same as
-				// cachePosRead moves.
-				final byte[] newcache = new byte[cache.length * 2];
-				cachePosRead += newcache.length - cache.length;
-				Log.detail(String.format("Increased from %d to %d",
-						cache.length, newcache.length));
-				System.arraycopy(cache, 0, newcache, 0, cachePosWrite);
-				System.arraycopy(cache, cachePosWrite, newcache, cachePosRead,
-						cache.length - cachePosWrite);
-				cache = newcache;
-			}
+		if (closed) throw new IOException("StandardInput is closed");
+		buffer[writePos] = b;
+		Log.detail(String.format("Put at %03d %d", writePos, b));
+		writePos = (writePos + 1) % buffer.length;
+		// check if write catches up read?
+		if (writePos == readPos) {
+			// we need to increase our ring buffer:
+			// we "insert space" between the current write and
+			// read position so writePos stays the same while
+			// readPos moves.
+			final byte[] newbuf = new byte[buffer.length * 2];
+			readPos += newbuf.length - buffer.length;
+			Log.detail(String.format("Increased from %d to %d", buffer.length,
+					newbuf.length));
+			System.arraycopy(buffer, 0, newbuf, 0, writePos);
+			System.arraycopy(buffer, writePos, newbuf, readPos, buffer.length
+					- writePos);
+			buffer = newbuf;
 		}
 	}
 
@@ -223,11 +223,9 @@ public final class StandardInput extends InputStream {
 	 *             if the stream has been closed
 	 * @see #put(byte)
 	 */
-	public void put(final byte[] bytes) throws IOException {
-		synchronized (this) {
-			for (final byte b : bytes)
-				put(b);
-		}
+	public synchronized void put(final byte[] bytes) throws IOException {
+		for (final byte b : bytes)
+			put(b);
 	}
 
 }
