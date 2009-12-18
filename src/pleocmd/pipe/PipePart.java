@@ -26,21 +26,6 @@ public abstract class PipePart extends StateHandling {
 		}
 	}
 
-	public final void reset() throws PipeException {
-		close();
-		init();
-	}
-
-	// CS_IGNORE_NEXT This is the only finalize()
-	@Override
-	protected final void finalize() throws Throwable { // CS_IGNORE
-		try {
-			ensureNoLongerInitialized();
-		} finally {
-			super.finalize();
-		}
-	}
-
 	@Override
 	public final String toString() {
 		return getClass().getSimpleName();

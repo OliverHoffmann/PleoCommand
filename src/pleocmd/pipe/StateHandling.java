@@ -269,4 +269,14 @@ public abstract class StateHandling {
 		}
 	}
 
+	// CS_IGNORE_NEXT This is the only finalize()
+	@Override
+	protected final void finalize() throws Throwable { // CS_IGNORE
+		try {
+			ensureNoLongerInitialized();
+		} finally {
+			super.finalize();
+		}
+	}
+
 }
