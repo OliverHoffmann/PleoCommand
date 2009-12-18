@@ -21,6 +21,13 @@ import java.util.concurrent.TimeoutException;
 
 import pleocmd.Log;
 
+/**
+ * This is the central communication class with the Pleo.<br>
+ * Handles opening and closing connections, sending and receiving data to/from
+ * the Pleo.
+ * 
+ * @author oliver
+ */
 public final class PleoCommunication implements SerialPortEventListener {
 
 	private static final int OPEN_TIMEOUT = 5000;
@@ -43,12 +50,25 @@ public final class PleoCommunication implements SerialPortEventListener {
 
 	private long inBufferLastRead;
 
+	/**
+	 * Creates a new instance of {@link PleoCommunication} which is bound to one
+	 * port.
+	 * 
+	 * @param portID
+	 *            the port under which the Pleo should be found
+	 * @see #getAvailableSerialPorts()
+	 * @see #getHighestPort()
+	 */
 	public PleoCommunication(final CommPortIdentifier portID) {
 		this.portID = portID;
 		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(), portID
 				.getCurrentOwner());
 	}
 
+	/**
+	 * Closes the connection to the port. Does nothing if no connection is
+	 * currently open.
+	 */
 	public void close() {
 		Log.detail("Closing");
 		try {
@@ -63,6 +83,17 @@ public final class PleoCommunication implements SerialPortEventListener {
 		port = null;
 	}
 
+	/**
+	 * Opens a new connection to the port specified in
+	 * {@link #PleoCommunication(CommPortIdentifier)}. If a connection is
+	 * already open, it will be closed first.<br>
+	 * Blocks until the connection has been opened or {@link #OPEN_TIMEOUT}
+	 * milliseconds have been elapsed.
+	 * 
+	 * @throws IOException
+	 *             if the port is already in use or the serial parameters could
+	 *             not be set.
+	 */
 	public void init() throws IOException {
 		close();
 		Log.detail("Connecting");
@@ -89,6 +120,12 @@ public final class PleoCommunication implements SerialPortEventListener {
 		}
 	}
 
+	/**
+	 * Reads new available data from the port and puts it into a buffer.
+	 * <p>
+	 * Is only <b>public</b> because of bad defaults in the super class.<br>
+	 * Must never be called.
+	 */
 	@Override
 	public void serialEvent(final SerialPortEvent event) {
 		if (event.getEventType() == SerialPortEvent.DATA_AVAILABLE)
@@ -111,6 +148,17 @@ public final class PleoCommunication implements SerialPortEventListener {
 			}
 	}
 
+	/**
+	 * Sends one command by writing all the bytes in the given {@link String}
+	 * with ISO-8859-1 encoding plus an additional newline character. <br>
+	 * Must only be called if a connection has been opened via {@link #init()}.
+	 * 
+	 * @param command
+	 *            the command to send thru the connection (must not have a
+	 *            newline character)
+	 * @throws IOException
+	 *             if an error during converting or sending the bytes occurred
+	 */
 	public void send(final String command) throws IOException {
 		inBuffer.delete(0, Integer.MAX_VALUE);
 		inBuffer.trimToSize();
@@ -123,6 +171,18 @@ public final class PleoCommunication implements SerialPortEventListener {
 		Log.detail("Sent '%s'", command);
 	}
 
+	/**
+	 * Tries to read the answer of a {@link #send(String)} from the connection.
+	 * Should be called after every {@link #send(String)} before sending again
+	 * (even if the answer is not processed any further) to clear the output
+	 * stream and make sure Pleo is able to receive new input.
+	 * 
+	 * @return the answer read from the connection converted via ISO-8859-1
+	 * @throws TimeoutException
+	 *             if the answer could not be read (completely) within a given
+	 *             time ({@link #ANSWER_TIMEOUT_1} and {@link #ANSWER_TIMEOUT_N}
+	 *             ).
+	 */
 	public String readAnswer() throws TimeoutException {
 		// wait until "> " has been received which marks the end of the answer
 		Log.detail("Reading answer");
@@ -152,6 +212,11 @@ public final class PleoCommunication implements SerialPortEventListener {
 		return inBuffer.toString();
 	}
 
+	/**
+	 * Collects all serial ports available under the current operating system.
+	 * 
+	 * @return an unsorted list of all available ports
+	 */
 	@SuppressWarnings("unchecked")
 	public static List<CommPortIdentifier> getAvailableSerialPorts() {
 		final List<CommPortIdentifier> h = new ArrayList<CommPortIdentifier>();
@@ -167,6 +232,16 @@ public final class PleoCommunication implements SerialPortEventListener {
 		return h;
 	}
 
+	/**
+	 * Returns a {@link CommPortIdentifier} fitting to the given name.
+	 * 
+	 * @param name
+	 *            the name of a port (under Linux something like
+	 *            <i>/dev/ttyS0</i>)
+	 * @return the fitting {@link CommPortIdentifier}
+	 * @throws IOException
+	 *             if a port with the given name could not be found
+	 */
 	@SuppressWarnings("unchecked")
 	public static CommPortIdentifier getPort(final String name)
 			throws IOException {
@@ -180,6 +255,14 @@ public final class PleoCommunication implements SerialPortEventListener {
 		throw new IOException("Port not found");
 	}
 
+	/**
+	 * Returns the "highest" available port, i.e. the port with the highest
+	 * decimal number.
+	 * 
+	 * @return "highest" available port
+	 * @throws IOException
+	 *             if not even one port is available
+	 */
 	public static CommPortIdentifier getHighestPort() throws IOException {
 		final List<CommPortIdentifier> ports = getAvailableSerialPorts();
 		if (ports.isEmpty()) throw new IOException("No port available");
