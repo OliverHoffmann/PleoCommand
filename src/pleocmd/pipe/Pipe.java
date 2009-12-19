@@ -23,6 +23,8 @@ import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
 /**
+ * The central processing point of {@link Data} objects.
+ * 
  * @author oliver
  */
 public final class Pipe extends StateHandling {
@@ -45,35 +47,74 @@ public final class Pipe extends StateHandling {
 
 	private Thread thrOutput;
 
+	/**
+	 * Creates a new {@link Pipe}.
+	 */
 	public Pipe() {
 		constructed();
 	}
 
+	/**
+	 * @return an unmodifiable list of all currently connected {@link Input}s
+	 */
 	public List<Input> getInputList() {
 		return Collections.unmodifiableList(inputList);
 	}
 
+	/**
+	 * @return an unmodifiable list of all currently connected {@link Output}s
+	 */
 	public List<Output> getOutputList() {
 		return Collections.unmodifiableList(outputList);
 	}
 
+	/**
+	 * @return an unmodifiable list of all currently connected {@link Converter}
+	 */
 	public List<Converter> getConverterList() {
 		return Collections.unmodifiableList(converterList);
 	}
 
-	public void addInput(final Input input) {
-		// TODO add ensure...
+	/**
+	 * Adds a new {@link Input} to the list of currently connected ones.
+	 * 
+	 * @param input
+	 *            the new {@link Input}
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 */
+	public void addInput(final Input input) throws StateException {
+		ensureConstructed();
 		inputList.add(input);
 	}
 
-	public void addConverter(final Converter converter) {
-		// TODO add ensure...
-		converterList.add(converter);
+	/**
+	 * Adds a new {@link Converter} to the list of currently connected ones.
+	 * 
+	 * @param output
+	 *            the new {@link Converter}
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 */
+	public void addOutput(final Output output) throws StateException {
+		ensureConstructed();
+		outputList.add(output);
 	}
 
-	public void addOutput(final Output output) {
-		// TODO add ensure...
-		outputList.add(output);
+	/**
+	 * Adds a new {@link Output} to the list of currently connected ones.
+	 * 
+	 * @param converter
+	 *            the new {@link Output}
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 */
+	public void addConverter(final Converter converter) throws StateException {
+		ensureConstructed();
+		converterList.add(converter);
 	}
 
 	@Override
@@ -123,6 +164,18 @@ public final class Pipe extends StateHandling {
 		ignoredOutputs.clear();
 	}
 
+	/**
+	 * Starts two threads which pipe all data of all connected {@link Input}s
+	 * through the all connected {@link Converter} to all connected
+	 * {@link Output}s.<br>
+	 * Waits until both threads have finished.
+	 * 
+	 * @throws PipeException
+	 *             if the object is not already initialized
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread while
+	 *             waiting for the two pipe threads
+	 */
 	public void pipeAllData() throws PipeException, InterruptedException {
 		ensureInitialized();
 		dataQueue.resetCache();
