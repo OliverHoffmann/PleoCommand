@@ -47,10 +47,12 @@ public final class SimpleConverter extends Converter {
 					"Invalid data: Second value must be a non-empty "
 							+ "string: '%s'", data);
 		try {
-			return map.findDataList(tn);
+			return DataSequenceMap.cloneList(map.findDataList(tn), data
+					.getPriority());
 		} catch (final ConverterException e) {
 			throw new ConverterException(this, false, e,
 					"Cannot convert simple-data '%s'", data);
 		}
 	}
+
 }

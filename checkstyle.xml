@@ -87,7 +87,7 @@
 		</module>
 		<!-- <module name="ClassDataAbstractionCoupling" /> -->
 		<module name="ClassFanOutComplexity">
-			<property name="max" value="25" />
+			<property name="max" value="30" />
 		</module>
 		<!-- <module name="CyclomaticComplexity" /> -->
 		<module name="NPathComplexity" />

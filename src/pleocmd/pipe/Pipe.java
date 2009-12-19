@@ -176,7 +176,9 @@ public final class Pipe extends StateHandling {
 			final List<Data> dataList = convertDataToDataList(data);
 
 			// ... and put it into the queue for Output classes
-			dataQueue.put(dataList);
+			if (dataQueue.put(dataList)) {
+				// TODO cancel output thread
+			}
 		}
 		Log.detail("Read %d data blocks from input", count);
 		dataQueue.close();

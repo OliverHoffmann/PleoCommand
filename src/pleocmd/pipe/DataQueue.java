@@ -23,6 +23,11 @@ public final class DataQueue {
 	private int writePos;
 
 	/**
+	 * The priority of the {@link Data} most recently read from {@link #buffer}.
+	 */
+	private byte lastPriority;
+
+	/**
 	 * Only true if the cache has been closed, i.e. the remaining data in
 	 * {@link #buffer} can still be read, but no new data can be put into the
 	 * {@link #buffer} and if {@link #readPos} catches up {@link #writePos}
@@ -56,6 +61,7 @@ public final class DataQueue {
 			readPos = 0;
 			writePos = 0;
 			closed = false;
+			lastPriority = Data.PRIO_LOWEST;
 		}
 	}
 
@@ -81,6 +87,7 @@ public final class DataQueue {
 		}
 		synchronized (this) {
 			final Data res = buffer[readPos];
+			lastPriority = res.getPriority();
 			Log.detail(String.format("Read from %03d '%s'", readPos, res));
 			readPos = (readPos + 1) % buffer.length;
 			return res;
@@ -90,15 +97,27 @@ public final class DataQueue {
 	/**
 	 * Puts one {@link Data} into the ringbuffer, so it can be read by
 	 * {@link #get()}.<br>
+	 * If {@link Data}'s priority is lower than the one of the current elements
+	 * in the queue, the new {@link Data} will silently be dropped. <br>
+	 * If {@link Data}'s priority is higher than the one of the current elements
+	 * in the queue, the queue is cleared before inserting the new {@link Data}. <br>
 	 * Should only be called from the Input/Converter thread.
 	 * 
 	 * @param data
 	 *            data to put into the ring buffer
+	 * @return true if the queue has been cleared because the new {@link Data}
+	 *         has a higher priority as the current {@link Data}s in the queue
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been {@link #close()}d.
 	 */
-	public synchronized void put(final Data data) throws IOException {
+	public synchronized boolean put(final Data data) throws IOException {
 		if (closed) throw new IOException("DataQueue is closed");
+
+		if (data.getPriority() < lastPriority) // silently drop the new Data
+			return false;
+		if (data.getPriority() > lastPriority) // quick clearing of the queue
+			readPos = writePos;
+
 		buffer[writePos] = data;
 		Log.detail(String.format("Put at %03d '%s'", writePos, data));
 		writePos = (writePos + 1) % buffer.length;
@@ -116,6 +135,8 @@ public final class DataQueue {
 					- writePos);
 			buffer = newbuf;
 		}
+
+		return data.getPriority() > lastPriority;
 	}
 
 	/**
@@ -124,13 +145,18 @@ public final class DataQueue {
 	 * 
 	 * @param list
 	 *            data to put into the ring buffer
+	 * @return true if the queue has been cleared because one of the new
+	 *         {@link Data} has a higher priority as the current {@link Data}s
+	 *         in the queue
 	 * @throws IOException
 	 *             if the queue has been closed
 	 * @see #put(Data)
 	 */
-	public synchronized void put(final List<Data> list) throws IOException {
+	public synchronized boolean put(final List<Data> list) throws IOException {
+		boolean cleared = false;
 		for (final Data data : list)
-			put(data);
+			cleared |= put(data);
+		return cleared;
 	}
 
 }

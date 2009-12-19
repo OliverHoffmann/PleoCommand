@@ -130,4 +130,28 @@ public final class DataSequenceMap {
 		}
 	}
 
+	/**
+	 * Creates a deep copy of the given list while changing the priority of
+	 * every {@link Data} in the list which has the default priority to the
+	 * given new one.
+	 * 
+	 * @param org
+	 *            the original list of {@link Data}
+	 * @param newPriority
+	 *            priority for every new {@link Data} which had the default
+	 *            priority
+	 * @return a new list of {@link Data} copies
+	 */
+	public static List<Data> cloneList(final List<Data> org,
+			final byte newPriority) {
+		final List<Data> res = new ArrayList<Data>(org.size());
+		for (final Data data : org) {
+			final byte orgPriority = data.getPriority();
+			res.add(new Data(data,
+					orgPriority == Data.PRIO_DEFAULT ? newPriority
+							: orgPriority));
+		}
+		return res;
+	}
+
 }

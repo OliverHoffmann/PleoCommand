@@ -55,13 +55,14 @@ public abstract class Value {
 		}
 	}
 
-	public static ValueType detectFromTypeChar(final char c) throws IOException {
+	public static ValueType detectFromTypeChar(final char c, final int index)
+			throws IOException {
 		if (c == IntValue.TYPE_CHAR) return IntValue.RECOMMENDED_TYPE;
 		if (c == FloatValue.TYPE_CHAR) return FloatValue.RECOMMENDED_TYPE;
 		if (c == StringValue.TYPE_CHAR) return StringValue.RECOMMENDED_TYPE;
 		if (c == BinaryValue.TYPE_CHAR) return BinaryValue.RECOMMENDED_TYPE;
-		throw new IOException(String.format("Invalid type identifier: 0x%02X",
-				c));
+		throw new IOException(String.format(
+				"Invalid type identifier: 0x%02X at position %d", c, index));
 	}
 
 	public static int getAsciiTypeChar(final Value value) {

@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import pleocmd.pipe.Data;
+import pleocmd.pipe.DataAsciiConverter;
 
 public final class BinaryValue extends Value {
 
@@ -58,7 +58,7 @@ public final class BinaryValue extends Value {
 
 	@Override
 	public String toString() {
-		return Data.toHexString(val);
+		return DataAsciiConverter.toHexString(val);
 	}
 
 	@Override
