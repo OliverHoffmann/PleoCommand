@@ -41,4 +41,24 @@ public final class DummyValue extends Value {
 		return null;
 	}
 
+	@Override
+	public Long asLong() {
+		return null;
+	}
+
+	@Override
+	public Double asDouble() {
+		return null;
+	}
+
+	@Override
+	public String asString() {
+		return null;
+	}
+
+	@Override
+	public byte[] asByteArray() {
+		return null;
+	}
+
 }

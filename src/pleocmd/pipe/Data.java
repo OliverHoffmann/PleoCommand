@@ -39,8 +39,22 @@ public final class Data extends AbstractList<Value> {
 		this.priority = priority;
 	}
 
+	/**
+	 * Returns the {@link Value} at the given position.
+	 * 
+	 * @param index
+	 *            index of the {@link Value} to return
+	 * @return {@link Value} at this position
+	 * @throws IndexOutOfBoundsException
+	 *             if the given index if invalid
+	 */
 	@Override
-	public Value get(final int index) {
+	public Value get(final int index) throws IndexOutOfBoundsException {
+		if (index < 0 || index >= values.size())
+			throw new IndexOutOfBoundsException(String.format(
+					"Argument %d does not exist in data '%s' "
+							+ "(only has %d argument(s))", index, this, values
+							.size()));
 		return values.get(index);
 	}
 

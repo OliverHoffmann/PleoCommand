@@ -41,14 +41,9 @@ public final class EmotionConverter extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		final String tn = data.getSafe(1).asString();
-		if (tn == null)
-			throw new ConverterException(this, false,
-					"Invalid data: Second value must be a non-empty "
-							+ "string: '%s'", data);
 		try {
-			return DataSequenceMap.cloneList(map.findDataList(tn), data
-					.getPriority());
+			return DataSequenceMap.cloneList(map.findDataList(data.get(1)
+					.asString()), data.getPriority());
 		} catch (final ConverterException e) {
 			throw new ConverterException(this, false, e,
 					"Cannot convert emotion-data '%s'", data);

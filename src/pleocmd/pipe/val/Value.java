@@ -19,19 +19,23 @@ public abstract class Value {
 	// CS_IGNORE_BEGIN This 4 methods need to be overridable
 
 	public Long asLong() {
-		return null;
+		throw new UnsupportedOperationException(
+				"Cannot convert data's argument to a long integer value");
 	}
 
 	public Double asDouble() {
-		return null;
+		throw new UnsupportedOperationException(
+				"Cannot convert data's argument to a double floating point value");
 	}
 
 	public String asString() {
-		return null;
+		throw new UnsupportedOperationException(
+				"Cannot convert data's argument to a string value");
 	}
 
 	public byte[] asByteArray() {
-		return null;
+		throw new UnsupportedOperationException(
+				"Cannot convert data's argument to a byte array value");
 	}
 
 	// CS_IGNORE_END

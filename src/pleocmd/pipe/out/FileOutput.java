@@ -57,7 +57,7 @@ public final class FileOutput extends Output {
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))
-				Log.consoleOut(data.getSafe(1).asString());
+				Log.consoleOut(data.get(1).asString());
 			break;
 		default:
 			throw new OutputException(this, true,
