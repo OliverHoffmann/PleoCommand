@@ -17,6 +17,7 @@ import pleocmd.pipe.in.Input;
 import pleocmd.pipe.in.TcpIpInput;
 import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.FileOutput;
+import pleocmd.pipe.out.InternalCommandOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 
@@ -37,7 +38,8 @@ public final class PipePartConfigFrame extends JDialog {
 	@SuppressWarnings("unchecked")
 	private final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
 			(Class<Output>[]) new Class<?>[] { FileOutput.class,
-					ConsoleOutput.class, PleoRXTXOutput.class });
+					ConsoleOutput.class, PleoRXTXOutput.class,
+					InternalCommandOutput.class });
 
 	private final Pipe pipe;
 
