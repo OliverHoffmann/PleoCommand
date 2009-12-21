@@ -17,6 +17,8 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private final List<Log> list = new ArrayList<Log>();
 
+	private String mark = "XXXXXXXXXX";
+
 	@Override
 	public int getColumnCount() {
 		return 4;
@@ -27,21 +29,33 @@ public final class LogTableModel extends AbstractTableModel {
 		return list.size();
 	}
 
-	@Override
-	public Object getValueAt(final int rowIndex, final int columnIndex) {
+	private String getCell(final int rowIndex, final int columnIndex) {
 		switch (columnIndex) {
 		case 0:
 			return list.get(rowIndex).getFormattedTime();
 		case 1:
-			return list.get(rowIndex).getType();
+			return list.get(rowIndex).getType().toString();
 		case 2:
 			return list.get(rowIndex).getCaller();
 		case 3:
-			return String.format("<html><span color=%s>%s</span></html>", list
-					.get(rowIndex).getTypeColor(), list.get(rowIndex).getMsg());
+			return list.get(rowIndex).getMsg();
 		default:
 			return "???";
 		}
+	}
+
+	private String getAttributes(final int rowIndex, final int columnIndex) {
+		String res = String.format(" color=%s", list.get(rowIndex)
+				.getTypeColor());
+		if (columnIndex == 2 && list.get(rowIndex).getCaller().startsWith(mark))
+			res += String.format(" bgcolor=#FFFF80");
+		return res;
+	}
+
+	@Override
+	public Object getValueAt(final int rowIndex, final int columnIndex) {
+		return String.format("<html><span%s>%s</span></html>", getAttributes(
+				rowIndex, columnIndex), getCell(rowIndex, columnIndex));
 	}
 
 	public void addLog(final Log log) {
@@ -79,6 +93,11 @@ public final class LogTableModel extends AbstractTableModel {
 
 	public Log getLogAt(final int index) {
 		return list.get(index);
+	}
+
+	public void setMark(final int index) {
+		mark = list.get(index).getCaller();
+		fireTableDataChanged();
 	}
 
 }

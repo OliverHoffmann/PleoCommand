@@ -3,6 +3,7 @@ package pleocmd.itfc.gui;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -64,7 +65,12 @@ public final class MainLogPanel extends JPanel {
 		tcm.getColumn(3).setHeaderValue("Message");
 		logTable.getTableHeader().setEnabled(false);
 		logTable.setShowGrid(false);
-		logTable.setEnabled(false);
+		logTable.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(final MouseEvent e) {
+				if (e.getClickCount() == 1) markSelectedOccurrences();
+			}
+		});
 		lay.addWholeLine(new JScrollPane(logTable,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), true);
@@ -99,6 +105,10 @@ public final class MainLogPanel extends JPanel {
 						clearLog();
 					}
 				});
+	}
+
+	protected void markSelectedOccurrences() {
+		logModel.setMark(logTable.getSelectedRow());
 	}
 
 	protected String getBacktrace(final int index) {
