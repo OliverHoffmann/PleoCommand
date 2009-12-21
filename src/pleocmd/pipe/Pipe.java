@@ -188,7 +188,7 @@ public final class Pipe extends StateHandling {
 				try {
 					runInputThread();
 				} catch (final Throwable t) { // CS_IGNORE
-					Log.error(t);
+					Log.error(t, "Input-Thread died");
 				}
 			}
 		};
@@ -198,7 +198,7 @@ public final class Pipe extends StateHandling {
 				try {
 					runOutputThread();
 				} catch (final Throwable t) { // CS_IGNORE
-					Log.error(t);
+					Log.error(t, "Output-Thread died");
 				}
 			}
 		};
@@ -218,27 +218,30 @@ public final class Pipe extends StateHandling {
 	}
 
 	protected void runInputThread() throws StateException, IOException {
-		Log.info("Input-Thread started");
 		int count = 0;
-		while (true) {
-			ensureInitialized();
+		try {
+			Log.info("Input-Thread started");
+			while (true) {
+				ensureInitialized();
 
-			// read next data block ...
-			final Data data = getFromInput();
-			if (data == null) break; // marks end of all inputs
-			++count;
+				// read next data block ...
+				final Data data = getFromInput();
+				if (data == null) break; // marks end of all inputs
+				++count;
 
-			// ... convert it ...
-			final List<Data> dataList = convertDataToDataList(data);
+				// ... convert it ...
+				final List<Data> dataList = convertDataToDataList(data);
 
-			// ... and put it into the queue for Output classes
-			if (dataQueue.put(dataList)) {
-				// TODO cancel output thread
+				// ... and put it into the queue for Output classes
+				if (dataQueue.put(dataList)) {
+					// TODO cancel output thread
+				}
 			}
+		} finally {
+			Log.info("Input-Thread finished");
+			Log.detail("Read %d data blocks from input", count);
+			dataQueue.close();
 		}
-		Log.info("Input-Thread finished");
-		Log.detail("Read %d data blocks from input", count);
-		dataQueue.close();
 	}
 
 	protected void runOutputThread() throws StateException,
