@@ -9,6 +9,7 @@ import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.cvt.EmotionConverter;
+import pleocmd.pipe.cvt.PassThroughConverter;
 import pleocmd.pipe.cvt.SimpleConverter;
 import pleocmd.pipe.in.ConsoleInput;
 import pleocmd.pipe.in.FileInput;
@@ -31,7 +32,7 @@ public final class PipePartConfigFrame extends JDialog {
 	@SuppressWarnings("unchecked")
 	private final PipePartPanel<Converter> pppConverter = new PipePartPanel<Converter>(
 			(Class<Converter>[]) new Class<?>[] { SimpleConverter.class,
-					EmotionConverter.class });
+					EmotionConverter.class, PassThroughConverter.class });
 
 	@SuppressWarnings("unchecked")
 	private final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
