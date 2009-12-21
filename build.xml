@@ -42,8 +42,14 @@
 			</classpath>
 		</checkstyle>
 
-		<exec executable="svn" dir="${basedir}" output="${dist}/changelog.txt">
+		<exec executable="svn" output="${bin}/changelog.xml">
 			<arg value="log" />
+			<arg value="-v" />
+			<arg value="--xml" />
+		</exec>
+		<exec executable="xsltproc" output="${dist}/changelog.html">
+			<arg value="svnlog.xsl" />
+			<arg value="${bin}/changelog.xml" />
 		</exec>
 	</target>
 
