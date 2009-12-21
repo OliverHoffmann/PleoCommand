@@ -35,7 +35,7 @@ public final class FileOutput extends Output {
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file '%s' for output of type %s", file, type);
+		Log.detail("Opening file '%s' for output of type '%s'", file, type);
 		out = new DataOutputStream(new FileOutputStream(file));
 	}
 

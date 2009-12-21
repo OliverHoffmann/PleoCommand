@@ -86,6 +86,7 @@ public final class Pipe extends StateHandling {
 	 */
 	public void addInput(final Input input) throws StateException {
 		ensureConstructed();
+		Log.detail("Connecting pipe with input '%s'", input);
 		inputList.add(input);
 	}
 
@@ -100,6 +101,7 @@ public final class Pipe extends StateHandling {
 	 */
 	public void addOutput(final Output output) throws StateException {
 		ensureConstructed();
+		Log.detail("Connecting pipe with output '%s'", output);
 		outputList.add(output);
 	}
 
@@ -114,18 +116,19 @@ public final class Pipe extends StateHandling {
 	 */
 	public void addConverter(final Converter converter) throws StateException {
 		ensureConstructed();
+		Log.detail("Connecting pipe with converter '%s'", converter);
 		converterList.add(converter);
 	}
 
 	@Override
 	protected void configure0() throws PipeException {
-		Log.detail("Marking all input as configured");
+		Log.detail("Configuring all input");
 		for (final Input in : inputList)
 			in.configure();
-		Log.detail("Marking all converter as configured");
+		Log.detail("Configuring all converter");
 		for (final Converter cvt : converterList)
 			cvt.configure();
-		Log.detail("Marking all output as configured");
+		Log.detail("Configuring all output");
 		for (final Output out : outputList)
 			out.configure();
 	}
@@ -215,7 +218,7 @@ public final class Pipe extends StateHandling {
 	}
 
 	protected void runInputThread() throws StateException, IOException {
-		Log.detail("Input-Thread started");
+		Log.info("Input-Thread started");
 		int count = 0;
 		while (true) {
 			ensureInitialized();
@@ -233,14 +236,14 @@ public final class Pipe extends StateHandling {
 				// TODO cancel output thread
 			}
 		}
+		Log.info("Input-Thread finished");
 		Log.detail("Read %d data blocks from input", count);
 		dataQueue.close();
-		Log.detail("Input-Thread finished");
 	}
 
 	protected void runOutputThread() throws StateException,
 			InterruptedException {
-		Log.detail("Output-Thread started");
+		Log.info("Output-Thread started");
 		int count = 0;
 		while (true) {
 			ensureInitialized();
@@ -253,8 +256,8 @@ public final class Pipe extends StateHandling {
 			// ... and send it to all currently registered outputs
 			writeDataToAllOutputs(data);
 		}
+		Log.info("Output-Thread finished");
 		Log.detail("Sent %d data blocks to output", count);
-		Log.detail("Output-Thread finished");
 	}
 
 	private Data getFromInput() {
@@ -278,17 +281,17 @@ public final class Pipe extends StateHandling {
 			} catch (final InputException e) {
 				Log.error(e);
 				if (e.isPermanent()) {
-					Log.detail("Skipping no longer working input '%s'", in);
+					Log.info("Skipping no longer working input '%s'", in);
 					in.tryClose();
 					++inputPosition;
 				} else
-					Log.detail("Skipping one data block from input '%s'", in);
+					Log.info("Skipping one data block from input '%s'", in);
 				// try next data packet / try from next input
 				continue;
 			}
 			// no more data available in this Input, so
 			// switch to the next one
-			Log.detail("Switching to next input");
+			Log.info("Switching to next input");
 			in.tryClose();
 			++inputPosition;
 			// try data packet from next input
@@ -315,7 +318,7 @@ public final class Pipe extends StateHandling {
 					&& (res = convertOneData(data, cvt)) != null) return res;
 
 		// no fitting (and not ignored and working) converter found
-		Log.detail("No Converter found, returning data as is: '%s'", data);
+		Log.info("No Converter found, returning data as is: '%s'", data);
 		res = new ArrayList<Data>(1);
 		res.add(data);
 		return res;
@@ -334,11 +337,11 @@ public final class Pipe extends StateHandling {
 		} catch (final ConverterException e) {
 			Log.error(e);
 			if (e.isPermanent()) {
-				Log.detail("Removing no longer working converter '%s'", cvt);
+				Log.info("Removing no longer working converter '%s'", cvt);
 				cvt.tryClose();
 				ignoredConverter.add(cvt);
 			} else
-				Log.detail("Skipping converter '%s' for one data block '%s'",
+				Log.info("Skipping converter '%s' for one data block '%s'",
 						cvt, data);
 		}
 		return null;
@@ -356,11 +359,11 @@ public final class Pipe extends StateHandling {
 		} catch (final OutputException e) {
 			Log.error(e);
 			if (e.isPermanent()) {
-				Log.detail("Removing no longer working output '%s'", out);
+				Log.info("Removing no longer working output '%s'", out);
 				out.tryClose();
 				ignoredOutputs.add(out);
 			} else
-				Log.detail("Skipping output '%s' for one data block '%s'", out,
+				Log.info("Skipping output '%s' for one data block '%s'", out,
 						data);
 		}
 	}
@@ -446,7 +449,7 @@ public final class Pipe extends StateHandling {
 				pp.getConfig().readFromFile(in);
 			} catch (final IOException e) {
 				// skip this pipe part and try to read the next one
-				Log.error(String.format("Skipped reading '%s' from file:", cn));
+				Log.error("Skipped reading '%s' from file:", cn);
 				Log.error(e);
 				in.reset();
 				skipped = true;

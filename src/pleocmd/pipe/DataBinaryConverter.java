@@ -160,6 +160,7 @@ public final class DataBinaryConverter {
 	 *             invalid type or is of an invalid format for its type
 	 */
 	public DataBinaryConverter(final DataInput in) throws IOException {
+		Log.detail("Started parsing a binary Data object");
 		final int hdr = in.readInt();
 		final int flags = hdr >> 27 & 0x1F;
 		final int cnt = (hdr >> 24 & 0x07) + 1;
@@ -188,6 +189,7 @@ public final class DataBinaryConverter {
 			val.readFromBinary(in);
 			values.add(val);
 		}
+		Log.detail("Finished parsing a binary Data object");
 	}
 
 	public byte getPriority() {
@@ -199,7 +201,7 @@ public final class DataBinaryConverter {
 	}
 
 	public void writeToBinary(final DataOutput out) throws IOException {
-		Log.detail("Writing data to binary output stream");
+		Log.detail("Writing Data to binary output stream");
 		if (values.size() > 8)
 			throw new IOException(
 					"Cannot handle more than 8 values for binary data");

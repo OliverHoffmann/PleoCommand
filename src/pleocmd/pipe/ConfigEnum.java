@@ -64,8 +64,8 @@ public final class ConfigEnum extends ConfigValue {
 		if (idx == -1)
 			throw new IOException(String.format(
 					"Invalid enumeration constant for '%s': "
-							+ "'%s' - must be one of %s", getLabel(), content,
-					Arrays.toString(identifiers.toArray())));
+							+ "'%s' - must be one of '%s'", getLabel(),
+					content, Arrays.toString(identifiers.toArray())));
 		setContent(idx);
 	}
 

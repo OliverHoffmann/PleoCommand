@@ -114,7 +114,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		try {
 			port.setSerialPortParams(BAUDRATE, SerialPort.DATABITS_8,
 					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-			Log.detail(String.format("Done initializing %s", toString()));
+			Log.detail("Done initializing '%s'", toString());
 		} catch (final UnsupportedCommOperationException e) {
 			throw new IOException("Cannot set serial-port parameters");
 		}

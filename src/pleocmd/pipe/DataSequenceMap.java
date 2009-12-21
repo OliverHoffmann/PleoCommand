@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import pleocmd.Log;
 import pleocmd.exc.ConverterException;
 
 public final class DataSequenceMap {
@@ -27,15 +28,18 @@ public final class DataSequenceMap {
 	}
 
 	public void addTrigger(final String trigger) {
+		Log.detail("Adding trigger '%s'", trigger);
 		if (!map.containsKey(trigger)) map.put(trigger, new ArrayList<Data>());
 	}
 
 	public boolean removeTrigger(final String trigger) {
+		Log.detail("Removing trigger '%s'", trigger);
 		return map.remove(trigger) != null;
 	}
 
 	public List<Data> getDataList(final String trigger) {
 		final List<Data> res = map.get(trigger);
+		Log.detail("Lookup of trigger '%s' got: %s", trigger, res);
 		return res == null ? null : Collections.unmodifiableList(res);
 	}
 
@@ -52,12 +56,14 @@ public final class DataSequenceMap {
 	}
 
 	public boolean clearDataList(final String trigger) {
+		Log.detail("Clearing whole list of trigger '%s'", trigger);
 		final List<Data> dataList = map.get(trigger);
 		if (dataList != null) dataList.clear();
 		return dataList != null;
 	}
 
 	public void addData(final String trigger, final Data data) {
+		Log.detail("Adding to trigger '%s': %s", trigger, data);
 		List<Data> dataList = map.get(trigger);
 		if (dataList == null) {
 			dataList = new ArrayList<Data>();
@@ -67,10 +73,12 @@ public final class DataSequenceMap {
 	}
 
 	public void reset() {
+		Log.detail("Clearing whole map '%s'", this);
 		map.clear();
 	}
 
 	public void writeToFile(final File file) throws IOException {
+		Log.detail("Writing map '%s' to file '%s'", this, file);
 		final FileWriter out = new FileWriter(file);
 		for (final Map.Entry<String, List<Data>> trigger : map.entrySet()) {
 			out.write("[");
@@ -90,6 +98,7 @@ public final class DataSequenceMap {
 	}
 
 	public void addFromFile(final File file) throws IOException {
+		Log.detail("Adding to map from file '%s'", file);
 		final BufferedReader in = new BufferedReader(new FileReader(file));
 		String line;
 		List<Data> dataList = null;
@@ -120,6 +129,7 @@ public final class DataSequenceMap {
 	}
 
 	public void addFromMap(final DataSequenceMap other) {
+		Log.detail("Copying all of map '%s' to '%s'", other, this);
 		for (final Map.Entry<String, List<Data>> entry : other.map.entrySet()) {
 			List<Data> dataList = map.get(entry.getKey());
 			if (dataList == null) {
@@ -144,6 +154,7 @@ public final class DataSequenceMap {
 	 */
 	public static List<Data> cloneList(final List<Data> org,
 			final byte newPriority) {
+		Log.detail("Cloning list '%s' with new priority %d", org, newPriority);
 		final List<Data> res = new ArrayList<Data>(org.size());
 		for (final Data data : org) {
 			final byte orgPriority = data.getPriority();
@@ -152,6 +163,22 @@ public final class DataSequenceMap {
 							: orgPriority));
 		}
 		return res;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("[");
+		boolean first = true;
+		for (final Map.Entry<String, List<Data>> trigger : map.entrySet()) {
+			if (!first) sb.append(", ");
+			first = false;
+			sb.append(trigger.getKey());
+			sb.append(":");
+			sb.append(trigger.getValue().size());
+			sb.append("x");
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 }

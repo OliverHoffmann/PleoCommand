@@ -166,7 +166,7 @@ public final class DataAsciiConverter {
 			// autodetect type
 			isHex = false;
 			type = detectDataType(buf, buflen);
-			Log.detail("Autodetecting resulted in %s", type);
+			Log.detail("Autodetecting resulted in: %s", type);
 		}
 
 		// create fitting value
@@ -204,7 +204,7 @@ public final class DataAsciiConverter {
 
 	public void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
-		Log.detail("Writing data to ASCII output stream");
+		Log.detail("Writing Data to ASCII output stream");
 		if (priority != Data.PRIO_DEFAULT) writeFlags(out);
 
 		boolean first = true;
@@ -314,7 +314,7 @@ public final class DataAsciiConverter {
 		} else
 			isHex = false;
 		buflen = 0;
-		Log.detail("Forced type %s - hex: %s", type, isHex);
+		Log.detail("Forced type '%s' - hex: %s", type, isHex);
 	}
 
 	private void putByteIntoBuffer(final byte b) {
@@ -347,7 +347,7 @@ public final class DataAsciiConverter {
 			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i]])) == 4)
 				throw new IOException(String.format(
 						"Invalid character for any known data type: 0x%02X "
-								+ "at position %d in %s", data[i], i,
+								+ "at position %d in '%s'", data[i], i,
 						toHexString(data)));
 		switch (res) {
 		case 1:

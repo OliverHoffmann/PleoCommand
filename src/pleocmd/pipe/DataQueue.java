@@ -59,8 +59,8 @@ public final class DataQueue {
 	 * Has no effect if the {@link DataQueue} is already closed.
 	 */
 	public synchronized void close() {
+		Log.detail("Sending close to ring-buffer '%s'", this);
 		closed = true;
-		Log.detail("Closed ring-buffer");
 	}
 
 	/**
@@ -69,12 +69,12 @@ public final class DataQueue {
 	 */
 	public void resetCache() {
 		synchronized (this) {
+			Log.detail("Resetting ring-buffer '%s'", this);
 			buffer = new Data[1];// TODO bigger default
 			readPos = 0;
 			writePos = 0;
 			closed = false;
 			lastPriority = Data.PRIO_LOWEST;
-			Log.detail("Reset ring-buffer");
 		}
 	}
 
@@ -101,7 +101,7 @@ public final class DataQueue {
 		synchronized (this) {
 			final Data res = buffer[readPos];
 			lastPriority = res.getPriority();
-			Log.detail(String.format("Read from %03d '%s'", readPos, res));
+			Log.detail("Read from %03d '%s' in '%s'", readPos, res, this);
 			readPos = (readPos + 1) % buffer.length;
 			return res;
 		}
@@ -132,7 +132,7 @@ public final class DataQueue {
 			readPos = writePos;
 
 		buffer[writePos] = data;
-		Log.detail(String.format("Put at %03d '%s'", writePos, data));
+		Log.detail("Put at %03d '%s' in '%s'", writePos, data, this);
 		writePos = (writePos + 1) % buffer.length;
 		if (writePos == readPos) {
 			// we need to increase our ring buffer:
@@ -141,8 +141,8 @@ public final class DataQueue {
 			// readPos moves.
 			final Data[] newbuf = new Data[buffer.length * 2];
 			readPos += newbuf.length - buffer.length;
-			Log.detail(String.format("Increased from %d to %d", buffer.length,
-					newbuf.length));
+			Log.detail("Increased from %d to %d in '%s'", buffer.length,
+					newbuf.length, this);
 			System.arraycopy(buffer, 0, newbuf, 0, writePos);
 			System.arraycopy(buffer, writePos, newbuf, readPos, buffer.length
 					- writePos);
@@ -170,6 +170,12 @@ public final class DataQueue {
 		for (final Data data : list)
 			cleared |= put(data);
 		return cleared;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("cap: %d, read: %d, write: %d",
+				buffer == null ? -1 : buffer.length, readPos, writePos);
 	}
 
 }

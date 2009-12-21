@@ -80,8 +80,8 @@ public final class StandardInput extends InputStream {
 	@Override
 	public void close() throws IOException {
 		if (MainFrame.hasGUI()) synchronized (this) {
+			Log.detail("Sending close to ring-buffer '%s'", this);
 			closed = true;
-			Log.detail("Closed ring-buffer");
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -98,11 +98,11 @@ public final class StandardInput extends InputStream {
 	 */
 	public void resetCache() {
 		synchronized (this) {
+			Log.detail("Resetting ring-buffer '%s'", this);
 			buffer = new byte[1]; // TODO bigger default
 			readPos = 0;
 			writePos = 0;
 			closed = false;
-			Log.detail("Reset ring-buffer");
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -131,7 +131,7 @@ public final class StandardInput extends InputStream {
 			// Java's mod doesn't work as expected with negative numbers
 			if (avail < 0) avail += buffer.length;
 			if (avail > 0) {
-				Log.detail("%d bytes available", avail);
+				Log.detail("%d bytes available in '%s'", avail, this);
 				return avail;
 			}
 			synchronized (this) {
@@ -176,7 +176,7 @@ public final class StandardInput extends InputStream {
 			}
 			synchronized (this) {
 				final int b = buffer[readPos];
-				Log.detail(String.format("Read from %03d %d", readPos, b));
+				Log.detail("Read from %03d 0x%02X in '%s'", readPos, b, this);
 				readPos = (readPos + 1) % buffer.length;
 				return b;
 			}
@@ -198,7 +198,7 @@ public final class StandardInput extends InputStream {
 		assert MainFrame.hasGUI();
 		if (closed) throw new IOException("StandardInput is closed");
 		buffer[writePos] = b;
-		Log.detail(String.format("Put at %03d %d", writePos, b));
+		Log.detail("Put at %03d 0x%02X in '%s'", writePos, b, this);
 		writePos = (writePos + 1) % buffer.length;
 		// check if write catches up read?
 		if (writePos == readPos) {
@@ -208,8 +208,8 @@ public final class StandardInput extends InputStream {
 			// readPos moves.
 			final byte[] newbuf = new byte[buffer.length * 2];
 			readPos += newbuf.length - buffer.length;
-			Log.detail(String.format("Increased from %d to %d", buffer.length,
-					newbuf.length));
+			Log.detail("Increased from %d to %d in '%s'", buffer.length,
+					newbuf.length, this);
 			System.arraycopy(buffer, 0, newbuf, 0, writePos);
 			System.arraycopy(buffer, writePos, newbuf, readPos, buffer.length
 					- writePos);
@@ -230,6 +230,12 @@ public final class StandardInput extends InputStream {
 	public synchronized void put(final byte[] bytes) throws IOException {
 		for (final byte b : bytes)
 			put(b);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("cap: %d, read: %d, write: %d",
+				buffer == null ? -1 : buffer.length, readPos, writePos);
 	}
 
 }
