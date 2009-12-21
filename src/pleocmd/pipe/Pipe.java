@@ -39,9 +39,11 @@ public final class Pipe extends StateHandling {
 
 	private final Set<Output> ignoredOutputs = new HashSet<Output>();
 
-	private int inputPosition;
+	private final Set<Long> deadlockDetection = new HashSet<Long>();
 
 	private final DataQueue dataQueue = new DataQueue();
+
+	private int inputPosition;
 
 	private Thread thrInput;
 
@@ -230,6 +232,7 @@ public final class Pipe extends StateHandling {
 				++count;
 
 				// ... convert it ...
+				deadlockDetection.clear();
 				final List<Data> dataList = convertDataToDataList(data);
 
 				// ... and put it into the queue for Output classes
@@ -331,6 +334,10 @@ public final class Pipe extends StateHandling {
 		try {
 			if (cvt.canHandleData(data)) {
 				Log.detail("Converting '%s' with '%s'", data, cvt);
+				final long id = (long) cvt.hashCode() << 32 | data.hashCode();
+				if (!deadlockDetection.add(id))
+					throw new ConverterException(cvt, true,
+							"Detected dead-lock");
 				final List<Data> newDatas = cvt.convert(data);
 				final List<Data> res = new ArrayList<Data>(newDatas.size());
 				for (final Data newData : newDatas)
