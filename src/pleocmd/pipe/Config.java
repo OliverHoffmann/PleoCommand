@@ -7,6 +7,7 @@ import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 
+import pleocmd.Log;
 import pleocmd.exc.PipeException;
 
 public final class Config extends AbstractList<ConfigValue> {
@@ -67,6 +68,7 @@ public final class Config extends AbstractList<ConfigValue> {
 
 	public void readFromFile(final BufferedReader in) throws IOException,
 			PipeException {
+		Log.detail("Reading config from BufferedReader");
 		for (final ConfigValue v : list) {
 			in.mark(10240);
 			final String line = in.readLine().trim();
@@ -81,10 +83,12 @@ public final class Config extends AbstractList<ConfigValue> {
 						label, v.getLabel()));
 			v.setFromString(line.substring(idx + 1).trim());
 		}
+		Log.detail("Read config from BufferedReader: %s", this);
 		owner.configure();
 	}
 
 	public void writeToFile(final Writer out) throws IOException {
+		Log.detail("Writing config to Writer: %s", this);
 		for (final ConfigValue v : list) {
 			out.write('\t');
 			out.write(v.getLabel());
@@ -93,6 +97,11 @@ public final class Config extends AbstractList<ConfigValue> {
 			out.write(v.getContentAsString());
 			out.write('\n');
 		}
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + " owned by " + owner;
 	}
 
 }

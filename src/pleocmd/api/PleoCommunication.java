@@ -274,6 +274,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 				return -cpi1.getName().compareTo(cpi2.getName());
 			}
 		});
+		Log.detail("Found as highest port: %s", ports.get(0).getName());
 		return ports.get(0);
 	}
 

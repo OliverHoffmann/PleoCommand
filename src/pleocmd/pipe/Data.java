@@ -25,16 +25,13 @@ public final class Data extends AbstractList<Value> {
 	private final byte priority;
 
 	public Data(final List<Value> values, final byte priority) {
-		Log.detail("New Data with %d value(s) and priority %d", values.size(),
-				priority);
 		this.values = values;
 		this.priority = priority;
+		Log.detail("New Data created: %s", this);
 	}
 
 	public Data(final Data data, final byte priority) {
-		Log.detail(
-				"Cloned Data with %d value(s) and changed priority %d -> %d",
-				data.values.size(), data.priority, priority);
+		Log.detail("Cloned Data '%s' and changed to %d", data, priority);
 		values = data.values;
 		this.priority = priority;
 	}
@@ -52,9 +49,7 @@ public final class Data extends AbstractList<Value> {
 	public Value get(final int index) throws IndexOutOfBoundsException {
 		if (index < 0 || index >= values.size())
 			throw new IndexOutOfBoundsException(String.format(
-					"Argument %d does not exist in data '%s' "
-							+ "(only has %d argument(s))", index, this, values
-							.size()));
+					"Argument %d does not exist in data '%s'", index, this));
 		return values.get(index);
 	}
 

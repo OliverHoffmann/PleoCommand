@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import pleocmd.itfc.gui.MainFrame;
+import pleocmd.pipe.DataQueue;
 
 /**
  * In console mode, the standard input gets simply wrapped by this class.<br>
@@ -13,6 +14,7 @@ import pleocmd.itfc.gui.MainFrame;
  * by {@link #read()}.
  * 
  * @author oliver
+ * @see DataQueue
  */
 public final class StandardInput extends InputStream {
 
@@ -79,6 +81,7 @@ public final class StandardInput extends InputStream {
 	public void close() throws IOException {
 		if (MainFrame.hasGUI()) synchronized (this) {
 			closed = true;
+			Log.detail("Closed ring-buffer");
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -95,11 +98,11 @@ public final class StandardInput extends InputStream {
 	 */
 	public void resetCache() {
 		synchronized (this) {
-			Log.detail("Resetting cache");
 			buffer = new byte[1]; // TODO bigger default
 			readPos = 0;
 			writePos = 0;
 			closed = false;
+			Log.detail("Reset ring-buffer");
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -125,7 +128,8 @@ public final class StandardInput extends InputStream {
 			synchronized (this) {
 				avail = (writePos - readPos) % buffer.length;
 			}
-			if (avail < 0) avail += buffer.length; // Java's mod is not a mod :(
+			// Java's mod doesn't work as expected with negative numbers
+			if (avail < 0) avail += buffer.length;
 			if (avail > 0) {
 				Log.detail("%d bytes available", avail);
 				return avail;

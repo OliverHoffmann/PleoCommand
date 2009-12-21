@@ -4,7 +4,19 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.StandardInput;
+import pleocmd.pipe.cvt.Converter;
+import pleocmd.pipe.in.Input;
+import pleocmd.pipe.out.Output;
 
+/**
+ * Provides a FiFo implemented as a ring-buffer which passes {@link Data} from
+ * {@link Input} / {@link Converter} thread to the {@link Output} thread in a
+ * thread-safe manner with priority support.
+ * 
+ * @author oliver
+ * @see StandardInput
+ */
 public final class DataQueue {
 
 	/**
@@ -48,6 +60,7 @@ public final class DataQueue {
 	 */
 	public synchronized void close() {
 		closed = true;
+		Log.detail("Closed ring-buffer");
 	}
 
 	/**
@@ -56,12 +69,12 @@ public final class DataQueue {
 	 */
 	public void resetCache() {
 		synchronized (this) {
-			Log.detail("Resetting cache");
 			buffer = new Data[1];// TODO bigger default
 			readPos = 0;
 			writePos = 0;
 			closed = false;
 			lastPriority = Data.PRIO_LOWEST;
+			Log.detail("Reset ring-buffer");
 		}
 	}
 

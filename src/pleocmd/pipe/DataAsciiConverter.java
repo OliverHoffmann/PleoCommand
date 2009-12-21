@@ -111,6 +111,7 @@ public final class DataAsciiConverter {
 	 *             invalid type or is of an invalid format for its type
 	 */
 	public DataAsciiConverter(final DataInput in) throws IOException {
+		Log.detail("Started parsing an ASCII Data object");
 		values = new ArrayList<Value>();
 		buf = new byte[1]; // TODO larger default
 		priority = Data.PRIO_DEFAULT;
@@ -122,6 +123,7 @@ public final class DataAsciiConverter {
 			case '\n':
 				parseValue();
 				// this was the end of the data block
+				Log.detail("Finished parsing an ASCII Data object");
 				return;
 			case '|':
 				parseValue();
@@ -164,6 +166,7 @@ public final class DataAsciiConverter {
 			// autodetect type
 			isHex = false;
 			type = detectDataType(buf, buflen);
+			Log.detail("Autodetecting resulted in %s", type);
 		}
 
 		// create fitting value
@@ -346,7 +349,6 @@ public final class DataAsciiConverter {
 						"Invalid character for any known data type: 0x%02X "
 								+ "at position %d in %s", data[i], i,
 						toHexString(data)));
-		Log.detail("Autodetecting resulted in %d", res);
 		switch (res) {
 		case 1:
 			return ValueType.Int64;
