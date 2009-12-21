@@ -6,7 +6,12 @@
 	<property name="src" location="src" />
 	<property name="bin" location="bin" />
 	<property name="lib" location="lib" />
+	<property name="dist" location="dist" />
 
+	<property name="mainclass" value="pleocmd.Main" />
+	<property name="classpath" value="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
+
+	<!-- Define external tasks -->
 	<taskdef resource="checkstyletask.properties"
 	         classpath="${lib}/checkstyle-all-5.0.jar" />
 
@@ -14,56 +19,73 @@
 	         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
 	         classpath="${lib}/jsmoothgen-ant.jar" />
 
+	<!-- Cleans bin/ and dist/ diretory -->
 	<target name="clean">
 		<delete dir="${bin}" verbose="${verb}" />
-		<delete file="${ant.project.name}.jar" verbose="${verb}" />
+		<delete dir="${dist}" verbose="${verb}" />
 	</target>
 
+	<!-- Creates class files, checks for errors and dumps subversion log in bin/ -->
 	<target name="build">
 		<mkdir dir="${bin}" />
+		<mkdir dir="${dist}" />
+
 		<javac srcdir="${src}"
 		       destdir="${bin}"
 		       verbose="${verb}"
-		       classpath="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
+		       classpath="${classpath}" />
+
 		<checkstyle config="checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
 			<classpath>
-				<pathelement path="${java.class.path}/" />
 				<pathelement path="${bin}" />
 			</classpath>
 		</checkstyle>
+
+		<exec executable="svn" dir="${basedir}" output="${dist}/changelog.txt">
+			<arg value="log" />
+		</exec>
 	</target>
 
+	<!-- Creates Java JAR archive and Windows executable in dist/ -->
 	<target name="dist" depends="build">
-		<delete file="${ant.project.name}.jar" verbose="${verb}" />
-		<jar jarfile="${ant.project.name}.jar"
+		<property name="jarfile" location="${dist}/${ant.project.name}.jar" />
+		<delete file="${jarfile}" verbose="${verb}" />
+		<jar jarfile="${jarfile}"
 		     basedir="${bin}"
 		     duplicate="fail"
 		     strict="warn">
 			<manifest>
-				<attribute name="Implementation-Vendor" value="${user.name}" />
+				<attribute name="Implementation-Vendor"
+				           value="Oliver Hoffmann" />
 				<attribute name="Implementation-Title"
 				           value="${ant.project.name}" />
 				<attribute name="Implementation-Version"
 				           value="0.1 @ ${java.vm.name} ${os.name}-${os.version}" />
-				<attribute name="Main-Class" value="pleocmd.Main" />
+				<attribute name="Main-Class" value="${mainclass}" />
 			</manifest>
 		</jar>
-		<echoxml file="${bin}/${ant.project.name}.jsmooth">
+
+		<property name="exefile" value="${ant.project.name}.exe" />
+		<property name="exeloc" location="${dist}/${exefile}" />
+		<property name="jsloc" value="${bin}/${ant.project.name}.jsmooth" />
+		<echoxml file="${jsloc}">
 			<jsmoothproject>
-				<classPath>/usr/share/rxtx-2/lib/RXTXcomm.jar</classPath>
-				<executableName>${ant.project.name}.exe</executableName>
-				<mainClassName>pleocmd.Main</mainClassName>
+				<classPath>${classpath}</classPath>
+				<executableName>${exefile}</executableName>
+				<mainClassName>${mainclass}</mainClassName>
 				<minimumVersion>1.5</minimumVersion>
 				<skeletonName>Windowed Wrapper</skeletonName>
 			</jsmoothproject>
 		</echoxml>
 		<jsmoothgen skeletonroot="${lib}/skeletons"
 		            verbose="${verb}"
-		            project="${bin}/${ant.project.name}.jsmooth" />
+		            project="${jsloc}" />
+		<move file="${bin}/${exefile}" tofile="${exeloc}" verbose="${verb}" />
+		<chmod file="${exeloc}" perm="ugo+rx" verbose="${verb}" />
 	</target>
 
-	<target name="rebuild" depends="clean,build">
+	<target name="rebuild" depends="clean, build, dist">
 	</target>
 
 </project>
