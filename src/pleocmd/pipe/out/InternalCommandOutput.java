@@ -6,7 +6,7 @@ import pleocmd.exc.OutputException;
 import pleocmd.pipe.Config;
 import pleocmd.pipe.Data;
 
-public class InternalCommandOutput extends Output {
+public final class InternalCommandOutput extends Output {
 
 	public InternalCommandOutput() {
 		super(new Config());
