@@ -107,6 +107,27 @@
 			<property name="format" value="printStackTrace" />
 			<property name="illegalPattern" value="true" />
 		</module>
+		<module name="Regexp">
+			<property name="id" value="NoLowerCaseHex" />
+			<property name="format" value="%[0-9]*x" />
+			<property name="illegalPattern" value="true" />
+		</module>
+		<module name="Regexp">
+			<property name="format" value="Log.*String\.format" />
+			<property name="illegalPattern" value="true" />
+		</module>
+		<module name="Regexp">
+			<!-- Matches all "%s" which is not "'%s'" or ": %s" -->
+			<property name="format"
+			          value="(Log|\+).*([^ ']%s[^']|[^:][^ ']%s|[^:] %s)" />
+			<property name="illegalPattern" value="true" />
+		</module>
+		<!--
+		<module name="Regexp">
+			<property name="format" value="Exception.*String\.format" />
+			<property name="illegalPattern" value="true" />
+		</module>
+		-->
 		<!--
 		<module name="DescendantToken">
 			<property name="tokens" value="PLUS" />
@@ -123,7 +144,8 @@
 			<property name="maximumNumber" value="0" />
 			<property name="maximumMessage" 
 			          value="Info: Typecast" />
-		</module> -->
+		</module> 
+		-->
 
 		<!-- Modifiers -->
 		<module name="ModifierOrder" />
