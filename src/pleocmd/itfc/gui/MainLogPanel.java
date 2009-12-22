@@ -32,6 +32,8 @@ public final class MainLogPanel extends JPanel {
 
 	private final JButton btnStart;
 
+	private final JButton btnAbort;
+
 	private final JButton btnSave;
 
 	private final JCheckBox cbShowDetail;
@@ -82,13 +84,14 @@ public final class MainLogPanel extends JPanel {
 						MainFrame.the().startPipeThread();
 					}
 				});
-		btnSave = lay.addButton(Button.SaveTo,
-				"Saves the whole log to a text file", new Runnable() {
+		btnAbort = lay.addButton("Abort", "dialog-close",
+				"Forcefully aborts the currently running pipe", new Runnable() {
 					@Override
 					public void run() {
-						writeLogToFile();
+						MainFrame.the().abortPipeThread();
 					}
 				});
+		lay.addSpacer();
 		cbShowDetail = new JCheckBox("Show detailed log", true);
 		cbShowDetail.addActionListener(new ActionListener() {
 			@Override
@@ -97,7 +100,13 @@ public final class MainLogPanel extends JPanel {
 			}
 		});
 		lay.add(cbShowDetail, false);
-		lay.addSpacer();
+		btnSave = lay.addButton(Button.SaveTo,
+				"Saves the whole log to a text file", new Runnable() {
+					@Override
+					public void run() {
+						writeLogToFile();
+					}
+				});
 		btnClear = lay.addButton(Button.Clear, "Empties the whole log list",
 				new Runnable() {
 					@Override
@@ -163,6 +172,7 @@ public final class MainLogPanel extends JPanel {
 
 	public void updateState() {
 		btnStart.setEnabled(!MainFrame.the().isPipeRunning());
+		btnAbort.setEnabled(MainFrame.the().isPipeRunning());
 		btnSave.setEnabled(logModel.getRowCount() > 0);
 		btnClear.setEnabled(logModel.getRowCount() > 0);
 	}
