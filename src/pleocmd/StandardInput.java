@@ -103,6 +103,7 @@ public final class StandardInput extends InputStream {
 			readPos = 0;
 			writePos = 0;
 			closed = false;
+			Log.detail("Reset ring-buffer '%s'", this);
 		}
 		EventQueue.invokeLater(new Runnable() {
 			@Override
@@ -208,12 +209,11 @@ public final class StandardInput extends InputStream {
 			// readPos moves.
 			final byte[] newbuf = new byte[buffer.length * 2];
 			readPos += newbuf.length - buffer.length;
-			Log.detail("Increased from %d to %d in '%s'", buffer.length,
-					newbuf.length, this);
 			System.arraycopy(buffer, 0, newbuf, 0, writePos);
 			System.arraycopy(buffer, writePos, newbuf, readPos, buffer.length
 					- writePos);
 			buffer = newbuf;
+			Log.detail("Increased from '%s'", this);
 		}
 	}
 

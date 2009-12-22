@@ -19,6 +19,8 @@ import pleocmd.pipe.out.Output;
  */
 public final class DataQueue {
 
+	public static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
+
 	/**
 	 * This array represents a ring buffer.
 	 */
@@ -35,9 +37,14 @@ public final class DataQueue {
 	private int writePos;
 
 	/**
-	 * The priority of the {@link Data} most recently read from {@link #buffer}.
+	 * The priority of all the {@link Data}s in the queue.<br>
+	 * This is {@link #PRIO_UNDEFINED} if the queue is empty and there is a
+	 * {@link #get()} waiting or there never was any {@link #get()} (since the
+	 * last {@link #resetCache()}).<br>
+	 * So it's defined for an empty queue only if the last {@link #get()} is
+	 * still being processed by the Output-Thread.
 	 */
-	private byte lastPriority;
+	private byte priority;
 
 	/**
 	 * Only true if the cache has been closed, i.e. the remaining data in
@@ -74,7 +81,8 @@ public final class DataQueue {
 			readPos = 0;
 			writePos = 0;
 			closed = false;
-			lastPriority = Data.PRIO_LOWEST;
+			priority = PRIO_UNDEFINED;
+			Log.detail("Reset ring-buffer '%s'", this);
 		}
 	}
 
@@ -89,18 +97,27 @@ public final class DataQueue {
 	 *             if waiting for the next data block has been interrupted
 	 */
 	public Data get() throws InterruptedException {
+		Log.detail("Trying to read in '%s'", this);
+		boolean first = true;
 		while (true) {
 			// check if read catches up write?
 			synchronized (this) {
 				if (readPos != writePos) break;
+				if (first) {
+					// queue empty and waiting in get(), so:
+					priority = PRIO_UNDEFINED;
+					Log.detail("Queue empty and waiting => "
+							+ "undefined priority in '%s'", this);
+				}
+				// if queue closed, were return null to signal end of pipe
 				if (closed) return null;
+				first = false;
 			}
 			// block until data available
 			Thread.sleep(30);
 		}
 		synchronized (this) {
 			final Data res = buffer[readPos];
-			lastPriority = res.getPriority();
 			Log.detail("Read from %03d '%s' in '%s'", readPos, res, this);
 			readPos = (readPos + 1) % buffer.length;
 			return res;
@@ -126,12 +143,21 @@ public final class DataQueue {
 	public synchronized boolean put(final Data data) throws IOException {
 		if (closed) throw new IOException("DataQueue is closed");
 
-		if (data.getPriority() < lastPriority) // silently drop the new Data
+		boolean hasBeenCleared = false;
+		if (priority != PRIO_UNDEFINED && data.getPriority() < priority) {
+			// silently drop the new Data
+			Log.detail("Dropped '%s' in '%s'", data, this);
 			return false;
-		if (data.getPriority() > lastPriority) // quick clearing of the queue
+		}
+		if (priority != PRIO_UNDEFINED && data.getPriority() > priority) {
+			// fast-clearing of the queue
 			readPos = writePos;
+			Log.detail("Cleared '%s' because of '%s'", this, data);
+			hasBeenCleared = true;
+		}
 
 		buffer[writePos] = data;
+		priority = data.getPriority();
 		Log.detail("Put at %03d '%s' in '%s'", writePos, data, this);
 		writePos = (writePos + 1) % buffer.length;
 		if (writePos == readPos) {
@@ -141,15 +167,14 @@ public final class DataQueue {
 			// readPos moves.
 			final Data[] newbuf = new Data[buffer.length * 2];
 			readPos += newbuf.length - buffer.length;
-			Log.detail("Increased from %d to %d in '%s'", buffer.length,
-					newbuf.length, this);
 			System.arraycopy(buffer, 0, newbuf, 0, writePos);
 			System.arraycopy(buffer, writePos, newbuf, readPos, buffer.length
 					- writePos);
 			buffer = newbuf;
+			Log.detail("Increased buffer in '%s'", this);
 		}
 
-		return data.getPriority() > lastPriority;
+		return hasBeenCleared;
 	}
 
 	/**
@@ -174,8 +199,9 @@ public final class DataQueue {
 
 	@Override
 	public String toString() {
-		return String.format("cap: %d, read: %d, write: %d",
-				buffer == null ? -1 : buffer.length, readPos, writePos);
+		return String.format("cap: %d, read: %d, write: %d, lastPrio: %d",
+				buffer == null ? -1 : buffer.length, readPos, writePos,
+				priority);
 	}
 
 }

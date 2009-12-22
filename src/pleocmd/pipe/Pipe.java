@@ -211,7 +211,12 @@ public final class Pipe extends StateHandling {
 		while (thrOutput.isAlive())
 			Thread.sleep(100);
 		Log.detail("Output Thread no longer alive");
-		assert !thrInput.isAlive();
+		if (thrInput.isAlive()) {
+			Log.error("Input-Thread still alive but Output-Thread died");
+			thrInput.interrupt();
+			while (thrInput.isAlive())
+				Thread.sleep(100);
+		}
 		Log.detail("Input Thread no longer alive");
 		thrInput = null;
 		thrOutput = null;
@@ -237,7 +242,9 @@ public final class Pipe extends StateHandling {
 
 				// ... and put it into the queue for Output classes
 				if (dataQueue.put(dataList)) {
-					// TODO cancel output thread
+					Log.info("Canceling current command, "
+							+ "because of higher-priority command '%s'", data);
+					thrOutput.interrupt();
 				}
 			}
 		} finally {
@@ -251,19 +258,27 @@ public final class Pipe extends StateHandling {
 			InterruptedException {
 		Log.info("Output-Thread started");
 		int count = 0;
-		while (true) {
-			ensureInitialized();
+		try {
+			while (true) {
+				ensureInitialized();
 
-			// fetch next data block ...
-			final Data data = dataQueue.get();
-			if (data == null) break;
-			++count;
+				// fetch next data block ...
+				final Data data = dataQueue.get();
+				if (data == null) break; // Input-Thread has finished piping
+				++count;
 
-			// ... and send it to all currently registered outputs
-			writeDataToAllOutputs(data);
+				// ... and send it to all currently registered outputs
+				try {
+					writeDataToAllOutputs(data);
+				} catch (final InterruptedException e) {
+					Log.detail("Outputting data '%s' has been interrupted",
+							data);
+				}
+			}
+		} finally {
+			Log.info("Output-Thread finished");
+			Log.detail("Sent %d data blocks to output", count);
 		}
-		Log.info("Output-Thread finished");
-		Log.detail("Sent %d data blocks to output", count);
 	}
 
 	private Data getFromInput() {
@@ -357,13 +372,15 @@ public final class Pipe extends StateHandling {
 		return null;
 	}
 
-	private void writeDataToAllOutputs(final Data data) {
+	private void writeDataToAllOutputs(final Data data)
+			throws InterruptedException {
 		Log.detail("Writing data block to %d output(s)", outputList.size());
 		for (final Output out : outputList)
 			if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
 	}
 
-	private void writeToOutput(final Data data, final Output out) {
+	private void writeToOutput(final Data data, final Output out)
+			throws InterruptedException {
 		try {
 			out.write(data);
 		} catch (final OutputException e) {

@@ -28,16 +28,11 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
-	protected void write0(final Data data) throws OutputException, IOException {
+	protected void write0(final Data data) throws OutputException, IOException,
+			InterruptedException {
 		if ("SC".equals(data.getSafe(0).asString())) {
 			final String v2 = data.get(1).asString();
-			if ("SLEEP".equals(v2))
-				try {
-					Thread.sleep(data.getSafe(2).asLong());
-				} catch (final InterruptedException e) {
-					throw new OutputException(this, false, e,
-							"Could not execute special command '%s'", data);
-				}
+			if ("SLEEP".equals(v2)) Thread.sleep(data.getSafe(2).asLong());
 		}
 	}
 }

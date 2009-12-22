@@ -292,6 +292,8 @@ public final class DataSequenceEditorFrame extends JDialog {
 				out.write(data);
 		} catch (final OutputException e) {
 			Log.error(e);
+		} catch (final InterruptedException e) {
+			Log.error(e);
 		}
 	}
 

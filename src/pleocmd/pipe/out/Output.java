@@ -26,7 +26,8 @@ public abstract class Output extends PipePart {
 	@Override
 	protected abstract void close0() throws OutputException, IOException;
 
-	public final void write(final Data data) throws OutputException {
+	public final void write(final Data data) throws OutputException,
+			InterruptedException {
 		try {
 			ensureInitialized();
 			write0(data);
@@ -40,6 +41,6 @@ public abstract class Output extends PipePart {
 	}
 
 	protected abstract void write0(Data data) throws OutputException,
-			IOException;
+			IOException, InterruptedException;
 
 }
