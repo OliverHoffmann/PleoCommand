@@ -8,12 +8,14 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
 import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
 import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 import pleocmd.pipe.Pipe;
 
 /**
@@ -127,6 +129,14 @@ public final class MainFrame extends JFrame {
 	}
 
 	public void exit() {
+		if (isPipeRunning()) {
+			if (JOptionPane.showOptionDialog(this,
+					"The pipe is still running. Exiting "
+							+ "will abort the pipe.", "Error",
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
+					null, null, null) != JOptionPane.YES_OPTION) return;
+			abortPipeThread();
+		}
 		Log.detail("GUI-Frame has been closed");
 		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
 		// TODO show message if pipe still running
@@ -158,12 +168,22 @@ public final class MainFrame extends JFrame {
 		pipeThread.start();
 	}
 
+	public synchronized void abortPipeThread() {
+		if (!isPipeRunning())
+			throw new IllegalStateException("Pipe-Thread not running");
+		try {
+			pipe.abortPipe();
+		} catch (final InterruptedException e) {
+			Log.error(e);
+		} catch (final StateException e) {
+			Log.error(e);
+		}
+	}
+
 	protected void pipeCore() throws PipeException, InterruptedException {
 		StandardInput.the().resetCache();
 		pipe.configure();
-		pipe.init();
 		pipe.pipeAllData();
-		pipe.close();
 	}
 
 	public void updateState() {

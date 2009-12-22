@@ -177,7 +177,9 @@ public final class Pipe extends StateHandling {
 	 * Starts two threads which pipe all data of all connected {@link Input}s
 	 * through the all connected {@link Converter} to all connected
 	 * {@link Output}s.<br>
-	 * Waits until both threads have finished.
+	 * Waits until both threads have finished.<br>
+	 * The {@link Pipe} is initialized before starting and closed after
+	 * finishing.
 	 * 
 	 * @throws PipeException
 	 *             if the object is not already initialized
@@ -186,7 +188,7 @@ public final class Pipe extends StateHandling {
 	 *             waiting for the two pipe threads
 	 */
 	public void pipeAllData() throws PipeException, InterruptedException {
-		ensureInitialized();
+		init();
 		dataQueue.resetCache();
 		thrInput = new Thread() {
 			@Override
@@ -208,8 +210,8 @@ public final class Pipe extends StateHandling {
 				}
 			}
 		};
-		thrInput.start();
 		thrOutput.start();
+		thrInput.start();
 
 		Log.detail("Started waiting for threads");
 		while (thrOutput.isAlive())
@@ -225,8 +227,33 @@ public final class Pipe extends StateHandling {
 		Log.detail("Input Thread no longer alive");
 		thrInput = null;
 		thrOutput = null;
+		close();
+		Log.info("Pipe finished and closed");
+	}
 
-		// TODO call close() here directly?
+	/**
+	 * Aborts the pipe if one is currently running.<br>
+	 * Note that {@link #pipeAllData()} itself blocks until the pipe has
+	 * finished, so {@link #abortPipe()} only makes sence if
+	 * {@link #pipeAllData()} is called from another thread. <br>
+	 * This method waits until the abort has been accepted.
+	 * 
+	 * @throws StateException
+	 *             if the object is not already initialized
+	 * @throws InterruptedException
+	 *             if waiting has been interrupted
+	 */
+	public void abortPipe() throws StateException, InterruptedException {
+		ensureInitialized();
+		Log.info("Aborting pipe");
+		inputThreadInterruped = true;
+		thrInput.interrupt();
+		dataQueue.close();
+		thrOutput.interrupt();
+		Log.detail("Waiting for accepted abort in threads");
+		while (thrInput != null || thrOutput != null)
+			Thread.sleep(100);
+		Log.info("Pipe successfully aborted");
 	}
 
 	protected void runInputThread() throws StateException, IOException {
