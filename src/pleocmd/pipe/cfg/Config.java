@@ -22,7 +22,8 @@ public final class Config extends AbstractList<ConfigValue> {
 	 */
 	public Config() {
 		assert new Throwable().getStackTrace()[1].getClassName().startsWith(
-				getClass().getPackage().getName() + ".");
+				PipePart.class.getPackage().getName() + ".") : new Throwable()
+				.getStackTrace()[1].toString();
 	}
 
 	@Override
