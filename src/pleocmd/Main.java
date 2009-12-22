@@ -5,8 +5,6 @@ import pleocmd.itfc.gui.MainFrame;
 
 /**
  * TODO: List of tasks:<br>
- * introduce priority system<br>
- * check all Log...<br>
  * add send button to input (before "send eos")<br>
  * exit while pipe is running?<br>
  * detect endless looping in convert()<br>
@@ -15,6 +13,8 @@ import pleocmd.itfc.gui.MainFrame;
  * check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)<br>
  * add javadoc<br>
  * move Data... classes to value package<br>
+ * autodetect pipeparts, not hardcoded<br>
+ * implement static PipePart.help()<br>
  */
 
 public final class Main {
@@ -23,8 +23,7 @@ public final class Main {
 		// utility class => hidden
 	}
 
-	@SuppressWarnings("unused")
-	public static void main(final String[] args) throws Exception {
+	public static void main(final String[] args) {
 		if (args.length > 0)
 			CommandLine.the().parse(args);
 		else
@@ -32,6 +31,7 @@ public final class Main {
 				@Override
 				public void uncaughtException(final Thread thread,
 						final Throwable throwable) {
+					throwable.printStackTrace();
 					Log.error(throwable);
 				}
 			}, "GUI-Thread") {

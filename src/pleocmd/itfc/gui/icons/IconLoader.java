@@ -43,7 +43,8 @@ public final class IconLoader {
 	 */
 	public static Icon getMissingIcon() {
 		final URL url = IconLoader.class.getResource("image-missing.png");
-		if (url == null) return new ImageIcon();
+		if (url == null)
+			throw new RuntimeException("Could not load 'image-missing' icon");
 		return new ImageIcon(url, "Missing an icon file in current classpath");
 	}
 
