@@ -254,8 +254,7 @@ public final class Pipe extends StateHandling {
 		}
 	}
 
-	protected void runOutputThread() throws StateException,
-			InterruptedException {
+	protected void runOutputThread() throws StateException {
 		Log.info("Output-Thread started");
 		int count = 0;
 		try {
@@ -263,7 +262,13 @@ public final class Pipe extends StateHandling {
 				ensureInitialized();
 
 				// fetch next data block ...
-				final Data data = dataQueue.get();
+				final Data data;
+				try {
+					data = dataQueue.get();
+				} catch (final InterruptedException e1) {
+					Log.detail("Reading next data has been interrupted");
+					continue;
+				}
 				if (data == null) break; // Input-Thread has finished piping
 				++count;
 
