@@ -171,21 +171,20 @@ public final class DataAsciiConverter {
 
 		// create fitting value
 		final Value val = Value.createForType(type);
-		if (val == null)
-			throw new IOException("Internal error: Invalid value type");
+		if (val == null) throw new InternalError("Invalid value type");
 
 		if (isHex) {
 			// we need to decode the data from a hex string
 			Log.detail("Converting hex data with length %d", buflen);
 			if (buflen % 2 != 0)
-				throw new IOException("Internal error: Broken hexadecimal data");
+				throw new InternalError("Broken hexadecimal data");
 			final byte[] buf2 = new byte[buflen / 2];
 			for (int i = 0, j = 0; i < buflen;) {
 				final int d1 = Character.digit(buf[i++], 16); // CS_IGNORE
 				final int d2 = Character.digit(buf[i++], 16); // CS_IGNORE
 				if (d1 == -1 || d2 == -1)
-					throw new IOException(
-							"Internal error: Broken hexadecimal data");
+				// TODO more detailed
+					throw new IOException("Broken hexadecimal data");
 				buf2[j++] = (byte) (d1 << 4 | d2); // CS_IGNORE
 			}
 			val.readFromAscii(buf2, buf2.length);
@@ -358,8 +357,7 @@ public final class DataAsciiConverter {
 		case 3:
 			return ValueType.NullTermString;
 		default:
-			throw new RuntimeException(
-					"Internal error: Invalid entry in TYPE_AUTODETECT_TABLE");
+			throw new InternalError("Invalid entry in TYPE_AUTODETECT_TABLE");
 		}
 	}
 

@@ -73,7 +73,7 @@ public final class ConfigPath extends ConfigValue {
 				tf.setText(fc.getSelectedFile().getPath());
 			break;
 		default:
-			throw new RuntimeException("Internal error: Invalid PathType");
+			throw new InternalError("Invalid PathType");
 		}
 	}
 

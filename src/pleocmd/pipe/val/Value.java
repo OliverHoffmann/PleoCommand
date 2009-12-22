@@ -75,9 +75,9 @@ public abstract class Value {
 					.get(null);
 		} catch (final Throwable t) {
 			// CS_IGNORE_PREV Catch everything that may go wrong here
-			throw new RuntimeException(
-					"Internal error: Cannot access field TYPE_CHAR "
-							+ "of a subclass of Value", t);
+			throw new InternalError(String.format(
+					"Cannot access field TYPE_CHAR "
+							+ "of a subclass of Value: %s", t));
 		}
 	}
 

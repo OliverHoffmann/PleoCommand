@@ -184,8 +184,7 @@ public final class DataBinaryConverter {
 			assert type.getID() == (hdr >> i * 3 & 0x07);
 			final Value val = Value.createForType(type);
 			if (val == null)
-				throw new IOException(
-						"Internal error: Type out of range 0 - 0x07");
+				throw new InternalError("Type out of range 0 - 0x07");
 			val.readFromBinary(in);
 			values.add(val);
 		}

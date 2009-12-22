@@ -106,8 +106,7 @@ public final class StringValue extends Value {
 		try {
 			return val.getBytes("ISO-8859-1");
 		} catch (final UnsupportedEncodingException e) {
-			throw new RuntimeException(
-					"Internal error: Default character-set not supported!");
+			throw new InternalError("Character-set ISO-8859-1 not supported!");
 		}
 	}
 

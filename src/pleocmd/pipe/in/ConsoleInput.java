@@ -47,8 +47,8 @@ public final class ConsoleInput extends Input {
 			return Data.createFromBinary(new DataInputStream(StandardInput
 					.the()));
 		default:
-			throw new InputException(this, true,
-					"Internal error: Invalid read-type: %s", type);
+			throw new InternalError(String
+					.format("Invalid read-type: %s", type));
 		}
 	}
 

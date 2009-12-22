@@ -108,7 +108,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		try {
 			port.addEventListener(this);
 		} catch (final TooManyListenersException e) {
-			throw new IOException("Internal error: Too many listeners");
+			throw new InternalError("Only one, but too many listeners");
 		}
 		port.notifyOnDataAvailable(true);
 		try {

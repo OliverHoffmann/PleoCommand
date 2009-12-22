@@ -53,8 +53,7 @@ public abstract class StateHandling {
 			setState(State.Constructed);
 		} catch (final StateException e) {
 			Log.error(e);
-			throw new RuntimeException(
-					"Internal error: Invalid state during ctor");
+			throw new InternalError("Invalid state during ctor");
 		}
 	}
 

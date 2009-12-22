@@ -51,8 +51,8 @@ public final class ConsoleOutput extends Output {
 				Log.consoleOut(data.get(1).asString());
 			break;
 		default:
-			throw new OutputException(this, true,
-					"Internal error: Invalid print-type: %s", type);
+			throw new InternalError(String.format("Invalid print-type: %s",
+					type));
 		}
 	}
 

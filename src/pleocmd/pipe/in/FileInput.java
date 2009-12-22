@@ -58,8 +58,8 @@ public final class FileInput extends Input {
 		case Binary:
 			return Data.createFromBinary(in);
 		default:
-			throw new InputException(this, true,
-					"Internal error: Invalid read-type: %s", type);
+			throw new InternalError(String
+					.format("Invalid read-type: %s", type));
 		}
 	}
 
