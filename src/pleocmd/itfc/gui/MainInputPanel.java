@@ -36,6 +36,8 @@ public final class MainInputPanel extends JPanel {
 
 	private final JTextField consoleInput;
 
+	private final JButton btnSend;
+
 	private final JButton btnSendEOS;
 
 	private final JButton btnRead;
@@ -71,6 +73,13 @@ public final class MainInputPanel extends JPanel {
 		});
 		lay.addWholeLine(consoleInput, false);
 
+		btnSend = lay.addButton("Send", "system-run",
+				"Send text from input-field to the pipe", new Runnable() {
+					@Override
+					public void run() {
+						putConsoleInput();
+					}
+				});
 		btnSendEOS = lay.addButton("Send EOS", "media-playback-stop",
 				"Send end-of-stream signal", new Runnable() {
 					@Override
@@ -212,6 +221,7 @@ public final class MainInputPanel extends JPanel {
 		final boolean ready = MainFrame.the().isPipeRunning()
 				&& !StandardInput.the().isClosed();
 		consoleInput.setEnabled(ready);
+		btnSend.setEnabled(ready);
 		btnSendEOS.setEnabled(ready);
 		btnRead.setEnabled(ready);
 		btnClear.setEnabled(historyListModel.getSize() > 0);
