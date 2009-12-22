@@ -49,6 +49,8 @@ public final class Pipe extends StateHandling {
 
 	private Thread thrOutput;
 
+	private boolean inputThreadInterruped;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 */
@@ -213,6 +215,7 @@ public final class Pipe extends StateHandling {
 		Log.detail("Output Thread no longer alive");
 		if (thrInput.isAlive()) {
 			Log.error("Input-Thread still alive but Output-Thread died");
+			inputThreadInterruped = true;
 			thrInput.interrupt();
 			while (thrInput.isAlive())
 				Thread.sleep(100);
@@ -225,10 +228,11 @@ public final class Pipe extends StateHandling {
 	}
 
 	protected void runInputThread() throws StateException, IOException {
+		inputThreadInterruped = false;
 		int count = 0;
 		try {
 			Log.info("Input-Thread started");
-			while (true) {
+			while (!inputThreadInterruped) {
 				ensureInitialized();
 
 				// read next data block ...
@@ -290,6 +294,7 @@ public final class Pipe extends StateHandling {
 		Log.detail("Reading one data block from input");
 		Input in;
 		while (true) {
+			if (inputThreadInterruped) return null;
 			assert inputPosition <= inputList.size();
 			if (inputPosition >= inputList.size()) {
 				Log.detail("InputList is empty");
