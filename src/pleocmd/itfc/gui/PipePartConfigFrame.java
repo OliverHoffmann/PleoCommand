@@ -8,47 +8,31 @@ import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
-import pleocmd.pipe.cvt.EmotionConverter;
-import pleocmd.pipe.cvt.PassThroughConverter;
-import pleocmd.pipe.cvt.SimpleConverter;
-import pleocmd.pipe.in.ConsoleInput;
-import pleocmd.pipe.in.FileInput;
 import pleocmd.pipe.in.Input;
-import pleocmd.pipe.in.TcpIpInput;
-import pleocmd.pipe.out.ConsoleOutput;
-import pleocmd.pipe.out.FileOutput;
-import pleocmd.pipe.out.InternalCommandOutput;
 import pleocmd.pipe.out.Output;
-import pleocmd.pipe.out.PleoRXTXOutput;
 
 public final class PipePartConfigFrame extends JDialog {
 
 	private static final long serialVersionUID = -1967218353263515865L;
 
-	@SuppressWarnings("unchecked")
-	private final PipePartPanel<Input> pppInput = new PipePartPanel<Input>(
-			(Class<Input>[]) new Class<?>[] { FileInput.class,
-					ConsoleInput.class, TcpIpInput.class });
+	private final PipePartPanel<Input> pppInput;
 
-	@SuppressWarnings("unchecked")
-	private final PipePartPanel<Converter> pppConverter = new PipePartPanel<Converter>(
-			(Class<Converter>[]) new Class<?>[] { SimpleConverter.class,
-					EmotionConverter.class, PassThroughConverter.class });
+	private final PipePartPanel<Converter> pppConverter;
 
-	@SuppressWarnings("unchecked")
-	private final PipePartPanel<Output> pppOutput = new PipePartPanel<Output>(
-			(Class<Output>[]) new Class<?>[] { FileOutput.class,
-					ConsoleOutput.class, PleoRXTXOutput.class,
-					InternalCommandOutput.class });
+	private final PipePartPanel<Output> pppOutput;
 
 	private final Pipe pipe;
 
 	public PipePartConfigFrame(final Pipe pipe) {
+		this.pipe = pipe;
+		pppInput = new PipePartPanel<Input>("in");
+		pppConverter = new PipePartPanel<Converter>("cvt");
+		pppOutput = new PipePartPanel<Output>("out");
+
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		this.pipe = pipe;
 		pppInput.getTableModel().clear();
 		pppInput.getTableModel().addPipeParts(pipe.getInputList());
 		pppConverter.getTableModel().clear();

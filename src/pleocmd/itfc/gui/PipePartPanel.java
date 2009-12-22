@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -21,6 +22,7 @@ import pleocmd.Log;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.PipePart;
+import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigValue;
 
@@ -28,7 +30,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private static final long serialVersionUID = 1806583246927239923L;
 
-	private final Class<E>[] availableParts;
+	private final List<Class<E>> availableParts;
 
 	private final PipePartTableModel<E> tableModel;
 
@@ -48,8 +50,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private boolean okPressed;
 
-	public PipePartPanel(final Class<E>[] availableParts) {
-		this.availableParts = availableParts;
+	public PipePartPanel(final String subPackage) {
+		availableParts = PipePartDetection.getAllPipeParts(subPackage);
 
 		final Layouter lay = new Layouter(this);
 		tableModel = new PipePartTableModel<E>();
