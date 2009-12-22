@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import pleocmd.itfc.gui.MainFrame;
-import pleocmd.pipe.DataQueue;
+import pleocmd.pipe.data.DataQueue;
 
 /**
  * In console mode, the standard input gets simply wrapped by this class.<br>

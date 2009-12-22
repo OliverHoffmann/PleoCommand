@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package pleocmd.pipe.data;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;

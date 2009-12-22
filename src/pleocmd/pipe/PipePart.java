@@ -2,6 +2,7 @@ package pleocmd.pipe;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
+import pleocmd.pipe.cfg.Config;
 
 public abstract class PipePart extends StateHandling {
 

@@ -19,6 +19,8 @@ import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.cvt.Converter;
+import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.DataQueue;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 

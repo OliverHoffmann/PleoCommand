@@ -4,7 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-import pleocmd.pipe.DataAsciiConverter;
+import pleocmd.pipe.data.DataAsciiConverter;
 
 public final class BinaryValue extends Value {
 

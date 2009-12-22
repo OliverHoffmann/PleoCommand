@@ -20,9 +20,9 @@ import javax.swing.event.ListSelectionListener;
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigValue;
 import pleocmd.pipe.PipePart;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigValue;
 
 public final class PipePartPanel<E extends PipePart> extends JPanel {
 

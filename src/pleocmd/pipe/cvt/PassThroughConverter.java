@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import pleocmd.pipe.Config;
-import pleocmd.pipe.Data;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.data.Data;
 
 public final class PassThroughConverter extends Converter {
 

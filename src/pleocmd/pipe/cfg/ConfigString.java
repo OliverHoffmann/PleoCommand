@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package pleocmd.pipe.cfg;
 
 import javax.swing.JTextField;
 

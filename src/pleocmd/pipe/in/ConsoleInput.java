@@ -5,9 +5,9 @@ import java.io.IOException;
 
 import pleocmd.StandardInput;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigEnum;
-import pleocmd.pipe.Data;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigEnum;
+import pleocmd.pipe.data.Data;
 
 public final class ConsoleInput extends Input {
 

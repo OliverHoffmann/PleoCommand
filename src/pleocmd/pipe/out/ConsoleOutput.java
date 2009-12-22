@@ -6,9 +6,9 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigEnum;
-import pleocmd.pipe.Data;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigEnum;
+import pleocmd.pipe.data.Data;
 
 public final class ConsoleOutput extends Output {
 

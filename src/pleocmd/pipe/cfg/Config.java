@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package pleocmd.pipe.cfg;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.exc.PipeException;
+import pleocmd.pipe.PipePart;
 
 public final class Config extends AbstractList<ConfigValue> {
 
@@ -43,7 +44,7 @@ public final class Config extends AbstractList<ConfigValue> {
 		return owner;
 	}
 
-	protected void setOwner(final PipePart owner) {
+	public void setOwner(final PipePart owner) {
 		if (this.owner != null)
 			throw new IllegalStateException(
 					"Config's owner has already been assigned");

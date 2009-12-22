@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package pleocmd.pipe.cfg;
 
 import java.awt.Container;
 import java.io.IOException;

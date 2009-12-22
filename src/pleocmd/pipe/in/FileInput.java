@@ -7,10 +7,10 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigEnum;
-import pleocmd.pipe.ConfigPath;
-import pleocmd.pipe.Data;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigEnum;
+import pleocmd.pipe.cfg.ConfigPath;
+import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input {
 

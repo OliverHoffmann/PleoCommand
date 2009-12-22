@@ -5,10 +5,10 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigDataSeq;
-import pleocmd.pipe.Data;
-import pleocmd.pipe.DataSequenceMap;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigDataSeq;
+import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.DataSequenceMap;
 
 public final class EmotionConverter extends Converter {
 

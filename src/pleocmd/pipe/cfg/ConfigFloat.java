@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package pleocmd.pipe.cfg;
 
 import java.io.IOException;
 
@@ -7,33 +7,32 @@ import javax.swing.SpinnerNumberModel;
 
 import pleocmd.itfc.gui.Layouter;
 
-public final class ConfigInt extends ConfigValue {
+public final class ConfigFloat extends ConfigValue {
 
-	private long content;
-
-	private final long min, max;
+	private double content;
+	private final double min, max;
 
 	private JSpinner sp;
 
-	public ConfigInt(final String label, final long min, final long max) {
+	public ConfigFloat(final String label, final double min, final double max) {
 		super(label);
 		this.min = min;
 		this.max = max;
 	}
 
-	public long getContent() {
+	public double getContent() {
 		return content;
 	}
 
-	public void setContent(final long content) {
+	public void setContent(final double content) {
 		this.content = content;
 	}
 
-	public long getMin() {
+	public double getMin() {
 		return min;
 	}
 
-	public long getMax() {
+	public double getMax() {
 		return max;
 	}
 
@@ -44,19 +43,19 @@ public final class ConfigInt extends ConfigValue {
 
 	@Override
 	public void insertGUIComponents(final Layouter lay) {
-		sp = new JSpinner(new SpinnerNumberModel(content, min, max, 1));
+		sp = new JSpinner(new SpinnerNumberModel(content, min, max, .00001));
 		lay.add(sp, true);
 	}
 
 	@Override
 	public void setFromGUIComponents() {
-		setContent((Long) sp.getValue());
+		setContent((Double) sp.getValue());
 	}
 
 	@Override
 	protected void setFromString(final String content) throws IOException {
 		try {
-			setContent(Long.valueOf(content));
+			setContent(Double.valueOf(content));
 		} catch (final NumberFormatException e) {
 			throw new IOException(String.format(
 					"Invalid number for '%s': '%s'", getLabel(), content));

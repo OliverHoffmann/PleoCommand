@@ -10,9 +10,9 @@ import java.util.concurrent.TimeoutException;
 import pleocmd.Log;
 import pleocmd.api.PleoCommunication;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.Config;
-import pleocmd.pipe.ConfigEnum;
-import pleocmd.pipe.Data;
+import pleocmd.pipe.cfg.Config;
+import pleocmd.pipe.cfg.ConfigEnum;
+import pleocmd.pipe.data.Data;
 
 public final class PleoRXTXOutput extends Output {
 
