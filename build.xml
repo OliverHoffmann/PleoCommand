@@ -55,9 +55,10 @@
 
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
 	<target name="dist" depends="build">
-		<property name="jarfile" location="${dist}/${ant.project.name}.jar" />
-		<delete file="${jarfile}" verbose="${verb}" />
-		<jar jarfile="${jarfile}"
+		<property name="jarfile" value="${ant.project.name}.jar" />
+		<property name="jarloc" location="${dist}/${jarfile}" />
+		<delete file="${jarloc}" verbose="${verb}" />
+		<jar jarfile="${jarloc}"
 		     basedir="${bin}"
 		     duplicate="fail"
 		     strict="warn">
@@ -77,11 +78,25 @@
 		<property name="jsloc" value="${bin}/${ant.project.name}.jsmooth" />
 		<echoxml file="${jsloc}">
 			<jsmoothproject>
-				<classPath>${classpath}</classPath>
-				<executableName>${exefile}</executableName>
-				<mainClassName>${mainclass}</mainClassName>
-				<minimumVersion>1.5</minimumVersion>
 				<skeletonName>Windowed Wrapper</skeletonName>
+				<minimumVersion>1.5</minimumVersion>
+				<mainClassName>${mainclass}</mainClassName>
+
+				<executableName>${exefile}</executableName>
+				<iconLocation>../${ant.project.name}.ico</iconLocation>
+				<classPath>${classpath}</classPath>
+
+				<embeddedJar>true</embeddedJar>
+				<jarLocation>${jarloc}</jarLocation>
+				
+				<maximumMemoryHeap>536870912</maximumMemoryHeap>
+					
+				<key>Message</key>
+				<value>Java is needed. Do you want to download it now?</value>
+				<key>URL</key>
+				<value>http://www.java.com</value>
+				<key>Debug</key>
+				<value>0</value>
 			</jsmoothproject>
 		</echoxml>
 		<jsmoothgen skeletonroot="${lib}/skeletons"
