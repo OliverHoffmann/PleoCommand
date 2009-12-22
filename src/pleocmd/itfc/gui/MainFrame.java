@@ -23,7 +23,7 @@ public final class MainFrame extends JFrame {
 
 	private static final long serialVersionUID = 7174844214646208915L;
 
-	private static final File PIPE_CONFIG_FILE = new File(System
+	public static final File PIPE_CONFIG_FILE = new File(System
 			.getProperty("user.home")
 			+ "/.pleocommand.pca");
 

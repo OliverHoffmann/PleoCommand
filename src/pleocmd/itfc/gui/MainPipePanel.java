@@ -75,6 +75,7 @@ public final class MainPipePanel extends JPanel {
 		new PipePartConfigFrame(pipe);
 		Log.detail("GUI-Frame is done with configuration");
 		updatePipeLabel();
+		writeConfigToFile(MainFrame.PIPE_CONFIG_FILE);
 	}
 
 	public void writeConfigToFile() {
@@ -114,6 +115,7 @@ public final class MainPipePanel extends JPanel {
 			Log.error(e);
 		}
 		updatePipeLabel();
+		writeConfigToFile(MainFrame.PIPE_CONFIG_FILE);
 	}
 
 	public void updateState() {
