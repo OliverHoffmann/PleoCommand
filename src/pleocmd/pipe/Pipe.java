@@ -256,6 +256,18 @@ public final class Pipe extends StateHandling {
 		Log.info("Pipe successfully aborted");
 	}
 
+	/**
+	 * This is the run() method of the Input-Thread.<br>
+	 * It fetches {@link Data} from the {@link Input}s, passes it to the
+	 * {@link Converter} and puts it into the {@link DataQueue} in a loop until
+	 * all {@link Input}s have finished or the thread gets interrupted.
+	 * 
+	 * @throws StateException
+	 *             if, during looping, the {@link Pipe} exits the "Initialized"
+	 *             state, which should never occur
+	 * @throws IOException
+	 *             if the {@link DataQueue} has been closed during looping
+	 */
 	protected void runInputThread() throws StateException, IOException {
 		inputThreadInterruped = false;
 		int count = 0;
@@ -287,6 +299,19 @@ public final class Pipe extends StateHandling {
 		}
 	}
 
+	/**
+	 * This is the run() method of the Output-Thread.<br>
+	 * It fetches {@link Data} from the {@link DataQueue} and passes it to the
+	 * {@link Output}s in a loop until the {@link DataQueue} has been closed.
+	 * <p>
+	 * If the thread gets interrupted, only the current {@link Data} processing
+	 * will be aborted. To interrupt the thread itself, one has to close the
+	 * {@link DataQueue}.
+	 * 
+	 * @throws StateException
+	 *             if, during looping, the {@link Pipe} exits the "Initialized"
+	 *             state, which should never occur
+	 */
 	protected void runOutputThread() throws StateException {
 		Log.info("Output-Thread started");
 		int count = 0;
@@ -319,6 +344,17 @@ public final class Pipe extends StateHandling {
 		}
 	}
 
+	/**
+	 * Tries to read one {@link Data} block from the currently active
+	 * {@link Input}.<br>
+	 * If the {@link Input} has no more {@link Data} available or it fails, the
+	 * next {@link Input} in the list will be used.<br>
+	 * If there are no more available {@link Input}s, <b>null</b> will be
+	 * returned.
+	 * 
+	 * @return a new {@link Data} or <b>null</b> if no {@link Input} in the list
+	 *         has any more available {@link Data}
+	 */
 	private Data getFromInput() {
 		Log.detail("Reading one data block from input");
 		Input in;
@@ -326,7 +362,7 @@ public final class Pipe extends StateHandling {
 			if (inputThreadInterruped) return null;
 			assert inputPosition <= inputList.size();
 			if (inputPosition >= inputList.size()) {
-				Log.detail("InputList is empty");
+				Log.detail("Finished InputList");
 				return null;
 			}
 			in = inputList.get(inputPosition);
@@ -384,6 +420,19 @@ public final class Pipe extends StateHandling {
 		return res;
 	}
 
+	/**
+	 * Tries to convert the given {@link Data} block with the {@link Converter}.
+	 * The converter is added to the {@link #ignoredConverter} list if it fails
+	 * permanently during the conversion.
+	 * 
+	 * @param data
+	 *            {@link Data} to convert
+	 * @param cvt
+	 *            {@link Converter} to use for conversion
+	 * @return list of {@link Data} created from {@link Converter} or
+	 *         <b>null</b> if the {@link Converter} could not handle the
+	 *         {@link Data} or an error occurred during conversion
+	 */
 	private List<Data> convertOneData(final Data data, final Converter cvt) {
 		try {
 			if (cvt.canHandleData(data)) {
@@ -411,6 +460,14 @@ public final class Pipe extends StateHandling {
 		return null;
 	}
 
+	/**
+	 * Writes the given {@link Data} to all {@link Output}s ignoring those which
+	 * have permanently failed.
+	 * 
+	 * @param data
+	 *            {@link Data} to write
+	 * @throws InterruptedException
+	 */
 	private void writeDataToAllOutputs(final Data data)
 			throws InterruptedException {
 		Log.detail("Writing data block to %d output(s)", outputList.size());
@@ -418,6 +475,15 @@ public final class Pipe extends StateHandling {
 			if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
 	}
 
+	/**
+	 * Writes one {@link Data} object to one {@link Output}.
+	 * 
+	 * @param data
+	 *            {@link Data} to write
+	 * @param out
+	 *            {@link Output} to write to
+	 * @throws InterruptedException
+	 */
 	private void writeToOutput(final Data data, final Output out)
 			throws InterruptedException {
 		try {
@@ -434,6 +500,12 @@ public final class Pipe extends StateHandling {
 		}
 	}
 
+	/**
+	 * Removes all connected {@link PipePart}s.
+	 * 
+	 * @throws PipeException
+	 *             if {@link Pipe} is not configured or currently initialized
+	 */
 	public void reset() throws PipeException {
 		ensureNoLongerInitialized();
 		inputList.clear();
@@ -444,6 +516,16 @@ public final class Pipe extends StateHandling {
 		assert ignoredOutputs.isEmpty();
 	}
 
+	/**
+	 * Writes the lists of connected {@link PipePart}s to a file.
+	 * 
+	 * @param file
+	 *            {@link File} to write the configuration to
+	 * @throws IOException
+	 *             on write failures
+	 * @throws PipeException
+	 *             if {@link Pipe} is not configured or currently initialized
+	 */
 	public void writeToFile(final File file) throws IOException, PipeException {
 		ensureNoLongerInitialized();
 		final Writer out = new FileWriter(file);
@@ -465,6 +547,18 @@ public final class Pipe extends StateHandling {
 		out.close();
 	}
 
+	/**
+	 * Creates the lists of connected {@link PipePart}s from a file.
+	 * 
+	 * @param file
+	 *            {@link File} to read the configuration from
+	 * @throws IOException
+	 *             on read failures
+	 * @throws PipeException
+	 *             if {@link Pipe} is not configured or currently initialized
+	 * @return true if all {@link PipePart}s could be restored from the file,
+	 *         false it at least one failed to load.
+	 */
 	public boolean readFromFile(final File file) throws IOException,
 			PipeException {
 		ensureNoLongerInitialized();
