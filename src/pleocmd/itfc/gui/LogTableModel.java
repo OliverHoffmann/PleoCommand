@@ -54,8 +54,9 @@ public final class LogTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
-		return String.format("<html><span%s>%s</span></html>", getAttributes(
-				rowIndex, columnIndex), getCell(rowIndex, columnIndex));
+		return String.format("<html><span%s><nobr>%s</nobr></span></html>",
+				getAttributes(rowIndex, columnIndex), getCell(rowIndex,
+						columnIndex));
 	}
 
 	public void addLog(final Log log) {
