@@ -22,6 +22,13 @@ public final class Log {
 	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
 			"HH:mm:ss.SSS");
 
+	/**
+	 * Needed to inline next line after a line-break when writing messages to a
+	 * plain {@link String}. Number of spaces must fit to format specificier in
+	 * {@link #toString()} and the length of the {@link #DATE_FORMATTER}.
+	 */
+	private static final String SPACES = String.format("%68s", "");
+
 	private final Type type;
 
 	private final String caller;
@@ -124,7 +131,7 @@ public final class Log {
 		case Error:
 			return "ERR";
 		case Console:
-			return " > ";
+			return ">  ";
 		default:
 			return "!?!";
 		}
@@ -133,7 +140,7 @@ public final class Log {
 	@Override
 	public String toString() {
 		return String.format("%s %s %-50s %s", getFormattedTime(),
-				getTypeShortString(), caller, msg);
+				getTypeShortString(), caller, msg.replace("\n", "\n" + SPACES));
 	}
 
 	/**
