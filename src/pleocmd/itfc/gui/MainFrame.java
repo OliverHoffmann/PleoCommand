@@ -23,11 +23,11 @@ import pleocmd.pipe.Pipe;
  */
 public final class MainFrame extends JFrame {
 
-	private static final long serialVersionUID = 7174844214646208915L;
-
 	public static final File PIPE_CONFIG_FILE = new File(System
 			.getProperty("user.home")
 			+ "/.pleocommand.pca");
+
+	private static final long serialVersionUID = 7174844214646208915L;
 
 	private static MainFrame guiFrame;
 

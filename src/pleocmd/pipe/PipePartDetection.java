@@ -120,7 +120,9 @@ public final class PipePartDetection {
 				throw new NoSuchMethodException(String.format(
 						"Method doesn't return String: '%s'", m));
 			return cls;
-		} catch (final Exception e) {
+		} catch (final Exception e) { // CS_IGNORE
+			// we need to catch all here, because there are too many
+			// this which may go wrong during class loading to handle each one
 			Log.error(e, "Cannot load class '%s' in '%s'", clsName, pkg);
 			return null;
 		}

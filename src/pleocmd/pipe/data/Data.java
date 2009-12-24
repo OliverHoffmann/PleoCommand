@@ -46,6 +46,7 @@ public final class Data extends AbstractList<Value> {
 	 *             if the given index if invalid
 	 */
 	@Override
+	// CS_IGNORE_NEXT unchecked exception thrown intentionally
 	public Value get(final int index) throws IndexOutOfBoundsException {
 		if (index < 0 || index >= values.size())
 			throw new IndexOutOfBoundsException(String.format(

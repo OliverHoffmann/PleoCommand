@@ -66,12 +66,12 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	private void printHelp(final Class<PipePart> cpp) {
+		// CS_IGNORE_NEXT format is correct in this context
 		Log.consoleOut("%s:", PipePartDetection.callHelp(cpp, HelpKind.Name));
-		Log.consoleOut("%s", PipePartDetection.callHelp(cpp,
-				HelpKind.Description));
+		Log.consoleOut(PipePartDetection.callHelp(cpp, HelpKind.Description));
 		final String cfg = PipePartDetection.callHelp(cpp,
 				HelpKind.Configuration);
-		if (!cfg.isEmpty()) Log.consoleOut("%s", cfg);
+		if (!cfg.isEmpty()) Log.consoleOut(cfg);
 		Log.consoleOut("");
 	}
 

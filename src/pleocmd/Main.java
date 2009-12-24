@@ -5,16 +5,12 @@ import pleocmd.itfc.gui.MainFrame;
 
 /**
  * TODO: List of tasks:<br>
- * add send button to input (before "send eos")<br>
- * exit while pipe is running?<br>
- * detect endless looping in convert()<br>
+ * only enable InputPanel if a ConsoleInput is in the pipe<br>
+ * new input: direct-input which directly uses configured Data<br>
  * checkstyle: no exception handling in pipe's, only pass them thru<br>
  * implement DataFilter<br>
  * check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)<br>
  * add javadoc<br>
- * move Data... classes to value package<br>
- * autodetect pipeparts, not hardcoded<br>
- * implement static PipePart.help()<br>
  */
 
 public final class Main {
@@ -31,7 +27,10 @@ public final class Main {
 				@Override
 				public void uncaughtException(final Thread thread,
 						final Throwable throwable) {
-					throwable.printStackTrace();
+					// we need to print the Exception additionally to
+					// logging it because logging itself may have caused
+					// the exception or it just is not yet initialized
+					throwable.printStackTrace(); // CS_IGNORE
 					Log.error(throwable);
 				}
 			}, "GUI-Thread") {

@@ -30,7 +30,7 @@
 			<property name="format" value="^.*$" />
 		</module> -->
 		<module name="ThrowsCount">
-			<property name="max" value="2" />
+			<property name="max" value="3" />
 		</module>
 
 		<!-- Coding -->
