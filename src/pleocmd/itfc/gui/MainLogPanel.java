@@ -17,6 +17,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import pleocmd.Log;
@@ -40,11 +41,12 @@ public final class MainLogPanel extends JPanel {
 
 	private final JButton btnClear;
 
+	private int minRowHeight;
+
 	public MainLogPanel() {
 		final Layouter lay = new Layouter(this);
 
-		logModel = new LogTableModel();
-		logTable = new JTable(logModel) {
+		logTable = new JTable() {
 
 			private static final long serialVersionUID = 1128237812769648620L;
 
@@ -54,6 +56,8 @@ public final class MainLogPanel extends JPanel {
 			}
 
 		};
+		logModel = new LogTableModel(logTable);
+		logTable.setModel(logModel);
 		final TableColumnModel tcm = logTable.getTableHeader().getColumnModel();
 		tcm.getColumn(0).setHeaderValue("Time");
 		tcm.getColumn(0).setMinWidth(100);
@@ -165,9 +169,15 @@ public final class MainLogPanel extends JPanel {
 
 	protected void addLog0(final Log log) {
 		logModel.addLog(log);
-		logTable.scrollRectToVisible(logTable.getCellRect(logModel
-				.getRowCount() - 1, 0, true));
-		updateState();
+		final int row = logModel.getRowCount() - 1;
+		if (minRowHeight == 0)
+			minRowHeight = logTable.prepareRenderer(
+					logTable.getCellRenderer(0, 0), 0, 0).getPreferredSize().height;
+		logTable.setRowHeight(row, 2 + Math.max(minRowHeight, logTable
+				.prepareRenderer(logTable.getCellRenderer(row, 3), row, 3)
+				.getPreferredSize().height));
+		logTable.scrollRectToVisible(logTable.getCellRect(row, 0, true));
+		if (row == 1) updateState();
 	}
 
 	public void updateState() {
@@ -177,4 +187,13 @@ public final class MainLogPanel extends JPanel {
 		btnClear.setEnabled(logModel.getRowCount() > 0);
 	}
 
+	void updateRowHeights() {
+		if (logTable.getRowCount() == 0) return;
+		final TableCellRenderer tcr = logTable.getCellRenderer(0, 3);
+		minRowHeight = logTable.prepareRenderer(logTable.getCellRenderer(0, 0),
+				0, 0).getPreferredSize().height;
+		for (int i = logTable.getRowCount() - 1; i >= 0; --i)
+			logTable.setRowHeight(i, 2 + Math.max(minRowHeight, logTable
+					.prepareRenderer(tcr, i, 3).getPreferredSize().height));
+	}
 }

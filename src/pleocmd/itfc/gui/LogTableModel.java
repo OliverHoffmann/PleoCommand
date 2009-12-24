@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.Log;
@@ -17,7 +18,13 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private final List<Log> list = new ArrayList<Log>();
 
+	private final JTable table;
+
 	private String mark = "XXXXXXXXXX";
+
+	public LogTableModel(final JTable table) {
+		this.table = table;
+	}
 
 	@Override
 	public int getColumnCount() {
@@ -56,7 +63,9 @@ public final class LogTableModel extends AbstractTableModel {
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
 		return String.format("<html><span%s><nobr>%s</nobr></span></html>",
 				getAttributes(rowIndex, columnIndex), getCell(rowIndex,
-						columnIndex));
+						columnIndex).replace("<", "&lt;").replace("\n", "<br>")
+						.replace("\t", "&nbsp;&nbsp;&nbsp;").replace(" ",
+								"&nbsp;"));
 	}
 
 	public void addLog(final Log log) {
@@ -79,6 +88,7 @@ public final class LogTableModel extends AbstractTableModel {
 				list.clear();
 				list.addAll(newList);
 				fireTableDataChanged();
+				MainFrame.the().getMainLogPanel().updateRowHeights();
 			}
 		}
 	}
@@ -98,7 +108,7 @@ public final class LogTableModel extends AbstractTableModel {
 
 	public void setMark(final int index) {
 		mark = list.get(index).getCaller();
-		fireTableDataChanged();
+		table.repaint();
 	}
 
 }
