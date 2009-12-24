@@ -139,8 +139,6 @@ public final class MainFrame extends JFrame {
 		}
 		Log.detail("GUI-Frame has been closed");
 		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
-		// TODO show message if pipe still running
-		// guiFrame = null;
 		dispose();
 	}
 
