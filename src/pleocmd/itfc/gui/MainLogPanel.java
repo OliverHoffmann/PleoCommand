@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -140,11 +141,15 @@ public final class MainLogPanel extends JPanel {
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter("Ascii-Logfile",
 				"log"));
-		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) try {
-			logModel.writeToFile(fc.getSelectedFile());
-		} catch (final IOException exc) {
-			Log.error(exc);
-		}
+		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
+			try {
+				File file = fc.getSelectedFile();
+				if (!file.getName().contains("."))
+					file = new File(file.getPath() + ".log");
+				logModel.writeToFile(file);
+			} catch (final IOException exc) {
+				Log.error(exc);
+			}
 	}
 
 	public void clearLog() {

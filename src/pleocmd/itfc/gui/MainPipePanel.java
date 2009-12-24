@@ -83,8 +83,12 @@ public final class MainPipePanel extends JPanel {
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
 				"Pipe-Configuration", "pca"));
-		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
-			writeConfigToFile(fc.getSelectedFile());
+		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			if (!file.getName().contains("."))
+				file = new File(file.getPath() + ".pca");
+			writeConfigToFile(file);
+		}
 	}
 
 	public void writeConfigToFile(final File file) {
