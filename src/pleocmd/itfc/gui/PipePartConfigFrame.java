@@ -33,12 +33,9 @@ public final class PipePartConfigFrame extends JDialog {
 		setTitle("Configure Pipe");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		pppInput.getTableModel().clear();
-		pppInput.getTableModel().addPipeParts(pipe.getInputList());
-		pppConverter.getTableModel().clear();
-		pppConverter.getTableModel().addPipeParts(pipe.getConverterList());
-		pppOutput.getTableModel().clear();
-		pppOutput.getTableModel().addPipeParts(pipe.getOutputList());
+		pppInput.assignPipeParts(pipe.getInputList());
+		pppConverter.assignPipeParts(pipe.getConverterList());
+		pppOutput.assignPipeParts(pipe.getOutputList());
 
 		// Add components
 		final Layouter lay = new Layouter(this);

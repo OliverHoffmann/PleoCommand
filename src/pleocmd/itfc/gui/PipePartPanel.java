@@ -249,6 +249,12 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		return table;
 	}
 
+	public void assignPipeParts(final List<E> ppList) {
+		tableModel.clear();
+		tableModel.addPipeParts(ppList);
+		updateState();
+	}
+
 	public void updateState() {
 		btnAdd.setEnabled(true);
 		final int foc = table.getSelectedRow();
