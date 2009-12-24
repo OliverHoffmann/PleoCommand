@@ -224,6 +224,7 @@ public final class MainInputPanel extends JPanel {
 		btnSend.setEnabled(ready);
 		btnSendEOS.setEnabled(ready);
 		btnRead.setEnabled(ready);
+		historyList.setEnabled(ready);
 		btnClear.setEnabled(historyListModel.getSize() > 0);
 	}
 
