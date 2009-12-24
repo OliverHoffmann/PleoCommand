@@ -64,4 +64,21 @@ public final class PleoRXTXOutput extends Output {
 			}
 		}
 	}
+
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "Pleo RXTX Output";
+		case Description:
+			return "Processes commands like 'PMC|foo' by sending 'foo' "
+					+ "without any modifications to the Pleo via an USB "
+					+ "connection by using the RXTX library";
+		case Configuration:
+			return "1: Path to the device on which the Pleo is connected to"
+					+ "this computer";
+		default:
+			return "???";
+		}
+	}
+
 }

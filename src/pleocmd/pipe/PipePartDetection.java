@@ -3,6 +3,8 @@ package pleocmd.pipe;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -13,6 +15,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import pleocmd.Log;
+import pleocmd.pipe.PipePart.HelpKind;
 
 public final class PipePartDetection {
 
@@ -100,21 +103,53 @@ public final class PipePartDetection {
 	@SuppressWarnings("unchecked")
 	private static <E extends PipePart> Class<E> loadClass(final String pkg,
 			final String fileName) {
-		if (!fileName.endsWith(".class") || fileName.contains("$"))
-			return null;
-
+		if (!fileName.endsWith(".class")) return null;
+		final String clsName = fileName.substring(0, fileName.length() - 6);
 		try {
-			final Class<E> cls = (Class<E>) Class.forName(pkg + '.'
-					+ fileName.substring(0, fileName.length() - 6));
-			if (!Modifier.isAbstract(cls.getModifiers())
-					&& PipePart.class.isAssignableFrom(cls)) return cls;
-		} catch (final LinkageError e) {
+			final Class<E> cls = (Class<E>) Class.forName(pkg + '.' + clsName);
+			if (!PipePart.class.isAssignableFrom(cls)) return null;
+			if (Modifier.isAbstract(cls.getModifiers())) return null;
+			final Method m = getHelp(cls);
+			if (!Modifier.isStatic(m.getModifiers()))
+				throw new NoSuchMethodException(String.format(
+						"Method is not static: '%s'", m));
+			if (!Modifier.isPublic(m.getModifiers()))
+				throw new NoSuchMethodException(String.format(
+						"Method is not public: '%s'", m));
+			if (!m.getReturnType().equals(String.class))
+				throw new NoSuchMethodException(String.format(
+						"Method doesn't return String: '%s'", m));
+			return cls;
+		} catch (final Exception e) {
+			Log.error(e, "Cannot load class '%s' in '%s'", clsName, pkg);
+			return null;
+		}
+	}
+
+	public static Method getHelp(final Class<? extends PipePart> cpp)
+			throws NoSuchMethodException {
+		try {
+			return cpp.getMethod("help", HelpKind.class);
+		} catch (final NoSuchMethodException e) {
+			throw new NoSuchMethodException(String.format(
+					"No 'public static String help(HelpKind)'" + " in '%s'",
+					cpp));
+		}
+	}
+
+	public static String callHelp(final Class<? extends PipePart> cpp,
+			final HelpKind kind) {
+		try {
+			return (String) PipePartDetection.getHelp(cpp).invoke(null, kind);
+		} catch (final IllegalArgumentException e) {
 			Log.error(e);
-		} catch (final ClassNotFoundException e) {
+		} catch (final IllegalAccessException e) {
 			Log.error(e);
-		} catch (final ClassCastException e) {
+		} catch (final InvocationTargetException e) {
+			Log.error(e);
+		} catch (final NoSuchMethodException e) {
 			Log.error(e);
 		}
-		return null;
+		return "";
 	}
 }

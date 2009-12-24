@@ -15,6 +15,10 @@ import pleocmd.pipe.out.Output;
  */
 public abstract class PipePart extends StateHandling {
 
+	public enum HelpKind {
+		Name, Description, Configuration
+	}
+
 	private final Config config;
 
 	/**

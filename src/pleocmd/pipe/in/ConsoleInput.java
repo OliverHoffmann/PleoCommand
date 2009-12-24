@@ -52,4 +52,18 @@ public final class ConsoleInput extends Input {
 		}
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "Console Input";
+		case Description:
+			return "Reads Data blocks from the standard input";
+		case Configuration:
+			return "1: 'Ascii' if Data blocks are in Ascii format or\n"
+					+ "   'Binary' if Data blocks should be treated as binary";
+		default:
+			return "???";
+		}
+	}
+
 }

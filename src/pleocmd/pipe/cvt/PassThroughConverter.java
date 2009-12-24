@@ -41,4 +41,18 @@ public final class PassThroughConverter extends Converter {
 		return res;
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "Pass-Through Converter";
+		case Description:
+			return "Just passes through any commands of type 'PMC' and 'SC' "
+					+ "without processing them any further";
+		case Configuration:
+			return "";
+		default:
+			return "???";
+		}
+	}
+
 }

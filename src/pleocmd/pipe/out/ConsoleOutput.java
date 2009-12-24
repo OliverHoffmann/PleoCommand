@@ -56,4 +56,18 @@ public final class ConsoleOutput extends Output {
 		}
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "Console Output";
+		case Description:
+			return "Writes Data blocks to the standard output";
+		case Configuration:
+			return "1: 'Ascii' if Data blocks will be in Ascii format or\n"
+					+ "   'Binary' if Data blocks will be written as binary";
+		default:
+			return "???";
+		}
+	}
+
 }

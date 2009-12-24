@@ -63,4 +63,20 @@ public final class FileInput extends Input {
 		}
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "File Input";
+		case Description:
+			return "Reads Data blocks from external files";
+		case Configuration:
+			return "1: Path to an external file from which commands should "
+					+ "be read in either Ascii or binary form\n"
+					+ "2: 'Ascii' if Data blocks are in Ascii format or\n"
+					+ "   'Binary' if Data blocks should be treated as binary";
+		default:
+			return "???";
+		}
+	}
+
 }

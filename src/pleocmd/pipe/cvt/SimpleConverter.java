@@ -50,4 +50,19 @@ public final class SimpleConverter extends Converter {
 		}
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "Simple Data Converter";
+		case Description:
+			return "Converts commands like 'DO|foo' into a sequence of "
+					+ "simpler commands based on a table lookup for 'foo'";
+		case Configuration:
+			return "1: Path to a file which contains a mapping between "
+					+ "triggers and a list of commands for each of them";
+		default:
+			return "???";
+		}
+	}
+
 }

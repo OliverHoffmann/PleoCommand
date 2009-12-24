@@ -34,4 +34,17 @@ public final class TcpIpInput extends Input {
 		return null;
 	}
 
+	public static String help(final HelpKind kind) {
+		switch (kind) {
+		case Name:
+			return "TCP/IP Input";
+		case Description:
+			return "TODO";
+		case Configuration:
+			return "TODO";
+		default:
+			return "???";
+		}
+	}
+
 }
