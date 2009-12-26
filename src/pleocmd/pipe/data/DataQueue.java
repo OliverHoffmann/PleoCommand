@@ -1,7 +1,6 @@
 package pleocmd.pipe.data;
 
 import java.io.IOException;
-import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
@@ -175,26 +174,6 @@ public final class DataQueue {
 		}
 
 		return hasBeenCleared;
-	}
-
-	/**
-	 * Puts a series of {@link Data} into the ring buffer as an atomic operation
-	 * (i.e. completely synchronized).
-	 * 
-	 * @param list
-	 *            data to put into the ring buffer
-	 * @return true if the queue has been cleared because one of the new
-	 *         {@link Data} has a higher priority as the current {@link Data}s
-	 *         in the queue
-	 * @throws IOException
-	 *             if the queue has been closed
-	 * @see #put(Data)
-	 */
-	public synchronized boolean put(final List<Data> list) throws IOException {
-		boolean cleared = false;
-		for (final Data data : list)
-			cleared |= put(data);
-		return cleared;
 	}
 
 	@Override

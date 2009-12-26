@@ -14,6 +14,8 @@ public final class ConsoleOutput extends Output {
 
 	private PrintType type;
 
+	private Data lastRoot;
+
 	public ConsoleOutput() {
 		super(new Config()
 				.addV(new ConfigEnum("PrintType", PrintType.values())));
@@ -32,19 +34,34 @@ public final class ConsoleOutput extends Output {
 
 	@Override
 	protected void close0() {
-		// nothing to do
+		lastRoot = null;
 	}
 
 	@Override
 	protected void write0(final Data data) throws OutputException, IOException {
+		Data root;
 		switch (type) {
-		case DataBinary:
-			final ByteArrayOutputStream out = new ByteArrayOutputStream();
-			data.writeToBinary(new DataOutputStream(out));
-			Log.consoleOut(out.toString("ISO-8859-1"));
-			break;
 		case DataAscii:
 			Log.consoleOut(data.toString());
+			break;
+		case DataBinary:
+			if (lastRoot != (root = data.getRoot())) {
+				lastRoot = root;
+				final ByteArrayOutputStream out = new ByteArrayOutputStream();
+				data.writeToBinary(new DataOutputStream(out));
+				Log.consoleOut(out.toString("ISO-8859-1"));
+			}
+			break;
+		case DataAsciiOriginal:
+			if (lastRoot != (root = data.getRoot())) {
+				lastRoot = root;
+				Log.consoleOut(data.getRoot().toString());
+			}
+			break;
+		case DataBinaryOriginal:
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			data.getRoot().writeToBinary(new DataOutputStream(out));
+			Log.consoleOut(out.toString("ISO-8859-1"));
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))

@@ -11,6 +11,7 @@ import java.util.AbstractList;
 import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.pipe.Pipe;
 import pleocmd.pipe.val.DummyValue;
 import pleocmd.pipe.val.Value;
 
@@ -20,20 +21,63 @@ public final class Data extends AbstractList<Value> {
 	public static final byte PRIO_LOWEST = -99;
 	public static final byte PRIO_HIGHEST = 99;
 
+	public static final long TIME_NOTIME = -1;
+
 	private final List<Value> values;
+
+	private final Data parent;
 
 	private final byte priority;
 
-	public Data(final List<Value> values, final byte priority) {
+	private final long time;
+
+	/**
+	 * Creates a new {@link Data} object where all fields can be set
+	 * individually.
+	 * 
+	 * @param values
+	 *            list of {@link Value}
+	 * @param parent
+	 *            the parent which was the cause while this {@link Data} has
+	 *            been created - may be <b>null</b>
+	 * @param priority
+	 *            priority of the new {@link Data} (must be between
+	 *            {@link #PRIO_LOWEST} and {@link #PRIO_HIGHEST}) - if
+	 *            {@link #PRIO_DEFAULT}, it will inherit the parent's priority
+	 *            if a parent is defined
+	 * @param time
+	 *            time at which this {@link Data} has been created relative to
+	 *            the start of the {@link Pipe} - if {@link #TIME_NOTIME} it
+	 *            will inherit the parent's time if a parent is defined
+	 */
+	public Data(final List<Value> values, final Data parent,
+			final byte priority, final long time) {
 		this.values = values;
-		this.priority = priority;
-		Log.detail("New Data created: %s", this);
+		this.parent = parent;
+		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
+				.getPriority() : priority;
+		this.time = time == TIME_NOTIME && parent != null ? parent.getTime()
+				: time;
+		Log.detail("New Data created: %s (parent: '%s' priority: %d time: %d)",
+				this, parent, priority, time);
 	}
 
-	public Data(final Data data, final byte priority) {
-		Log.detail("Cloned Data '%s' and changed to %d", data, priority);
-		values = data.values;
-		this.priority = priority;
+	/**
+	 * Creates a new {@link Data} object where all fields will be inherited from
+	 * the parent if one is defined or set to defaults otherwise.
+	 * 
+	 * @param values
+	 *            list of {@link Value}
+	 * @param parent
+	 *            the parent which was the cause while this {@link Data} has
+	 *            been created - may be <b>null</b>
+	 */
+	public Data(final List<Value> values, final Data parent) {
+		this.values = values;
+		this.parent = parent;
+		priority = parent != null ? parent.getPriority() : PRIO_DEFAULT;
+		time = parent != null ? parent.getTime() : TIME_NOTIME;
+		Log.detail("New Data created: %s (parent: '%s')", this, parent);
 	}
 
 	/**
@@ -73,8 +117,16 @@ public final class Data extends AbstractList<Value> {
 		return values.size();
 	}
 
+	public Data getParent() {
+		return parent;
+	}
+
 	public byte getPriority() {
 		return priority;
+	}
+
+	public long getTime() {
+		return time;
 	}
 
 	/**
@@ -88,8 +140,7 @@ public final class Data extends AbstractList<Value> {
 	 *             invalid type or is of an invalid format for its type
 	 */
 	public static Data createFromBinary(final DataInput in) throws IOException {
-		final DataBinaryConverter dbc = new DataBinaryConverter(in);
-		return new Data(dbc.getValues(), dbc.getPriority());
+		return new DataBinaryConverter(in).createDataFromFields();
 	}
 
 	/**
@@ -104,8 +155,7 @@ public final class Data extends AbstractList<Value> {
 	 * @see DataAsciiConverter
 	 */
 	public static Data createFromAscii(final DataInput in) throws IOException {
-		final DataAsciiConverter dac = new DataAsciiConverter(in);
-		return new Data(dac.getValues(), dac.getPriority());
+		return new DataAsciiConverter(in).createDataFromFields();
 	}
 
 	/**
@@ -145,6 +195,10 @@ public final class Data extends AbstractList<Value> {
 			Log.error(e);
 			return String.format("S:%1", e.getMessage());
 		}
+	}
+
+	public Data getRoot() {
+		return parent == null ? this : parent.getRoot();
 	}
 
 }

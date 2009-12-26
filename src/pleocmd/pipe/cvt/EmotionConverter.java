@@ -43,7 +43,7 @@ public final class EmotionConverter extends Converter {
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		try {
 			return DataSequenceMap.cloneList(map.findDataList(data.get(1)
-					.asString()), data.getPriority());
+					.asString()), data);
 		} catch (final ConverterException e) {
 			throw new ConverterException(this, false, e,
 					"Cannot convert emotion-data '%s'", data);

@@ -31,17 +31,20 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
-	protected void write0(final Data data) throws OutputException, IOException,
-			InterruptedException {
+	protected void write0(final Data data) throws OutputException, IOException {
 		if ("SC".equals(data.getSafe(0).asString())) {
 			final String v2 = data.get(1).asString();
 			if ("SLEEP".equals(v2))
-				Thread.sleep(data.getSafe(2).asLong());
+				try {
+					Thread.sleep(data.getSafe(2).asLong());
+				} catch (final InterruptedException e) {
+					Log.error(e, "Executing '%s' failed", data);
+				}
 			else if ("HELP".equals(v2))
 				printHelp();
 			else
 				throw new OutputException(this, false,
-						"Unknown internal command: '%s'", v2);
+						"Unknown internal command: '%s' in '%s'", v2, data);
 		}
 	}
 

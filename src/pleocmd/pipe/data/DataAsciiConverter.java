@@ -5,10 +5,9 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.pipe.Pipe;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
@@ -33,17 +32,24 @@ import pleocmd.pipe.val.ValueType;
  * The next 2 characters must be digits and will be interpreted as the priority
  * (may be preceded by a '-' for negative numbers)</td>
  * </tr>
+ * <tr>
+ * <td>T</td>
+ * <td>Time:<br>
+ * The next up to 10 characters must be digits and will be interpreted as the
+ * time in milliseconds if followed by 'ms' or seconds if followed by 's' after
+ * starting the {@link Pipe} at which this {@link Data} should be executed</td>
+ * </tr>
  * </table>
  * <p>
  * Examples:<br>
  * 25|7.3|Hello<br>
  * [P-05]I:3|F:2.0|S:Some String<br>
  * S: 12345678 | 100 | F: 100 | Bx: F0DD35007E | Sx: 48454C4C4F<br>
- * [P99]S:Very High Priority<br>
+ * [T1sP99]S:Very High Priority, executed after 1 second<br>
  * 
  * @author oliver
  */
-public final class DataAsciiConverter {
+public final class DataAsciiConverter extends AbstractDataConverter {
 
 	/**
 	 * 1 => valid decimal number<br>
@@ -73,10 +79,6 @@ public final class DataAsciiConverter {
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
-	private final List<Value> values;
-
-	private byte priority;
-
 	private byte[] buf;
 
 	private int buflen;
@@ -95,8 +97,7 @@ public final class DataAsciiConverter {
 	 *            {@link Data} to read from
 	 */
 	public DataAsciiConverter(final Data data) {
-		priority = data.getPriority();
-		values = data;
+		super(data);
 	}
 
 	/**
@@ -112,9 +113,7 @@ public final class DataAsciiConverter {
 	 */
 	public DataAsciiConverter(final DataInput in) throws IOException {
 		Log.detail("Started parsing an ASCII Data object");
-		values = new ArrayList<Value>();
 		buf = new byte[1]; // TODO larger default
-		priority = Data.PRIO_DEFAULT;
 		index = -1;
 		while (true) {
 			++index;
@@ -123,6 +122,7 @@ public final class DataAsciiConverter {
 			case '\n':
 				parseValue();
 				// this was the end of the data block
+				trimValues();
 				Log.detail("Finished parsing an ASCII Data object");
 				return;
 			case '|':
@@ -190,24 +190,16 @@ public final class DataAsciiConverter {
 			val.readFromAscii(buf2, buf2.length);
 		} else
 			val.readFromAscii(buf, buflen);
-		values.add(val);
-	}
-
-	public byte getPriority() {
-		return priority;
-	}
-
-	public List<Value> getValues() {
-		return values;
+		getValues().add(val);
 	}
 
 	public void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
 		Log.detail("Writing Data to ASCII output stream");
-		if (priority != Data.PRIO_DEFAULT) writeFlags(out);
+		writeFlags(out);
 
 		boolean first = true;
-		for (final Value value : values) {
+		for (final Value value : getValues()) {
 			// write delimiter if needed
 			if (!first) {
 				out.writeByte(' ');
@@ -243,13 +235,24 @@ public final class DataAsciiConverter {
 	}
 
 	private void writeFlags(final DataOutput out) throws IOException {
+		if (getPriority() == Data.PRIO_DEFAULT && getTime() == Data.TIME_NOTIME)
+			return;
 		out.writeByte('[');
 		out.writeByte(' ');
-		if (priority != Data.PRIO_DEFAULT) {
+		if (getPriority() != Data.PRIO_DEFAULT) {
 			out.writeByte('P');
-			if (priority < 0) out.writeByte('-');
-			out.writeByte('0' + Math.abs(priority) / 10);
-			out.writeByte('0' + Math.abs(priority) % 10);
+			if (getPriority() < 0) out.writeByte('-');
+			out.writeByte('0' + Math.abs(getPriority()) / 10);
+			out.writeByte('0' + Math.abs(getPriority()) % 10);
+			out.writeByte(' ');
+		}
+		if (getTime() != Data.TIME_NOTIME) {
+			out.writeByte('T');
+			final boolean inSec = getTime() % 1000 == 0;
+			final long val = inSec ? getTime() / 1000 : getTime();
+			out.write(String.valueOf(val).getBytes("ISO-8859-1"));
+			if (!inSec) out.write('m');
+			out.write('s');
 			out.writeByte(' ');
 		}
 		out.writeByte(']');
@@ -268,6 +271,10 @@ public final class DataAsciiConverter {
 			case 'P':
 			case 'p':
 				parseFlagPriority(in);
+				break;
+			case 'T':
+			case 't':
+				parseFlagTime(in);
 				break;
 			default:
 				throw new IOException(String.format("Invalid character 0x%02X "
@@ -295,11 +302,47 @@ public final class DataAsciiConverter {
 			throw new IOException(String.format("Invalid character 0x%02X "
 					+ "in priority at position %d", b, index));
 		res += b - '0';
-		priority = neg ? (byte) -res : res;
-		if (priority < Data.PRIO_LOWEST || priority > Data.PRIO_HIGHEST)
-			throw new IOException(String.format(
-					"Priority is out of range: %d not between " + "%d and %d",
-					priority, Data.PRIO_LOWEST, Data.PRIO_HIGHEST));
+		if (neg) res = (byte) -res;
+
+		Log.detail("Parsed priority: %d", res);
+
+		if (res < Data.PRIO_LOWEST || res > Data.PRIO_HIGHEST)
+			throw new IOException(String.format("Priority is out of range: "
+					+ "%d not between %d and %d", res, Data.PRIO_LOWEST,
+					Data.PRIO_HIGHEST));
+		setPriority(res);
+	}
+
+	private void parseFlagTime(final DataInput in) throws IOException {
+		long res = 0;
+		while (true) {
+			++index;
+			final byte b = in.readByte();
+			if (b == 'm') {
+				++index;
+				final byte b2 = in.readByte();
+				if (b2 != 's')
+					throw new IOException(String.format("Invalid character "
+							+ "0x%02X in time at position %d", b2, index));
+				break;
+			}
+			if (b == 's') {
+				res *= 1000;
+				break;
+			}
+			if (b < '0' || b > '9')
+				throw new IOException(String.format("Invalid character 0x%02X "
+						+ "in time at position %d", b, index));
+			res *= 10;
+			res += b - '0';
+		}
+
+		Log.detail("Parsed time: %d ms", res);
+
+		if (res > 0xFFFFFFFFL)
+			throw new IOException(String.format("Time is out of range: "
+					+ "%d not between 0 and 0xFFFFFFFF", res));
+		setTime(res);
 	}
 
 	private void parseTypeIdentifier() throws IOException {

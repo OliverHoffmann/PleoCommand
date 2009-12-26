@@ -3,8 +3,6 @@ package pleocmd.pipe.data;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.pipe.val.Value;
@@ -105,7 +103,9 @@ import pleocmd.pipe.val.ValueType;
  * </tr>
  * <tr>
  * <td>1</td>
- * <td>reserved, must be 0</td>
+ * <td>Time-Bytes appended:<br>
+ * 4 Bytes with time since the first Data block in milliseconds is appended
+ * after the 4 Header-Bytes (and the Priority Byte)</td>
  * </tr>
  * <tr>
  * <td>2</td>
@@ -123,18 +123,14 @@ import pleocmd.pipe.val.ValueType;
  * 
  * @author oliver
  */
-public final class DataBinaryConverter {
+public final class DataBinaryConverter extends AbstractDataConverter {
 
 	public static final int FLAG_PRIORITY = 0x01;
-	public static final int FLAG_RESERVED_1 = 0x02;
+	public static final int FLAG_TIME = 0x02;
 	public static final int FLAG_RESERVED_2 = 0x04;
 	public static final int FLAG_RESERVED_3 = 0x08;
 	public static final int FLAG_RESERVED_4 = 0x10;
-	private static final int FLAG_RESERVED_MASK = 0x1E;
-
-	private byte priority;
-
-	private final List<Value> values;
+	private static final int FLAG_RESERVED_MASK = 0x1C;
 
 	/**
 	 * Creates a new {@link DataBinaryConverter} that wraps an existing
@@ -144,8 +140,7 @@ public final class DataBinaryConverter {
 	 *            {@link Data} to read from
 	 */
 	public DataBinaryConverter(final Data data) {
-		priority = data.getPriority();
-		values = data;
+		super(data);
 	}
 
 	/**
@@ -164,21 +159,26 @@ public final class DataBinaryConverter {
 		final int hdr = in.readInt();
 		final int flags = hdr >> 27 & 0x1F;
 		final int cnt = (hdr >> 24 & 0x07) + 1;
-		priority = Data.PRIO_DEFAULT;
 		if ((flags & FLAG_PRIORITY) != 0) {
-			priority = in.readByte();
-			if (priority < Data.PRIO_LOWEST || priority > Data.PRIO_HIGHEST)
+			setPriority(in.readByte());
+			if (getPriority() < Data.PRIO_LOWEST
+					|| getPriority() > Data.PRIO_HIGHEST)
 				throw new IOException(String.format(
 						"Priority is out of range: %d not between "
-								+ "%d and %d", priority, Data.PRIO_LOWEST,
+								+ "%d and %d", getPriority(), Data.PRIO_LOWEST,
 						Data.PRIO_HIGHEST));
+		}
+		if ((flags & FLAG_TIME) != 0) {
+			final long ms = in.readInt() & 0xFFFFFFFFL;
+			assert ms >= 0 : ms;
+			setTime(ms);
 		}
 		if ((flags & FLAG_RESERVED_MASK) != 0)
 			throw new IOException(String.format(
 					"Reserved flags have been set: 0x%02X", flags));
 		Log.detail("Header is 0x%08X => flags: 0x%02X count: %d", hdr, flags,
 				cnt);
-		values = new ArrayList<Value>(cnt);
+		assert cnt <= 8 : cnt;
 		for (int i = 0; i < cnt; ++i) {
 			final ValueType type = ValueType.values()[hdr >> i * 3 & 0x07];
 			assert type.getID() == (hdr >> i * 3 & 0x07);
@@ -186,38 +186,36 @@ public final class DataBinaryConverter {
 			if (val == null)
 				throw new InternalError("Type out of range 0 - 0x07");
 			val.readFromBinary(in);
-			values.add(val);
+			getValues().add(val);
 		}
+		trimValues();
 		Log.detail("Finished parsing a binary Data object");
-	}
-
-	public byte getPriority() {
-		return priority;
-	}
-
-	public List<Value> getValues() {
-		return values;
 	}
 
 	public void writeToBinary(final DataOutput out) throws IOException {
 		Log.detail("Writing Data to binary output stream");
-		if (values.size() > 8)
+		if (getValues().size() > 8)
 			throw new IOException(
 					"Cannot handle more than 8 values for binary data");
 
 		// write header
 		int flags = 0;
-		if (priority != Data.PRIO_DEFAULT) flags |= FLAG_PRIORITY;
-		int hdr = (flags & 0x1F) << 27 | (values.size() - 1 & 0x07) << 24;
-		for (int i = 0; i < values.size(); ++i)
-			hdr |= (values.get(i).getType().getID() & 0x07) << i * 3;
+		if (getPriority() != Data.PRIO_DEFAULT) flags |= FLAG_PRIORITY;
+		if (getTime() != Data.TIME_NOTIME) flags |= FLAG_TIME;
+		int hdr = (flags & 0x1F) << 27 | (getValues().size() - 1 & 0x07) << 24;
+		for (int i = 0; i < getValues().size(); ++i)
+			hdr |= (getValues().get(i).getType().getID() & 0x07) << i * 3;
 		out.writeInt(hdr);
 
-		// write priority
-		if (priority != Data.PRIO_DEFAULT) out.write(priority);
+		// write optional data
+		if (getPriority() != Data.PRIO_DEFAULT) out.write(getPriority());
+		if (getTime() != Data.TIME_NOTIME) {
+			assert getTime() >= 0 && getTime() <= 0xFFFFFFFFL : getTime();
+			out.writeInt((int) getTime());
+		}
 
 		// write the field content
-		for (final Value value : values)
+		for (final Value value : getValues())
 			value.writeToBinary(out);
 	}
 

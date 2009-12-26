@@ -20,6 +20,8 @@ public final class FileOutput extends Output {
 
 	private DataOutputStream out;
 
+	private Data lastRoot;
+
 	public FileOutput() {
 		super(new Config().addV(
 				new ConfigPath("File", ConfigPath.PathType.FileForWriting))
@@ -44,16 +46,30 @@ public final class FileOutput extends Output {
 		Log.detail("Closing file '%s'", file);
 		out.close();
 		out = null;
+		lastRoot = null;
 	}
 
 	@Override
 	protected void write0(final Data data) throws OutputException, IOException {
+		Data root;
 		switch (type) {
+		case DataAscii:
+			data.writeToAscii(out, true);
+			break;
 		case DataBinary:
 			data.writeToBinary(out);
 			break;
-		case DataAscii:
-			data.writeToAscii(out, true);
+		case DataAsciiOriginal:
+			if (lastRoot != (root = data.getRoot())) {
+				lastRoot = root;
+				root.writeToAscii(out, true);
+			}
+			break;
+		case DataBinaryOriginal:
+			if (lastRoot != (root = data.getRoot())) {
+				lastRoot = root;
+				data.getRoot().writeToBinary(out);
+			}
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))

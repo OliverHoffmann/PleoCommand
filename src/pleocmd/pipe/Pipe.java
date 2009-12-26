@@ -31,6 +31,10 @@ import pleocmd.pipe.out.Output;
  */
 public final class Pipe extends StateHandling {
 
+	private static final int MAX_BEHIND = 300;
+
+	private static long startTime;
+
 	private final List<Input> inputList = new ArrayList<Input>();
 
 	private final List<Output> outputList = new ArrayList<Output>();
@@ -210,6 +214,7 @@ public final class Pipe extends StateHandling {
 				}
 			}
 		};
+		startTime = System.currentTimeMillis();
 		thrOutput.start();
 		thrInput.start();
 
@@ -286,11 +291,7 @@ public final class Pipe extends StateHandling {
 				final List<Data> dataList = convertDataToDataList(data);
 
 				// ... and put it into the queue for Output classes
-				if (dataQueue.put(dataList)) {
-					Log.info("Canceling current command, "
-							+ "because of higher-priority command '%s'", data);
-					thrOutput.interrupt();
-				}
+				putIntoOutputQueue(dataList);
 			}
 		} finally {
 			Log.info("Input-Thread finished");
@@ -331,12 +332,7 @@ public final class Pipe extends StateHandling {
 				++count;
 
 				// ... and send it to all currently registered outputs
-				try {
-					writeDataToAllOutputs(data);
-				} catch (final InterruptedException e) {
-					Log.detail("Outputting data '%s' has been interrupted",
-							data);
-				}
+				writeDataToAllOutputs(data);
 			}
 		} finally {
 			Log.info("Output-Thread finished");
@@ -391,6 +387,46 @@ public final class Pipe extends StateHandling {
 			in.tryClose();
 			++inputPosition;
 			// try data packet from next input
+		}
+	}
+
+	/**
+	 * Puts all {@link Data}s in the list to the {@link DataQueue}.<br>
+	 * If a time is specified for the {@link Data} this method will wait for the
+	 * correct time or print a warning if it's already behind.<br>
+	 * Immediately returns if sleeping for timed {@link Data} has been
+	 * interrupted
+	 * 
+	 * @param dataList
+	 *            list of {@link Data} objects to put into the {@link DataQueue}
+	 * @throws IOException
+	 *             if the {@link DataQueue} has been closed
+	 */
+	private void putIntoOutputQueue(final List<Data> dataList)
+			throws IOException {
+		for (final Data data : dataList) {
+			if (data.getTime() != Data.TIME_NOTIME) {
+				final long delta = startTime + data.getTime()
+						- System.currentTimeMillis();
+				if (delta > 0) {
+					Log.detail("Waiting %d ms", delta);
+					try {
+						Thread.sleep(delta);
+					} catch (final InterruptedException e) {
+						Log.error(e, "Failed to wait for correct output time");
+						return;
+					}
+				} else if (delta < -MAX_BEHIND)
+					Log.warn("Output of '%s' is %d ms behind", data, -delta);
+				// TODO only warn for the first in dataList?
+				else
+					Log.detail("Output of '%s' is %d ms behind", data, -delta);
+			}
+			if (dataQueue.put(data)) {
+				Log.info("Canceling current command, "
+						+ "because of higher-priority command '%s'", data);
+				thrOutput.interrupt();
+			}
 		}
 	}
 
@@ -466,11 +502,10 @@ public final class Pipe extends StateHandling {
 	 * 
 	 * @param data
 	 *            {@link Data} to write
-	 * @throws InterruptedException
 	 */
-	private void writeDataToAllOutputs(final Data data)
-			throws InterruptedException {
-		Log.detail("Writing data block to %d output(s)", outputList.size());
+	private void writeDataToAllOutputs(final Data data) {
+		Log.detail("Writing data block '%s' to %d output(s)", data, outputList
+				.size());
 		for (final Output out : outputList)
 			if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
 	}
@@ -482,10 +517,8 @@ public final class Pipe extends StateHandling {
 	 *            {@link Data} to write
 	 * @param out
 	 *            {@link Output} to write to
-	 * @throws InterruptedException
 	 */
-	private void writeToOutput(final Data data, final Output out)
-			throws InterruptedException {
+	private void writeToOutput(final Data data, final Output out) {
 		try {
 			out.write(data);
 		} catch (final OutputException e) {
@@ -575,6 +608,7 @@ public final class Pipe extends StateHandling {
 			final String pckName = getClass().getPackage().getName();
 			String fcn;
 			PipePart pp;
+			// TODO combine with PipePartDetection
 			try {
 				try {
 					fcn = String.format("%s.in.%s", pckName, cn);
@@ -629,4 +663,12 @@ public final class Pipe extends StateHandling {
 		in.close();
 		return !skipped;
 	}
+
+	public static long getStartTime() {
+		if (startTime == 0)
+			throw new RuntimeException("Cannot get start-time: There has "
+					+ "never been any pipe started");
+		return startTime;
+	}
+
 }
