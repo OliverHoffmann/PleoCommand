@@ -13,8 +13,34 @@ import pleocmd.itfc.gui.MainFrame;
  */
 public final class Log {
 
+	/**
+	 * Specifies the type of a message.
+	 * 
+	 * @author oliver
+	 */
 	public enum Type {
-		Detail, Info, Warn, Error, Console
+		/**
+		 * Detailed debug messages.<br>
+		 * Will only get printed if {@link Log#logDetailed} is set
+		 */
+		Detail,
+		/**
+		 * Informational messages.
+		 */
+		Info,
+		/**
+		 * Warnings and other severe messages.
+		 */
+		Warn,
+		/**
+		 * Errors and Exceptions.
+		 */
+		Error,
+		/**
+		 * The standard output is captured via this {@link Type} in GUI mode.<br>
+		 * Will not be used in console mode.
+		 */
+		Console
 	}
 
 	private static boolean logDetailed = true;

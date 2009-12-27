@@ -12,15 +12,45 @@ import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.pipe.Pipe;
+import pleocmd.pipe.cvt.Converter;
+import pleocmd.pipe.in.Input;
+import pleocmd.pipe.out.Output;
 import pleocmd.pipe.val.DummyValue;
 import pleocmd.pipe.val.Value;
 
+/**
+ * Contains information about one command which will be created from
+ * {@link Input}s, converted by {@link Converter}s and then written out by
+ * {@link Output}s inside the {@link Pipe}.
+ * 
+ * @author oliver
+ */
 public final class Data extends AbstractList<Value> {
 
+	/**
+	 * The priority which will be used if no special one is specified.
+	 */
 	public static final byte PRIO_DEFAULT = 0;
+
+	/**
+	 * The lowest possible priority.<br>
+	 * If this constant changes, reading and writing in the
+	 * {@link DataAsciiConverter} must be updated.
+	 */
 	public static final byte PRIO_LOWEST = -99;
+
+	/**
+	 * The highest possible priority.<br>
+	 * If this constant changes, reading and writing in the
+	 * {@link DataAsciiConverter} must be updated.
+	 */
 	public static final byte PRIO_HIGHEST = 99;
 
+	/**
+	 * This specifies that a {@link Data} object doesn't have a specific time at
+	 * which it should be executed - it will just be executed when it reaches
+	 * the top position in the {@link DataQueue}.
+	 */
 	public static final long TIME_NOTIME = -1;
 
 	private final List<Value> values;
@@ -117,14 +147,35 @@ public final class Data extends AbstractList<Value> {
 		return values.size();
 	}
 
+	/**
+	 * @return the parent of this {@link Data} - it is the {@link Data} which
+	 *         was the cause why this one has been created. Recursively moving
+	 *         up the parents will return the root of the tree-structured
+	 *         hierarchy.<br>
+	 *         May be <b>null</b>, if this one is the root (i.e. it has directly
+	 *         been read from an {@link Input}).
+	 */
 	public Data getParent() {
 		return parent;
 	}
 
+	/**
+	 * @return the priority of this {@link Data} which is between
+	 *         {@link #PRIO_LOWEST} and {@link #PRIO_HIGHEST}. {@link Data}s
+	 *         with lower priority will be removed from the {@link DataQueue} if
+	 *         one with a higher priority arrives. {@link Data}s with a lower
+	 *         priority than other ones already in the queue will be ignored.
+	 */
 	public byte getPriority() {
 		return priority;
 	}
 
+	/**
+	 * @return the specific time at which this {@link Data} should be executed
+	 *         (i.e. passed on to the {@link Output}s in the {@link Pipe}). If
+	 *         {@link #TIME_NOTIME} it will just be executed when it reaches the
+	 *         top position in the {@link DataQueue}.
+	 */
 	public long getTime() {
 		return time;
 	}
@@ -138,6 +189,7 @@ public final class Data extends AbstractList<Value> {
 	 * @throws IOException
 	 *             if data could not be read from {@link DataInput}, is of an
 	 *             invalid type or is of an invalid format for its type
+	 * @see DataBinaryConverter
 	 */
 	public static Data createFromBinary(final DataInput in) throws IOException {
 		return new DataBinaryConverter(in).createDataFromFields();
@@ -176,10 +228,34 @@ public final class Data extends AbstractList<Value> {
 				(string + '\n').getBytes("ISO-8859-1"))));
 	}
 
+	/**
+	 * Writes this {@link Data} to a {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            the {@link DataOutput} to which this {@link Data} will be
+	 *            written in a binary form
+	 * @throws IOException
+	 *             if writing to {@link DataOutput} failed or this {@link Data}
+	 *             's fields cannot be put into binary representation (for
+	 *             example more than eight values associated)
+	 * @see DataBinaryConverter
+	 */
 	public void writeToBinary(final DataOutput out) throws IOException {
 		new DataBinaryConverter(this).writeToBinary(out);
 	}
 
+	/**
+	 * Writes this {@link Data} to a {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            the {@link DataOutput} to which this {@link Data} will be
+	 *            written in ISO-8859-1 encoding
+	 * @param writeLF
+	 *            if a line-feed should be appended
+	 * @throws IOException
+	 *             if writing to {@link DataOutput} failed
+	 * @see DataAsciiConverter
+	 */
 	public void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
 		new DataAsciiConverter(this).writeToAscii(out, writeLF);
@@ -197,6 +273,13 @@ public final class Data extends AbstractList<Value> {
 		}
 	}
 
+	/**
+	 * @return the root of the tree-structured hierarchy of this {@link Data} -
+	 *         it is the {@link Data} which was the first cause why this one has
+	 *         been created.<br>
+	 *         May be the {@link Data} itself, if this one is the root (i.e. it
+	 *         has directly been read from an {@link Input}).
+	 */
 	public Data getRoot() {
 		return parent == null ? this : parent.getRoot();
 	}
