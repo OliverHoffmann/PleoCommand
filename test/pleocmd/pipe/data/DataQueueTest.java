@@ -55,7 +55,7 @@ public final class DataQueueTest {
 			queue.put(data);
 		Data d = createData(1);
 		queue.put(d);
-		assertSame(queue.get(), d);
+		assertSame(d, queue.get());
 		System.out.println("Tested High-Priority Data in DataQueue");
 
 		queue.resetCache();
@@ -66,7 +66,7 @@ public final class DataQueueTest {
 			queue.put(data);
 		d = createData(-1);
 		queue.put(d);
-		assertSame(queue.get(), buf0[0]);
+		assertSame(buf0[0], queue.get());
 		System.out.println("Tested Low-Priority Data in DataQueue");
 
 		System.out.println("Done testing DataQueue");

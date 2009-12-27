@@ -32,7 +32,7 @@ public final class StandardInputTest {
 			System.out.println("Starting test loop for StandardInput");
 			StandardInput.the().put(buf0);
 			System.out.println("Put bytes into StandardInput");
-			assertEquals(StandardInput.the().available(), buf0.length);
+			assertEquals(buf0.length, StandardInput.the().available());
 			System.out.println("Checked available bytes");
 			StandardInput.the().read(buf1);
 			System.out.println("Read bytes from StandardInput");
@@ -42,10 +42,10 @@ public final class StandardInputTest {
 			System.out.println("Closed StandardInput");
 
 			// now available() should no longer block ...
-			assertEquals(StandardInput.the().available(), 0);
+			assertEquals(0, StandardInput.the().available());
 
 			// ... and read should fail
-			assertEquals(StandardInput.the().read(), -1);
+			assertEquals(-1, StandardInput.the().read());
 
 			StandardInput.the().resetCache();
 			System.out.println("Reset StandardInput");
