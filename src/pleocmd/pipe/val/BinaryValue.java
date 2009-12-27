@@ -3,6 +3,8 @@ package pleocmd.pipe.val;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
 
 import pleocmd.pipe.data.DataAsciiConverter;
 
@@ -69,6 +71,24 @@ public final class BinaryValue extends Value {
 	@Override
 	public boolean mustWriteAsciiAsHex() {
 		return true;
+	}
+
+	@Override
+	public Value set(final String content) throws UnsupportedEncodingException {
+		val = content.getBytes("ISO-8859-1");
+		return this;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) return true;
+		if (!(o instanceof BinaryValue)) return false;
+		return Arrays.equals(val, ((BinaryValue) o).val);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.hashCode(val);
 	}
 
 }

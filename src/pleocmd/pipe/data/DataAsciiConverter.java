@@ -74,6 +74,22 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 			3, 3, 3, 3, 3, 3, 3, 3, // 68 - 6F
 			3, 3, 3, 3, 3, 3, 3, 3, // 70 - 77
 			3, 3, 3, 3, 4, 3, 3, 4, // 78 - 7F
+			4, 4, 4, 4, 4, 4, 4, 4, // 80 - 87
+			4, 4, 4, 4, 4, 4, 4, 4, // 88 - 8F
+			4, 4, 4, 4, 4, 4, 4, 4, // 90 - 97
+			4, 4, 4, 4, 4, 4, 4, 4, // 98 - 9F
+			4, 4, 4, 4, 4, 4, 4, 4, // A0 - A7
+			4, 4, 4, 4, 4, 4, 4, 4, // A8 - AF
+			4, 4, 4, 4, 4, 4, 4, 4, // B0 - B7
+			4, 4, 4, 4, 4, 4, 4, 4, // B8 - BF
+			4, 4, 4, 4, 4, 4, 4, 4, // C0 - C7
+			4, 4, 4, 4, 4, 4, 4, 4, // C8 - CF
+			4, 4, 4, 4, 4, 4, 4, 4, // D0 - D7
+			4, 4, 4, 4, 4, 4, 4, 4, // D8 - DF
+			4, 4, 4, 4, 4, 4, 4, 4, // E0 - E7
+			4, 4, 4, 4, 4, 4, 4, 4, // E8 - EF
+			4, 4, 4, 4, 4, 4, 4, 4, // F0 - F7
+			4, 4, 4, 4, 4, 4, 4, 4, // F8 - FF
 	};
 
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
@@ -113,20 +129,20 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 */
 	public DataAsciiConverter(final DataInput in) throws IOException {
 		Log.detail("Started parsing an ASCII Data object");
-		buf = new byte[1]; // TODO larger default
+		buf = new byte[64];
 		index = -1;
 		while (true) {
 			++index;
 			final byte b = in.readByte();
 			switch (b) {
 			case '\n':
-				parseValue();
+				parseValue(getValues().isEmpty());
 				// this was the end of the data block
 				trimValues();
 				Log.detail("Finished parsing an ASCII Data object");
 				return;
 			case '|':
-				parseValue();
+				parseValue(false);
 				// prepare for the next value
 				type = null;
 				isHex = false;
@@ -157,10 +173,12 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		}
 	}
 
-	private void parseValue() throws IOException {
+	private void parseValue(final boolean ignoreIfEmpty) throws IOException {
 		// trim whitespaces
 		while (buflen > 0 && buf[buflen - 1] == ' ')
 			--buflen;
+
+		if (ignoreIfEmpty && buflen == 0) return;
 
 		if (type == null) {
 			// autodetect type
@@ -386,6 +404,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		int res = 0;
 		Log.detail("Autodetecting data type of %d bytes", len);
 		for (int i = 0; i < len; ++i)
+			// TODO lookup-index is -128 - 127 instead of 0 .. 255
 			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i]])) == 4)
 				throw new IOException(String.format(
 						"Invalid character for any known data type: 0x%02X "

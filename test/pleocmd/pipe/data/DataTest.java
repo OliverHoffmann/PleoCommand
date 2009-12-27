@@ -1,0 +1,86 @@
+package pleocmd.pipe.data;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.junit.Test;
+
+import pleocmd.Log;
+import pleocmd.pipe.val.Value;
+import pleocmd.pipe.val.ValueType;
+
+public final class DataTest {
+
+	@Test
+	@SuppressWarnings("deprecation")
+	public void testConversion() throws IOException {
+		Log.setLogDetailed(false);
+
+		final List<Value> values = new ArrayList<Value>();
+		final Data d1 = new Data(values, null);
+		testAsciiConversion(d1);
+		try {
+			testBinaryConversion(d1);
+			fail("IOException not thrown");
+		} catch (final IOException e) {
+			assertTrue(e.getMessage().contains("without any"));
+		}
+		Log.consoleOut("Tested conversion of Data #1: '%s'", d1);
+
+		values.clear();
+		values.add(Value.createForType(ValueType.Int8).set("0"));
+		final Data d2 = new Data(values, null, Data.PRIO_HIGHEST, 12345000);
+		testAsciiConversion(d2);
+		testBinaryConversion(d2);
+		Log.consoleOut("Tested conversion of Data #2: '%s'", d2);
+
+		values.clear();
+		values.add(Value.createForType(ValueType.Int8).set("-12"));
+		values.add(Value.createForType(ValueType.NullTermString).set(""));
+		values.add(Value.createForType(ValueType.Float64).set("0.0000000012"));
+		values.add(Value.createForType(ValueType.Data).set(
+				new String(new byte[] { 12, -7, 127, 0, -128, 20 })));
+		values.add(Value.createForType(ValueType.NullTermString).set(
+				"äöü ÄÖÜ ß"));
+		values.add(Value.createForType(ValueType.NullTermString).set(
+				"and yet another string"));
+		final Data d3 = new Data(values, null, Data.PRIO_DEFAULT, 0);
+		testAsciiConversion(d3);
+		testBinaryConversion(d3);
+		Log.consoleOut("Tested conversion of Data #3: '%s'", d3);
+
+		values.clear();
+		assertEquals("not shallow copied:", 6, d3.size());
+		Log.consoleOut("Data testing done");
+	}
+
+	private void testBinaryConversion(final Data data) throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		data.writeToBinary(new DataOutputStream(out));
+
+		final ByteArrayInputStream in = new ByteArrayInputStream(out
+				.toByteArray());
+		final Data newData = Data.createFromBinary(new DataInputStream(in));
+		assertEquals(data, newData);
+	}
+
+	private void testAsciiConversion(final Data data) throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		data.writeToAscii(new DataOutputStream(out), true);
+
+		final ByteArrayInputStream in = new ByteArrayInputStream(out
+				.toByteArray());
+		final Data newData = Data.createFromAscii(new DataInputStream(in));
+		assertEquals(data, newData);
+	}
+
+}

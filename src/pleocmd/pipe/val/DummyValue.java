@@ -71,4 +71,19 @@ public final class DummyValue extends Value {
 		return new byte[0];
 	}
 
+	@Override
+	public Value set(final String content) {
+		throw new UnsupportedOperationException("This is a dummy value");
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		return o instanceof DummyValue;
+	}
+
+	@Override
+	public int hashCode() {
+		return 0;
+	}
+
 }

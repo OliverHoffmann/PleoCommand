@@ -144,4 +144,12 @@ public abstract class Value {
 
 	public abstract boolean mustWriteAsciiAsHex();
 
+	public abstract Value set(final String content) throws IOException;
+
+	@Override
+	public abstract boolean equals(final Object obj);
+
+	@Override
+	public abstract int hashCode();
+
 }

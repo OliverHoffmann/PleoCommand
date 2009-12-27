@@ -56,15 +56,6 @@ public final class IntValue extends Value {
 	public void readFromAscii(final byte[] in, final int len)
 			throws IOException {
 		val = Long.valueOf(new String(in, 0, len, "US-ASCII"));
-		/*
-		 * val = 0; int i = 0; boolean isNeg = false; if (!in.isEmpty() &&
-		 * in.get(0) == '-') { isNeg = true; ++i; } if (i == in.size()) throw
-		 * new IOException("Missing characters for decimal value"); for (; i <
-		 * in.size(); ++i) { val *= 10; final byte b = in.get(i); if (b < '0' ||
-		 * b > '9') throw new
-		 * IOException("Invalid character for decimal value"); val += b - '0'; }
-		 * if (isNeg) val = -val;
-		 */
 	}
 
 	@Override
@@ -84,7 +75,7 @@ public final class IntValue extends Value {
 
 	@Override
 	public double asDouble() {
-		return Double.valueOf(val);
+		return val;
 	}
 
 	@Override
@@ -95,6 +86,24 @@ public final class IntValue extends Value {
 	@Override
 	public boolean mustWriteAsciiAsHex() {
 		return false;
+	}
+
+	@Override
+	public Value set(final String content) {
+		val = Long.valueOf(content);
+		return this;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) return true;
+		if (!(o instanceof IntValue)) return false;
+		return val == ((IntValue) o).val;
+	}
+
+	@Override
+	public int hashCode() {
+		return (int) (val ^ val >>> 32);
 	}
 
 }

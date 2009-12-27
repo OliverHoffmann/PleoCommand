@@ -1,5 +1,6 @@
 package pleocmd.pipe.val;
 
+// TODO remove this class and only use the ...Value classes for distinguishing?
 public enum ValueType {
 
 	Int8(0), Int32(1), Int64(2), Float32(3), Float64(4), UTFString(5), NullTermString(

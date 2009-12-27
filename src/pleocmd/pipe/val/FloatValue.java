@@ -96,4 +96,23 @@ public final class FloatValue extends Value {
 		return false;
 	}
 
+	@Override
+	public Value set(final String content) {
+		val = Double.valueOf(content);
+		return this;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) return true;
+		if (!(o instanceof FloatValue)) return false;
+		return val == ((FloatValue) o).val;
+	}
+
+	@Override
+	public int hashCode() {
+		final long lb = Double.doubleToLongBits(val);
+		return (int) (lb ^ lb >>> 32);
+	}
+
 }

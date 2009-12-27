@@ -185,6 +185,7 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			final Value val = Value.createForType(type);
 			if (val == null)
 				throw new InternalError("Type out of range 0 - 0x07");
+			Log.detail("Reading value of type '%s' from binary", type);
 			val.readFromBinary(in);
 			getValues().add(val);
 		}
@@ -194,6 +195,9 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 
 	public void writeToBinary(final DataOutput out) throws IOException {
 		Log.detail("Writing Data to binary output stream");
+		if (getValues().isEmpty())
+			throw new IOException(
+					"Cannot write binary data without any values assigned to it");
 		if (getValues().size() > 8)
 			throw new IOException(
 					"Cannot handle more than 8 values for binary data");

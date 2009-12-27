@@ -28,6 +28,22 @@ public final class StringValue extends Value {
 			1, 1, 1, 1, 1, 1, 1, 1, // 68 - 6F
 			1, 1, 1, 1, 1, 1, 1, 1, // 70 - 77
 			1, 1, 1, 1, 0, 1, 1, 0, // 78 - 7F
+			0, 0, 0, 0, 0, 0, 0, 0, // 80 - 87
+			0, 0, 0, 0, 0, 0, 0, 0, // 88 - 8F
+			0, 0, 0, 0, 0, 0, 0, 0, // 90 - 97
+			0, 0, 0, 0, 0, 0, 0, 0, // 98 - 9F
+			0, 0, 0, 0, 0, 0, 0, 0, // A0 - A7
+			0, 0, 0, 0, 0, 0, 0, 0, // A8 - AF
+			0, 0, 0, 0, 0, 0, 0, 0, // B0 - B7
+			0, 0, 0, 0, 0, 0, 0, 0, // B8 - BF
+			0, 0, 0, 0, 0, 0, 0, 0, // C0 - C7
+			0, 0, 0, 0, 0, 0, 0, 0, // C8 - CF
+			0, 0, 0, 0, 0, 0, 0, 0, // D0 - D7
+			0, 0, 0, 0, 0, 0, 0, 0, // D8 - DF
+			0, 0, 0, 0, 0, 0, 0, 0, // E0 - E7
+			0, 0, 0, 0, 0, 0, 0, 0, // E8 - EF
+			0, 0, 0, 0, 0, 0, 0, 0, // F0 - F7
+			0, 0, 0, 0, 0, 0, 0, 0, // F8 - FF
 	};
 
 	private String val;
@@ -132,6 +148,24 @@ public final class StringValue extends Value {
 			}
 		// all characters are valid
 		return false;
+	}
+
+	@Override
+	public Value set(final String content) {
+		val = content;
+		return this;
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) return true;
+		if (!(o instanceof StringValue)) return false;
+		return val.equals(((StringValue) o).val);
+	}
+
+	@Override
+	public int hashCode() {
+		return val.hashCode();
 	}
 
 }

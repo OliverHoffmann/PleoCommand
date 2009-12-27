@@ -8,6 +8,7 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.AbstractList;
+import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.Log;
@@ -66,7 +67,7 @@ public final class Data extends AbstractList<Value> {
 	 * individually.
 	 * 
 	 * @param values
-	 *            list of {@link Value}
+	 *            list of {@link Value} - will be <b>shallow-copied</b>
 	 * @param parent
 	 *            the parent which was the cause while this {@link Data} has
 	 *            been created - may be <b>null</b>
@@ -82,7 +83,8 @@ public final class Data extends AbstractList<Value> {
 	 */
 	public Data(final List<Value> values, final Data parent,
 			final byte priority, final long time) {
-		this.values = values;
+		this.values = new ArrayList<Value>(values.size());
+		this.values.addAll(values);
 		this.parent = parent;
 		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
 				.getPriority() : priority;
@@ -97,13 +99,14 @@ public final class Data extends AbstractList<Value> {
 	 * the parent if one is defined or set to defaults otherwise.
 	 * 
 	 * @param values
-	 *            list of {@link Value}
+	 *            list of {@link Value} - will be <b>shallow-copied</b>
 	 * @param parent
 	 *            the parent which was the cause while this {@link Data} has
 	 *            been created - may be <b>null</b>
 	 */
 	public Data(final List<Value> values, final Data parent) {
-		this.values = values;
+		this.values = new ArrayList<Value>(values.size());
+		this.values.addAll(values);
 		this.parent = parent;
 		priority = parent != null ? parent.getPriority() : PRIO_DEFAULT;
 		time = parent != null ? parent.getTime() : TIME_NOTIME;
@@ -282,6 +285,24 @@ public final class Data extends AbstractList<Value> {
 	 */
 	public Data getRoot() {
 		return parent == null ? this : parent.getRoot();
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+		if (o == this) return true;
+		if (!(o instanceof Data)) return false;
+		final Data d = (Data) o;
+		return values.equals(d.values) && parent == d.parent
+				&& priority == d.priority && time == d.time;
+	}
+
+	@Override
+	public int hashCode() {
+		int res = values.hashCode();
+		res = res * 31 + (parent == null ? 0 : parent.hashCode());
+		res = res * 31 + priority;
+		res = res * 31 + (int) (time ^ time >>> 32);
+		return res;
 	}
 
 }
