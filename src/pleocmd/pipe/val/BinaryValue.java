@@ -60,7 +60,7 @@ public final class BinaryValue extends Value {
 
 	@Override
 	public String toString() {
-		return DataAsciiConverter.toHexString(val);
+		return DataAsciiConverter.toHexString(val, val.length);
 	}
 
 	@Override

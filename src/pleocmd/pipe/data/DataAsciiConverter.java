@@ -404,12 +404,11 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		int res = 0;
 		Log.detail("Autodetecting data type of %d bytes", len);
 		for (int i = 0; i < len; ++i)
-			// TODO lookup-index is -128 - 127 instead of 0 .. 255
-			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i]])) == 4)
+			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i] & 0xFF])) == 4)
 				throw new IOException(String.format(
 						"Invalid character for any known data type: 0x%02X "
 								+ "at position %d in '%s'", data[i], i,
-						toHexString(data)));
+						toHexString(data, len)));
 		switch (res) {
 		case 1:
 			return ValueType.Int64;
@@ -423,9 +422,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		}
 	}
 
-	public static String toHexString(final byte[] a) {
+	public static String toHexString(final byte[] a, final int len) {
 		final StringBuilder sb = new StringBuilder("[");
-		for (int i = 0; i < a.length; ++i) {
+		for (int i = 0; i < len; ++i) {
 			if (i > 0) sb.append(", ");
 			sb.append(a[i]);
 		}

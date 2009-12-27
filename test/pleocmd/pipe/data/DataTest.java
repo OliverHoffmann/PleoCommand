@@ -60,6 +60,30 @@ public final class DataTest {
 
 		values.clear();
 		assertEquals("not shallow copied:", 6, d3.size());
+
+		final Data d4 = Data.createFromAscii("[]");
+		Log.consoleOut("Tested string creation of Data #4: '%s'", d4);
+
+		final Data d5 = Data.createFromAscii("[]|||");
+		Log.consoleOut("Tested string creation of Data #5: '%s'", d5);
+
+		final Data d6 = Data.createFromAscii("[T5000ms]||Sx:00|Ix:3337");
+		Log.consoleOut("Tested string creation of Data #6: '%s'", d6);
+
+		try {
+			Data.createFromAscii("ß");
+			fail("IOException not thrown");
+		} catch (final IOException e) {
+			assertTrue(e.getMessage().contains("Invalid character"));
+		}
+
+		try {
+			Data.createFromAscii("1|2|\0");
+			fail("IOException not thrown");
+		} catch (final IOException e) {
+			assertTrue(e.getMessage().contains("Invalid character"));
+		}
+
 		Log.consoleOut("Data testing done");
 	}
 
