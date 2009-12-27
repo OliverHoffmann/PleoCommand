@@ -18,6 +18,8 @@ import pleocmd.pipe.data.DataQueue;
  */
 public final class StandardInput extends InputStream {
 
+	private static final int RB_DEFAULT = 1024;
+
 	private static StandardInput stdin;
 
 	/**
@@ -99,7 +101,7 @@ public final class StandardInput extends InputStream {
 	public void resetCache() {
 		synchronized (this) {
 			Log.detail("Resetting ring-buffer '%s'", this);
-			buffer = new byte[1]; // TODO bigger default
+			buffer = new byte[RB_DEFAULT];
 			readPos = 0;
 			writePos = 0;
 			closed = false;
@@ -164,8 +166,7 @@ public final class StandardInput extends InputStream {
 				// check if read catches up write?
 				synchronized (this) {
 					if (readPos != writePos) break;
-					if (closed)
-						throw new IOException("StandardInput is closed");
+					if (closed) return -1;
 				}
 				// block until data available
 				try {
@@ -176,7 +177,7 @@ public final class StandardInput extends InputStream {
 				}
 			}
 			synchronized (this) {
-				final int b = buffer[readPos];
+				final int b = buffer[readPos] & 0xFF;
 				Log.detail("Read from %03d 0x%02X in '%s'", readPos, b, this);
 				readPos = (readPos + 1) % buffer.length;
 				return b;
