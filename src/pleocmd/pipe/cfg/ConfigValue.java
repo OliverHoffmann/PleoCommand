@@ -4,6 +4,11 @@ import java.io.IOException;
 
 import pleocmd.itfc.gui.Layouter;
 
+/**
+ * Base class for a value inside a {@link Config}.
+ * 
+ * @author oliver
+ */
 public abstract class ConfigValue {
 
 	private final String label;

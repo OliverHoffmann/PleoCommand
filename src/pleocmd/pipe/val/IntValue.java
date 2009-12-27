@@ -78,12 +78,12 @@ public final class IntValue extends Value {
 	}
 
 	@Override
-	public Long asLong() {
+	public long asLong() {
 		return val;
 	}
 
 	@Override
-	public Double asDouble() {
+	public double asDouble() {
 		return Double.valueOf(val);
 	}
 

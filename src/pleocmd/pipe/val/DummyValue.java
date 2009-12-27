@@ -4,6 +4,16 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import pleocmd.pipe.data.Data;
+
+/**
+ * A placeholder for a {@link Value} on a position in a {@link Data} which does
+ * not exist. Just returns some safe default value for every conversion
+ * operation and never fails during conversion.
+ * 
+ * @see Data#getSafe(int)
+ * @author oliver
+ */
 public final class DummyValue extends Value {
 
 	public DummyValue() {
@@ -42,23 +52,23 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	public Long asLong() {
-		return null;
+	public long asLong() {
+		return 0;
 	}
 
 	@Override
-	public Double asDouble() {
-		return null;
+	public double asDouble() {
+		return .0;
 	}
 
 	@Override
 	public String asString() {
-		return null;
+		return "";
 	}
 
 	@Override
 	public byte[] asByteArray() {
-		return null;
+		return new byte[0];
 	}
 
 }

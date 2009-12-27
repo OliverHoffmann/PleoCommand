@@ -11,6 +11,12 @@ import pleocmd.Log;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.PipePart;
 
+/**
+ * Contains the whole configuration of a {@link PipePart} as well as mechanisms
+ * for reading and writing it from and to files.
+ * 
+ * @author oliver
+ */
 public final class Config extends AbstractList<ConfigValue> {
 
 	private final List<ConfigValue> list = new ArrayList<ConfigValue>();
@@ -28,11 +34,6 @@ public final class Config extends AbstractList<ConfigValue> {
 
 	@Override
 	public ConfigValue get(final int index) {
-		return list.get(index);
-	}
-
-	public ConfigValue getSafe(final int index) {
-		if (index < 0 || index >= list.size()) return new ConfigDummy();
 		return list.get(index);
 	}
 

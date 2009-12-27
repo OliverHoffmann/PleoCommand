@@ -82,7 +82,7 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	public Double asDouble() {
+	public double asDouble() {
 		return val;
 	}
 

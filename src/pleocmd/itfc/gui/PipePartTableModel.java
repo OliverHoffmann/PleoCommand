@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.pipe.PipePart;
+import pleocmd.pipe.cfg.Config;
 
 public final class PipePartTableModel<E extends PipePart> extends
 		AbstractTableModel {
@@ -30,8 +31,8 @@ public final class PipePartTableModel<E extends PipePart> extends
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
 		if (columnIndex == 0)
 			return list.get(rowIndex).getClass().getSimpleName();
-		return list.get(rowIndex).getConfig().getSafe(columnIndex - 1)
-				.toString();
+		final Config cfg = list.get(rowIndex).getConfig();
+		return columnIndex > cfg.size() ? "" : cfg.get(columnIndex - 1);
 	}
 
 	private void detectMaxConfigs() {

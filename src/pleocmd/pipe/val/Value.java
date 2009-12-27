@@ -4,35 +4,77 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import pleocmd.pipe.data.Data;
+
+/**
+ * Contains one (of possibly more) information from a {@link Data}.
+ * 
+ * @author oliver
+ */
 public abstract class Value {
 
 	private final ValueType type;
 
+	/**
+	 * Creates a new {@link Value}.
+	 * 
+	 * @param type
+	 *            the type of the new {@link Value}. Must fit to the
+	 *            implementing class.
+	 * @see #createForType(ValueType)
+	 */
 	protected Value(final ValueType type) {
 		this.type = type;
 	}
 
+	/**
+	 * @return the {@link ValueType} of this {@link Value}
+	 */
 	public final ValueType getType() {
 		return type;
 	}
 
 	// CS_IGNORE_BEGIN This 4 methods need to be overridable
 
-	public Long asLong() {
+	/**
+	 * @return the contents of this {@link Value} as a {@link Long}.
+	 * @throws UnsupportedOperationException
+	 *             if this {@link Value} can not be represented as a
+	 *             {@link Long}
+	 */
+	public long asLong() {
 		throw new UnsupportedOperationException(
 				"Cannot convert data's argument to a long integer value");
 	}
 
-	public Double asDouble() {
+	/**
+	 * @return the contents of this {@link Value} as a {@link Double}.
+	 * @throws UnsupportedOperationException
+	 *             if this {@link Value} can not be represented as a
+	 *             {@link Double}
+	 */
+	public double asDouble() {
 		throw new UnsupportedOperationException(
 				"Cannot convert data's argument to a double floating point value");
 	}
 
+	/**
+	 * @return the contents of this {@link Value} as a {@link String}.
+	 * @throws UnsupportedOperationException
+	 *             if this {@link Value} can not be represented as a
+	 *             {@link String}
+	 */
 	public String asString() {
 		throw new UnsupportedOperationException(
 				"Cannot convert data's argument to a string value");
 	}
 
+	/**
+	 * @return the contents of this {@link Value} as an array of {@link Byte}s.
+	 * @throws UnsupportedOperationException
+	 *             if this {@link Value} can not be represented as an array of
+	 *             {@link Byte}s
+	 */
 	public byte[] asByteArray() {
 		throw new UnsupportedOperationException(
 				"Cannot convert data's argument to a byte array value");
@@ -40,6 +82,13 @@ public abstract class Value {
 
 	// CS_IGNORE_END
 
+	/**
+	 * Creates a new {@link Value} based on a given {@link ValueType}.
+	 * 
+	 * @param type
+	 *            {@link ValueType} of the new {@link Value}
+	 * @return new {@link Value}
+	 */
 	public static Value createForType(final ValueType type) {
 		switch (type) {
 		case Int8:
