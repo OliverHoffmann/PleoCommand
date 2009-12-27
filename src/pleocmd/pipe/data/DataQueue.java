@@ -18,7 +18,14 @@ import pleocmd.pipe.out.Output;
  */
 public final class DataQueue {
 
+	/**
+	 * Will be used if the queue is empty and there is a {@link #get()} waiting
+	 * to indicate that the queue is currently accepting everything without any
+	 * side effects.
+	 */
 	public static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
+
+	private static final int RB_DEFAULT = 16;
 
 	/**
 	 * This array represents a ring buffer.
@@ -53,6 +60,9 @@ public final class DataQueue {
 	 */
 	private boolean closed;
 
+	/**
+	 * Creates a new, empty and opened {@link DataQueue}.
+	 */
 	public DataQueue() {
 		resetCache();
 	}
@@ -76,7 +86,7 @@ public final class DataQueue {
 	public void resetCache() {
 		synchronized (this) {
 			Log.detail("Resetting ring-buffer '%s'", this);
-			buffer = new Data[1];// TODO bigger default
+			buffer = new Data[RB_DEFAULT];
 			readPos = 0;
 			writePos = 0;
 			closed = false;

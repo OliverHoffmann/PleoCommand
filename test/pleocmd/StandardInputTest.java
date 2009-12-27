@@ -10,10 +10,10 @@ import org.junit.Test;
 
 import pleocmd.itfc.gui.MainFrame;
 
-public class StandardInputTest {
+public final class StandardInputTest {
 
 	private static final int BUF_SIZE = 16 * 1024;
-	private static final long RAND_SEED = 292175611265159452L;
+	private static final long RAND_SEED = 2921756112651594520L;
 
 	@Test(timeout = 60000)
 	public void testPutAndRead() throws IOException {
