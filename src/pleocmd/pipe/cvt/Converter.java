@@ -6,17 +6,12 @@ import java.util.List;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.data.Data;
 
 /**
  * @author oliver
  */
 public abstract class Converter extends PipePart {
-
-	public Converter(final Config config) {
-		super(config);
-	}
 
 	@Override
 	protected abstract void configure0() throws ConverterException, IOException;

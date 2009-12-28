@@ -4,13 +4,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.data.Data;
 
 public final class PassThroughConverter extends Converter {
 
 	public PassThroughConverter() {
-		super(new Config());
+		constructed();
 	}
 
 	@Override

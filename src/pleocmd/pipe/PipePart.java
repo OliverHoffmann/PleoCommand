@@ -21,15 +21,9 @@ public abstract class PipePart extends StateHandling {
 
 	private final Config config;
 
-	/**
-	 * @param emptyConfig
-	 *            an empty dummy configuration which has correct value names and
-	 *            identifiers but with no values assigned to it.
-	 */
-	public PipePart(final Config emptyConfig) {
-		config = emptyConfig;
+	public PipePart() {
+		config = new Config();
 		config.setOwner(this);
-		constructed();
 	}
 
 	/**
@@ -45,7 +39,7 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	@Override
-	public final String toString() {
+	public String toString() { // CS_IGNORE_PREV keep overridable
 		return getClass().getSimpleName();
 	}
 

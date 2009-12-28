@@ -12,6 +12,7 @@ public final class ConfigString extends ConfigValue {
 
 	public ConfigString(final String label) {
 		super(label);
+		content = "";
 	}
 
 	public String getContent() {
@@ -19,6 +20,7 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	public void setContent(final String content) {
+		if (content == null) throw new NullPointerException("content");
 		this.content = content;
 	}
 

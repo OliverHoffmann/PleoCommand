@@ -18,6 +18,7 @@ public final class ConfigFloat extends ConfigValue {
 		super(label);
 		this.min = min;
 		this.max = max;
+		content = min;
 	}
 
 	public double getContent() {
@@ -25,6 +26,10 @@ public final class ConfigFloat extends ConfigValue {
 	}
 
 	public void setContent(final double content) {
+		if (content < min || content > max)
+			throw new IndexOutOfBoundsException(String.format(
+					"New content %f must be between %f and %f", content, min,
+					max));
 		this.content = content;
 	}
 

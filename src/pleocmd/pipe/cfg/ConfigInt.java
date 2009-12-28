@@ -19,6 +19,7 @@ public final class ConfigInt extends ConfigValue {
 		super(label);
 		this.min = min;
 		this.max = max;
+		content = min;
 	}
 
 	public long getContent() {
@@ -26,6 +27,10 @@ public final class ConfigInt extends ConfigValue {
 	}
 
 	public void setContent(final long content) {
+		if (content < min || content > max)
+			throw new IndexOutOfBoundsException(String.format(
+					"New content %d must be between %d and %d", content, min,
+					max));
 		this.content = content;
 	}
 

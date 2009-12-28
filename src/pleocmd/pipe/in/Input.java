@@ -5,17 +5,12 @@ import java.io.IOException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.data.Data;
 
 /**
  * @author oliver
  */
 public abstract class Input extends PipePart {
-
-	public Input(final Config config) {
-		super(config);
-	}
 
 	@Override
 	protected abstract void configure0() throws InputException, IOException;

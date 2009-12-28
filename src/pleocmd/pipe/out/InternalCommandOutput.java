@@ -6,13 +6,12 @@ import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.data.Data;
 
 public final class InternalCommandOutput extends Output {
 
 	public InternalCommandOutput() {
-		super(new Config());
+		constructed();
 	}
 
 	@Override

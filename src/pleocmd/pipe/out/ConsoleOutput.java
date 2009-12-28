@@ -6,25 +6,25 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleOutput extends Output {
+
+	private final ConfigEnum<PrintType> cfg0;
 
 	private PrintType type;
 
 	private Data lastRoot;
 
 	public ConsoleOutput() {
-		super(new Config()
-				.addV(new ConfigEnum("PrintType", PrintType.values())));
+		getConfig().add(cfg0 = new ConfigEnum<PrintType>(PrintType.class));
+		constructed();
 	}
 
 	@Override
 	protected void configure0() {
-		type = PrintType.values()[((ConfigEnum) getConfig().get(0))
-				.getContent()];
+		type = cfg0.getEnum();
 	}
 
 	@Override

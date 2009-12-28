@@ -5,21 +5,23 @@ import java.io.IOException;
 
 import pleocmd.StandardInput;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleInput extends Input {
 
+	private final ConfigEnum<ReadType> cfg0;
+
 	private ReadType type;
 
 	public ConsoleInput() {
-		super(new Config().addV(new ConfigEnum("ReadType", ReadType.values())));
+		getConfig().add(cfg0 = new ConfigEnum<ReadType>(ReadType.class));
+		constructed();
 	}
 
 	@Override
 	protected void configure0() {
-		type = ReadType.values()[((ConfigEnum) getConfig().get(0)).getContent()];
+		type = cfg0.getEnum();
 	}
 
 	@Override

@@ -7,12 +7,16 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.cfg.ConfigPath;
+import pleocmd.pipe.cfg.ConfigPath.PathType;
 import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input {
+
+	private final ConfigPath cfg0;
+
+	private final ConfigEnum<ReadType> cfg1;
 
 	private File file;
 
@@ -21,15 +25,15 @@ public final class FileInput extends Input {
 	private DataInputStream in;
 
 	public FileInput() {
-		super(new Config().addV(
-				new ConfigPath("File", ConfigPath.PathType.FileForReading))
-				.addV(new ConfigEnum("ReadType", ReadType.values())));
+		getConfig().add(cfg0 = new ConfigPath("File", PathType.FileForReading));
+		getConfig().add(cfg1 = new ConfigEnum<ReadType>(ReadType.class));
+		constructed();
 	}
 
 	@Override
 	protected void configure0() {
-		file = new File(((ConfigPath) getConfig().get(0)).getContent());
-		type = ReadType.values()[((ConfigEnum) getConfig().get(1)).getContent()];
+		file = new File(cfg0.getContent());
+		type = cfg1.getEnum();
 	}
 
 	@Override

@@ -5,17 +5,19 @@ import java.io.IOException;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigDataSeq;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataSequenceMap;
 
 public final class SimpleConverter extends Converter {
 
+	private final ConfigDataSeq cfg0;
+
 	private final DataSequenceMap map = new DataSequenceMap();
 
 	public SimpleConverter() {
-		super(new Config().addV(new ConfigDataSeq("Sequence-File")));
+		getConfig().add(cfg0 = new ConfigDataSeq("Sequence-File"));
+		constructed();
 	}
 
 	@Override
@@ -25,7 +27,7 @@ public final class SimpleConverter extends Converter {
 
 	@Override
 	protected void init0() throws IOException {
-		map.readFromFile(new File(getConfig().get(0).getContentAsString()));
+		map.readFromFile(new File(cfg0.getContent()));
 	}
 
 	@Override

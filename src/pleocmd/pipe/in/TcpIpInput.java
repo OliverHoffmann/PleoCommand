@@ -1,12 +1,11 @@
 package pleocmd.pipe.in;
 
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.data.Data;
 
 public final class TcpIpInput extends Input {
 
 	public TcpIpInput() {
-		super(new Config());
+		constructed();
 	}
 
 	@Override

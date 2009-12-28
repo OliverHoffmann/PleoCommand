@@ -10,18 +10,21 @@ import java.util.concurrent.TimeoutException;
 import pleocmd.Log;
 import pleocmd.api.PleoCommunication;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.cfg.Config;
-import pleocmd.pipe.cfg.ConfigEnum;
+import pleocmd.pipe.cfg.ConfigList;
 import pleocmd.pipe.data.Data;
 
 public final class PleoRXTXOutput extends Output {
+
+	private final ConfigList cfg0;
 
 	private PleoCommunication pc;
 
 	private String device;
 
 	public PleoRXTXOutput() {
-		super(new Config().addV(new ConfigEnum("Device", getAllDeviceNames())));
+		getConfig().add(
+				cfg0 = new ConfigList("Device", true, getAllDeviceNames()));
+		constructed();
 	}
 
 	private static List<String> getAllDeviceNames() {
@@ -35,7 +38,7 @@ public final class PleoRXTXOutput extends Output {
 
 	@Override
 	protected void configure0() {
-		device = getConfig().get(0).getContentAsString();
+		device = cfg0.getContent();
 	}
 
 	@Override

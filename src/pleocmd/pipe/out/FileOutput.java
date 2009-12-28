@@ -7,12 +7,16 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.cfg.ConfigPath;
+import pleocmd.pipe.cfg.ConfigPath.PathType;
 import pleocmd.pipe.data.Data;
 
 public final class FileOutput extends Output {
+
+	private final ConfigPath cfg0;
+
+	private final ConfigEnum<PrintType> cfg1;
 
 	private File file;
 
@@ -23,16 +27,15 @@ public final class FileOutput extends Output {
 	private Data lastRoot;
 
 	public FileOutput() {
-		super(new Config().addV(
-				new ConfigPath("File", ConfigPath.PathType.FileForWriting))
-				.addV(new ConfigEnum("PrintType", PrintType.values())));
+		getConfig().add(cfg0 = new ConfigPath("File", PathType.FileForWriting));
+		getConfig().add(cfg1 = new ConfigEnum<PrintType>(PrintType.class));
+		constructed();
 	}
 
 	@Override
 	protected void configure0() {
-		file = new File(((ConfigPath) getConfig().get(0)).getContent());
-		type = PrintType.values()[((ConfigEnum) getConfig().get(1))
-				.getContent()];
+		file = new File(cfg0.getContent());
+		type = cfg1.getEnum();
 	}
 
 	@Override

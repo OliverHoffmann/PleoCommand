@@ -1,72 +1,23 @@
 package pleocmd.pipe.cfg;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+public final class ConfigEnum<E extends Enum<E>> extends ConfigList {
 
-import javax.swing.JComboBox;
+	private final Class<E> enumClass;
 
-import pleocmd.itfc.gui.Layouter;
-
-public final class ConfigEnum extends ConfigValue {
-
-	private final List<String> identifiers = new ArrayList<String>();
-
-	private int content;
-
-	private JComboBox cb;
-
-	public ConfigEnum(final String label, final List<String> identifiers) {
-		super(label);
-		this.identifiers.addAll(identifiers);
+	/**
+	 * Creates a new {@link ConfigEnum}.
+	 */
+	public ConfigEnum(final Class<E> enumClass) {
+		super(enumClass.toString(), false, enumClass.getEnumConstants());
+		this.enumClass = enumClass;
 	}
 
-	public ConfigEnum(final String label, final Object[] identifiers) {
-		super(label);
-		for (final Object id : identifiers)
-			this.identifiers.add(id.toString());
+	public E getEnum() {
+		return enumClass.getEnumConstants()[0];
 	}
 
-	public int getContent() {
-		return content;
-	}
-
-	public void setContent(final int content) {
-		this.content = content;
-	}
-
-	public List<String> getIdentifiers() {
-		return Collections.unmodifiableList(identifiers);
-	}
-
-	@Override
-	public String getContentAsString() {
-		return identifiers.get(content);
-	}
-
-	@Override
-	public void insertGUIComponents(final Layouter lay) {
-		cb = new JComboBox(identifiers.toArray());
-		cb.setSelectedIndex(content);
-		lay.add(cb, true);
-	}
-
-	@Override
-	public void setFromGUIComponents() {
-		setContent(cb.getSelectedIndex());
-	}
-
-	@Override
-	protected void setFromString(final String content) throws IOException {
-		final int idx = identifiers.indexOf(content);
-		if (idx == -1)
-			throw new IOException(String.format(
-					"Invalid enumeration constant for '%s': "
-							+ "'%s' - must be one of '%s'", getLabel(),
-					content, Arrays.toString(identifiers.toArray())));
-		setContent(idx);
+	public void setEnum(final E e) {
+		setContent(e.toString());
 	}
 
 }

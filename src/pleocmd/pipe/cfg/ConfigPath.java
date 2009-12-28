@@ -24,6 +24,7 @@ public final class ConfigPath extends ConfigValue {
 	public ConfigPath(final String label, final PathType type) {
 		super(label);
 		this.type = type;
+		content = "";
 	}
 
 	public String getContent() {
@@ -31,6 +32,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	public void setContent(final String content) {
+		if (content == null) throw new NullPointerException("content");
 		this.content = content;
 	}
 

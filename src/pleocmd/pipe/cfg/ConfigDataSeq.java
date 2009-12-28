@@ -23,6 +23,7 @@ public final class ConfigDataSeq extends ConfigValue {
 
 	public ConfigDataSeq(final String label) {
 		super(label);
+		content = "";
 	}
 
 	public String getContent() {
@@ -30,6 +31,7 @@ public final class ConfigDataSeq extends ConfigValue {
 	}
 
 	public void setContent(final String content) {
+		if (content == null) throw new NullPointerException("content");
 		this.content = content;
 	}
 
