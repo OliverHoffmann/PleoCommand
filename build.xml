@@ -7,6 +7,12 @@
 	<property name="bin" location="bin" />
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
+	<property name="test" location="test" />
+
+	<property name="jarfile" value="${ant.project.name}.jar" />
+	<property name="jarloc" location="${dist}/${jarfile}" />
+	<property name="exefile" value="${ant.project.name}.exe" />
+	<property name="exeloc" location="${dist}/${exefile}" />
 
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
@@ -37,6 +43,7 @@
 
 		<checkstyle config="checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
+			<fileset dir="${test}" includes="**/*.java" />
 			<classpath>
 				<pathelement path="${bin}" />
 			</classpath>
@@ -55,8 +62,6 @@
 
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
 	<target name="dist" depends="build">
-		<property name="jarfile" value="${ant.project.name}.jar" />
-		<property name="jarloc" location="${dist}/${jarfile}" />
 		<delete file="${jarloc}" verbose="${verb}" />
 		<jar jarfile="${jarloc}"
 		     basedir="${bin}"
@@ -73,8 +78,6 @@
 			</manifest>
 		</jar>
 
-		<property name="exefile" value="${ant.project.name}.exe" />
-		<property name="exeloc" location="${dist}/${exefile}" />
 		<property name="jsloc" value="${bin}/${ant.project.name}.jsmooth" />
 		<echoxml file="${jsloc}">
 			<jsmoothproject>
@@ -88,9 +91,9 @@
 
 				<embeddedJar>true</embeddedJar>
 				<jarLocation>${jarloc}</jarLocation>
-				
+
 				<maximumMemoryHeap>536870912</maximumMemoryHeap>
-					
+
 				<key>Message</key>
 				<value>Java is needed. Do you want to download it now?</value>
 				<key>URL</key>
