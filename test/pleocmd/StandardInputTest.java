@@ -13,13 +13,14 @@ import pleocmd.itfc.gui.MainFrame;
 public final class StandardInputTest {
 
 	private static final int BUF_SIZE = 16 * 1024;
+
 	private static final long RAND_SEED = 2921756112651594520L;
 
 	@Test(timeout = 60000)
 	public void testPutAndRead() throws IOException {
 		// prepare
-		final byte buf0[] = new byte[BUF_SIZE];
-		final byte buf1[] = new byte[BUF_SIZE];
+		final byte[] buf0 = new byte[BUF_SIZE];
+		final byte[] buf1 = new byte[BUF_SIZE];
 		new Random(RAND_SEED).nextBytes(buf0);
 
 		// ensure we are in GUI mode
@@ -29,17 +30,20 @@ public final class StandardInputTest {
 
 		// execute twice
 		for (int i = 0; i < 2; ++i) {
-			System.out.println("Starting test loop for StandardInput");
+			Log.consoleOut("Starting test loop for StandardInput '%s'",
+					StandardInput.the());
 			StandardInput.the().put(buf0);
-			System.out.println("Put bytes into StandardInput");
+			Log.consoleOut("Put bytes into StandardInput '%s'", StandardInput
+					.the());
 			assertEquals(buf0.length, StandardInput.the().available());
-			System.out.println("Checked available bytes");
+			Log.consoleOut("Checked available bytes");
 			StandardInput.the().read(buf1);
-			System.out.println("Read bytes from StandardInput");
+			Log.consoleOut("Read bytes from StandardInput '%s'", StandardInput
+					.the());
 			assertArrayEquals(buf0, buf1);
 
 			StandardInput.the().close();
-			System.out.println("Closed StandardInput");
+			Log.consoleOut("Closed StandardInput '%s'", StandardInput.the());
 
 			// now available() should no longer block ...
 			assertEquals(0, StandardInput.the().available());
@@ -48,9 +52,9 @@ public final class StandardInputTest {
 			assertEquals(-1, StandardInput.the().read());
 
 			StandardInput.the().resetCache();
-			System.out.println("Reset StandardInput");
+			Log.consoleOut("Reset StandardInput '%s'", StandardInput.the());
 		}
-		System.out.println("Done testing StandardInput");
+		Log.consoleOut("Done testing StandardInput");
 	}
 
 }

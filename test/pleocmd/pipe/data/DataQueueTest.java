@@ -23,31 +23,31 @@ public final class DataQueueTest {
 		Log.setLogDetailed(false);
 
 		// prepare
-		final Data buf0[] = new Data[BUF_SIZE];
-		final Data buf1[] = new Data[BUF_SIZE];
+		final Data[] buf0 = new Data[BUF_SIZE];
+		final Data[] buf1 = new Data[BUF_SIZE];
 		for (int i = 0; i < BUF_SIZE; ++i)
 			buf0[i] = new Data(new ArrayList<Value>(0), null);
 		final DataQueue queue = new DataQueue();
 
 		// execute twice
 		for (int i = 0; i < 2; ++i) {
-			System.out.println("Starting test loop for DataQueue");
+			Log.consoleOut("Starting test loop for DataQueue '%s'", queue);
 			for (final Data data : buf0)
 				queue.put(data);
-			System.out.println("Put Data into DataQueue");
+			Log.consoleOut("Put Data into DataQueue '%s'", queue);
 			for (int j = 0; j < BUF_SIZE; ++j)
 				buf1[j] = queue.get();
-			System.out.println("Read Data from DataQueue");
+			Log.consoleOut("Read Data from DataQueue '%s'", queue);
 			assertArrayEquals(buf0, buf1);
 
 			queue.close();
-			System.out.println("Closed DataQueue");
+			Log.consoleOut("Closed DataQueue '%s'", queue);
 
 			// now get should fail
 			assertNull(queue.get());
 
 			queue.resetCache();
-			System.out.println("Reset DataQueue");
+			Log.consoleOut("Reset DataQueue '%s'", queue);
 		}
 
 		// now again with some higher and lower priority objects
@@ -56,10 +56,10 @@ public final class DataQueueTest {
 		Data d = createData(1);
 		queue.put(d);
 		assertSame(d, queue.get());
-		System.out.println("Tested High-Priority Data in DataQueue");
+		Log.consoleOut("Tested High-Priority Data in DataQueue '%s'", queue);
 
 		queue.resetCache();
-		System.out.println("Reset DataQueue");
+		Log.consoleOut("Reset DataQueue '%s'", queue);
 
 		// now again with some higher and lower priority objects
 		for (final Data data : buf0)
@@ -67,9 +67,9 @@ public final class DataQueueTest {
 		d = createData(-1);
 		queue.put(d);
 		assertSame(buf0[0], queue.get());
-		System.out.println("Tested Low-Priority Data in DataQueue");
+		Log.consoleOut("Tested Low-Priority Data in DataQueue '%s'", queue);
 
-		System.out.println("Done testing DataQueue");
+		Log.consoleOut("Done testing DataQueue");
 	}
 
 	private Data createData(final int prioDelta) {
