@@ -60,6 +60,22 @@
 		</exec>
 	</target>
 
+	<!-- Executes all JUnit test cases -->
+	<target name="test" depends="dist">
+		<junit showoutput="true" failureproperty="testfailed">
+			<classpath>
+				<pathelement path="${lib}/junit.jar" />
+				<pathelement path="${lib}/hamcrest-core.jar" />
+				<pathelement path="${bin}" />
+			</classpath>
+			<formatter type="plain" usefile="false" />
+			<batchtest>
+				<fileset dir="${test}" includes="**/*.java" />
+			</batchtest>
+		</junit>
+		<fail message="At least one JUnit test failed" if="testfailed" />
+	</target>
+
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
 	<target name="dist" depends="build">
 		<delete file="${jarloc}" verbose="${verb}" />
