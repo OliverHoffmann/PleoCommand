@@ -36,7 +36,7 @@ public final class Main {
 			}, "GUI-Thread") {
 				@Override
 				public void run() {
-					MainFrame.the();
+					MainFrame.the().showModalGUI();
 				}
 			}.start();
 	}

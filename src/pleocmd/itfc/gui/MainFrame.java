@@ -85,7 +85,10 @@ public final class MainFrame extends JFrame {
 						exit();
 					}
 				});
+		Log.detail("GUI-Frame created");
+	}
 
+	public void showModalGUI() {
 		// Center window on screen
 		setSize(800, 500);
 		setLocationRelativeTo(null);
@@ -94,7 +97,6 @@ public final class MainFrame extends JFrame {
 		mainPipePanel.readConfigFromFile(PIPE_CONFIG_FILE);
 		updateState();
 
-		Log.detail("GUI-Frame created");
 		Log.info("Application started");
 		setVisible(true);
 	}
