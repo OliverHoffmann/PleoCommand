@@ -51,7 +51,6 @@
 
 		<exec executable="svn">
 			<arg value="up" />
-			<arg value="--changelist=E" />
 			<arg value="--non-interactive" />
 		</exec>
 		<exec executable="svn" output="${bin}/changelog.xml">
