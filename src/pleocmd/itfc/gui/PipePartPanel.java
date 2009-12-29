@@ -193,7 +193,9 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			final JPanel sub = new JPanel();
 			final Layouter laySub = new Layouter(sub);
 			final String compLabel = v.getLabel() + ":";
-			lay.add(new JLabel(compLabel, SwingConstants.RIGHT), false);
+			final JLabel lbl = new JLabel(compLabel, SwingConstants.RIGHT);
+			lbl.setVerticalAlignment(SwingConstants.TOP);
+			lay.add(lbl, false);
 			lay.addWholeLine(sub, false);
 			v.insertGUIComponents(laySub);
 		}
