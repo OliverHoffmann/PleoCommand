@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import pleocmd.Log;
+import pleocmd.Log.Type;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 
@@ -29,7 +30,7 @@ public final class CommandLine {
 	public void parse(final String[] args) {
 		try {
 			// TODO already have some detailed output here
-			Log.setLogDetailed(false);
+			Log.setMinLogType(Type.Info);
 			for (final String arg : args) {
 				final File file = new File(arg);
 				if (file.isFile())
@@ -39,7 +40,7 @@ public final class CommandLine {
 						throw new RuntimeException(String.format(
 								"Cannot recognize filetype of '%s'", file));
 				else if ("-d".equals(arg) || "--detailed".equals(arg))
-					Log.setLogDetailed(true);
+					Log.setMinLogType(Type.Detail);
 				else
 					throw new RuntimeException(String.format(
 							"Cannot recognize argument '%s'", file));

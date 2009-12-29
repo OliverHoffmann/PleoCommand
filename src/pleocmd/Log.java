@@ -43,7 +43,7 @@ public final class Log {
 		Console
 	}
 
-	private static boolean logDetailed = true;
+	private static Type minLogType = Type.Detail;
 
 	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
 			"HH:mm:ss.SSS");
@@ -171,12 +171,13 @@ public final class Log {
 
 	/**
 	 * Prints messages to the GUI's log, if any, or to the standard error
-	 * otherwise.<br>
+	 * otherwise if their {@link #type} is not "lower" than the
+	 * {@link #minLogType}.<br>
 	 * Always prints messages of type Console to the standard output (instead of
 	 * standard error) no matter if a GUI exists or not.
 	 */
 	private void process() {
-		if (type != Type.Detail || logDetailed) {
+		if (type.ordinal() >= minLogType.ordinal()) {
 			if (type == Type.Console) System.out.println(getMsg()); // CS_IGNORE
 			if (MainFrame.hasGUI())
 				MainFrame.the().addLog(this);
@@ -335,21 +336,53 @@ public final class Log {
 	}
 
 	/**
-	 * Sets whether messages of {@link Type#Detail} (send by
-	 * {@link #detail(String, Object...)}) should be processed or just ignored.
+	 * Sets the "lowest" {@link Type} which will be processed. Messages of
+	 * "lower" types will be ignored.
+	 * <p>
+	 * Possible values:
+	 * <table>
+	 * <tr>
+	 * <td>{@link Type#Detail}</td>
+	 * <td>all messages will be processed</td>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link Type#Info}</td>
+	 * <td>all but detailed messages will be processed</td>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link Type#Warn}</td>
+	 * <td>only warnings and errors will be processed</td>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link Type#Error}</td>
+	 * <td>only errors will be processed</td>
+	 * </tr>
+	 * <tr>
+	 * <td>{@link Type#Console}</td>
+	 * <td>no messages will be processed</td>
+	 * </tr>
+	 * </table>
+	 * <p>
+	 * Note that messages of {@link Type#Console} are treated as wrapped
+	 * standard output and not as normal messages and are therefore always be
+	 * processed even if minLogType is set to {@link Type#Console}.
 	 * 
-	 * @param logDetailed
+	 * @param minLogType
 	 *            true if {@link Type#Detail} will be processed
 	 */
-	public static void setLogDetailed(final boolean logDetailed) {
-		Log.logDetailed = logDetailed;
+	public static void setMinLogType(final Type minLogType) {
+		if (minLogType.ordinal() < Type.Detail.ordinal()
+				|| minLogType.ordinal() > Type.Console.ordinal())
+			throw new IllegalArgumentException("Invalid value for minLogType");
+		Log.minLogType = minLogType;
 	}
 
 	/**
-	 * @return true if {@link Type#Detail} will be processed
+	 * @return the "lowest" {@link Type} which will be processed. Messages of
+	 *         "lower" types will be ignored.
 	 */
-	public static boolean isLogDetailed() {
-		return logDetailed;
+	public static Type getMinLogType() {
+		return minLogType;
 	}
 
 }

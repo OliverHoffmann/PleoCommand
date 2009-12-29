@@ -10,7 +10,6 @@ import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.Log;
-import pleocmd.Log.Type;
 
 public final class LogTableModel extends AbstractTableModel {
 
@@ -79,17 +78,16 @@ public final class LogTableModel extends AbstractTableModel {
 	}
 
 	public void refresh() {
-		if (!Log.isLogDetailed()) {
-			// remove all detailed logs from our list
-			final List<Log> newList = new ArrayList<Log>();
-			for (final Log log : list)
-				if (log.getType() != Type.Detail) newList.add(log);
-			if (list.size() != newList.size()) {
-				list.clear();
-				list.addAll(newList);
-				fireTableDataChanged();
-				MainFrame.the().getMainLogPanel().updateRowHeights();
-			}
+		// remove all currently not processed logs from our list
+		final int minType = Log.getMinLogType().ordinal();
+		final List<Log> newList = new ArrayList<Log>();
+		for (final Log log : list)
+			if (log.getType().ordinal() >= minType) newList.add(log);
+		if (list.size() != newList.size()) {
+			list.clear();
+			list.addAll(newList);
+			fireTableDataChanged();
+			MainFrame.the().getMainLogPanel().updateRowHeights();
 		}
 	}
 

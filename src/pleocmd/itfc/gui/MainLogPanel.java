@@ -22,6 +22,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import pleocmd.Log;
+import pleocmd.Log.Type;
 import pleocmd.itfc.gui.Layouter.Button;
 
 public final class MainLogPanel extends JPanel {
@@ -158,7 +159,7 @@ public final class MainLogPanel extends JPanel {
 	}
 
 	public void refreshLogDetailState() {
-		Log.setLogDetailed(cbShowDetail.isSelected());
+		Log.setMinLogType(cbShowDetail.isSelected() ? Type.Detail : Type.Info);
 		logModel.refresh();
 		updateState();
 	}
