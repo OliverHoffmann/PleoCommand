@@ -280,7 +280,7 @@ public abstract class StateHandling {
 
 	@Override
 	public String toString() { // CS_IGNORE_PREV keep overridable
-		return String.format("%s [%s]", getClass().getSimpleName(), getState());
+		return String.format("%s <%s>", getClass().getSimpleName(), getState());
 	}
 
 }
