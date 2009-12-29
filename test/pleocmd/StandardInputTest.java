@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import pleocmd.itfc.gui.MainFrame;
 
-public final class StandardInputTest {
+public final class StandardInputTest extends Testcases {
 
 	private static final int BUF_SIZE = 16 * 1024;
 
@@ -18,15 +18,13 @@ public final class StandardInputTest {
 
 	@Test(timeout = 60000)
 	public void testPutAndRead() throws IOException {
+		// ensure we are in GUI mode
+		MainFrame.the();
+
 		// prepare
 		final byte[] buf0 = new byte[BUF_SIZE];
 		final byte[] buf1 = new byte[BUF_SIZE];
 		new Random(RAND_SEED).nextBytes(buf0);
-
-		// ensure we are in GUI mode
-		MainFrame.the();
-		// no need for detailed output
-		Log.setLogDetailed(false);
 
 		// execute twice
 		for (int i = 0; i < 2; ++i) {

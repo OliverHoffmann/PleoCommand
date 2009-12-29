@@ -14,18 +14,19 @@ import java.io.OutputStreamWriter;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.cfg.ConfigPath.PathType;
 
-public final class ConfigTest {
+public final class ConfigTest extends Testcases {
 
 	private Config createConfig() {
 		return new PipePart() { // CS_IGNORE just a test-case class
 
 			{
 				final Config cfg = getConfig();
-				cfg.add(new ConfigString("Test-String"));
+				cfg.add(new ConfigString("Test-String", false));
 				cfg.add(new ConfigInt("Test-Int", 5, 12));
 				cfg.add(new ConfigFloat("Test-Float", 0.3, 0.5));
 				cfg.add(new ConfigDataSeq("Test-DataSeq"));
@@ -59,7 +60,6 @@ public final class ConfigTest {
 
 	@Test
 	public void testConfig() throws IOException {
-		Log.setLogDetailed(false);
 		final Config cfg = createConfig();
 		Log.consoleOut("Constructed new config '%s'", cfg);
 
@@ -71,7 +71,7 @@ public final class ConfigTest {
 		}
 
 		try {
-			cfg.add(new ConfigString("CanNeverBeAdded"));
+			cfg.add(new ConfigString("CanNeverBeAdded", false));
 			fail("addV() allows adding after construction");
 		} catch (final IllegalStateException e) {
 			assertTrue(e.getMessage().startsWith("Cannot ad"));

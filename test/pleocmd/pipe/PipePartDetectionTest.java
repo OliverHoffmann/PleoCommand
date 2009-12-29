@@ -6,10 +6,11 @@ import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.in.FileInput;
 
-public final class PipePartDetectionTest {
+public final class PipePartDetectionTest extends Testcases {
 
 	@Test
 	public void testGetAllPipeParts() throws NoSuchMethodException {

@@ -8,10 +8,11 @@ import java.io.IOException;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 
-public class StateHandlingTest {
+public class StateHandlingTest extends Testcases {
 
 	static class StateHandlingTestClass extends StateHandling {
 
@@ -36,7 +37,6 @@ public class StateHandlingTest {
 
 	@Test
 	public final void testEnsureStates() throws PipeException {
-		Log.setLogDetailed(false);
 
 		shtc = new StateHandlingTestClass();
 		shtc.ensureConstructing();

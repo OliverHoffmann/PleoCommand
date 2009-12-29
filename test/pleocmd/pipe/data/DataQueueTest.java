@@ -10,9 +10,10 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.pipe.val.Value;
 
-public final class DataQueueTest {
+public final class DataQueueTest extends Testcases {
 
 	private static final int BUF_SIZE = 1024;
 	private static final long RAND_SEED = 928215371469291872L;
@@ -20,7 +21,6 @@ public final class DataQueueTest {
 	@Test(timeout = 60000)
 	public void testPutAndRead() throws IOException, InterruptedException {
 		// no need for detailed output
-		Log.setLogDetailed(false);
 
 		// prepare
 		final Data[] buf0 = new Data[BUF_SIZE];

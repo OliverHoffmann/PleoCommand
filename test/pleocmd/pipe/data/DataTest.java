@@ -15,15 +15,15 @@ import java.util.List;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
-public final class DataTest {
+public final class DataTest extends Testcases {
 
 	@Test
 	@SuppressWarnings("deprecation")
 	public void testConversion() throws IOException {
-		Log.setLogDetailed(false);
 
 		final List<Value> values = new ArrayList<Value>();
 		final Data d1 = new Data(values, null);
