@@ -21,10 +21,10 @@ public abstract class Output extends PipePart {
 	@Override
 	protected abstract void close0() throws OutputException, IOException;
 
-	public final void write(final Data data) throws OutputException {
+	public final boolean write(final Data data) throws OutputException {
 		try {
 			ensureInitialized();
-			write0(data);
+			return write0(data);
 		} catch (final IOException e) {
 			throw new OutputException(this, false, e,
 					"Cannot write data block '%s'", data);
@@ -34,7 +34,7 @@ public abstract class Output extends PipePart {
 		}
 	}
 
-	protected abstract void write0(Data data) throws OutputException,
+	protected abstract boolean write0(Data data) throws OutputException,
 			IOException;
 
 }

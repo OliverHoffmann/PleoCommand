@@ -53,7 +53,8 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
-	protected void write0(final Data data) throws OutputException, IOException {
+	protected boolean write0(final Data data) throws OutputException,
+			IOException {
 		Data root;
 		switch (type) {
 		case DataAscii:
@@ -82,6 +83,7 @@ public final class FileOutput extends Output {
 			throw new InternalError(String.format("Invalid print-type: %s",
 					type));
 		}
+		return false;
 	}
 
 	public static String help(final HelpKind kind) {

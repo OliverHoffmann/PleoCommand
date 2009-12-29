@@ -56,7 +56,8 @@ public final class PleoRXTXOutput extends Output {
 	}
 
 	@Override
-	protected void write0(final Data data) throws OutputException, IOException {
+	protected boolean write0(final Data data) throws OutputException,
+			IOException {
 		if ("PMC".equals(data.getSafe(0).asString())) {
 			pc.send(data.get(1).asString());
 			try {
@@ -65,7 +66,9 @@ public final class PleoRXTXOutput extends Output {
 				throw new OutputException(this, true, e,
 						"Cannot read answer for command '%s'", data);
 			}
+			return true;
 		}
+		return false;
 	}
 
 	public static String help(final HelpKind kind) {

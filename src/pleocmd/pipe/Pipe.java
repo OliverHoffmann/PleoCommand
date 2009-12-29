@@ -516,7 +516,9 @@ public final class Pipe extends StateHandling {
 
 	/**
 	 * Writes the given {@link Data} to all {@link Output}s ignoring those which
-	 * have permanently failed.
+	 * have permanently failed.<br>
+	 * Complains if the {@link Data} has not been accepted by at least one
+	 * {@link Output}.
 	 * 
 	 * @param data
 	 *            {@link Data} to write
@@ -524,8 +526,17 @@ public final class Pipe extends StateHandling {
 	private void writeDataToAllOutputs(final Data data) {
 		Log.detail("Writing data block '%s' to %d output(s)", data, outputList
 				.size());
+		boolean foundOne = false;
 		for (final Output out : outputList)
-			if (!ignoredOutputs.contains(out)) writeToOutput(data, out);
+			if (!ignoredOutputs.contains(out))
+				foundOne |= writeToOutput(data, out);
+		if (!foundOne) {
+			final Throwable t = new OutputException(null, false,
+					"Skipping data block '%s' because no fitting "
+							+ "output has been found", data);
+			Log.error(t);
+			feedback.addError(t, false);
+		}
 	}
 
 	/**
@@ -535,11 +546,11 @@ public final class Pipe extends StateHandling {
 	 *            {@link Data} to write
 	 * @param out
 	 *            {@link Output} to write to
+	 * @return true if the {@link Output} accepted the {@link Data}
 	 */
-	private void writeToOutput(final Data data, final Output out) {
+	private boolean writeToOutput(final Data data, final Output out) {
 		try {
-			feedback.incDataOutputCount();
-			out.write(data);
+			if (!out.write(data)) return false;
 		} catch (final OutputException e) {
 			Log.error(e);
 			if (!e.isPermanent()
@@ -555,6 +566,8 @@ public final class Pipe extends StateHandling {
 				Log.info("Skipping output '%s' for one data block '%s'", out,
 						data);
 		}
+		feedback.incDataOutputCount();
+		return true;
 	}
 
 	/**
