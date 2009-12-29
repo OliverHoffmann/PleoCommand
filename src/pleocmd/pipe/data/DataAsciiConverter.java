@@ -195,14 +195,20 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 			// we need to decode the data from a hex string
 			Log.detail("Converting hex data with length %d", buflen);
 			if (buflen % 2 != 0)
-				throw new InternalError("Broken hexadecimal data");
+				throw new IOException(String.format("Broken hexadecimal data: "
+						+ "Length must be multiple of two: %d", buflen));
 			final byte[] buf2 = new byte[buflen / 2];
 			for (int i = 0, j = 0; i < buflen;) {
 				final int d1 = Character.digit(buf[i++], 16); // CS_IGNORE
 				final int d2 = Character.digit(buf[i++], 16); // CS_IGNORE
-				if (d1 == -1 || d2 == -1)
-				// TODO more detailed
-					throw new IOException("Broken hexadecimal data");
+				if (d1 == -1)
+					throw new IOException(String.format("Broken hexadecimal "
+							+ "data: Invalid character at %d: 0x%02X", index
+							- buflen + i - 2, buf[i - 2]));
+				if (d2 == -1)
+					throw new IOException(String.format("Broken hexadecimal "
+							+ "data: Invalid character at %d: 0x%02X", index
+							- buflen + i - 1, buf[i - 1]));
 				buf2[j++] = (byte) (d1 << 4 | d2); // CS_IGNORE
 			}
 			val.readFromAscii(buf2, buf2.length);

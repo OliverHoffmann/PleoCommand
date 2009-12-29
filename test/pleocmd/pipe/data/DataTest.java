@@ -32,7 +32,7 @@ public final class DataTest extends Testcases {
 			testBinaryConversion(d1);
 			fail("IOException not thrown");
 		} catch (final IOException e) {
-			assertTrue(e.getMessage().contains("without any"));
+			assertTrue(e.toString(), e.getMessage().contains("without any"));
 		}
 		Log.consoleOut("Tested conversion of Data #1: '%s'", d1);
 
@@ -74,14 +74,30 @@ public final class DataTest extends Testcases {
 			Data.createFromAscii("ß");
 			fail("IOException not thrown");
 		} catch (final IOException e) {
-			assertTrue(e.getMessage().contains("Invalid character"));
+			assertTrue(e.toString(), e.getMessage().contains(
+					"Invalid character"));
 		}
 
 		try {
 			Data.createFromAscii("1|2|\0");
 			fail("IOException not thrown");
 		} catch (final IOException e) {
-			assertTrue(e.getMessage().contains("Invalid character"));
+			assertTrue(e.toString(), e.getMessage().contains(
+					"Invalid character"));
+		}
+
+		try {
+			Data.createFromAscii("Bx:F850BEXYA0");
+			fail("IOException not thrown");
+		} catch (final IOException e) {
+			assertTrue(e.toString(), e.getMessage().endsWith("9: 0x58"));
+		}
+
+		try {
+			Data.createFromAscii("Bx:F850B");
+			fail("IOException not thrown");
+		} catch (final IOException e) {
+			assertTrue(e.toString(), e.getMessage().endsWith(": 5"));
 		}
 
 		Log.consoleOut("Data testing done");
