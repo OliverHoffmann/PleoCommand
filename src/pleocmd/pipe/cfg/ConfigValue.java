@@ -27,7 +27,7 @@ public abstract class ConfigValue {
 
 	public abstract void setFromGUIComponents();
 
-	protected abstract void setFromString(String content) throws IOException;
+	public abstract void setFromString(String content) throws IOException;
 
 	@Override
 	public final String toString() {

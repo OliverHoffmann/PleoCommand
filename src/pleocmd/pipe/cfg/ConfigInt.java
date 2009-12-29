@@ -59,7 +59,7 @@ public final class ConfigInt extends ConfigValue {
 	}
 
 	@Override
-	protected void setFromString(final String content) throws IOException {
+	public void setFromString(final String content) throws IOException {
 		try {
 			setContent(Long.valueOf(content));
 		} catch (final NumberFormatException e) {

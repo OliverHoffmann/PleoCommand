@@ -120,7 +120,7 @@ public class ConfigList extends ConfigValue {
 	}
 
 	@Override
-	protected final void setFromString(final String content) throws IOException {
+	public final void setFromString(final String content) throws IOException {
 		setContent(content);
 	}
 

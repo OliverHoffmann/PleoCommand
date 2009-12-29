@@ -85,7 +85,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	protected void setFromString(final String content) throws IOException {
+	public void setFromString(final String content) throws IOException {
 		setContent(content);
 	}
 

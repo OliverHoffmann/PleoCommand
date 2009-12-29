@@ -58,7 +58,7 @@ public final class ConfigFloat extends ConfigValue {
 	}
 
 	@Override
-	protected void setFromString(final String content) throws IOException {
+	public void setFromString(final String content) throws IOException {
 		try {
 			setContent(Double.valueOf(content));
 		} catch (final NumberFormatException e) {
