@@ -88,7 +88,7 @@ public class StateHandlingTest extends Testcases {
 			shtc.ensureConstructing();
 			fail("Expected StateException");
 		} catch (final StateException e) {
-			assertTrue(e.getMessage().contains("wrong state"));
+			assertTrue(e.toString(), e.getMessage().contains("wrong state"));
 		}
 	}
 
@@ -97,7 +97,7 @@ public class StateHandlingTest extends Testcases {
 			shtc.ensureConstructed();
 			fail("Expected StateException");
 		} catch (final StateException e) {
-			assertTrue(e.getMessage().contains("wrong state"));
+			assertTrue(e.toString(), e.getMessage().contains("wrong state"));
 		}
 	}
 
@@ -106,7 +106,7 @@ public class StateHandlingTest extends Testcases {
 			shtc.ensureConfigured();
 			fail("Expected StateException");
 		} catch (final StateException e) {
-			assertTrue(e.getMessage().contains("wrong state"));
+			assertTrue(e.toString(), e.getMessage().contains("wrong state"));
 		}
 	}
 
@@ -115,7 +115,7 @@ public class StateHandlingTest extends Testcases {
 			shtc.ensureInitialized();
 			fail("Expected StateException");
 		} catch (final StateException e) {
-			assertTrue(e.getMessage().contains("wrong state"));
+			assertTrue(e.toString(), e.getMessage().contains("wrong state"));
 		}
 	}
 
@@ -124,7 +124,7 @@ public class StateHandlingTest extends Testcases {
 			shtc.ensureNoLongerInitialized();
 			fail("Expected StateException");
 		} catch (final StateException e) {
-			assertTrue(e.getMessage().contains("wrong state"));
+			assertTrue(e.toString(), e.getMessage().contains("wrong state"));
 		}
 	}
 

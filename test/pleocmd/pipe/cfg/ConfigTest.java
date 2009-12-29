@@ -67,14 +67,14 @@ public final class ConfigTest extends Testcases {
 			cfg.setOwner(null);
 			fail("setOwner() can be called twice");
 		} catch (final IllegalStateException e) {
-			assertTrue(e.getMessage().contains("has already"));
+			assertTrue(e.toString(), e.getMessage().contains("has already"));
 		}
 
 		try {
 			cfg.add(new ConfigString("CanNeverBeAdded", false));
 			fail("addV() allows adding after construction");
 		} catch (final IllegalStateException e) {
-			assertTrue(e.getMessage().startsWith("Cannot ad"));
+			assertTrue(e.toString(), e.getMessage().startsWith("Cannot ad"));
 		}
 
 		Log.consoleOut("Checked owner management of config '%s'", cfg);
@@ -92,7 +92,7 @@ public final class ConfigTest extends Testcases {
 			cfg.get(1).setFromString("30");
 			fail("ConfigInt can be set out of bounds");
 		} catch (final IndexOutOfBoundsException e) {
-			assertTrue(e.getMessage().contains("must be between"));
+			assertTrue(e.toString(), e.getMessage().contains("must be between"));
 		}
 
 		cfg.get(2).setFromString("0.5");
@@ -100,7 +100,7 @@ public final class ConfigTest extends Testcases {
 			cfg.get(2).setFromString("0.2");
 			fail("ConfigFloat can be set out of bounds");
 		} catch (final IndexOutOfBoundsException e) {
-			assertTrue(e.getMessage().contains("must be between"));
+			assertTrue(e.toString(), e.getMessage().contains("must be between"));
 		}
 		Log.consoleOut("Checked bounds of config '%s'", cfg);
 	}
