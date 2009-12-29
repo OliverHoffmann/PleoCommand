@@ -21,33 +21,76 @@ public class PipeTest extends Testcases {
 			InterruptedException, IOException {
 		PipeFeedback fb;
 
-		// test empty pipe
+		Log.consoleOut("Test empty pipe");
 		fb = testSimplePipe("", -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
-		// test simple pipe
-		fb = testSimplePipe("SC|SLEEP|100\nSC|ECHO|Echo working\n", 90, -1, 2,
+		Log.consoleOut("Test simple pipe");
+		fb = testSimplePipe("SC|SLEEP|100\nSC|ECHO|Echo working\n", 100, -1, 2,
 				0, 2, 0, 0, 0, 0, 0);
 
-		// test bad input
+		Log.consoleOut("Test bad input");
 		fb = testSimplePipe("SC|HELP", -1, -1, 0, 0, 0, 1, 0, 0, 0, 0);
 
-		// test interrupt
+		Log.consoleOut("Test unknown command");
+		fb = testSimplePipe("UNKNOWN|0|6.5|Hello\n", -1, -1, 1, 0, 0, 1, 0, 0,
+				0, 0);
+
+		Log.consoleOut("Test executing rest of queue after close");
+		fb = testSimplePipe("SC|SLEEP|500\nSC|SLEEP|1\nSC|SLEEP|1\n"
+				+ "SC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\nSC|ECHO|End\n", 500, -1,
+				7, 0, 7, 0, 0, 0, 0, 0);
+
+		Log.consoleOut("Test interrupt");
 		fb = testSimplePipe("[P-10]SC|SLEEP|10000\nSC|ECHO|HighPrio\n"
 				+ "SC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\n"
 				+ "SC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\n", -1, 9000,
-				10, 0, -1, 0, 0, 1, 0, 0);
+				10, 0, -1, 0, 0, 1, -1, 0);
 		assertTrue(fb.getDataOutputCount() == 9
 				|| fb.getDataOutputCount() == 10);
+		assertTrue(fb.getDropCount() <= 1);
 
-		// test low priority drop
-		fb = testSimplePipe("SC|SLEEP|400\n[P-10]SC|SLEEP|30000\n", 350, 25000,
+		Log.consoleOut("Test low priority drop");
+		fb = testSimplePipe("SC|SLEEP|400\n[P-10]SC|SLEEP|30000\n", 400, 25000,
 				2, 0, 1, 0, 0, 0, 1, 0);
 
-		// test queue clearing
-		fb = testSimplePipe("SC|SLEEP|10000\nSC|SLEEP|1\nSC|SLEEP|1\n"
-				+ "SC|SLEEP|1\nSC|SLEEP|1\nSC|SLEEP|1\n[P05]ECHO|HighPrio\n",
-				-1, -1, 7, 0, 2, 0, 0, 1, 5, 0);
+		Log.consoleOut("Test high priority queue clearing");
+		fb = testSimplePipe("SC|SLEEP|10000\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
+				+ "SC|FAIL\nSC|FAIL\n[P05]SC|ECHO|HighPrio\n", -1, -1, 7, 0, 2,
+				0, 0, 1, 5, 0);
 
+		Log.consoleOut("Test timed execution (need to wait)");
+		fb = testSimplePipe(
+				"SC|SLEEP|100\n[T500msP10]SC|ECHO|Timed HighPrio\n", 500, -1,
+				2, 0, 2, 0, 0, 0, 0, 0);
+
+		Log.consoleOut("Test timed execution (short delay)");
+		fb = testSimplePipe("SC|SLEEP|100\n[T50ms]SC|ECHO|Short Delay\n", 100,
+				-1, 2, 0, 2, 0, 0, 0, 0, 0);
+
+		Log.consoleOut("Test timed execution (long delay)");
+		fb = testSimplePipe("SC|SLEEP|500\n[T0ms]SC|ECHO|Long Delay\n", 500,
+				-1, 2, 0, 2, 0, 0, 0, 0, 1);
+		// TODO behind detection does not work
+
+		Log.consoleOut("Test timed execution combined with priority (high)");
+		fb = testSimplePipe("[T5s]SC|FAIL|Never printed\n"
+				+ "[T300msP01]SC|ECHO|Higher priority\n", 300, 4000, 2, 0, 2,
+				0, 0, 0, 1, 0);
+
+		Log.consoleOut("Test timed execution combined with priority (low)");
+		fb = testSimplePipe("[T1s]SC|ECHO|Printed\n"
+				+ "[T300msP-99]SC|FAIL|Dropped\n", 1000, -1, 2, 0, 1, 0, 0, 0,
+				1, 0);
+
+		Log.consoleOut("Test continuing execution after temporary error");
+		fb = testSimplePipe("SC|FAIL\nSC|SLEEP|500\n", 500, -1, 2, 0, 2, 1, 0,
+				0, 0, 0);
+
+		Log.consoleOut("Test continuing after permanent error");
+		// TODO two input, the first fails => the second must work
+		// TODO converter fails => output unconverted
+		// TODO the single output fails => pipe stopped
+		// TODO two output, the first fails => the second must work
 	}
 
 	// CS_IGNORE_NEXT this many parameters are ok here - only a test case
@@ -96,7 +139,7 @@ public class PipeTest extends Testcases {
 
 	@Test
 	public final void testReadWriteFiles() {
-		// fail("Not yet implemented");
+		// TODO fail("Not yet implemented");
 	}
 
 }
