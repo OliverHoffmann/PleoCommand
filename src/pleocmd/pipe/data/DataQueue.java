@@ -60,6 +60,8 @@ public final class DataQueue {
 	 */
 	private boolean closed;
 
+	private int sizeBeforeClear;
+
 	/**
 	 * Creates a new, empty and opened {@link DataQueue}.
 	 */
@@ -91,6 +93,7 @@ public final class DataQueue {
 			writePos = 0;
 			closed = false;
 			priority = PRIO_UNDEFINED;
+			sizeBeforeClear = 0;
 			Log.detail("Reset ring-buffer '%s'", this);
 		}
 	}
@@ -134,6 +137,27 @@ public final class DataQueue {
 	}
 
 	/**
+	 * The return value of {@link DataQueue#put(Data)}.
+	 * 
+	 * @author oliver
+	 */
+	public enum PutResult {
+		/**
+		 * The {@link Data} has been put into the queue.
+		 */
+		Put,
+		/**
+		 * The queue has been cleared because the new {@link Data} has a higher
+		 * priority as the current {@link Data}s in the queue.
+		 */
+		ClearedAndPut,
+		/**
+		 * The new {@link Data} has silently been dropped.
+		 */
+		Dropped
+	}
+
+	/**
 	 * Puts one {@link Data} into the ringbuffer, so it can be read by
 	 * {@link #get()}.<br>
 	 * If {@link Data}'s priority is lower than the one of the current elements
@@ -144,22 +168,23 @@ public final class DataQueue {
 	 * 
 	 * @param data
 	 *            data to put into the ring buffer
-	 * @return true if the queue has been cleared because the new {@link Data}
-	 *         has a higher priority as the current {@link Data}s in the queue
+	 * @return a {@link PutResult}
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been {@link #close()}d.
 	 */
-	public synchronized boolean put(final Data data) throws IOException {
+	public synchronized PutResult put(final Data data) throws IOException {
 		if (closed) throw new IOException("DataQueue is closed");
 
 		boolean hasBeenCleared = false;
 		if (priority != PRIO_UNDEFINED && data.getPriority() < priority) {
 			// silently drop the new Data
 			Log.detail("Dropped '%s' in '%s'", data, this);
-			return false;
+			return PutResult.Dropped;
 		}
 		if (priority != PRIO_UNDEFINED && data.getPriority() > priority) {
 			// fast-clearing of the queue
+			sizeBeforeClear = (writePos - readPos) % buffer.length;
+			if (sizeBeforeClear < 0) sizeBeforeClear += buffer.length;
 			readPos = writePos;
 			Log.detail("Cleared '%s' because of '%s'", this, data);
 			hasBeenCleared = true;
@@ -183,7 +208,18 @@ public final class DataQueue {
 			Log.detail("Increased buffer in '%s'", this);
 		}
 
-		return hasBeenCleared;
+		return hasBeenCleared ? PutResult.ClearedAndPut : PutResult.Put;
+	}
+
+	/**
+	 * @return the number of {@link Data}s which were in the queue immediately
+	 *         before the queue has been cleared due to a high-priority
+	 *         {@link Data} in {@link #put(Data)}.<br>
+	 *         Is <b>0></b> if the queue has never been cleared since the last
+	 *         {@link #resetCache()}.
+	 */
+	public int getSizeBeforeClear() {
+		return sizeBeforeClear;
 	}
 
 	@Override

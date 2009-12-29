@@ -33,8 +33,6 @@ public final class Pipe extends StateHandling {
 
 	private static final int MAX_BEHIND = 300;
 
-	private static long startTime;
-
 	private final List<Input> inputList = new ArrayList<Input>();
 
 	private final List<Output> outputList = new ArrayList<Output>();
@@ -57,10 +55,13 @@ public final class Pipe extends StateHandling {
 
 	private boolean inputThreadInterruped;
 
+	private PipeFeedback feedback;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 */
 	public Pipe() {
+		feedback = new PipeFeedback();
 		constructed();
 	}
 
@@ -179,8 +180,7 @@ public final class Pipe extends StateHandling {
 
 	/**
 	 * Starts two threads which pipe all data of all connected {@link Input}s
-	 * through the all connected {@link Converter} to all connected
-	 * {@link Output}s.<br>
+	 * through all connected {@link Converter} to all connected {@link Output}s.<br>
 	 * Waits until both threads have finished.<br>
 	 * The {@link Pipe} is initialized before starting and closed after
 	 * finishing.
@@ -201,6 +201,7 @@ public final class Pipe extends StateHandling {
 					runInputThread();
 				} catch (final Throwable t) { // CS_IGNORE
 					Log.error(t, "Input-Thread died");
+					getFeedback().addError(t, true);
 				}
 			}
 		};
@@ -211,10 +212,11 @@ public final class Pipe extends StateHandling {
 					runOutputThread();
 				} catch (final Throwable t) { // CS_IGNORE
 					Log.error(t, "Output-Thread died");
+					getFeedback().addError(t, true);
 				}
 			}
 		};
-		startTime = System.currentTimeMillis();
+		feedback = new PipeFeedback();
 		thrOutput.start();
 		thrInput.start();
 
@@ -230,6 +232,7 @@ public final class Pipe extends StateHandling {
 				Thread.sleep(100);
 		}
 		Log.detail("Input Thread no longer alive");
+		feedback.stopped();
 		thrInput = null;
 		thrOutput = null;
 		close();
@@ -326,6 +329,7 @@ public final class Pipe extends StateHandling {
 					data = dataQueue.get();
 				} catch (final InterruptedException e1) {
 					Log.detail("Reading next data has been interrupted");
+					feedback.incInterruptionCount();
 					continue;
 				}
 				if (data == null) break; // Input-Thread has finished piping
@@ -365,6 +369,7 @@ public final class Pipe extends StateHandling {
 			try {
 				if (in.canReadData()) {
 					final Data res = in.readData();
+					feedback.incDataInputCount();
 					if (res == null)
 						throw new InputException(in, false,
 								"readData() returned null");
@@ -372,6 +377,7 @@ public final class Pipe extends StateHandling {
 				}
 			} catch (final InputException e) {
 				Log.error(e);
+				feedback.addError(e, e.isPermanent());
 				if (e.isPermanent()) {
 					Log.info("Skipping no longer working input '%s'", in);
 					in.tryClose();
@@ -406,7 +412,7 @@ public final class Pipe extends StateHandling {
 			throws IOException {
 		for (final Data data : dataList) {
 			if (data.getTime() != Data.TIME_NOTIME) {
-				final long delta = startTime + data.getTime()
+				final long delta = feedback.getStartTime() + data.getTime()
 						- System.currentTimeMillis();
 				if (delta > 0) {
 					Log.detail("Waiting %d ms", delta);
@@ -414,18 +420,28 @@ public final class Pipe extends StateHandling {
 						Thread.sleep(delta);
 					} catch (final InterruptedException e) {
 						Log.error(e, "Failed to wait for correct output time");
+						// no incInterruptionCount() here
 						return;
 					}
-				} else if (delta < -MAX_BEHIND)
+				} else if (delta < -MAX_BEHIND) {
 					Log.warn("Output of '%s' is %d ms behind", data, -delta);
-				// TODO only warn for the first in dataList?
-				else
+					// TODO only warn for the first in dataList?
+					feedback.incBehindCount(-delta);
+				} else
 					Log.detail("Output of '%s' is %d ms behind", data, -delta);
 			}
-			if (dataQueue.put(data)) {
+			switch (dataQueue.put(data)) {
+			case ClearedAndPut:
 				Log.info("Canceling current command, "
 						+ "because of higher-priority command '%s'", data);
 				thrOutput.interrupt();
+				feedback.incDropCount(dataQueue.getSizeBeforeClear());
+				break;
+			case Dropped:
+				feedback.incDropCount();
+				break;
+			case Put:
+				break;
 			}
 		}
 	}
@@ -477,6 +493,7 @@ public final class Pipe extends StateHandling {
 				if (!deadlockDetection.add(id))
 					throw new ConverterException(cvt, true,
 							"Detected dead-lock");
+				feedback.incDataConvertedCount();
 				final List<Data> newDatas = cvt.convert(data);
 				final List<Data> res = new ArrayList<Data>(newDatas.size());
 				for (final Data newData : newDatas)
@@ -485,6 +502,7 @@ public final class Pipe extends StateHandling {
 			}
 		} catch (final ConverterException e) {
 			Log.error(e);
+			feedback.addError(e, e.isPermanent());
 			if (e.isPermanent()) {
 				Log.info("Removing no longer working converter '%s'", cvt);
 				cvt.tryClose();
@@ -520,9 +538,15 @@ public final class Pipe extends StateHandling {
 	 */
 	private void writeToOutput(final Data data, final Output out) {
 		try {
+			feedback.incDataOutputCount();
 			out.write(data);
 		} catch (final OutputException e) {
 			Log.error(e);
+			if (!e.isPermanent()
+					&& e.getCause() instanceof InterruptedException)
+				feedback.incInterruptionCount();
+			else
+				feedback.addError(e, e.isPermanent());
 			if (e.isPermanent()) {
 				Log.info("Removing no longer working output '%s'", out);
 				out.tryClose();
@@ -547,6 +571,7 @@ public final class Pipe extends StateHandling {
 		assert inputPosition == 0;
 		assert ignoredConverter.isEmpty();
 		assert ignoredOutputs.isEmpty();
+		assert feedback.getStopTime() > 0;
 	}
 
 	/**
@@ -664,11 +689,15 @@ public final class Pipe extends StateHandling {
 		return !skipped;
 	}
 
-	public static long getStartTime() {
-		if (startTime == 0)
-			throw new RuntimeException("Cannot get start-time: There has "
-					+ "never been any pipe started");
-		return startTime;
+	public PipeFeedback getFeedback() {
+		return feedback;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s: %s - %s - %s <%s>", getClass()
+				.getSimpleName(), inputList, converterList, outputList,
+				getState());
 	}
 
 }
