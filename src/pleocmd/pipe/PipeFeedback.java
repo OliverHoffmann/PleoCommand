@@ -165,7 +165,7 @@ public final class PipeFeedback {
 	}
 
 	/**
-	 * Called from {@link Pipe} if a {@link Data} is about to be send to a
+	 * Called from {@link Pipe} if a {@link Data} has been send to a
 	 * {@link Converter}.
 	 */
 	synchronized void incDataConvertedCount() {
@@ -173,7 +173,7 @@ public final class PipeFeedback {
 	}
 
 	/**
-	 * Called from {@link Pipe} if a {@link Data} is about to be send to an
+	 * Called from {@link Pipe} if a {@link Data} has been send to an
 	 * {@link Output}.
 	 */
 	synchronized void incDataOutputCount() {
@@ -214,7 +214,7 @@ public final class PipeFeedback {
 				+ "output has been %d time(s) interrupted "
 				+ "due to high-priority data and a data block "
 				+ "has %d time(s) been dropped due to low-priority and "
-				+ "it was time(s) behind (average %d, max %d, sum %d).",
+				+ "it was %d time(s) behind (average %d, max %d, sum %d).",
 				stopTime == 0 ? "is running since" : "has run", getElapsed(),
 				dataInputCount, dataConvertedCount, dataOutputCount,
 				temporaryErrors.size(), permanentErrors.size(),
