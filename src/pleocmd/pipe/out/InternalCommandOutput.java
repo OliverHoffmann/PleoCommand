@@ -37,10 +37,13 @@ public final class InternalCommandOutput extends Output {
 				try {
 					Thread.sleep(data.getSafe(2).asLong());
 				} catch (final InterruptedException e) {
-					Log.error(e, "Executing '%s' failed", data);
+					throw new OutputException(this, false, e,
+							"Executing '%s' failed", data);
 				}
 			else if ("HELP".equals(v2))
 				printHelp();
+			else if ("ECHO".equals(v2))
+				Log.consoleOut(data.getSafe(2).asString());
 			else
 				throw new OutputException(this, false,
 						"Unknown internal command: '%s' in '%s'", v2, data);
