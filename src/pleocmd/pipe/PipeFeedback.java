@@ -35,6 +35,8 @@ public final class PipeFeedback {
 
 	private int dropCount;
 
+	private int behindCountSignificant;
+
 	private long behindCount;
 
 	private long behindMax;
@@ -134,6 +136,10 @@ public final class PipeFeedback {
 		return dropCount;
 	}
 
+	public synchronized long getSignificantBehindCount() {
+		return behindCountSignificant;
+	}
+
 	public synchronized long getBehindCount() {
 		return behindCount;
 	}
@@ -196,10 +202,12 @@ public final class PipeFeedback {
 	}
 
 	synchronized void incDropCount(final int increment) {
-		dropCount = increment;
+		dropCount += increment;
 	}
 
-	synchronized void incBehindCount(final long behind) {
+	synchronized void incBehindCount(final long behind,
+			final boolean significant) {
+		if (significant) ++behindCountSignificant;
 		++behindCount;
 		if (behindMax < behind) behindMax = behind;
 		behindSum += behind;
@@ -218,8 +226,8 @@ public final class PipeFeedback {
 				stopTime == 0 ? "is running since" : "has run", getElapsed(),
 				dataInputCount, dataConvertedCount, dataOutputCount,
 				temporaryErrors.size(), permanentErrors.size(),
-				interruptionCount, dropCount, behindCount, getBehindAverage(),
-				behindMax, behindSum);
+				interruptionCount, dropCount, behindCountSignificant,
+				getBehindAverage(), behindMax, behindSum);
 	}
 
 }

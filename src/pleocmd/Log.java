@@ -43,10 +43,10 @@ public final class Log {
 		Console
 	}
 
-	private static Type minLogType = Type.Detail;
-
-	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
+	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
 			"HH:mm:ss.SSS");
+
+	private static Type minLogType = Type.Detail;
 
 	/**
 	 * Needed to inline next line after a line-break when writing messages to a
@@ -383,6 +383,15 @@ public final class Log {
 	 */
 	public static Type getMinLogType() {
 		return minLogType;
+	}
+
+	/**
+	 * @param type
+	 *            one of the log {@link Type}s
+	 * @return true if messages of the given {@link Type} can be logged.
+	 */
+	public static boolean canLog(final Type type) {
+		return type.ordinal() >= minLogType.ordinal();
 	}
 
 }

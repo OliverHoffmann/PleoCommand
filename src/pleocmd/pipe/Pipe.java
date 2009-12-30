@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,6 +33,8 @@ import pleocmd.pipe.out.Output;
 public final class Pipe extends StateHandling {
 
 	private static final int MAX_BEHIND = 300;
+
+	private static final long OVERHEAD_REDUCTION_TIME = 0;
 
 	private final List<Input> inputList = new ArrayList<Input>();
 
@@ -308,7 +311,7 @@ public final class Pipe extends StateHandling {
 	 * It fetches {@link Data} from the {@link DataQueue} and passes it to the
 	 * {@link Output}s in a loop until the {@link DataQueue} has been closed.
 	 * <p>
-	 * If the thread gets interrupted, only the current {@link Data} processing
+	 * If the thread gets interrupted, only writing of the current {@link Data}
 	 * will be aborted. To interrupt the thread itself, one has to close the
 	 * {@link DataQueue}.
 	 * 
@@ -335,6 +338,9 @@ public final class Pipe extends StateHandling {
 				if (data == null) break; // Input-Thread has finished piping
 				++count;
 
+				// ... wait for the correct time, if needed ...
+				if (!waitForOutputTime(data)) continue;
+
 				// ... and send it to all currently registered outputs
 				writeDataToAllOutputs(data);
 			}
@@ -342,6 +348,36 @@ public final class Pipe extends StateHandling {
 			Log.info("Output-Thread finished");
 			Log.detail("Sent %d data blocks to output", count);
 		}
+	}
+
+	private boolean waitForOutputTime(final Data data) {
+		if (data.getTime() == Data.TIME_NOTIME) return true;
+		final long execTime = feedback.getStartTime() + data.getTime();
+		final long delta = execTime - System.currentTimeMillis();
+		if (delta > 0) {
+			Log.detail("Waiting %d ms", delta);
+			try {
+				Thread.sleep(delta);
+			} catch (final InterruptedException e) {
+				Log.error(e, "Failed to wait %d ms for "
+						+ "correct output time", delta);
+				// no incInterruptionCount() here
+				return false;
+			}
+			return true;
+		}
+		final boolean significant = delta < -MAX_BEHIND;
+		feedback.incBehindCount(-delta, significant);
+		if (significant)
+			// TODO only warn for the first in dataList?
+			Log.warn("Output of '%s' is %d ms behind (should have been "
+					+ "executed at %s)", data, -delta, data, Log.DATE_FORMATTER
+					.format(new Date(execTime)));
+		else if (Log.canLog(Log.Type.Detail))
+			Log.detail("Output of '%s' is %d ms behind (should have been "
+					+ "executed at %s)", data, -delta, data, Log.DATE_FORMATTER
+					.format(new Date(execTime)));
+		return true;
 	}
 
 	/**
@@ -397,11 +433,18 @@ public final class Pipe extends StateHandling {
 	}
 
 	/**
-	 * Puts all {@link Data}s in the list to the {@link DataQueue}.<br>
+	 * Puts all {@link Data}s in the list to the {@link DataQueue}.
+	 * <p>
+	 * Drops the {@link Data} if it's priority is lower than the one in the
+	 * queue. <br>
+	 * Clears the queue and interrupts the output thread if the {@link Data}'s
+	 * priority is higher than the one in the queue.
+	 * <p>
 	 * If a time is specified for the {@link Data} this method will wait for the
-	 * correct time or print a warning if it's already behind.<br>
+	 * correct time before it decides whether the {@link Data} has to be dropped
+	 * or the queue be cleared.<br>
 	 * Immediately returns if sleeping for timed {@link Data} has been
-	 * interrupted
+	 * interrupted.
 	 * 
 	 * @param dataList
 	 *            list of {@link Data} objects to put into the {@link DataQueue}
@@ -411,25 +454,27 @@ public final class Pipe extends StateHandling {
 	private void putIntoOutputQueue(final List<Data> dataList)
 			throws IOException {
 		for (final Data data : dataList) {
+
+			// if time-to-wait is positive we wait here before we are
+			// forced to immediately drop a data block or clear the queue
+			// TODO wait here only if needed
 			if (data.getTime() != Data.TIME_NOTIME) {
-				final long delta = feedback.getStartTime() + data.getTime()
-						- System.currentTimeMillis();
+				final long execTime = feedback.getStartTime() + data.getTime();
+				final long delta = execTime - System.currentTimeMillis()
+						- OVERHEAD_REDUCTION_TIME;
 				if (delta > 0) {
 					Log.detail("Waiting %d ms", delta);
 					try {
 						Thread.sleep(delta);
 					} catch (final InterruptedException e) {
-						Log.error(e, "Failed to wait for correct output time");
+						Log.error(e, "Failed to wait %d ms for "
+								+ "correct output time", delta);
 						// no incInterruptionCount() here
 						return;
 					}
-				} else if (delta < -MAX_BEHIND) {
-					Log.warn("Output of '%s' is %d ms behind", data, -delta);
-					// TODO only warn for the first in dataList?
-					feedback.incBehindCount(-delta);
-				} else
-					Log.detail("Output of '%s' is %d ms behind", data, -delta);
+				}
 			}
+
 			switch (dataQueue.put(data)) {
 			case ClearedAndPut:
 				Log.info("Canceling current command, "
@@ -448,8 +493,10 @@ public final class Pipe extends StateHandling {
 
 	/**
 	 * Converts one {@link Data} object to a list of {@link Data} objects if a
-	 * fitting {@link Converter} could be found. Otherwise the {@link Data}
-	 * object itself is returned.
+	 * fitting {@link Converter} can be found. Otherwise the {@link Data} object
+	 * itself is returned.<br>
+	 * This method recursively calls {@link #convertOneData(Data, Converter)}
+	 * which again calls this method.
 	 * 
 	 * @param data
 	 *            The {@link Data} object to be converted.
@@ -475,7 +522,11 @@ public final class Pipe extends StateHandling {
 	/**
 	 * Tries to convert the given {@link Data} block with the {@link Converter}.
 	 * The converter is added to the {@link #ignoredConverter} list if it fails
-	 * permanently during the conversion.
+	 * permanently during the conversion.<br>
+	 * All {@link Data}s returned by the converter will immediately be converted
+	 * again.<br>
+	 * This method recursively calls {@link #convertDataToDataList(Data)} which
+	 * again calls this method.
 	 * 
 	 * @param data
 	 *            {@link Data} to convert

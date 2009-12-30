@@ -60,7 +60,7 @@ public class PipeTest extends Testcases {
 
 		Log.consoleOut("Test timed execution (need to wait)");
 		fb = testSimplePipe(
-				"SC|SLEEP|100\n[T500msP10]SC|ECHO|Timed HighPrio\n", 500, -1,
+				"SC|SLEEP|400\n[T600msP10]SC|ECHO|Timed HighPrio\n", 600, 950,
 				2, 0, 2, 0, 0, 0, 0, 0);
 
 		Log.consoleOut("Test timed execution (short delay)");
@@ -70,21 +70,45 @@ public class PipeTest extends Testcases {
 		Log.consoleOut("Test timed execution (long delay)");
 		fb = testSimplePipe("SC|SLEEP|500\n[T0ms]SC|ECHO|Long Delay\n", 500,
 				-1, 2, 0, 2, 0, 0, 0, 0, 1);
-		// TODO behind detection does not work
 
-		Log.consoleOut("Test timed execution combined with priority (high)");
-		fb = testSimplePipe("[T5s]SC|FAIL|Never printed\n"
-				+ "[T300msP01]SC|ECHO|Higher priority\n", 300, 4000, 2, 0, 2,
-				0, 0, 0, 1, 0);
+		Log.consoleOut("Test timed execution combined "
+				+ "with low priority (executed)");
+		fb = testSimplePipe("[T500ms]SC|ECHO|Printed\n"
+				+ "[T900msP-99]SC|ECHO|PrintedToo\n", 900, -1, 2, 0, 2, 0, 0,
+				0, 0, 0);
 
-		Log.consoleOut("Test timed execution combined with priority (low)");
-		fb = testSimplePipe("[T1s]SC|ECHO|Printed\n"
-				+ "[T300msP-99]SC|FAIL|Dropped\n", 1000, -1, 2, 0, 1, 0, 0, 0,
+		Log.consoleOut("Test timed execution combined "
+				+ "with low priority (dropped)");
+		fb = testSimplePipe("[T500ms]SC|SLEEP|500\n"
+				+ "[T900msP-99]SC|FAIL|Dropped\n", 1000, -1, 2, 0, 1, 0, 0, 0,
 				1, 0);
 
-		Log.consoleOut("Test continuing execution after temporary error");
+		Log.consoleOut("Test timed execution combined "
+				+ "with high priority (executed)");
+		fb = testSimplePipe("[T500ms]SC|ECHO|Printed\n"
+				+ "[T900msP33]SC|ECHO|HighPrio\n", 900, -1, 2, 0, 2, 0, 0, 0,
+				0, 0);
+
+		Log.consoleOut("Test timed execution combined "
+				+ "with high priority (interrupted)");
+		fb = testSimplePipe("[T500ms]SC|SLEEP|500\n"
+				+ "[T900msP33]SC|ECHO|HighPrio\n", 900, -1, 2, 0, 2, 0, 0, 1,
+				0, 0);
+
+		Log.consoleOut("Test continuing after temporary error");
 		fb = testSimplePipe("SC|FAIL\nSC|SLEEP|500\n", 500, -1, 2, 0, 2, 1, 0,
 				0, 0, 0);
+
+		Log.consoleOut("Test complex situation");
+		fb = testSimplePipe("[T100ms]SC|ECHO|1\n" + "SC|FAIL|UnknownCommand\n"
+				+ "[T300msP10]SC|ECHO|2\n" + "[P10T300ms]SC|ECHO|3\n"
+				+ "[P05T400ms]SC|ECHO|4\n" + "[P05T400ms]SC|SLEEP|600\n"
+				+ "[T400ms]SC|FAIL|Drop\n" + "SC|FAIL|Drop\n"
+				+ "InvalidInputßßß\n" + "SC|FAIL|Drop\n"
+				+ "[T550ms]SC|FAIL|Drop\n" + "[T600msP05]SC|ECHO|I'm late\n"
+				+ "[P05]SC|ECHO|5\n" + "[T1100msP05]SC|ECHO|6\n"
+				+ "[T1200ms]SC|SLEEP|300\n" + "[P99T1350ms]SC|ECHO|7\n", 1350,
+				-1, 15, 0, 11, 2, 0, 1, 4, 1);
 
 		Log.consoleOut("Test continuing after permanent error");
 		// TODO two input, the first fails => the second must work
@@ -115,8 +139,9 @@ public class PipeTest extends Testcases {
 
 		// print log
 		Log.consoleOut(pipe.getFeedback().toString());
-		Log.consoleOut("Tested Pipe '%s' containing '%s'", pipe, staticData
+		Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe, staticData
 				.replaceAll("\n(.)", "; $1").replace("\n", ""));
+		Log.consoleOut("");
 
 		// check result
 		final PipeFeedback fb = pipe.getFeedback();
