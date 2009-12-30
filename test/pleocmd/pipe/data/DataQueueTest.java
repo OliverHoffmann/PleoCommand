@@ -19,7 +19,7 @@ public final class DataQueueTest extends Testcases {
 	private static final long RAND_SEED = 928215371469291872L;
 
 	@Test(timeout = 60000)
-	public void testPutAndRead() throws IOException, InterruptedException {
+	public void testPutAndGet() throws IOException, InterruptedException {
 		// no need for detailed output
 
 		// prepare
