@@ -145,21 +145,33 @@ public class PipeTest extends Testcases {
 
 		// check result
 		final PipeFeedback fb = pipe.getFeedback();
+		if (permErr != -1)
+			assertEquals("Permanent Error Count is wrong: ", permErr, fb
+					.getPermanentErrors().size());
+		if (tempErr != -1)
+			assertEquals("Temporary Error Count is wrong: ", tempErr, fb
+					.getTemporaryErrors().size());
+		if (intrCnt != -1)
+			assertEquals("Interrupt Count is wrong: ", intrCnt, fb
+					.getInterruptionCount());
+		if (dropCnt != -1)
+			assertEquals("Drop Count is wrong: ", dropCnt, fb.getDropCount());
+		if (behindCnt != -1)
+			assertEquals("Behind Count is wrong: ", behindCnt, fb
+					.getSignificantBehindCount());
+		if (dataIn != -1)
+			assertEquals("Data Input Count is wrong: ", dataIn, fb
+					.getDataInputCount());
+		if (dataCvt != -1)
+			assertEquals("Data Conversion Count is wrong: ", dataCvt, fb
+					.getDataConvertedCount());
+		if (dataOut != -1)
+			assertEquals("Data Output Count is wrong: ", dataOut, fb
+					.getDataOutputCount());
 		if (minTime != -1)
 			assertTrue("Took not long enough", fb.getElapsed() >= minTime);
 		if (maxTime != -1)
 			assertTrue("Took too long", fb.getElapsed() <= maxTime);
-		if (dataIn != -1) assertEquals(dataIn, fb.getDataInputCount());
-		if (dataCvt != -1) assertEquals(dataCvt, fb.getDataConvertedCount());
-		if (dataOut != -1) assertEquals(dataOut, fb.getDataOutputCount());
-		if (tempErr != -1)
-			assertEquals(tempErr, fb.getTemporaryErrors().size());
-		if (permErr != -1)
-			assertEquals(permErr, fb.getPermanentErrors().size());
-		if (intrCnt != -1) assertEquals(intrCnt, fb.getInterruptionCount());
-		if (dropCnt != -1) assertEquals(dropCnt, fb.getDropCount());
-		if (behindCnt != -1)
-			assertEquals(behindCnt, fb.getSignificantBehindCount());
 		return fb;
 	}
 
