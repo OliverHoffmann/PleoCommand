@@ -158,7 +158,8 @@ public class PipeTest extends Testcases {
 			assertEquals(permErr, fb.getPermanentErrors().size());
 		if (intrCnt != -1) assertEquals(intrCnt, fb.getInterruptionCount());
 		if (dropCnt != -1) assertEquals(dropCnt, fb.getDropCount());
-		if (behindCnt != -1) assertEquals(behindCnt, fb.getBehindCount());
+		if (behindCnt != -1)
+			assertEquals(behindCnt, fb.getSignificantBehindCount());
 		return fb;
 	}
 
