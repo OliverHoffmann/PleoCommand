@@ -34,7 +34,33 @@ public final class Pipe extends StateHandling {
 
 	private static final int MAX_BEHIND = 300;
 
-	private static final long OVERHEAD_REDUCTION_TIME = 0;
+	/**
+	 * Number of milliseconds to reduce waiting-time in the input thread for
+	 * timed {@link Data}. before it's passed to the output thread's
+	 * {@link #waitForOutputTime(Data)}
+	 * <p>
+	 * If too small (smaller than time needed to pass from Input thread via
+	 * {@link #dataQueue} to Output thread), very short delays for timed
+	 * {@link Data} may occur in some situations.<br>
+	 * If too large, {@link Data}s may be dropped or interrupted without need if
+	 * a timed {@link Data} with a different priority follows.<br>
+	 * Typical values are in [0, 40] for fast and [25, 200] for a slow computer.
+	 */
+	private static final long OVERHEAD_REDUCTION_TIME = 10;
+
+	/**
+	 * Number of milliseconds it approximately takes from
+	 * {@link #waitForOutputTime(Data)} via {@link #writeDataToAllOutputs(Data)}
+	 * to {@link Output#write(Data)}
+	 * <p>
+	 * If too small, very short delays for timed {@link Data} may occur.<br>
+	 * If too large, timed {@link Data}s may be executed too early.<br>
+	 * Typical values are in [0, 10].<br>
+	 * Should not be larger than {@link #OVERHEAD_REDUCTION_TIME}<br>
+	 * Note that if {@link DataQueue#OUTPUT_THREAD_SLEEP_TIME} is too large, a
+	 * delay may already have occurred which can't be compensated here.
+	 */
+	private static final long OUTPUT_INIT_OVERHEAD = 2;
 
 	private final List<Input> inputList = new ArrayList<Input>();
 
@@ -102,6 +128,7 @@ public final class Pipe extends StateHandling {
 		ensureConstructed();
 		Log.detail("Connecting pipe with input '%s'", input);
 		inputList.add(input);
+		((PipePart) input).connectedToPipe(this);
 	}
 
 	/**
@@ -117,6 +144,7 @@ public final class Pipe extends StateHandling {
 		ensureConstructed();
 		Log.detail("Connecting pipe with output '%s'", output);
 		outputList.add(output);
+		((PipePart) output).connectedToPipe(this);
 	}
 
 	/**
@@ -132,6 +160,7 @@ public final class Pipe extends StateHandling {
 		ensureConstructed();
 		Log.detail("Connecting pipe with converter '%s'", converter);
 		converterList.add(converter);
+		((PipePart) converter).connectedToPipe(this);
 	}
 
 	@Override
@@ -353,7 +382,8 @@ public final class Pipe extends StateHandling {
 	private boolean waitForOutputTime(final Data data) {
 		if (data.getTime() == Data.TIME_NOTIME) return true;
 		final long execTime = feedback.getStartTime() + data.getTime();
-		final long delta = execTime - System.currentTimeMillis();
+		final long delta = execTime - System.currentTimeMillis()
+				- OUTPUT_INIT_OVERHEAD;
 		if (delta > 0) {
 			Log.detail("Waiting %d ms", delta);
 			try {
@@ -371,11 +401,11 @@ public final class Pipe extends StateHandling {
 		if (significant)
 			// TODO only warn for the first in dataList?
 			Log.warn("Output of '%s' is %d ms behind (should have been "
-					+ "executed at %s)", data, -delta, data, Log.DATE_FORMATTER
+					+ "executed at '%s')", data, -delta, Log.DATE_FORMATTER
 					.format(new Date(execTime)));
 		else if (Log.canLog(Log.Type.Detail))
 			Log.detail("Output of '%s' is %d ms behind (should have been "
-					+ "executed at %s)", data, -delta, data, Log.DATE_FORMATTER
+					+ "executed at '%s')", data, -delta, Log.DATE_FORMATTER
 					.format(new Date(execTime)));
 		return true;
 	}
@@ -629,6 +659,12 @@ public final class Pipe extends StateHandling {
 	 */
 	public void reset() throws PipeException {
 		ensureNoLongerInitialized();
+		for (final PipePart pp : inputList)
+			pp.disconnectedFromPipe(this);
+		for (final PipePart pp : converterList)
+			pp.disconnectedFromPipe(this);
+		for (final PipePart pp : outputList)
+			pp.disconnectedFromPipe(this);
 		inputList.clear();
 		converterList.clear();
 		outputList.clear();
@@ -748,6 +784,7 @@ public final class Pipe extends StateHandling {
 				throw new PipeException(pp, true,
 						"Cannot create PipePart of class '%s': "
 								+ "Unknown super class", cn);
+			pp.connectedToPipe(this);
 		}
 		in.close();
 		return !skipped;

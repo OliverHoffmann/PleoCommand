@@ -25,7 +25,18 @@ public final class DataQueue {
 	 */
 	public static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
 
+	/**
+	 * Initial ringbuffer size after {@link #resetCache()}.
+	 */
 	private static final int RB_DEFAULT = 16;
+
+	/**
+	 * Number of milliseconds to wait until data is available in {@link #get()}.
+	 * If too small, cpu usage may increase during idle times<br>
+	 * If too large, short delays for timed {@link Data} may occur.<br>
+	 * Typical values are in [5, 30].
+	 */
+	private static final long OUTPUT_THREAD_SLEEP_TIME = 10;
 
 	/**
 	 * This array represents a ring buffer.
@@ -126,7 +137,7 @@ public final class DataQueue {
 				first = false;
 			}
 			// block until data available
-			Thread.sleep(30);
+			Thread.sleep(OUTPUT_THREAD_SLEEP_TIME);
 		}
 		synchronized (this) {
 			final Data res = buffer[readPos];
