@@ -22,7 +22,6 @@ import pleocmd.pipe.val.ValueType;
 public final class DataTest extends Testcases {
 
 	@Test
-	@SuppressWarnings("deprecation")
 	public void testConversion() throws IOException {
 
 		final List<Value> values = new ArrayList<Value>();

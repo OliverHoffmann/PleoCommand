@@ -16,7 +16,6 @@ import pleocmd.pipe.val.Value;
 public final class DataQueueTest extends Testcases {
 
 	private static final int BUF_SIZE = 1024;
-	private static final long RAND_SEED = 928215371469291872L;
 
 	@Test(timeout = 60000)
 	public void testPutAndGet() throws IOException, InterruptedException {
