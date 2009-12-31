@@ -3,6 +3,7 @@ package pleocmd.pipe;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.io.File;
 import java.io.IOException;
 
 import org.junit.Test;
@@ -10,9 +11,12 @@ import org.junit.Test;
 import pleocmd.Log;
 import pleocmd.Testcases;
 import pleocmd.exc.PipeException;
-import pleocmd.pipe.in.Input;
+import pleocmd.pipe.in.FileInput;
+import pleocmd.pipe.in.ReadType;
 import pleocmd.pipe.in.StaticInput;
+import pleocmd.pipe.out.FileOutput;
 import pleocmd.pipe.out.InternalCommandOutput;
+import pleocmd.pipe.out.PrintType;
 
 public class PipeTest extends Testcases {
 
@@ -22,7 +26,7 @@ public class PipeTest extends Testcases {
 		PipeFeedback fb;
 
 		Log.consoleOut("Test empty pipe");
-		fb = testSimplePipe("", -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
+		fb = testSimplePipe(new Pipe(), -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		Log.consoleOut("Test simple pipe");
 		fb = testSimplePipe("SC|SLEEP|100\nSC|ECHO|Echo working\n", 100, -1, 2,
@@ -110,26 +114,64 @@ public class PipeTest extends Testcases {
 				+ "[T1200ms]SC|SLEEP|300\n" + "[P99T1350ms]SC|ECHO|7\n", 1350,
 				-1, 15, 0, 11, 2, 0, 1, 4, 1);
 
-		Log.consoleOut("Test continuing after permanent error");
-		// TODO two input, the first fails => the second must work
+		Log.consoleOut("Test timing");
+		testSimplePipe("SC|ECHO|$ELAPSED=0?\n" + "[T150ms]SC|SLEEP|200\n"
+				+ "SC|ECHO|$ELAPSED=350?\n"
+				+ "[T450msP10]SC|ECHO|$ELAPSED=450?\n"
+				+ "[T550ms]SC|ECHO|$ELAPSED=550?\n"
+				+ "[T650ms]SC|ECHO|$ELAPSED=650?\n"
+				+ "[T700ms]SC|ECHO|$ELAPSED=700?\n"
+				+ "[T750ms]SC|ECHO|$ELAPSED=750?\n"
+				+ "[T775ms]SC|ECHO|$ELAPSED=775?\n"
+				+ "[T800ms]SC|ECHO|$ELAPSED=800?\n"
+				+ "[T825ms]SC|ECHO|$ELAPSED=825?\n"
+				+ "[T850ms]SC|ECHO|$ELAPSED=850?\n"
+				+ "[T860ms]SC|ECHO|$ELAPSED=860?\n"
+				+ "[T870ms]SC|ECHO|$ELAPSED=870?\n"
+				+ "[T880ms]SC|ECHO|$ELAPSED=880?\n"
+				+ "[T1000ms]SC|ECHO|$ELAPSED=1000?\n"
+				+ "SC|ECHO|$ELAPSED=1000+<10?\n"
+				+ "SC|ECHO|$ELAPSED=1000+<20?\n"
+				+ "SC|ECHO|$ELAPSED=1000+<30?\n", 450, -1, 19, 0, 19, 0, 0, 0,
+				0, 0);
+
+		Log.consoleOut("Test error handling (two inputs, first one fails)");
+		Pipe p = new Pipe();
+		p.addInput(new FileInput(new File("/does/not/exist"), ReadType.Ascii));
+		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
+		p.addOutput(new InternalCommandOutput());
+		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+
+		Log.consoleOut("Test error handling (converter fails)");
+		Log.consoleOut("TODO");
 		// TODO converter fails => output unconverted
-		// TODO the single output fails => pipe stopped
-		// TODO two output, the first fails => the second must work
+
+		Log.consoleOut("Test error handling (sole output fails)");
+		p = new Pipe();
+		p.addInput(new StaticInput("[T1s]\n[T8sP10]\n"));
+		p.addOutput(new FileOutput(new File("/can/not/be/created"),
+				PrintType.DataAscii));
+		fb = testSimplePipe(p, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
+
+		Log.consoleOut("Test error handling (two outputs, first one fails)");
+		p = new Pipe();
+		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
+		p.addOutput(new FileOutput(new File("/can/not/be/created"),
+				PrintType.DataAscii));
+		p.addOutput(new InternalCommandOutput());
+		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 	}
 
 	// CS_IGNORE_NEXT this many parameters are ok here - only a test case
-	private PipeFeedback testSimplePipe(final String staticData,
-			final long minTime, final long maxTime, final int dataIn,
-			final int dataCvt, final int dataOut, final int tempErr,
-			final int permErr, final int intrCnt, final int dropCnt,
-			final int behindCnt) throws PipeException, InterruptedException,
-			IOException {
+	private PipeFeedback testSimplePipe(final Object o, final long minTime,
+			final long maxTime, final int dataIn, final int dataCvt,
+			final int dataOut, final int tempErr, final int permErr,
+			final int intrCnt, final int dropCnt, final int behindCnt)
+			throws PipeException, InterruptedException, IOException {
 		// create pipe
-		final Pipe pipe = new Pipe();
-		if (!staticData.isEmpty()) {
-			final Input in = new StaticInput();
-			in.getConfig().get(0).setFromString(staticData);
-			pipe.addInput(in);
+		final Pipe pipe = o instanceof Pipe ? (Pipe) o : new Pipe();
+		if (o instanceof String) {
+			pipe.addInput(new StaticInput((String) o));
 			pipe.addOutput(new InternalCommandOutput());
 		}
 
@@ -139,8 +181,11 @@ public class PipeTest extends Testcases {
 
 		// print log
 		Log.consoleOut(pipe.getFeedback().toString());
-		Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe, staticData
-				.replaceAll("\n(.)", "; $1").replace("\n", ""));
+		if (o instanceof String)
+			Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe,
+					((String) o).replaceAll("\n(.)", "; $1").replace("\n", ""));
+		else
+			Log.consoleOut("Finished Pipe '%s'", pipe);
 		Log.consoleOut("");
 
 		// check result
