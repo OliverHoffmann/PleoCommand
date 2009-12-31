@@ -1,6 +1,7 @@
 package pleocmd.pipe.cfg;
 
 import java.awt.Container;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JFileChooser;
@@ -15,7 +16,7 @@ public final class ConfigPath extends ConfigValue {
 		FileForReading, FileForWriting, Directory
 	}
 
-	private String content;
+	private File content;
 
 	private final PathType type;
 
@@ -24,14 +25,14 @@ public final class ConfigPath extends ConfigValue {
 	public ConfigPath(final String label, final PathType type) {
 		super(label);
 		this.type = type;
-		content = "";
+		content = new File("");
 	}
 
-	public String getContent() {
+	public File getContent() {
 		return content;
 	}
 
-	public void setContent(final String content) {
+	public void setContent(final File content) {
 		if (content == null) throw new NullPointerException("content");
 		this.content = content;
 	}
@@ -42,12 +43,12 @@ public final class ConfigPath extends ConfigValue {
 
 	@Override
 	public String getContentAsString() {
-		return content;
+		return content.getPath();
 	}
 
 	@Override
 	public void insertGUIComponents(final Layouter lay) {
-		tf = new JTextField(content, 50);
+		tf = new JTextField(content.getPath(), 50);
 		lay.add(tf, true);
 		lay.addButton(Button.Browse, new Runnable() {
 			@Override
@@ -81,12 +82,12 @@ public final class ConfigPath extends ConfigValue {
 
 	@Override
 	public void setFromGUIComponents() {
-		setContent(tf.getText());
+		setContent(new File(tf.getText()));
 	}
 
 	@Override
 	public void setFromString(final String content) throws IOException {
-		setContent(content);
+		setContent(new File(content));
 	}
 
 }

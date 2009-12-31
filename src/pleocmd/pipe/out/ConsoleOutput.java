@@ -22,6 +22,11 @@ public final class ConsoleOutput extends Output {
 		constructed();
 	}
 
+	public ConsoleOutput(final PrintType type) {
+		this();
+		cfg0.setEnum(type);
+	}
+
 	@Override
 	protected void configure0() {
 		type = cfg0.getEnum();

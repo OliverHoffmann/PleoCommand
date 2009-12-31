@@ -19,6 +19,11 @@ public final class ConsoleInput extends Input {
 		constructed();
 	}
 
+	public ConsoleInput(final ReadType type) {
+		this();
+		cfg0.setEnum(type);
+	}
+
 	@Override
 	protected void configure0() {
 		type = cfg0.getEnum();

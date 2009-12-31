@@ -21,6 +21,11 @@ public final class StaticInput extends Input {
 		constructed();
 	}
 
+	public StaticInput(final String staticData) {
+		this();
+		cfg0.setContent(staticData);
+	}
+
 	@Override
 	protected void configure0() {
 		input = cfg0.getContent();

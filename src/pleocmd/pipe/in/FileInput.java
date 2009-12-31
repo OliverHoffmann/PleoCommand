@@ -30,9 +30,15 @@ public final class FileInput extends Input {
 		constructed();
 	}
 
+	public FileInput(final File file, final ReadType type) {
+		this();
+		cfg0.setContent(file);
+		cfg1.setEnum(type);
+	}
+
 	@Override
 	protected void configure0() {
-		file = new File(cfg0.getContent());
+		file = cfg0.getContent();
 		type = cfg1.getEnum();
 	}
 

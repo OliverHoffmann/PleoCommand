@@ -27,6 +27,11 @@ public final class PleoRXTXOutput extends Output {
 		constructed();
 	}
 
+	public PleoRXTXOutput(final String device) {
+		this();
+		cfg0.setContent(device);
+	}
+
 	private static List<String> getAllDeviceNames() {
 		final List<String> names = new ArrayList<String>();
 		final List<CommPortIdentifier> ports = PleoCommunication
