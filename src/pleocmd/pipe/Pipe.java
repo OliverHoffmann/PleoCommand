@@ -68,9 +68,11 @@ public final class Pipe extends StateHandling {
 
 	private final List<Converter> converterList = new ArrayList<Converter>();
 
-	private final Set<Converter> ignoredConverter = new HashSet<Converter>();
+	private final Set<PipePart> ignoredInputs = new HashSet<PipePart>();
 
-	private final Set<Output> ignoredOutputs = new HashSet<Output>();
+	private final Set<PipePart> ignoredConverter = new HashSet<PipePart>();
+
+	private final Set<PipePart> ignoredOutputs = new HashSet<PipePart>();
 
 	private final Set<Long> deadlockDetection = new HashSet<Long>();
 
@@ -166,27 +168,31 @@ public final class Pipe extends StateHandling {
 	@Override
 	protected void configure0() throws PipeException {
 		Log.detail("Configuring all input");
-		for (final Input in : inputList)
-			in.configure();
+		for (final PipePart pp : inputList)
+			if (!pp.tryConfigure()) ignoredInputs.add(pp);
+
 		Log.detail("Configuring all converter");
-		for (final Converter cvt : converterList)
-			cvt.configure();
+		for (final PipePart pp : converterList)
+			if (!pp.tryConfigure()) ignoredConverter.add(pp);
+
 		Log.detail("Configuring all output");
-		for (final Output out : outputList)
-			out.configure();
+		for (final PipePart pp : outputList)
+			if (!pp.tryConfigure()) ignoredOutputs.add(pp);
 	}
 
 	@Override
 	protected void init0() throws PipeException {
 		Log.detail("Initializing all input");
-		for (final Input in : inputList)
-			in.init();
+		for (final PipePart pp : inputList)
+			if (!pp.tryInit()) ignoredInputs.add(pp);
+
 		Log.detail("Initializing all converter");
-		for (final Converter cvt : converterList)
-			cvt.init();
+		for (final PipePart pp : converterList)
+			if (!pp.tryInit()) ignoredConverter.add(pp);
+
 		Log.detail("Initializing all output");
-		for (final Output out : outputList)
-			out.init();
+		for (final PipePart pp : outputList)
+			if (!pp.tryInit()) ignoredOutputs.add(pp);
 	}
 
 	@Override
@@ -198,7 +204,8 @@ public final class Pipe extends StateHandling {
 		}
 		Log.detail("Closing all input");
 		for (int i = inputPosition; i < inputList.size(); ++i)
-			inputList.get(i).tryClose();
+			if (!ignoredInputs.contains(inputList.get(i)))
+				inputList.get(i).tryClose();
 		Log.detail("Closing all converter");
 		for (final PipePart pp : converterList)
 			if (!ignoredConverter.contains(pp)) pp.tryClose();
@@ -206,6 +213,7 @@ public final class Pipe extends StateHandling {
 		for (final PipePart pp : outputList)
 			if (!ignoredOutputs.contains(pp)) pp.tryClose();
 		inputPosition = 0;
+		ignoredInputs.clear();
 		ignoredConverter.clear();
 		ignoredOutputs.clear();
 	}
@@ -224,6 +232,7 @@ public final class Pipe extends StateHandling {
 	 *             waiting for the two pipe threads
 	 */
 	public void pipeAllData() throws PipeException, InterruptedException {
+		feedback = new PipeFeedback();
 		init();
 		dataQueue.resetCache();
 		thrInput = new Thread() {
@@ -248,7 +257,7 @@ public final class Pipe extends StateHandling {
 				}
 			}
 		};
-		feedback = new PipeFeedback();
+		feedback.started();
 		thrOutput.start();
 		thrInput.start();
 
@@ -310,7 +319,6 @@ public final class Pipe extends StateHandling {
 	 */
 	protected void runInputThread() throws StateException, IOException {
 		inputThreadInterruped = false;
-		int count = 0;
 		try {
 			Log.info("Input-Thread started");
 			while (!inputThreadInterruped) {
@@ -319,7 +327,6 @@ public final class Pipe extends StateHandling {
 				// read next data block ...
 				final Data data = getFromInput();
 				if (data == null) break; // marks end of all inputs
-				++count;
 
 				// ... convert it ...
 				deadlockDetection.clear();
@@ -330,7 +337,8 @@ public final class Pipe extends StateHandling {
 			}
 		} finally {
 			Log.info("Input-Thread finished");
-			Log.detail("Read %d data blocks from input", count);
+			Log.detail("Read %d data blocks from input", feedback
+					.getDataInputCount());
 			dataQueue.close();
 		}
 	}
@@ -350,7 +358,6 @@ public final class Pipe extends StateHandling {
 	 */
 	protected void runOutputThread() throws StateException {
 		Log.info("Output-Thread started");
-		int count = 0;
 		try {
 			while (true) {
 				ensureInitialized();
@@ -365,7 +372,9 @@ public final class Pipe extends StateHandling {
 					continue;
 				}
 				if (data == null) break; // Input-Thread has finished piping
-				++count;
+
+				// There's no need to continue if we have no more outputs
+				if (ignoredOutputs.size() == outputList.size()) break;
 
 				// ... wait for the correct time, if needed ...
 				if (!waitForOutputTime(data)) continue;
@@ -375,7 +384,8 @@ public final class Pipe extends StateHandling {
 			}
 		} finally {
 			Log.info("Output-Thread finished");
-			Log.detail("Sent %d data blocks to output", count);
+			Log.detail("Sent %d data blocks to output", feedback
+					.getDataOutputCount());
 		}
 	}
 
@@ -432,6 +442,12 @@ public final class Pipe extends StateHandling {
 				return null;
 			}
 			in = inputList.get(inputPosition);
+			if (ignoredInputs.contains(in)) {
+				Log.detail("Skipping input '%s' which failed "
+						+ "in config/init phase", in);
+				++inputPosition;
+				continue;
+			}
 			try {
 				if (in.canReadData()) {
 					final Data res = in.readData();
@@ -669,6 +685,7 @@ public final class Pipe extends StateHandling {
 		converterList.clear();
 		outputList.clear();
 		assert inputPosition == 0;
+		assert ignoredInputs.isEmpty();
 		assert ignoredConverter.isEmpty();
 		assert ignoredOutputs.isEmpty();
 		assert feedback.getStopTime() > 0;

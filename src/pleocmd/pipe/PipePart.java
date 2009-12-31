@@ -29,14 +29,53 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	/**
+	 * Tries to call {@link #configure()} and writes an error message to the
+	 * {@link Log} if configuring fails.
+	 * 
+	 * @return true if configuring was successful
+	 */
+	public final boolean tryConfigure() {
+		try {
+			configure();
+			return true;
+		} catch (final PipeException e) {
+			pipe.getFeedback().addError(e, e.isPermanent());
+			Log.error(e, "Cannot configure '%s'", getClass().getSimpleName());
+			return false;
+		}
+	}
+
+	/**
+	 * Tries to call {@link #init()} and writes an error message to the
+	 * {@link Log} if initializing fails.
+	 * 
+	 * @return true if initializing was successful
+	 */
+	public final boolean tryInit() {
+		try {
+			init();
+			return true;
+		} catch (final PipeException e) {
+			pipe.getFeedback().addError(e, e.isPermanent());
+			Log.error(e, "Cannot initialize '%s'", getClass().getSimpleName());
+			return false;
+		}
+	}
+
+	/**
 	 * Tries to call {@link #close()} and writes an error message to the
 	 * {@link Log} if closing fails.
+	 * 
+	 * @return true if closing was successful
 	 */
-	public final void tryClose() {
+	public final boolean tryClose() {
 		try {
 			close();
+			return true;
 		} catch (final PipeException e) {
+			pipe.getFeedback().addError(e, e.isPermanent());
 			Log.error(e, "Cannot close '%s'", getClass().getSimpleName());
+			return false;
 		}
 	}
 

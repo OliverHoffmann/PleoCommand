@@ -17,7 +17,7 @@ import pleocmd.pipe.out.Output;
  */
 public final class PipeFeedback {
 
-	private final long startTime;
+	private long startTime;
 
 	private long stopTime;
 
@@ -51,7 +51,7 @@ public final class PipeFeedback {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
 				.equals(Pipe.class.getName()) : s1;
-		startTime = System.currentTimeMillis();
+		startTime = 0;
 		temporaryErrors = new ArrayList<Throwable>();
 		permanentErrors = new ArrayList<Throwable>();
 	}
@@ -154,6 +154,10 @@ public final class PipeFeedback {
 
 	public synchronized long getBehindAverage() {
 		return behindCount == 0 ? 0 : behindSum / behindCount;
+	}
+
+	synchronized void started() {
+		startTime = System.currentTimeMillis();
 	}
 
 	synchronized void stopped() {
