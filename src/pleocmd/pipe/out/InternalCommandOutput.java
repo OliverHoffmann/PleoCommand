@@ -44,7 +44,8 @@ public final class InternalCommandOutput extends Output {
 			else if ("HELP".equals(v2))
 				printHelp();
 			else if ("ECHO".equals(v2))
-				Log.consoleOut(data.getSafe(2).asString());
+				Log.consoleOut(data.getSafe(2).asString().replace("$ELAPSED",
+						String.valueOf(getPipe().getFeedback().getElapsed())));
 			else
 				throw new OutputException(this, false,
 						"Unknown internal command: '%s' in '%s'", v2, data);
