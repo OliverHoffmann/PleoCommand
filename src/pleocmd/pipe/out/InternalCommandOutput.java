@@ -6,7 +6,9 @@ import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
+import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.in.Input;
 
 public final class InternalCommandOutput extends Output {
 
@@ -57,24 +59,21 @@ public final class InternalCommandOutput extends Output {
 	private void printHelp() {
 		Log.consoleOut("All available inputs:");
 		Log.consoleOut("---------------------");
-		for (final Class<PipePart> cpp : PipePartDetection
-				.getAllPipeParts("in"))
+		for (final Class<Input> cpp : PipePartDetection.ALL_INPUT)
 			printHelp(cpp);
 
 		Log.consoleOut("All available converter:");
 		Log.consoleOut("------------------------");
-		for (final Class<PipePart> cpp : PipePartDetection
-				.getAllPipeParts("cvt"))
+		for (final Class<Converter> cpp : PipePartDetection.ALL_CONVERTER)
 			printHelp(cpp);
 
 		Log.consoleOut("All available outputs:");
 		Log.consoleOut("----------------------");
-		for (final Class<PipePart> cpp : PipePartDetection
-				.getAllPipeParts("out"))
+		for (final Class<Output> cpp : PipePartDetection.ALL_OUTPUT)
 			printHelp(cpp);
 	}
 
-	private void printHelp(final Class<PipePart> cpp) {
+	private void printHelp(final Class<? extends PipePart> cpp) {
 		// CS_IGNORE_NEXT format is correct in this context
 		Log.consoleOut("%s:", PipePartDetection.callHelp(cpp, HelpKind.Name));
 		Log.consoleOut(PipePartDetection.callHelp(cpp, HelpKind.Description));

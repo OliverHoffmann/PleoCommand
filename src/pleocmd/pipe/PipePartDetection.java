@@ -9,6 +9,7 @@ import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -16,14 +17,32 @@ import java.util.jar.JarFile;
 
 import pleocmd.Log;
 import pleocmd.pipe.PipePart.HelpKind;
+import pleocmd.pipe.cvt.Converter;
+import pleocmd.pipe.in.Input;
+import pleocmd.pipe.out.Output;
 
 public final class PipePartDetection {
+
+	private static final List<Class<Input>> LIST_IN = getAllPipeParts("in");
+	private static final List<Class<Converter>> LIST_CVT = getAllPipeParts("cvt");
+	private static final List<Class<Output>> LIST_OUT = getAllPipeParts("out");
+
+	// CS_IGNORE_BEGIN need private before public here
+
+	public static final List<Class<Input>> ALL_INPUT = Collections
+			.unmodifiableList(LIST_IN);
+	public static final List<Class<Converter>> ALL_CONVERTER = Collections
+			.unmodifiableList(LIST_CVT);
+	public static final List<Class<Output>> ALL_OUTPUT = Collections
+			.unmodifiableList(LIST_OUT);
+
+	// CS_IGNORE_END
 
 	private PipePartDetection() {
 		// utility class => hidden
 	}
 
-	public static <E extends PipePart> List<Class<E>> getAllPipeParts(
+	private static <E extends PipePart> List<Class<E>> getAllPipeParts(
 			final String subPackage) {
 		final List<Class<E>> res = new ArrayList<Class<E>>();
 
@@ -41,6 +60,7 @@ public final class PipePartDetection {
 			return res;
 		}
 
+		// Check all files in this paths (CLASS files and JAR archives)
 		while (resources.hasMoreElements()) {
 			String path;
 			try {

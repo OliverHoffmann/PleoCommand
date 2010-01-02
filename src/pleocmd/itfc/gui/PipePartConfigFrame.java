@@ -7,6 +7,7 @@ import pleocmd.Log;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
+import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -25,9 +26,10 @@ public final class PipePartConfigFrame extends JDialog {
 
 	public PipePartConfigFrame(final Pipe pipe) {
 		this.pipe = pipe;
-		pppInput = new PipePartPanel<Input>("in");
-		pppConverter = new PipePartPanel<Converter>("cvt");
-		pppOutput = new PipePartPanel<Output>("out");
+		pppInput = new PipePartPanel<Input>(PipePartDetection.ALL_INPUT);
+		pppConverter = new PipePartPanel<Converter>(
+				PipePartDetection.ALL_CONVERTER);
+		pppOutput = new PipePartPanel<Output>(PipePartDetection.ALL_OUTPUT);
 
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");

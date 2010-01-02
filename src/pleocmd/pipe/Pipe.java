@@ -688,7 +688,6 @@ public final class Pipe extends StateHandling {
 		assert ignoredInputs.isEmpty();
 		assert ignoredConverter.isEmpty();
 		assert ignoredOutputs.isEmpty();
-		assert feedback.getStopTime() > 0;
 	}
 
 	/**
@@ -722,6 +721,18 @@ public final class Pipe extends StateHandling {
 		out.close();
 	}
 
+	private Class<? extends PipePart> findPipePartClass(final String name)
+			throws PipeException {
+		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_INPUT)
+			if (pp.getSimpleName().equals(name)) return pp;
+		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_CONVERTER)
+			if (pp.getSimpleName().equals(name)) return pp;
+		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_OUTPUT)
+			if (pp.getSimpleName().equals(name)) return pp;
+		throw new PipeException(null, false,
+				"Cannot find any PipePart with class-name '%s'", name);
+	}
+
 	/**
 	 * Creates the lists of connected {@link PipePart}s from a file.
 	 * 
@@ -746,47 +757,24 @@ public final class Pipe extends StateHandling {
 			line = line.trim();
 			if (!line.endsWith(":"))
 				throw new IOException("Missing ':' at end of line");
-			final String cn = line.substring(0, line.length() - 1);
-			final String pckName = getClass().getPackage().getName();
-			String fcn;
+			final Class<? extends PipePart> ppc = findPipePartClass(line
+					.substring(0, line.length() - 1));
 			PipePart pp;
-			// TODO combine with PipePartDetection
 			try {
-				try {
-					fcn = String.format("%s.in.%s", pckName, cn);
-					pp = (PipePart) getClass().getClassLoader().loadClass(fcn)
-							.newInstance();
-				} catch (final ClassNotFoundException e1) {
-					try {
-						fcn = String.format("%s.cvt.%s", pckName, cn);
-						pp = (PipePart) getClass().getClassLoader().loadClass(
-								fcn).newInstance();
-					} catch (final ClassNotFoundException e2) {
-						try {
-							fcn = String.format("%s.out.%s", pckName, cn);
-							pp = (PipePart) getClass().getClassLoader()
-									.loadClass(fcn).newInstance();
-						} catch (final ClassNotFoundException e3) {
-							throw new PipeException(null, false,
-									"Cannot find PipePart with class-name '%s' in any "
-											+ "package under '%s'", cn, pckName);
-						}
-					}
-				}
+				pp = ppc.newInstance();
 			} catch (final InstantiationException e) {
 				throw new PipeException(null, false, e,
-						"Cannot create PipePart of class '%s'", cn);
+						"Cannot create an instance of '%s'", ppc);
 			} catch (final IllegalAccessException e) {
 				throw new PipeException(null, false, e,
-						"Cannot create PipePart of class '%s'", cn);
+						"Cannot create an instance of '%s'", ppc);
 			}
 			try {
 				in.mark(0);
 				pp.getConfig().readFromFile(in);
 			} catch (final IOException e) {
 				// skip this pipe part and try to read the next one
-				Log.error("Skipped reading '%s' from file:", cn);
-				Log.error(e);
+				Log.error(e, "Skipped reading '%s' from file:", ppc);
 				in.reset();
 				skipped = true;
 				continue;
@@ -798,9 +786,8 @@ public final class Pipe extends StateHandling {
 			else if (pp instanceof Output)
 				outputList.add((Output) pp);
 			else
-				throw new PipeException(pp, true,
-						"Cannot create PipePart of class '%s': "
-								+ "Unknown super class", cn);
+				throw new InternalError(String.format(
+						"Superclass of PipePart '%s' unknown", ppc));
 			pp.connectedToPipe(this);
 		}
 		in.close();

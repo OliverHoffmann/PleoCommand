@@ -14,11 +14,11 @@ public final class PipePartDetectionTest extends Testcases {
 
 	@Test
 	public void testGetAllPipeParts() throws NoSuchMethodException {
-		assertFalse(PipePartDetection.getAllPipeParts("in").isEmpty());
+		assertFalse(PipePartDetection.ALL_INPUT.isEmpty());
 		Log.consoleOut("Got list of all PipePart in 'in'");
-		assertFalse(PipePartDetection.getAllPipeParts("cvt").isEmpty());
+		assertFalse(PipePartDetection.ALL_CONVERTER.isEmpty());
 		Log.consoleOut("Got list of all PipePart in 'cvt'");
-		assertFalse(PipePartDetection.getAllPipeParts("out").isEmpty());
+		assertFalse(PipePartDetection.ALL_OUTPUT.isEmpty());
 		Log.consoleOut("Got list of all PipePart in 'out'");
 
 		PipePartDetection.getHelp(FileInput.class);

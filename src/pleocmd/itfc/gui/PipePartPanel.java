@@ -22,7 +22,6 @@ import pleocmd.Log;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.cfg.Config;
 import pleocmd.pipe.cfg.ConfigValue;
 
@@ -50,8 +49,8 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private boolean okPressed;
 
-	public PipePartPanel(final String subPackage) {
-		availableParts = PipePartDetection.getAllPipeParts(subPackage);
+	public PipePartPanel(final List<Class<E>> availableParts) {
+		this.availableParts = availableParts;
 
 		final Layouter lay = new Layouter(this);
 		tableModel = new PipePartTableModel<E>();
