@@ -1,12 +1,12 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.log;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.Log;
@@ -15,13 +15,15 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 4577491604077043435L;
 
+	private static final Color CLR_MARK = new Color(1.0f, 1.0f, 0.5f, 1.0f);
+
 	private final List<Log> list = new ArrayList<Log>();
 
-	private final JTable table;
+	private final LogTable table;
 
 	private String mark = "XXXXXXXXXX";
 
-	public LogTableModel(final JTable table) {
+	public LogTableModel(final LogTable table) {
 		this.table = table;
 	}
 
@@ -50,21 +52,17 @@ public final class LogTableModel extends AbstractTableModel {
 		}
 	}
 
-	private String getAttributes(final int rowIndex, final int columnIndex) {
-		String res = String.format(" color=%s", list.get(rowIndex)
-				.getTypeColor());
-		if (columnIndex == 2 && list.get(rowIndex).getCaller().startsWith(mark))
-			res += String.format(" bgcolor=#FFFF80");
-		return res;
-	}
-
 	@Override
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
-		return String.format("<html><span%s><nobr>%s</nobr></span></html>",
-				getAttributes(rowIndex, columnIndex), getCell(rowIndex,
-						columnIndex).replace("<", "&lt;").replace("\n", "<br>")
-						.replace("\t", "&nbsp;&nbsp;&nbsp;").replace(" ",
-								"&nbsp;"));
+		return new LogTableStyledCell(getCell(rowIndex, columnIndex),
+				columnIndex == 3, list.get(rowIndex).getTypeColor(),
+				getBackgroundColor(rowIndex, columnIndex), false, false);
+	}
+
+	private Color getBackgroundColor(final int rowIndex, final int columnIndex) {
+		if (columnIndex != 2) return null;
+		if (list.get(rowIndex).getCaller().startsWith(mark)) return CLR_MARK;
+		return null;
 	}
 
 	public void addLog(final Log log) {
@@ -87,7 +85,7 @@ public final class LogTableModel extends AbstractTableModel {
 			list.clear();
 			list.addAll(newList);
 			fireTableDataChanged();
-			MainFrame.the().getMainLogPanel().updateRowHeights();
+			table.updateRowHeights();
 		}
 	}
 

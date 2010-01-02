@@ -1,5 +1,6 @@
 package pleocmd;
 
+import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -113,22 +114,22 @@ public final class Log {
 	}
 
 	/**
-	 * @return a color matching the {@link Type} of this log entry.
+	 * @return a {@link Color} matching the {@link Type} of this log entry.
 	 * @see #getType()
 	 */
-	public String getTypeColor() {
+	public Color getTypeColor() {
 		switch (type) {
 		case Detail:
-			return "#A0A0A0"; // gray
+			return Color.GRAY;
 		case Info:
-			return "#0000FF"; // blue
+			return Color.BLUE;
 		case Warn:
-			return "#FFA020"; // orange
+			return Color.ORANGE;
 		case Error:
-			return "#FF0000"; // red
+			return Color.RED;
 		case Console:
 		default:
-			return "#000000"; // black
+			return Color.BLACK;
 		}
 	}
 
