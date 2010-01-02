@@ -108,35 +108,35 @@ public abstract class PipePart extends StateHandling {
 		return pipe;
 	}
 
-	final void connectedToPipe(final Pipe pipe) {
+	final void connectedToPipe(final Pipe newPipe) {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
 				.equals(Pipe.class.getName()) : s1;
 
-		if (pipe == null) throw new NullPointerException("pipe");
-		if (this.pipe != null)
+		if (newPipe == null) throw new NullPointerException("newPipe");
+		if (pipe != null)
 			throw new IllegalArgumentException(String.format(
 					"Cannot connect to pipe '%s': Already connected to '%s'",
-					pipe, this.pipe));
+					newPipe, pipe));
 
-		this.pipe = pipe;
+		pipe = newPipe;
 	}
 
-	final void disconnectedFromPipe(final Pipe pipe) {
+	final void disconnectedFromPipe(final Pipe curPipe) {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
 				.equals(Pipe.class.getName()) : s1;
 
-		if (pipe == null) throw new NullPointerException("pipe");
-		if (this.pipe == null)
+		if (curPipe == null) throw new NullPointerException("curPipe");
+		if (pipe == null)
 			throw new IllegalArgumentException(String.format(
-					"Cannot disconnect from pipe '%s': Not connected", pipe));
-		if (this.pipe != pipe)
+					"Cannot disconnect from pipe '%s': Not connected", curPipe));
+		if (pipe != curPipe)
 			throw new IllegalArgumentException(String.format(
 					"Cannot disconnect from pipe '%s': Connected to '%s'",
-					pipe, this.pipe));
+					curPipe, pipe));
 
-		this.pipe = null;
+		pipe = null;
 	}
 
 }

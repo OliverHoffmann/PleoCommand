@@ -20,8 +20,7 @@ public final class Log {
 	 */
 	public enum Type {
 		/**
-		 * Detailed debug messages.<br>
-		 * Will only get printed if {@link Log#logDetailed} is set
+		 * Detailed or debug messages.
 		 */
 		Detail,
 		/**

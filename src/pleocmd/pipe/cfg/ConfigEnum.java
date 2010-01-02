@@ -6,6 +6,9 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigList {
 
 	/**
 	 * Creates a new {@link ConfigEnum}.
+	 * 
+	 * @param enumClass
+	 *            the class of the {@link Enum} which should be wrapped
 	 */
 	public ConfigEnum(final Class<E> enumClass) {
 		super(enumClass.toString(), false, enumClass.getEnumConstants());

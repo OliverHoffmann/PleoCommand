@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.junit.Test;
 
@@ -22,7 +21,7 @@ public class PipeTest extends Testcases {
 
 	@Test
 	public final void testPipeAllData() throws PipeException,
-			InterruptedException, IOException {
+			InterruptedException {
 		PipeFeedback fb;
 
 		Log.consoleOut("Test empty pipe");
@@ -167,7 +166,7 @@ public class PipeTest extends Testcases {
 			final long maxTime, final int dataIn, final int dataCvt,
 			final int dataOut, final int tempErr, final int permErr,
 			final int intrCnt, final int dropCnt, final int behindCnt)
-			throws PipeException, InterruptedException, IOException {
+			throws PipeException, InterruptedException {
 		// create pipe
 		final Pipe pipe = o instanceof Pipe ? (Pipe) o : new Pipe();
 		if (o instanceof String) {
