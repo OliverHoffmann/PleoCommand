@@ -4,5 +4,6 @@
     "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
 
 <suppressions>
-
+	<!-- Testcases may be larger than 30 statements -->
+	<suppress checks="ExecutableStatementCount" files=".*/test/.*Test.java" />
 </suppressions>

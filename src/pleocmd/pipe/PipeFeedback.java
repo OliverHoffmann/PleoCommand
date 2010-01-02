@@ -27,9 +27,9 @@ public final class PipeFeedback {
 
 	private int dataOutputCount;
 
-	private final ArrayList<Throwable> temporaryErrors;
+	private final List<Throwable> temporaryErrors;
 
-	private final ArrayList<Throwable> permanentErrors;
+	private final List<Throwable> permanentErrors;
 
 	private int interruptionCount;
 
@@ -162,8 +162,8 @@ public final class PipeFeedback {
 
 	synchronized void stopped() {
 		stopTime = System.currentTimeMillis();
-		temporaryErrors.trimToSize();
-		permanentErrors.trimToSize();
+		((ArrayList<?>) temporaryErrors).trimToSize();
+		((ArrayList<?>) permanentErrors).trimToSize();
 	}
 
 	/**

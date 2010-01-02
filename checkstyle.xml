@@ -89,7 +89,9 @@
 			<property name="max" value="30" />
 		</module>
 		<!-- <module name="CyclomaticComplexity" /> -->
-		<module name="NPathComplexity" />
+		<module name="NPathComplexity">
+			<property name="max" value="256" />
+		</module>
 		<!-- <module name="JavaNCSS" /> -->
 
 		<!-- Miscellaneous -->
@@ -168,7 +170,7 @@
 
 		<!-- Size Violations -->
 		<module name="ExecutableStatementCount">
-			<property name="max" value="50" />
+			<property name="max" value="30" />
 		</module>
 		<!-- <module name="MethodLength" /> -->
 		<module name="AnonInnerLength" />
