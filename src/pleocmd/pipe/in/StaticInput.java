@@ -4,36 +4,34 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
+import pleocmd.cfg.ConfigString;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.cfg.ConfigString;
 import pleocmd.pipe.data.Data;
 
 public final class StaticInput extends Input {
 
-	private final ConfigString cfg0;
-
-	private String input;
+	private final ConfigString cfgInput;
 
 	private DataInputStream in;
 
 	public StaticInput() {
-		getConfig().add(cfg0 = new ConfigString("Input", true));
+		addConfig(cfgInput = new ConfigString("Input", true));
 		constructed();
 	}
 
 	public StaticInput(final String staticData) {
 		this();
-		cfg0.setContent(staticData);
+		cfgInput.setContent(staticData);
 	}
 
 	@Override
 	protected void configure0() {
-		input = cfg0.getContent();
+		// nothing to do
 	}
 
 	@Override
 	protected void init0() throws IOException {
-		in = new DataInputStream(new ByteArrayInputStream(input
+		in = new DataInputStream(new ByteArrayInputStream(cfgInput.getContent()
 				.getBytes("ISO-8859-1")));
 	}
 

@@ -1,8 +1,8 @@
-package pleocmd.pipe.cfg;
+package pleocmd.cfg;
 
 import java.awt.Container;
 import java.io.File;
-import java.io.IOException;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
@@ -42,8 +42,42 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	public String getContentAsString() {
+	String asString() {
 		return content.getPath();
+	}
+
+	@Override
+	void setFromString(final String string) {
+		setContent(new File(string));
+	}
+
+	@Override
+	List<String> asStrings() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	void setFromStrings(final List<String> strings) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	String getIdentifier() {
+		switch (type) {
+		case FileForReading:
+			return "read";
+		case FileForWriting:
+			return "write";
+		case Directory:
+			return "dir";
+		default:
+			throw new InternalError("Invalid PathType");
+		}
+	}
+
+	@Override
+	boolean isSingleLined() {
+		return true;
 	}
 
 	@Override
@@ -83,11 +117,6 @@ public final class ConfigPath extends ConfigValue {
 	@Override
 	public void setFromGUIComponents() {
 		setContent(new File(tf.getText()));
-	}
-
-	@Override
-	public void setFromString(final String content) throws IOException {
-		setContent(new File(content));
 	}
 
 }

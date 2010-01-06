@@ -4,29 +4,27 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import pleocmd.StandardInput;
+import pleocmd.cfg.ConfigEnum;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleInput extends Input {
 
-	private final ConfigEnum<ReadType> cfg0;
-
-	private ReadType type;
+	private final ConfigEnum<ReadType> cfgType;
 
 	public ConsoleInput() {
-		getConfig().add(cfg0 = new ConfigEnum<ReadType>(ReadType.class));
+		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.class));
 		constructed();
 	}
 
 	public ConsoleInput(final ReadType type) {
 		this();
-		cfg0.setEnum(type);
+		cfgType.setEnum(type);
 	}
 
 	@Override
 	protected void configure0() {
-		type = cfg0.getEnum();
+		// nothing to do
 	}
 
 	@Override
@@ -46,7 +44,7 @@ public final class ConsoleInput extends Input {
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		switch (type) {
+		switch (cfgType.getEnum()) {
 		case Ascii:
 			return Data
 					.createFromAscii(new DataInputStream(StandardInput.the()));
@@ -54,8 +52,8 @@ public final class ConsoleInput extends Input {
 			return Data.createFromBinary(new DataInputStream(StandardInput
 					.the()));
 		default:
-			throw new InternalError(String
-					.format("Invalid read-type: %s", type));
+			throw new InternalError(String.format("Invalid read-type: %s",
+					cfgType.getEnum()));
 		}
 	}
 

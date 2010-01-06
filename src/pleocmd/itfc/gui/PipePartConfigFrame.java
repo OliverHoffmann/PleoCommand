@@ -4,6 +4,8 @@ import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
@@ -22,10 +24,7 @@ public final class PipePartConfigFrame extends JDialog {
 
 	private final PipePartPanel<Output> pppOutput;
 
-	private final Pipe pipe;
-
-	public PipePartConfigFrame(final Pipe pipe) {
-		this.pipe = pipe;
+	public PipePartConfigFrame() {
 		pppInput = new PipePartPanel<Input>(PipePartDetection.ALL_INPUT);
 		pppConverter = new PipePartPanel<Converter>(
 				PipePartDetection.ALL_CONVERTER);
@@ -35,9 +34,9 @@ public final class PipePartConfigFrame extends JDialog {
 		setTitle("Configure Pipe");
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-		pppInput.assignPipeParts(pipe.getInputList());
-		pppConverter.assignPipeParts(pipe.getConverterList());
-		pppOutput.assignPipeParts(pipe.getOutputList());
+		pppInput.assignPipeParts(Pipe.the().getInputList());
+		pppConverter.assignPipeParts(Pipe.the().getConverterList());
+		pppOutput.assignPipeParts(Pipe.the().getOutputList());
 
 		// Add components
 		final Layouter lay = new Layouter(this);
@@ -70,7 +69,7 @@ public final class PipePartConfigFrame extends JDialog {
 		});
 
 		// Center window on screen
-		setSize(700, 400);
+		pack();
 		setLocationRelativeTo(null);
 
 		Log.detail("Config-Frame created");
@@ -80,15 +79,20 @@ public final class PipePartConfigFrame extends JDialog {
 
 	public void applyChanges() {
 		try {
-			pipe.reset();
+			Pipe.the().reset();
 			for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
-				pipe.addInput(pppInput.getTableModel().getPipePart(i));
+				Pipe.the().addInput(pppInput.getTableModel().getPipePart(i));
 			for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
-				pipe.addConverter(pppConverter.getTableModel().getPipePart(i));
+				Pipe.the().addConverter(
+						pppConverter.getTableModel().getPipePart(i));
 			for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
-				pipe.addOutput(pppOutput.getTableModel().getPipePart(i));
+				Pipe.the().addOutput(pppOutput.getTableModel().getPipePart(i));
+			Configuration.the().writeToDefaultFile();
+			MainFrame.the().getMainPipePanel().updatePipeLabel();
 			Log.detail("Applied Config-Frame");
 		} catch (final PipeException e) {
+			Log.error(e);
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}

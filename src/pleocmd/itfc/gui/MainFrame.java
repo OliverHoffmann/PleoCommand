@@ -3,7 +3,6 @@ package pleocmd.itfc.gui;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -14,6 +13,11 @@ import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
+import pleocmd.cfg.ConfigBounds;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.Pipe;
@@ -21,17 +25,11 @@ import pleocmd.pipe.Pipe;
 /**
  * @author oliver
  */
-public final class MainFrame extends JFrame {
-
-	public static final File PIPE_CONFIG_FILE = new File(System
-			.getProperty("user.home")
-			+ "/.pleocommand.pca");
+public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private static final long serialVersionUID = 7174844214646208915L;
 
 	private static MainFrame guiFrame;
-
-	private final Pipe pipe;
 
 	private final MainPipePanel mainPipePanel;
 
@@ -45,12 +43,13 @@ public final class MainFrame extends JFrame {
 
 	private Thread pipeThread;
 
+	private final ConfigBounds cfg0 = new ConfigBounds("Position");
+
 	private MainFrame() {
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
 		mainInputPanel = new MainInputPanel();
-		pipe = new Pipe();
-		mainPipePanel = new MainPipePanel(pipe);
+		mainPipePanel = new MainPipePanel();
 
 		ToolTipManager.sharedInstance().setInitialDelay(50);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
@@ -85,19 +84,22 @@ public final class MainFrame extends JFrame {
 						exit();
 					}
 				});
+
+		pack();
+		setLocationRelativeTo(null);
+		try {
+			Configuration.the().registerConfigurableObject(this,
+					getClass().getSimpleName());
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
+
 		Log.detail("GUI-Frame created");
 	}
 
 	public void showModalGUI() {
-		// Center window on screen
-		setSize(800, 500);
-		setLocationRelativeTo(null);
-
-		// Load default configuration
-		mainPipePanel.readConfigFromFile(PIPE_CONFIG_FILE);
-		updateState();
-
 		Log.info("Application started");
+		updateState();
 		setVisible(true);
 	}
 
@@ -140,7 +142,11 @@ public final class MainFrame extends JFrame {
 			abortPipeThread();
 		}
 		Log.detail("GUI-Frame has been closed");
-		mainPipePanel.writeConfigToFile(PIPE_CONFIG_FILE);
+		try {
+			Configuration.the().writeToDefaultFile();
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 		dispose();
 	}
 
@@ -172,7 +178,7 @@ public final class MainFrame extends JFrame {
 		if (!isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread not running");
 		try {
-			pipe.abortPipe();
+			Pipe.the().abortPipe();
 		} catch (final InterruptedException e) {
 			Log.error(e);
 		} catch (final StateException e) {
@@ -182,8 +188,8 @@ public final class MainFrame extends JFrame {
 
 	protected void pipeCore() throws PipeException, InterruptedException {
 		StandardInput.the().resetCache();
-		pipe.configure();
-		pipe.pipeAllData();
+		Pipe.the().configure();
+		Pipe.the().pipeAllData();
 	}
 
 	public void updateState() {
@@ -199,6 +205,27 @@ public final class MainFrame extends JFrame {
 
 	public synchronized boolean isPipeRunning() {
 		return pipeThread != null;
+	}
+
+	@Override
+	public Group getSkeleton(final String groupName) {
+		return new Group(groupName).add(cfg0);
+	}
+
+	@Override
+	public void configurationAboutToBeChanged() {
+		// nothing to do
+	}
+
+	@Override
+	public void configurationChanged(final Group group) {
+		setBounds(cfg0.getContent());
+	}
+
+	@Override
+	public List<Group> configurationWriteback() {
+		cfg0.setContent(getBounds());
+		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
 }

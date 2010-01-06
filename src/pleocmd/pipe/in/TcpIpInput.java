@@ -4,46 +4,45 @@ import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-import pleocmd.pipe.cfg.ConfigInt;
-import pleocmd.pipe.cfg.ConfigString;
+import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.pipe.data.Data;
 
 public final class TcpIpInput extends Input {
 
-	private final ConfigString cfg0;
+	private final ConfigString cfgHost;
 
-	private final ConfigInt cfg1;
-
-	private String host;
-
-	private int port;
+	private final ConfigInt cfgPort;
 
 	private Socket socket;
 
 	private DataInputStream in;
 
 	public TcpIpInput() {
-		getConfig().add(cfg0 = new ConfigString("Host", false));
-		getConfig().add(cfg1 = new ConfigInt("Port", 1, 65535));
-		cfg1.setContent(19876);
+		addConfig(cfgHost = new ConfigString("Host", false));
+		addConfig(cfgPort = new ConfigInt("Port", 19876, 1, 65535));
 		constructed();
 	}
 
 	public TcpIpInput(final String host, final int port) {
 		this();
-		cfg0.setContent(host);
-		cfg1.setContent(port);
+		cfgHost.setContent(host);
+		try {
+			cfgPort.setContent(port);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException("Cannot set port", e);
+		}
 	}
 
 	@Override
 	protected void configure0() {
-		host = cfg0.getContent();
-		port = (int) cfg1.getContent();
+		// nothing to do
 	}
 
 	@Override
 	protected void init0() throws IOException {
-		socket = new Socket(host, port);
+		socket = new Socket(cfgHost.getContent(), (int) cfgPort.getContent());
 		in = new DataInputStream(socket.getInputStream());
 	}
 

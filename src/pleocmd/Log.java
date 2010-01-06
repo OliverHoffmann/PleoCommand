@@ -196,6 +196,7 @@ public final class Log {
 						"$1"), st[stepsBack].getMethodName());
 	}
 
+	// TODO creates Log even if logging is disabled for this type
 	private static void msg(final Type type, final String msg,
 			final Object... args) {
 		new Log(type, getCallersName(3), args.length == 0 ? msg : String
@@ -388,10 +389,38 @@ public final class Log {
 	/**
 	 * @param type
 	 *            one of the log {@link Type}s
-	 * @return true if messages of the given {@link Type} can be logged.
+	 * @return true if messages of the given {@link Type} can be logged
 	 */
 	public static boolean canLog(final Type type) {
 		return type.ordinal() >= minLogType.ordinal();
+	}
+
+	/**
+	 * @return true if messages of {@link Type#Detail} can be logged
+	 */
+	public static boolean canLogDetail() {
+		return Type.Detail.ordinal() >= minLogType.ordinal();
+	}
+
+	/**
+	 * @return true if messages of {@link Type#Info} can be logged
+	 */
+	public static boolean canLogInfo() {
+		return Type.Info.ordinal() >= minLogType.ordinal();
+	}
+
+	/**
+	 * @return true if messages of {@link Type#Warn} can be logged
+	 */
+	public static boolean canLogWarning() {
+		return Type.Warn.ordinal() >= minLogType.ordinal();
+	}
+
+	/**
+	 * @return true if messages of {@link Type#Error} can be logged
+	 */
+	public static boolean canLogError() {
+		return Type.Error.ordinal() >= minLogType.ordinal();
 	}
 
 }

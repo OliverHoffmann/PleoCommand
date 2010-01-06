@@ -1,7 +1,6 @@
 package pleocmd.itfc.gui;
 
 import java.io.File;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -10,15 +9,14 @@ import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
-import pleocmd.exc.PipeException;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
 public final class MainPipePanel extends JPanel {
 
 	private static final long serialVersionUID = 5361715509143723415L;
-
-	private final Pipe pipe;
 
 	private final JLabel pipeLabel;
 
@@ -28,9 +26,7 @@ public final class MainPipePanel extends JPanel {
 
 	private final JButton btnLoad;
 
-	public MainPipePanel(final Pipe pipe) {
-		this.pipe = pipe;
-
+	public MainPipePanel() {
 		final Layouter lay = new Layouter(this);
 		pipeLabel = new JLabel();
 		updatePipeLabel();
@@ -60,22 +56,19 @@ public final class MainPipePanel extends JPanel {
 				});
 	}
 
-	private void updatePipeLabel() {
+	public void updatePipeLabel() {
 		pipeLabel.setText(String.format(
-				"Pipe has %d input%s, %d converter and %d output%s", pipe
-						.getInputList().size(),
-				pipe.getInputList().size() == 1 ? "" : "s", pipe
-						.getConverterList().size(),
-				pipe.getOutputList().size(),
-				pipe.getOutputList().size() == 1 ? "" : "s"));
+				"Pipe has %d input%s, %d converter and %d output%s", Pipe.the()
+						.getInputList().size(), Pipe.the().getInputList()
+						.size() == 1 ? "" : "s", Pipe.the().getConverterList()
+						.size(), Pipe.the().getOutputList().size(), Pipe.the()
+						.getOutputList().size() == 1 ? "" : "s"));
 	}
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		new PipePartConfigFrame(pipe);
+		new PipePartConfigFrame();
 		Log.detail("GUI-Frame is done with configuration");
-		updatePipeLabel();
-		writeConfigToFile(MainFrame.PIPE_CONFIG_FILE);
 	}
 
 	public void writeConfigToFile() {
@@ -93,10 +86,9 @@ public final class MainPipePanel extends JPanel {
 
 	public void writeConfigToFile(final File file) {
 		try {
-			pipe.writeToFile(file);
-		} catch (final IOException e) {
-			Log.error(e);
-		} catch (final PipeException e) {
+			// TODO write only pipe specific groups
+			Configuration.the().writeToFile(file);
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}
@@ -112,21 +104,20 @@ public final class MainPipePanel extends JPanel {
 
 	public void readConfigFromFile(final File file) {
 		try {
-			pipe.readFromFile(file);
-		} catch (final IOException e) {
-			Log.error(e);
-		} catch (final PipeException e) {
+			// TODO read only pipe-specific groups
+			Configuration.the().readFromFile(file);
+			updatePipeLabel();
+			Configuration.the().writeToDefaultFile();
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
-		updatePipeLabel();
-		writeConfigToFile(MainFrame.PIPE_CONFIG_FILE);
 	}
 
 	public void updateState() {
 		btnModify.setEnabled(!MainFrame.the().isPipeRunning());
-		btnSave.setEnabled(pipe.getInputList().isEmpty()
-				|| !pipe.getConverterList().isEmpty()
-				|| !pipe.getOutputList().isEmpty());
+		btnSave.setEnabled(Pipe.the().getInputList().isEmpty()
+				|| !Pipe.the().getConverterList().isEmpty()
+				|| !Pipe.the().getOutputList().isEmpty());
 		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
 	}
 

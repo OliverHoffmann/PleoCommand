@@ -1,8 +1,10 @@
 package pleocmd.pipe;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigValue;
+import pleocmd.cfg.Group;
 import pleocmd.exc.PipeException;
-import pleocmd.pipe.cfg.Config;
+import pleocmd.exc.StateException;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -19,13 +21,31 @@ public abstract class PipePart extends StateHandling {
 		Name, Description, Configuration
 	}
 
-	private final Config config;
+	private final Group group;
 
 	private Pipe pipe;
 
 	public PipePart() {
-		config = new Config();
-		config.setOwner(this);
+		group = new Group(Pipe.class.getSimpleName() + ": "
+				+ getClass().getSimpleName(), this);
+	}
+
+	/**
+	 * @return the {@link Group} with all available configuration for this
+	 *         {@link PipePart}. Changes made to it will be ignored until
+	 *         {@link #configure()} is called (again).
+	 */
+	public final Group getGroup() {
+		return group;
+	}
+
+	public final void addConfig(final ConfigValue value) {
+		try {
+			ensureConstructing();
+		} catch (final StateException e) {
+			throw new IllegalStateException("Cannot add ConfigValue", e);
+		}
+		group.add(value);
 	}
 
 	/**
@@ -81,17 +101,7 @@ public abstract class PipePart extends StateHandling {
 
 	@Override
 	public String toString() { // CS_IGNORE_PREV keep overridable
-		return getClass().getSimpleName();
-	}
-
-	/**
-	 * @return the {@link Config} associated with this {@link PipePart} and used
-	 *         during {@link #configure()}. Changes made to it after
-	 *         configuration will be ignored until {@link #configure()} is
-	 *         called again.
-	 */
-	public final Config getConfig() {
-		return config;
+		return group.toString();
 	}
 
 	/**

@@ -1,4 +1,8 @@
-package pleocmd.pipe.cfg;
+package pleocmd.cfg;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -32,8 +36,42 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public String getContentAsString() {
+	String asString() {
 		return content;
+	}
+
+	@Override
+	void setFromString(final String string) {
+		setContent(string);
+	}
+
+	@Override
+	List<String> asStrings() {
+		final List<String> res = new ArrayList<String>();
+		final StringTokenizer st = new StringTokenizer(content, "\n");
+		while (st.hasMoreTokens())
+			res.add(st.nextToken());
+		return res;
+	}
+
+	@Override
+	void setFromStrings(final List<String> strings) {
+		final StringBuilder sb = new StringBuilder();
+		for (final String str : strings) {
+			sb.append(str);
+			sb.append('\n');
+		}
+		setContent(sb.toString());
+	}
+
+	@Override
+	String getIdentifier() {
+		return null;
+	}
+
+	@Override
+	boolean isSingleLined() {
+		return !multiLine;
 	}
 
 	@Override
@@ -46,11 +84,6 @@ public final class ConfigString extends ConfigValue {
 	@Override
 	public void setFromGUIComponents() {
 		setContent(tc.getText());
-	}
-
-	@Override
-	public void setFromString(final String content) {
-		setContent(content);
 	}
 
 }

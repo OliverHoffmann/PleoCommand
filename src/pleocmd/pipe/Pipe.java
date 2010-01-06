@@ -1,11 +1,6 @@
 package pleocmd.pipe;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -14,6 +9,11 @@ import java.util.List;
 import java.util.Set;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.OutputException;
@@ -30,9 +30,7 @@ import pleocmd.pipe.out.Output;
  * 
  * @author oliver
  */
-public final class Pipe extends StateHandling {
-
-	private static final int MAX_BEHIND = 300;
+public final class Pipe extends StateHandling implements ConfigurationInterface {
 
 	/**
 	 * Number of milliseconds to reduce waiting-time in the input thread for
@@ -62,6 +60,8 @@ public final class Pipe extends StateHandling {
 	 */
 	private static final long OUTPUT_INIT_OVERHEAD = 2;
 
+	private static Pipe pipe;
+
 	private final List<Input> inputList = new ArrayList<Input>();
 
 	private final List<Output> outputList = new ArrayList<Output>();
@@ -88,12 +88,31 @@ public final class Pipe extends StateHandling {
 
 	private PipeFeedback feedback;
 
+	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
+			10000);
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 */
-	public Pipe() {
+	private Pipe() {
+		pipe = this;
 		feedback = new PipeFeedback();
+		final Set<String> groupNames = new HashSet<String>();
+		groupNames.add(getClass().getSimpleName());
+		for (final Class<? extends PipePart> ppc : PipePartDetection.ALL_PIPEPART)
+			groupNames.add(getClass().getSimpleName() + ": "
+					+ ppc.getSimpleName());
+		try {
+			Configuration.the().registerConfigurableObject(this, groupNames);
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 		constructed();
+	}
+
+	public static Pipe the() {
+		if (pipe == null) new Pipe();
+		return pipe;
 	}
 
 	/**
@@ -406,7 +425,7 @@ public final class Pipe extends StateHandling {
 			}
 			return true;
 		}
-		final boolean significant = delta < -MAX_BEHIND;
+		final boolean significant = delta < -cfgMaxBehind.getContent();
 		feedback.incBehindCount(-delta, significant);
 		if (significant)
 			// TODO only warn for the first in dataList?
@@ -690,95 +709,47 @@ public final class Pipe extends StateHandling {
 		assert ignoredOutputs.isEmpty();
 	}
 
-	/**
-	 * Writes the lists of connected {@link PipePart}s to a file.
-	 * 
-	 * @param file
-	 *            {@link File} to write the configuration to
-	 * @throws IOException
-	 *             on write failures
-	 * @throws PipeException
-	 *             if {@link Pipe} is not configured or currently initialized
-	 */
-	public void writeToFile(final File file) throws IOException, PipeException {
-		ensureNoLongerInitialized();
-		final Writer out = new FileWriter(file);
-		for (final PipePart pp : inputList) {
-			out.write(pp.getClass().getSimpleName());
-			out.write(":\n");
-			pp.getConfig().writeToFile(out);
+	@Override
+	public Group getSkeleton(final String groupName) {
+		if (groupName.equals(getClass().getSimpleName()))
+			return new Group(groupName).add(cfgMaxBehind);
+		final String prefix = getClass().getSimpleName() + ":";
+		if (!groupName.startsWith(prefix))
+			throw new InternalError("Wrong groupName for skeleton creation");
+		final String name = groupName.substring(prefix.length()).trim();
+		try {
+			for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
+				if (pp.getSimpleName().equals(name))
+					return pp.newInstance().getGroup();
+			throw new ConfigurationException("Cannot find any PipePart "
+					+ "with class-name '%s'", name);
+		} catch (final Exception e) {
+			// ConfigurationException,
+			// InstantiationException,
+			// IllegalAccessException
+			Log.error(e, "Skipped reading '%s' from config:", groupName);
+			return null;
 		}
-		for (final PipePart pp : converterList) {
-			out.write(pp.getClass().getSimpleName());
-			out.write(":\n");
-			pp.getConfig().writeToFile(out);
-		}
-		for (final PipePart pp : outputList) {
-			out.write(pp.getClass().getSimpleName());
-			out.write(":\n");
-			pp.getConfig().writeToFile(out);
-		}
-		out.close();
+
 	}
 
-	private Class<? extends PipePart> findPipePartClass(final String name)
-			throws PipeException {
-		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_INPUT)
-			if (pp.getSimpleName().equals(name)) return pp;
-		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_CONVERTER)
-			if (pp.getSimpleName().equals(name)) return pp;
-		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_OUTPUT)
-			if (pp.getSimpleName().equals(name)) return pp;
-		throw new PipeException(null, false,
-				"Cannot find any PipePart with class-name '%s'", name);
+	@Override
+	public void configurationAboutToBeChanged() throws ConfigurationException {
+		try {
+			reset();
+		} catch (final PipeException e) {
+			throw new ConfigurationException(e,
+					"Cannot write back configuration");
+		}
 	}
 
-	/**
-	 * Creates the lists of connected {@link PipePart}s from a file.
-	 * 
-	 * @param file
-	 *            {@link File} to read the configuration from
-	 * @throws IOException
-	 *             on read failures
-	 * @throws PipeException
-	 *             if {@link Pipe} is not configured or currently initialized
-	 * @return true if all {@link PipePart}s could be restored from the file,
-	 *         false it at least one failed to load.
-	 */
-	public boolean readFromFile(final File file) throws IOException,
-			PipeException {
-		ensureNoLongerInitialized();
-		boolean skipped = false;
-		reset();
-		final BufferedReader in = new BufferedReader(new FileReader(file));
-		while (true) {
-			String line = in.readLine();
-			if (line == null) break;
-			line = line.trim();
-			if (!line.endsWith(":"))
-				throw new IOException("Missing ':' at end of line");
-			final Class<? extends PipePart> ppc = findPipePartClass(line
-					.substring(0, line.length() - 1));
-			PipePart pp;
-			try {
-				pp = ppc.newInstance();
-			} catch (final InstantiationException e) {
-				throw new PipeException(null, false, e,
-						"Cannot create an instance of '%s'", ppc);
-			} catch (final IllegalAccessException e) {
-				throw new PipeException(null, false, e,
-						"Cannot create an instance of '%s'", ppc);
-			}
-			try {
-				in.mark(0);
-				pp.getConfig().readFromFile(in);
-			} catch (final IOException e) {
-				// skip this pipe part and try to read the next one
-				Log.error(e, "Skipped reading '%s' from file:", ppc);
-				in.reset();
-				skipped = true;
-				continue;
-			}
+	@Override
+	public void configurationChanged(final Group group)
+			throws ConfigurationException {
+		// TODO if config loaded before register...() getUser() will return null
+		// because getSkeleton() has never been executed
+		if (group.getUser() instanceof PipePart) {
+			final PipePart pp = (PipePart) group.getUser();
 			if (pp instanceof Input)
 				inputList.add((Input) pp);
 			else if (pp instanceof Converter)
@@ -787,11 +758,35 @@ public final class Pipe extends StateHandling {
 				outputList.add((Output) pp);
 			else
 				throw new InternalError(String.format(
-						"Superclass of PipePart '%s' unknown", ppc));
+						"Superclass of PipePart '%s' unknown", pp));
 			pp.connectedToPipe(this);
+			try {
+				pp.configure();
+			} catch (final PipeException e) {
+				throw new ConfigurationException(e,
+						"Cannot configure PipePart with group '%s'", group);
+			}
+		} else if (!group.getName().equals(getClass().getSimpleName()))
+			throw new InternalError("Unknown group: " + group);
+	}
+
+	@Override
+	public List<Group> configurationWriteback() throws ConfigurationException {
+		try {
+			ensureNoLongerInitialized();
+		} catch (final StateException e) {
+			throw new ConfigurationException(e,
+					"Cannot write back configuration");
 		}
-		in.close();
-		return !skipped;
+		final List<Group> res = new ArrayList<Group>();
+		res.add(getSkeleton(getClass().getSimpleName()));
+		for (final PipePart pp : inputList)
+			res.add(pp.getGroup());
+		for (final PipePart pp : converterList)
+			res.add(pp.getGroup());
+		for (final PipePart pp : outputList)
+			res.add(pp.getGroup());
+		return res;
 	}
 
 	public PipeFeedback getFeedback() {

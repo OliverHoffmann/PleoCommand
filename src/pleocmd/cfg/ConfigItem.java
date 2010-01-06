@@ -1,6 +1,5 @@
-package pleocmd.pipe.cfg;
+package pleocmd.cfg;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,7 +9,7 @@ import javax.swing.JComboBox;
 
 import pleocmd.itfc.gui.Layouter;
 
-public class ConfigList extends ConfigValue {
+public class ConfigItem extends ConfigValue {
 
 	private final List<String> identifiers = new ArrayList<String>();
 
@@ -21,20 +20,20 @@ public class ConfigList extends ConfigValue {
 	private JComboBox cb;
 
 	/**
-	 * Creates a new {@link ConfigList}.
+	 * Creates a new {@link ConfigItem}.
 	 * 
 	 * @param label
-	 *            name of this {@link Config} - used in GUI mode configuration
-	 *            and for configuration files
+	 *            name of this {@link ConfigItem} - used in GUI mode
+	 *            configuration and for configuration files
 	 * @param freeAssign
-	 *            if true any string may be assigned to this {@link ConfigList},
+	 *            if true any string may be assigned to this {@link ConfigItem},
 	 *            if false only the ones in the list of identifiers may be used
 	 * @param identifiers
 	 *            list of valid {@link String}s that can be used for this
-	 *            {@link ConfigList} or - if freeAssign is true - a list of
+	 *            {@link ConfigItem} or - if freeAssign is true - a list of
 	 *            proposals for GUI mode configuration.
 	 */
-	public ConfigList(final String label, final boolean freeAssign,
+	public ConfigItem(final String label, final boolean freeAssign,
 			final List<String> identifiers) {
 		super(label);
 		this.freeAssign = freeAssign;
@@ -43,22 +42,22 @@ public class ConfigList extends ConfigValue {
 	}
 
 	/**
-	 * Creates a new {@link ConfigList}.
+	 * Creates a new {@link ConfigItem}.
 	 * 
 	 * @param label
-	 *            name of this {@link Config} - used in GUI mode configuration
-	 *            and for configuration files
+	 *            name of this {@link ConfigItem} - used in GUI mode
+	 *            configuration and for configuration files
 	 * @param freeAssign
-	 *            if true any string may be assigned to this {@link ConfigList},
+	 *            if true any string may be assigned to this {@link ConfigItem},
 	 *            if false only the ones in the list of identifiers may be used
 	 * @param identifiers
 	 *            array of valid {@link Object}s that can be used for this
-	 *            {@link ConfigList} or - if freeAssign is true - a list of
+	 *            {@link ConfigItem} or - if freeAssign is true - a list of
 	 *            proposals for GUI mode configuration.<br>
 	 *            Only the result of {@link Object#toString()} from each of the
 	 *            entries is stored internally.
 	 */
-	public ConfigList(final String label, final boolean freeAssign,
+	public ConfigItem(final String label, final boolean freeAssign,
 			final Object[] identifiers) {
 		super(label);
 		this.freeAssign = freeAssign;
@@ -102,8 +101,33 @@ public class ConfigList extends ConfigValue {
 	}
 
 	@Override
-	public final String getContentAsString() {
+	final String asString() {
 		return content;
+	}
+
+	@Override
+	final void setFromString(final String string) {
+		setContent(string);
+	}
+
+	@Override
+	final List<String> asStrings() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	final void setFromStrings(final List<String> strings) {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	final String getIdentifier() {
+		return "item";
+	}
+
+	@Override
+	final boolean isSingleLined() {
+		return true;
 	}
 
 	@Override
@@ -117,11 +141,6 @@ public class ConfigList extends ConfigValue {
 	@Override
 	public final void setFromGUIComponents() {
 		setContent(cb.getSelectedItem().toString());
-	}
-
-	@Override
-	public final void setFromString(final String content) throws IOException {
-		setContent(content);
 	}
 
 }

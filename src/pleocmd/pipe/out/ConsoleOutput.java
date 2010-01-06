@@ -5,31 +5,29 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigEnum;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.cfg.ConfigEnum;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleOutput extends Output {
 
-	private final ConfigEnum<PrintType> cfg0;
-
-	private PrintType type;
+	private final ConfigEnum<PrintType> cfgType;
 
 	private Data lastRoot;
 
 	public ConsoleOutput() {
-		getConfig().add(cfg0 = new ConfigEnum<PrintType>(PrintType.class));
+		addConfig(cfgType = new ConfigEnum<PrintType>(PrintType.class));
 		constructed();
 	}
 
 	public ConsoleOutput(final PrintType type) {
 		this();
-		cfg0.setEnum(type);
+		cfgType.setEnum(type);
 	}
 
 	@Override
 	protected void configure0() {
-		type = cfg0.getEnum();
+		// nothing to do
 	}
 
 	@Override
@@ -46,7 +44,7 @@ public final class ConsoleOutput extends Output {
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		Data root;
-		switch (type) {
+		switch (cfgType.getEnum()) {
 		case DataAscii:
 			Log.consoleOut(data.toString());
 			break;
@@ -75,7 +73,7 @@ public final class ConsoleOutput extends Output {
 			break;
 		default:
 			throw new InternalError(String.format("Invalid print-type: %s",
-					type));
+					cfgType.getEnum()));
 		}
 		return false;
 	}

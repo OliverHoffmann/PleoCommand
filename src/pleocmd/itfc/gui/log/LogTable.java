@@ -2,6 +2,8 @@ package pleocmd.itfc.gui.log;
 
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
@@ -31,6 +33,14 @@ public final class LogTable extends JTable {
 			@Override
 			public void mouseClicked(final MouseEvent e) {
 				if (e.getClickCount() == 1)
+					getLogModel().setMark(getSelectedRow());
+			}
+		});
+
+		addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyTyped(final KeyEvent e) {
+				if (e.getKeyChar() == ' ')
 					getLogModel().setMark(getSelectedRow());
 			}
 		});
@@ -70,8 +80,9 @@ public final class LogTable extends JTable {
 
 	@Override
 	public String getToolTipText(final MouseEvent event) {
-		final Throwable bt = logModel.getLogAt(rowAtPoint(event.getPoint()))
-				.getBacktrace();
+		final int idx = rowAtPoint(event.getPoint());
+		if (idx == -1) return null;
+		final Throwable bt = logModel.getLogAt(idx).getBacktrace();
 		if (bt == null) return null;
 		final StringWriter sw = new StringWriter();
 		final PrintWriter pw = new PrintWriter(sw);

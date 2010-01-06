@@ -6,53 +6,49 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigEnum;
+import pleocmd.cfg.ConfigPath;
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.OutputException;
-import pleocmd.pipe.cfg.ConfigEnum;
-import pleocmd.pipe.cfg.ConfigPath;
-import pleocmd.pipe.cfg.ConfigPath.PathType;
 import pleocmd.pipe.data.Data;
 
 public final class FileOutput extends Output {
 
-	private final ConfigPath cfg0;
+	private final ConfigPath cfgFile;
 
-	private final ConfigEnum<PrintType> cfg1;
-
-	private File file;
-
-	private PrintType type;
+	private final ConfigEnum<PrintType> cfgType;
 
 	private DataOutputStream out;
 
 	private Data lastRoot;
 
 	public FileOutput() {
-		getConfig().add(cfg0 = new ConfigPath("File", PathType.FileForWriting));
-		getConfig().add(cfg1 = new ConfigEnum<PrintType>(PrintType.class));
+		addConfig(cfgFile = new ConfigPath("File", PathType.FileForWriting));
+		addConfig(cfgType = new ConfigEnum<PrintType>(PrintType.class));
 		constructed();
 	}
 
 	public FileOutput(final File file, final PrintType type) {
 		this();
-		cfg0.setContent(file);
-		cfg1.setEnum(type);
+		cfgFile.setContent(file);
+		cfgType.setEnum(type);
 	}
 
 	@Override
 	protected void configure0() {
-		file = cfg0.getContent();
-		type = cfg1.getEnum();
+		// nothing to do
 	}
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file '%s' for output of type '%s'", file, type);
-		out = new DataOutputStream(new FileOutputStream(file));
+		Log.detail("Opening file '%s' for output of type '%s'", cfgFile
+				.getContent(), cfgType.getEnum());
+		out = new DataOutputStream(new FileOutputStream(cfgFile.getContent()));
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		Log.detail("Closing file '%s'", file);
+		Log.detail("Closing file '%s'", cfgFile.getContent());
 		out.close();
 		out = null;
 		lastRoot = null;
@@ -62,7 +58,7 @@ public final class FileOutput extends Output {
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		Data root;
-		switch (type) {
+		switch (cfgType.getEnum()) {
 		case DataAscii:
 			data.writeToAscii(out, true);
 			break;
@@ -87,7 +83,7 @@ public final class FileOutput extends Output {
 			break;
 		default:
 			throw new InternalError(String.format("Invalid print-type: %s",
-					type));
+					cfgType.getEnum()));
 		}
 		return false;
 	}

@@ -6,51 +6,46 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigEnum;
+import pleocmd.cfg.ConfigPath;
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.InputException;
-import pleocmd.pipe.cfg.ConfigEnum;
-import pleocmd.pipe.cfg.ConfigPath;
-import pleocmd.pipe.cfg.ConfigPath.PathType;
 import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input {
 
-	private final ConfigPath cfg0;
+	private final ConfigPath cfgFile;
 
-	private final ConfigEnum<ReadType> cfg1;
-
-	private File file;
-
-	private ReadType type;
+	private final ConfigEnum<ReadType> cfgType;
 
 	private DataInputStream in;
 
 	public FileInput() {
-		getConfig().add(cfg0 = new ConfigPath("File", PathType.FileForReading));
-		getConfig().add(cfg1 = new ConfigEnum<ReadType>(ReadType.class));
+		addConfig(cfgFile = new ConfigPath("File", PathType.FileForReading));
+		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.class));
 		constructed();
 	}
 
 	public FileInput(final File file, final ReadType type) {
 		this();
-		cfg0.setContent(file);
-		cfg1.setEnum(type);
+		cfgFile.setContent(file);
+		cfgType.setEnum(type);
 	}
 
 	@Override
 	protected void configure0() {
-		file = cfg0.getContent();
-		type = cfg1.getEnum();
+		// nothing to do
 	}
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file '%s' for input", file);
-		in = new DataInputStream(new FileInputStream(file));
+		Log.detail("Opening file '%s' for input", cfgFile.getContent());
+		in = new DataInputStream(new FileInputStream(cfgFile.getContent()));
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		Log.detail("Closing file '%s'", file);
+		Log.detail("Closing file '%s'", cfgFile.getContent());
 		in.close();
 		in = null;
 	}
@@ -62,14 +57,14 @@ public final class FileInput extends Input {
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		switch (type) {
+		switch (cfgType.getEnum()) {
 		case Ascii:
 			return Data.createFromAscii(in);
 		case Binary:
 			return Data.createFromBinary(in);
 		default:
-			throw new InternalError(String
-					.format("Invalid read-type: %s", type));
+			throw new InternalError(String.format("Invalid read-type: %s",
+					cfgType.getEnum()));
 		}
 	}
 

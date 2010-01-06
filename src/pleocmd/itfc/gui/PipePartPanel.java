@@ -19,11 +19,10 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigValue;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cfg.Config;
-import pleocmd.pipe.cfg.ConfigValue;
 
 public final class PipePartPanel<E extends PipePart> extends JPanel {
 
@@ -140,8 +139,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 	public void addPipePart(final Class<E> part) {
 		try {
 			final E pp = part.newInstance();
-			if (createConfigureDialog("Add", pp.getConfig()))
-				tableModel.addPipePart(pp);
+			if (createConfigureDialog("Add", pp)) tableModel.addPipePart(pp);
 		} catch (final InstantiationException e) {
 			Log.error(e);
 		} catch (final IllegalAccessException e) {
@@ -157,8 +155,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 	}
 
 	public void modifyPipePart(final int index) {
-		createConfigureDialog("Configure", tableModel.getPipePart(index)
-				.getConfig());
+		createConfigureDialog("Configure", tableModel.getPipePart(index));
 	}
 
 	public void movePipePartUp(final int indexOld, final int indexNew) {
@@ -172,16 +169,15 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		return tableModel;
 	}
 
-	public boolean createConfigureDialog(final String prefix,
-			final Config config) {
+	public boolean createConfigureDialog(final String prefix, final PipePart pp) {
 		// no need to configure if no values assigned
-		if (config.isEmpty()) return true;
+		if (pp.getGroup().isEmpty()) return true;
 		okPressed = false;
 
 		final JDialog dlg = new JDialog();
-		dlg.setTitle(String.format("%s %s", prefix, config.getOwner()));
+		dlg.setTitle(String.format("%s %s", prefix, pp));
 		final Layouter lay = new Layouter(dlg);
-		for (final ConfigValue v : config) {
+		for (final ConfigValue v : pp.getGroup().getValueMap().values()) {
 			// each config-value gets its own JPanel so they don't
 			// interfere with each other. JPanels covering
 			// more than one line are not yet tested.
@@ -210,14 +206,14 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 				lb.addButton(Button.Ok, new Runnable() {
 					@Override
 					public void run() {
-						saveConfigChanges(config);
+						saveConfigChanges(pp);
 						dlg.dispose();
 					}
 				}));
 		lb.addButton(Button.Apply, new Runnable() {
 			@Override
 			public void run() {
-				saveConfigChanges(config);
+				saveConfigChanges(pp);
 			}
 		});
 		lb.addButton(Button.Cancel, new Runnable() {
@@ -235,11 +231,11 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		return okPressed;
 	}
 
-	protected void saveConfigChanges(final Config config) {
+	protected void saveConfigChanges(final PipePart pp) {
 		try {
-			for (final ConfigValue v : config)
+			for (final ConfigValue v : pp.getGroup().getValueMap().values())
 				v.setFromGUIComponents();
-			config.getOwner().configure();
+			pp.configure();
 			okPressed = true;
 		} catch (final PipeException e) {
 			Log.error(e);

@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -21,15 +22,16 @@ import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigDataMap;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.OutputException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.DataSequenceMap;
 import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
@@ -39,9 +41,9 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	private static final long serialVersionUID = -5729115559356740425L;
 
-	private final File file;
+	private final ConfigDataMap map;
 
-	private final DataSequenceMap map = new DataSequenceMap();
+	private final ConfigDataMap mapOrg;
 
 	private final DefaultComboBoxModel cbModel;
 
@@ -64,8 +66,10 @@ public final class DataSequenceEditorFrame extends JDialog {
 	private List<Output> playOutputList;
 
 	// CS_IGNORE_NEXT Contains only GUI component creation
-	public DataSequenceEditorFrame(final File file) {
-		this.file = file;
+	public DataSequenceEditorFrame(final ConfigDataMap cfgMap) {
+		mapOrg = cfgMap;
+		map = new ConfigDataMap(mapOrg.getLabel());
+		map.assignFrom(mapOrg);
 
 		Log.detail("Creating DataSequenceEditorFrame");
 		setTitle("Edit Data Sequence");
@@ -82,7 +86,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
 				if ("comboBoxEdited".equals(e.getActionCommand())) {
-					getMap().addTrigger(
+					getMap().createContent(
 							getCBTrigger().getSelectedItem().toString());
 					updateComboBoxModel();
 				}
@@ -101,6 +105,8 @@ public final class DataSequenceEditorFrame extends JDialog {
 		lay.addWholeLine(cbTrigger, false);
 
 		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
+		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
+				.getFontMetrics(tpDataSequence.getFont()).getHeight()));
 		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
 
 		lay.addSpacer();
@@ -177,11 +183,9 @@ public final class DataSequenceEditorFrame extends JDialog {
 		});
 
 		// Center window on screen
-		setSize(800, 400);
+		pack();
 		setLocationRelativeTo(null);
 
-		map.reset();
-		addSequenceListFromFile(file);
 		updateState();
 
 		Log.detail("DataSequenceEditorFrame created");
@@ -189,7 +193,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 		setVisible(true);
 	}
 
-	protected DataSequenceMap getMap() {
+	protected ConfigDataMap getMap() {
 		return map;
 	}
 
@@ -212,12 +216,10 @@ public final class DataSequenceEditorFrame extends JDialog {
 	public void addFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
-		fc.addChoosableFileFilter(new FileNameExtensionFilter(
-				"CommandSequenceList", "csl"));
 		fc.addChoosableFileFilter(new FileFilter() {
 			@Override
 			public boolean accept(final File f) {
-				return !f.getName().endsWith(".csl");
+				return !f.getName().endsWith(".cfg"); // TODO extension?
 			}
 
 			@Override
@@ -226,21 +228,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 			}
 		});
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			if (fc.getSelectedFile().getName().endsWith(".csl"))
-				addSequenceListFromFile(fc.getSelectedFile());
-			else
-				addSequenceFromFile(fc.getSelectedFile());
-	}
-
-	public void addSequenceListFromFile(final File fileToAdd) {
-		try {
-			map.addFromFile(fileToAdd);
-		} catch (final IOException e) {
-			Log.error(e);
-		}
-
-		// pass changes to JComboBox and JTextPane
-		updateComboBoxModel();
+			addSequenceFromFile(fc.getSelectedFile());
 	}
 
 	public void addSequenceFromFile(final File fileToAdd) {
@@ -307,9 +295,10 @@ public final class DataSequenceEditorFrame extends JDialog {
 
 	public void saveChanges() {
 		writeTextPaneToMap(cbTrigger.getSelectedItem());
+		mapOrg.assignFrom(map);
 		try {
-			map.writeToFile(file);
-		} catch (final IOException e) {
+			Configuration.the().writeToDefaultFile();
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}
@@ -317,7 +306,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 	protected void updateComboBoxModel() {
 		final Object lastSelected = cbTrigger.getSelectedItem();
 		cbModel.removeAllElements();
-		for (final String trigger : map.getAllTriggers())
+		for (final String trigger : map.getAllKeys())
 			cbModel.addElement(trigger);
 		if (lastSelected == null || cbModel.getIndexOf(lastSelected) >= 0)
 			getCBTrigger().setSelectedItem(lastSelected);
@@ -330,14 +319,14 @@ public final class DataSequenceEditorFrame extends JDialog {
 				if (tpDataSequence.getDocument().getLength() == 0) return;
 				throw new IOException("No name selected in ComboBox");
 			}
-			map.clearDataList(triggerName.toString());
+			map.clearContent(triggerName.toString());
 			final BufferedReader in = new BufferedReader(new StringReader(
 					tpDataSequence.getText()));
 			String line;
 			while ((line = in.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && line.charAt(0) != '#')
-					map.addData(triggerName.toString(), Data
+					map.addContent(triggerName.toString(), Data
 							.createFromAscii(line));
 			}
 			in.close();
@@ -351,7 +340,7 @@ public final class DataSequenceEditorFrame extends JDialog {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			doc.remove(0, doc.getLength());
 			if (triggerName != null) {
-				final List<Data> dataList = map.getDataList(triggerName
+				final List<Data> dataList = map.getContent(triggerName
 						.toString());
 				if (dataList != null)
 					for (final Data data : dataList)

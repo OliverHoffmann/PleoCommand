@@ -23,9 +23,11 @@ public class PipeTest extends Testcases {
 	public final void testPipeAllData() throws PipeException,
 			InterruptedException {
 		PipeFeedback fb;
+		final Pipe p = Pipe.the();
 
 		Log.consoleOut("Test empty pipe");
-		fb = testSimplePipe(new Pipe(), -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
+		p.reset();
+		fb = testSimplePipe(null, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0);
 
 		Log.consoleOut("Test simple pipe");
 		fb = testSimplePipe("SC|SLEEP|100\nSC|ECHO|Echo working\n", 100, -1, 2,
@@ -58,8 +60,10 @@ public class PipeTest extends Testcases {
 
 		Log.consoleOut("Test high priority queue clearing");
 		fb = testSimplePipe("SC|SLEEP|10000\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
-				+ "SC|FAIL\nSC|FAIL\n[P05]SC|ECHO|HighPrio\n", -1, -1, 7, 0, 2,
-				0, 0, 1, 5, 0);
+				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
+				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
+				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
+				+ "[P05]SC|ECHO|HighPrio\n", -1, -1, 23, 0, 2, 0, 0, 1, 21, 0);
 
 		Log.consoleOut("Test timed execution (need to wait)");
 		fb = testSimplePipe(
@@ -135,42 +139,43 @@ public class PipeTest extends Testcases {
 				0, 0);
 
 		Log.consoleOut("Test error handling (two inputs, first one fails)");
-		Pipe p = new Pipe();
+		p.reset();
 		p.addInput(new FileInput(new File("/does/not/exist"), ReadType.Ascii));
 		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
 		p.addOutput(new InternalCommandOutput());
-		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 
 		Log.consoleOut("Test error handling (converter fails)");
 		Log.consoleOut("TODO");
 		// TODO converter fails => output unconverted
 
 		Log.consoleOut("Test error handling (sole output fails)");
-		p = new Pipe();
+		p.reset();
 		p.addInput(new StaticInput("[T1s]\n[T8sP10]\n"));
 		p.addOutput(new FileOutput(new File("/can/not/be/created"),
 				PrintType.DataAscii));
-		fb = testSimplePipe(p, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(null, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
 
 		Log.consoleOut("Test error handling (two outputs, first one fails)");
-		p = new Pipe();
+		p.reset();
 		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
 		p.addOutput(new FileOutput(new File("/can/not/be/created"),
 				PrintType.DataAscii));
 		p.addOutput(new InternalCommandOutput());
-		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 	}
 
 	// CS_IGNORE_NEXT this many parameters are ok here - only a test case
-	private PipeFeedback testSimplePipe(final Object o, final long minTime,
+	private PipeFeedback testSimplePipe(final String input, final long minTime,
 			final long maxTime, final int dataIn, final int dataCvt,
 			final int dataOut, final int tempErr, final int permErr,
 			final int intrCnt, final int dropCnt, final int behindCnt)
 			throws PipeException, InterruptedException {
 		// create pipe
-		final Pipe pipe = o instanceof Pipe ? (Pipe) o : new Pipe();
-		if (o instanceof String) {
-			pipe.addInput(new StaticInput((String) o));
+		final Pipe pipe = Pipe.the();
+		if (input != null) {
+			pipe.reset();
+			pipe.addInput(new StaticInput(input));
 			pipe.addOutput(new InternalCommandOutput());
 		}
 
@@ -180,9 +185,9 @@ public class PipeTest extends Testcases {
 
 		// print log
 		Log.consoleOut(pipe.getFeedback().toString());
-		if (o instanceof String)
-			Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe,
-					((String) o).replaceAll("\n(.)", "; $1").replace("\n", ""));
+		if (input != null)
+			Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe, input
+					.replaceAll("\n(.)", "; $1").replace("\n", ""));
 		else
 			Log.consoleOut("Finished Pipe '%s'", pipe);
 		Log.consoleOut("");

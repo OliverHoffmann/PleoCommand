@@ -1,12 +1,14 @@
 package pleocmd.itfc.gui;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
+import pleocmd.cfg.ConfigValue;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.cfg.Config;
 
 public final class PipePartTableModel<E extends PipePart> extends
 		AbstractTableModel {
@@ -14,6 +16,8 @@ public final class PipePartTableModel<E extends PipePart> extends
 	private static final long serialVersionUID = -815026047488409255L;
 
 	private final List<E> list = new ArrayList<E>();
+
+	private final Map<E, List<String>> valueMap = new HashMap<E, List<String>>();
 
 	private int maxConfigs;
 
@@ -31,29 +35,39 @@ public final class PipePartTableModel<E extends PipePart> extends
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
 		if (columnIndex == 0)
 			return list.get(rowIndex).getClass().getSimpleName();
-		final Config cfg = list.get(rowIndex).getConfig();
-		return columnIndex > cfg.size() ? "" : cfg.get(columnIndex - 1);
+		final PipePart pp = list.get(rowIndex);
+		return columnIndex > pp.getGroup().getSize() ? "" : pp.getGroup().get(
+				valueMap.get(pp).get(columnIndex - 1));
 	}
 
 	private void detectMaxConfigs() {
 		int mc = 0;
 		for (final E pp : list)
-			mc = Math.max(mc, pp.getConfig().size());
+			mc = Math.max(mc, pp.getGroup().getSize());
 		if (maxConfigs != mc) {
 			maxConfigs = mc;
 			fireTableStructureChanged();
 		}
 	}
 
-	public void addPipePart(final E pp) {
+	private void addPipePart0(final E pp) {
+		final List<String> labels = new ArrayList<String>(pp.getGroup()
+				.getSize());
+		for (final ConfigValue value : pp.getGroup().getValueMap().values())
+			labels.add(value.getLabel());
+		valueMap.put(pp, labels);
 		list.add(pp);
+	}
+
+	public void addPipePart(final E pp) {
+		addPipePart0(pp);
 		fireTableRowsInserted(list.size() - 1, list.size() - 1);
 		detectMaxConfigs();
 	}
 
 	public void addPipeParts(final List<E> ppList) {
 		for (final E pp : ppList)
-			list.add(pp);
+			addPipePart0(pp);
 		fireTableDataChanged();
 		detectMaxConfigs();
 	}

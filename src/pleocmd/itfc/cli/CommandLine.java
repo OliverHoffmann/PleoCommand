@@ -1,10 +1,11 @@
 package pleocmd.itfc.cli;
 
 import java.io.File;
-import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.Log.Type;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 
@@ -15,11 +16,8 @@ public final class CommandLine {
 
 	private static CommandLine commandLine;
 
-	private final Pipe pipe;
-
 	private CommandLine() {
 		commandLine = this;
-		pipe = new Pipe();
 	}
 
 	public static CommandLine the() {
@@ -56,10 +54,10 @@ public final class CommandLine {
 
 	public void executePipe(final File pcaFile) {
 		try {
-			pipe.readFromFile(pcaFile);
-			pipe.configure();
-			pipe.pipeAllData();
-		} catch (final IOException e) {
+			Configuration.the().readFromFile(pcaFile);
+			Pipe.the().configure();
+			Pipe.the().pipeAllData();
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		} catch (final PipeException e) {
 			Log.error(e);

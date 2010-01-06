@@ -26,6 +26,17 @@ public final class PipePartDetection {
 	private static final List<Class<Input>> LIST_IN = getAllPipeParts("in");
 	private static final List<Class<Converter>> LIST_CVT = getAllPipeParts("cvt");
 	private static final List<Class<Output>> LIST_OUT = getAllPipeParts("out");
+	private static final List<Class<? extends PipePart>> LIST_PIPEPART;
+
+	static {
+		LIST_PIPEPART = new ArrayList<Class<? extends PipePart>>();
+		for (final Class<Input> ppc : LIST_IN)
+			LIST_PIPEPART.add(ppc);
+		for (final Class<Converter> ppc : LIST_CVT)
+			LIST_PIPEPART.add(ppc);
+		for (final Class<Output> ppc : LIST_OUT)
+			LIST_PIPEPART.add(ppc);
+	}
 
 	// CS_IGNORE_BEGIN need private before public here
 
@@ -35,6 +46,8 @@ public final class PipePartDetection {
 			.unmodifiableList(LIST_CVT);
 	public static final List<Class<Output>> ALL_OUTPUT = Collections
 			.unmodifiableList(LIST_OUT);
+	public static final List<Class<? extends PipePart>> ALL_PIPEPART = Collections
+			.unmodifiableList(LIST_PIPEPART);
 
 	// CS_IGNORE_END
 
