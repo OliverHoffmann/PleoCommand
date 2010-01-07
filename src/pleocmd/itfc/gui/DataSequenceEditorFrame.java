@@ -26,9 +26,12 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigDataMap;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.exc.OutputException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.data.Data;
@@ -37,9 +40,12 @@ import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 
 // CS_IGNORE_NEXT The classes this one relies on are mainly GUI components
-public final class DataSequenceEditorFrame extends JDialog {
+public final class DataSequenceEditorFrame extends JDialog implements
+		ConfigurationInterface {
 
 	private static final long serialVersionUID = -5729115559356740425L;
+
+	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
 	private final ConfigDataMap map;
 
@@ -182,9 +188,14 @@ public final class DataSequenceEditorFrame extends JDialog {
 			}
 		});
 
-		// Center window on screen
 		pack();
 		setLocationRelativeTo(null);
+		try {
+			Configuration.the().registerConfigurableObject(this,
+					getClass().getSimpleName());
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 
 		updateState();
 
@@ -360,6 +371,27 @@ public final class DataSequenceEditorFrame extends JDialog {
 		btnPlayAll.setEnabled(false);// TODO
 		btnUndo.setEnabled(false);// TODO
 		btnRedo.setEnabled(false); // TODO
+	}
+
+	@Override
+	public Group getSkeleton(final String groupName) {
+		return new Group(groupName).add(cfgBounds);
+	}
+
+	@Override
+	public void configurationAboutToBeChanged() {
+		// nothing to do
+	}
+
+	@Override
+	public void configurationChanged(final Group group) {
+		setBounds(cfgBounds.getContent());
+	}
+
+	@Override
+	public List<Group> configurationWriteback() {
+		cfgBounds.setContent(getBounds());
+		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
 }

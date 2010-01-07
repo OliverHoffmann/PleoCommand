@@ -1,11 +1,16 @@
 package pleocmd.itfc.gui;
 
+import java.util.List;
+
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
@@ -14,9 +19,12 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public final class PipePartConfigFrame extends JDialog {
+public final class PipePartConfigFrame extends JDialog implements
+		ConfigurationInterface {
 
 	private static final long serialVersionUID = -1967218353263515865L;
+
+	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
 	private final PipePartPanel<Input> pppInput;
 
@@ -68,9 +76,14 @@ public final class PipePartConfigFrame extends JDialog {
 			}
 		});
 
-		// Center window on screen
 		pack();
 		setLocationRelativeTo(null);
+		try {
+			Configuration.the().registerConfigurableObject(this,
+					getClass().getSimpleName());
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 
 		Log.detail("Config-Frame created");
 		setModal(true);
@@ -95,6 +108,27 @@ public final class PipePartConfigFrame extends JDialog {
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
+	}
+
+	@Override
+	public Group getSkeleton(final String groupName) {
+		return new Group(groupName).add(cfgBounds);
+	}
+
+	@Override
+	public void configurationAboutToBeChanged() {
+		// nothing to do
+	}
+
+	@Override
+	public void configurationChanged(final Group group) {
+		setBounds(cfgBounds.getContent());
+	}
+
+	@Override
+	public List<Group> configurationWriteback() {
+		cfgBounds.setContent(getBounds());
+		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
 }

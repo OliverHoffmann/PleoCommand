@@ -29,6 +29,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private static final long serialVersionUID = 7174844214646208915L;
 
+	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
+
 	private static MainFrame guiFrame;
 
 	private final MainPipePanel mainPipePanel;
@@ -42,8 +44,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	private final JButton btnExit;
 
 	private Thread pipeThread;
-
-	private final ConfigBounds cfg0 = new ConfigBounds("Position");
 
 	private MainFrame() {
 		guiFrame = this;
@@ -209,7 +209,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	@Override
 	public Group getSkeleton(final String groupName) {
-		return new Group(groupName).add(cfg0);
+		return new Group(groupName).add(cfgBounds);
 	}
 
 	@Override
@@ -219,12 +219,12 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	@Override
 	public void configurationChanged(final Group group) {
-		setBounds(cfg0.getContent());
+		setBounds(cfgBounds.getContent());
 	}
 
 	@Override
 	public List<Group> configurationWriteback() {
-		cfg0.setContent(getBounds());
+		cfgBounds.setContent(getBounds());
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
