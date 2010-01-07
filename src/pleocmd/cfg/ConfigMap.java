@@ -83,7 +83,19 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	@Override
 	final String asString() {
-		throw new UnsupportedOperationException();
+		final StringBuilder sb = new StringBuilder("[");
+		for (final Entry<K, List<V>> entry : content.entrySet()) {
+			sb.append(entry.getKey());
+			sb.append(": ");
+			sb.append(entry.getValue().size());
+			sb.append("x, ");
+		}
+		if (!content.isEmpty()) {
+			sb.deleteCharAt(sb.length() - 1);
+			sb.deleteCharAt(sb.length() - 1);
+		}
+		sb.append("]");
+		return sb.toString();
 	}
 
 	@Override
