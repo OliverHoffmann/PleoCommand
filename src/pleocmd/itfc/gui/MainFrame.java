@@ -29,9 +29,9 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private static final long serialVersionUID = 7174844214646208915L;
 
-	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
-
 	private static MainFrame guiFrame;
+
+	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
 	private final MainPipePanel mainPipePanel;
 
