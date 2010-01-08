@@ -8,6 +8,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
@@ -22,6 +24,10 @@ public final class LogTable extends JTable {
 	private LogTableModel logModel;
 
 	private int minRowHeight;
+
+	private final Timer timer = new Timer();
+
+	private TimerTask updateTask;
 
 	public LogTable() {
 		setDefaultRenderer(Object.class, new LogTableCellRenderer());
@@ -48,10 +54,22 @@ public final class LogTable extends JTable {
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(final ComponentEvent e) {
-				updateRowHeights();
+				scheduleUpdate();
 			}
+
 		});
 
+	}
+
+	protected void scheduleUpdate() {
+		if (updateTask != null) updateTask.cancel();
+		updateTask = new TimerTask() {
+			@Override
+			public void run() {
+				updateRowHeights();
+			}
+		};
+		timer.schedule(updateTask, 200);
 	}
 
 	public void setLogModel(final LogTableModel logModel) {
