@@ -21,8 +21,7 @@ import pleocmd.pipe.out.PrintType;
 public class PipeTest extends Testcases {
 
 	@Test
-	public final void testPipeAllData() throws PipeException,
-			InterruptedException, ConfigurationException {
+	public final void testPipeAllData() throws Exception {
 		PipeFeedback fb;
 		final Pipe p = Pipe.the();
 
@@ -141,9 +140,11 @@ public class PipeTest extends Testcases {
 
 		Log.consoleOut("Test error handling (two inputs, first one fails)");
 		p.reset();
-		p.addInput(new FileInput(new File("/does/not/exist"), ReadType.Ascii));
+		final File tmpFile = File.createTempFile("PipeTest", null);
+		p.addInput(new FileInput(tmpFile, ReadType.Ascii));
 		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
 		p.addOutput(new InternalCommandOutput());
+		tmpFile.delete();
 		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 
 		Log.consoleOut("Test error handling (converter fails)");
@@ -153,16 +154,17 @@ public class PipeTest extends Testcases {
 		Log.consoleOut("Test error handling (sole output fails)");
 		p.reset();
 		p.addInput(new StaticInput("[T1s]\n[T8sP10]\n"));
-		p.addOutput(new FileOutput(new File("/can/not/be/created"),
-				PrintType.DataAscii));
+		p.addOutput(new FileOutput(tmpFile, PrintType.DataAscii));
+		tmpFile.mkdir();
 		fb = testSimplePipe(null, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
+		tmpFile.delete();
 
 		Log.consoleOut("Test error handling (two outputs, first one fails)");
 		p.reset();
 		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
-		p.addOutput(new FileOutput(new File("/can/not/be/created"),
-				PrintType.DataAscii));
+		p.addOutput(new FileOutput(tmpFile, PrintType.DataAscii));
 		p.addOutput(new InternalCommandOutput());
+		tmpFile.mkdir();
 		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 	}
 
