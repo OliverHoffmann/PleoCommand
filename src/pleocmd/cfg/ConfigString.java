@@ -28,10 +28,10 @@ public final class ConfigString extends ConfigValue {
 		return content;
 	}
 
-	public void setContent(final String content) {
+	public void setContent(final String content) throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine && content.contains("\n"))
-			throw new IllegalArgumentException("content contains line-feeds");
+			throw new ConfigurationException("content contains line-feeds");
 		this.content = content;
 	}
 
@@ -41,7 +41,7 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	void setFromString(final String string) {
+	void setFromString(final String string) throws ConfigurationException {
 		setContent(string);
 	}
 
@@ -61,7 +61,11 @@ public final class ConfigString extends ConfigValue {
 			sb.append(str);
 			sb.append('\n');
 		}
-		setContent(sb.toString());
+		try {
+			setContent(sb.toString());
+		} catch (final ConfigurationException e) {
+			throw new InternalError("Caught exception which should never occur");
+		}
 	}
 
 	@Override
@@ -83,7 +87,11 @@ public final class ConfigString extends ConfigValue {
 
 	@Override
 	public void setFromGUIComponents() {
-		setContent(tc.getText());
+		try {
+			setContent(tc.getText());
+		} catch (final ConfigurationException e) {
+			throw new InternalError("Caught exception which should never occur");
+		}
 	}
 
 }

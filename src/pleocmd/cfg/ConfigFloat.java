@@ -29,7 +29,7 @@ public final class ConfigFloat extends ConfigValue {
 
 	public void setContent(final double content) throws ConfigurationException {
 		if (content < min || content > max)
-			throw new ConfigurationException("%d not between %d and %d",
+			throw new ConfigurationException("%f not between %f and %f",
 					content, min, max);
 		this.content = content;
 	}

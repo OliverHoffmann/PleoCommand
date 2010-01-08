@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.in.FileInput;
 import pleocmd.pipe.in.ReadType;
@@ -21,7 +22,7 @@ public class PipeTest extends Testcases {
 
 	@Test
 	public final void testPipeAllData() throws PipeException,
-			InterruptedException {
+			InterruptedException, ConfigurationException {
 		PipeFeedback fb;
 		final Pipe p = Pipe.the();
 
@@ -170,7 +171,7 @@ public class PipeTest extends Testcases {
 			final long maxTime, final int dataIn, final int dataCvt,
 			final int dataOut, final int tempErr, final int permErr,
 			final int intrCnt, final int dropCnt, final int behindCnt)
-			throws PipeException, InterruptedException {
+			throws PipeException, InterruptedException, ConfigurationException {
 		// create pipe
 		final Pipe pipe = Pipe.the();
 		if (input != null) {

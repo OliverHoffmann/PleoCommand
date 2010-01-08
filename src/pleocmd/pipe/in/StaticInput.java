@@ -5,6 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
 
@@ -19,7 +20,7 @@ public final class StaticInput extends Input {
 		constructed();
 	}
 
-	public StaticInput(final String staticData) {
+	public StaticInput(final String staticData) throws ConfigurationException {
 		this();
 		cfgInput.setContent(staticData);
 	}

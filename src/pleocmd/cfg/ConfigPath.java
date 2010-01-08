@@ -7,6 +7,7 @@ import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
+import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.Layouter.Button;
 
@@ -32,8 +33,33 @@ public final class ConfigPath extends ConfigValue {
 		return content;
 	}
 
-	public void setContent(final File content) {
+	public void setContent(final File content) throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
+		if (type != PathType.FileForWriting && !content.exists())
+			throw new ConfigurationException("'%s' does not exist", content);
+		if (type != PathType.Directory && content.isDirectory())
+			throw new ConfigurationException("'%s' is a directory", content);
+
+		switch (type) {
+		case FileForReading:
+			if (!content.canRead())
+				throw new ConfigurationException("Cannot read from file '%s'",
+						content);
+			break;
+		case FileForWriting:
+			if (content.exists() ? !content.canWrite() : !content
+					.getParentFile().canWrite())
+				throw new ConfigurationException("Cannot write to file '%s'",
+						content);
+			break;
+		case Directory:
+			if (!content.isDirectory())
+				throw new ConfigurationException("'%s' is not a directory",
+						content);
+			break;
+		default:
+			throw new InternalError("Invalid PathType");
+		}
 		this.content = content;
 	}
 
@@ -47,7 +73,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	void setFromString(final String string) {
+	void setFromString(final String string) throws ConfigurationException {
 		setContent(new File(string));
 	}
 
@@ -95,7 +121,7 @@ public final class ConfigPath extends ConfigValue {
 	protected void selectPath(final Container parent) {
 		final JFileChooser fc = new JFileChooser(getContent());
 		// TODO file extensioon?
-		switch (getType()) {
+		switch (type) {
 		case FileForReading:
 			if (fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
 				tf.setText(fc.getSelectedFile().getPath());
@@ -116,7 +142,11 @@ public final class ConfigPath extends ConfigValue {
 
 	@Override
 	public void setFromGUIComponents() {
-		setContent(new File(tf.getText()));
+		try {
+			setContent(new File(tf.getText()));
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 	}
 
 }

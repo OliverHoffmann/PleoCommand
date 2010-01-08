@@ -25,7 +25,8 @@ public final class TcpIpInput extends Input {
 		constructed();
 	}
 
-	public TcpIpInput(final String host, final int port) {
+	public TcpIpInput(final String host, final int port)
+			throws ConfigurationException {
 		this();
 		cfgHost.setContent(host);
 		try {

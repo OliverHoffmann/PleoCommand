@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.swing.JComboBox;
 
+import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter;
 
 public class ConfigItem extends ConfigValue {
@@ -76,13 +77,13 @@ public class ConfigItem extends ConfigValue {
 		return content;
 	}
 
-	public final void setContent(final String content) {
+	public final void setContent(final String content)
+			throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
 		if (!freeAssign && !identifiers.contains(content))
-			throw new IllegalArgumentException(String.format(
-					"Invalid constant for '%s': '%s' - must be "
-							+ "one of '%s'", getLabel(), content, Arrays
-							.toString(identifiers.toArray())));
+			throw new ConfigurationException("Invalid constant "
+					+ "for '%s': '%s' - must be one of '%s'", getLabel(),
+					content, Arrays.toString(identifiers.toArray()));
 		this.content = content;
 	}
 
@@ -106,7 +107,7 @@ public class ConfigItem extends ConfigValue {
 	}
 
 	@Override
-	final void setFromString(final String string) {
+	final void setFromString(final String string) throws ConfigurationException {
 		setContent(string);
 	}
 
@@ -140,7 +141,11 @@ public class ConfigItem extends ConfigValue {
 
 	@Override
 	public final void setFromGUIComponents() {
-		setContent(cb.getSelectedItem().toString());
+		try {
+			setContent(cb.getSelectedItem().toString());
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 	}
 
 }

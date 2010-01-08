@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 import pleocmd.Log;
 import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigItem;
+import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.data.Data;
 
@@ -25,7 +26,7 @@ public final class PleoRXTXOutput extends Output {
 		constructed();
 	}
 
-	public PleoRXTXOutput(final String device) {
+	public PleoRXTXOutput(final String device) throws ConfigurationException {
 		this();
 		cfgDevice.setContent(device);
 	}

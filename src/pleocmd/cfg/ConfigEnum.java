@@ -33,7 +33,11 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigItem {
 	}
 
 	public void setEnum(final E e) {
-		setContent(e.toString());
+		try {
+			setContent(e.toString());
+		} catch (final ConfigurationException e1) {
+			throw new InternalError("Name of enum not recognized !?");
+		}
 	}
 
 }
