@@ -12,9 +12,10 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.cfg.ConfigPath.PathType;
 
-public final class ConfigValueTest {
+public final class ConfigValueTest extends Testcases {
 
 	private enum TestEnum {
 		Test1, Test2, Test3, Test4;
