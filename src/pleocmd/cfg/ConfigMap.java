@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
+import javax.swing.JLabel;
+
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.Layouter.Button;
 
@@ -153,6 +155,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	@Override
 	public final void insertGUIComponents(final Layouter lay) {
+		lay.add(new JLabel(ConfigMap.this.asString()), false);
 		lay.addButton(Button.Modify, "Modifies the map", new Runnable() {
 			@Override
 			public void run() {
