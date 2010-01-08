@@ -197,6 +197,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			Log.error(e);
 		}
 
+		updateComboBoxModel();
 		updateState();
 
 		Log.detail("DataSequenceEditorFrame created");
