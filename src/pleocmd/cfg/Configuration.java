@@ -20,9 +20,11 @@ import pleocmd.cfg.ConfigPath.PathType;
 
 public final class Configuration {
 
-	private static final File DEF_CONFIG_FILE = new File(System
-			.getProperty("user.home")
-			+ "/.pleocommand.cfg");
+	private static File defaultConfigFile;
+	static {
+		defaultConfigFile = new File(System.getProperty("user.home")
+				+ "/.pleocommand.cfg");
+	}
 
 	private static Configuration config;
 
@@ -47,6 +49,16 @@ public final class Configuration {
 	public static Configuration the() {
 		if (config == null) new Configuration();
 		return config;
+	}
+
+	public static void setDefaultConfigFile(final File file)
+			throws ConfigurationException {
+		defaultConfigFile = file;
+		if (config != null) config.writeToDefaultFile();
+	}
+
+	public static File getDefaultConfigFile() {
+		return defaultConfigFile;
 	}
 
 	/**
@@ -143,7 +155,7 @@ public final class Configuration {
 	}
 
 	public void readFromDefaultFile() throws ConfigurationException {
-		readFromFile(DEF_CONFIG_FILE);
+		readFromFile(defaultConfigFile);
 	}
 
 	public void readFromFile(final File file) throws ConfigurationException {
@@ -284,7 +296,7 @@ public final class Configuration {
 	}
 
 	public void writeToDefaultFile() throws ConfigurationException {
-		writeToFile(DEF_CONFIG_FILE);
+		writeToFile(defaultConfigFile);
 	}
 
 	public void writeToFile(final File file) throws ConfigurationException {
@@ -353,6 +365,18 @@ public final class Configuration {
 			}
 		}
 		out.write('\n');
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Configuration");
+		sb.append(" Registered configurable objects: ");
+		sb.append(configObjects.toString());
+		sb.append(" Registered groups: ");
+		sb.append(groupsRegistered.toString());
+		sb.append(" Unassigned groups: ");
+		sb.append(groupsUnassigned.toString());
+		return sb.toString();
 	}
 
 	public static List<Group> asList(final Group group) {

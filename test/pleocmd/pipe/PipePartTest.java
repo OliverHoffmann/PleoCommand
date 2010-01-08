@@ -9,11 +9,12 @@ import java.io.IOException;
 import org.junit.Test;
 
 import pleocmd.Log;
+import pleocmd.Testcases;
 import pleocmd.cfg.ConfigString;
 import pleocmd.cfg.ConfigurationException;
 import pleocmd.exc.PipeException;
 
-public final class PipePartTest {
+public final class PipePartTest extends Testcases {
 
 	private final ConfigString cfg0 = new ConfigString("Config A", false);
 	private final ConfigString cfg1 = new ConfigString("Config B", true);

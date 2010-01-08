@@ -166,6 +166,7 @@ public class PipeTest extends Testcases {
 		p.addOutput(new InternalCommandOutput());
 		tmpFile.mkdir();
 		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+		tmpFile.delete();
 	}
 
 	// CS_IGNORE_NEXT this many parameters are ok here - only a test case
