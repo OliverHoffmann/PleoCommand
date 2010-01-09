@@ -1,26 +1,26 @@
 package pleocmd.itfc.gui;
 
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Vector;
 
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
@@ -51,9 +51,15 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 	private final ConfigDataMap mapOrg;
 
-	private final DefaultComboBoxModel cbModel;
+	private final JList triggerList;
 
-	private final JComboBox cbTrigger;
+	private final DataSequenceEditorListModel triggerModel;
+
+	private final JButton btnAddTrigger;
+
+	private final JButton btnRenameTrigger;
+
+	private final JButton btnRemoveTrigger;
 
 	private final JTextPane tpDataSequence;
 
@@ -69,6 +75,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 	private final JButton btnRedo;
 
+	private String trigger;
+
 	private List<Output> playOutputList;
 
 	// CS_IGNORE_NEXT Contains only GUI component creation
@@ -83,32 +91,43 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 		// Add components
 		final Layouter lay = new Layouter(this);
-		cbModel = new DefaultComboBoxModel(new Vector<String>());
-		cbTrigger = new JComboBox(cbModel);
-		cbTrigger.setEditable(true);
-		cbTrigger.setMaximumRowCount(2);
-		cbTrigger.addActionListener(new ActionListener() {
+		triggerModel = new DataSequenceEditorListModel();
+		triggerList = new JList(triggerModel);
+		triggerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		lay.addWholeLine(new JScrollPane(triggerList), false);
+		triggerList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
-			public void actionPerformed(final ActionEvent e) {
-				if ("comboBoxEdited".equals(e.getActionCommand())) {
-					getMap().createContent(
-							getCBTrigger().getSelectedItem().toString());
-					updateComboBoxModel();
-				}
+			public void valueChanged(final ListSelectionEvent e) {
+				triggerIndexChanged();
 			}
 
 		});
-		cbTrigger.addItemListener(new ItemListener() {
+		lay.add(new JLabel("Trigger:"), false);
+		btnAddTrigger = lay.addButton("Add", "list-add", "", new Runnable() {
 			@Override
-			public void itemStateChanged(final ItemEvent e) {
-				if (e.getStateChange() == ItemEvent.SELECTED)
-					updateTextPaneFromMap(e.getItem());
-				else
-					writeTextPaneToMap(e.getItem());
+			public void run() {
+				addNewTrigger();
 			}
 		});
-		lay.addWholeLine(cbTrigger, false);
+		btnRenameTrigger = lay.addButton("Rename", "edit-rename", "",
+				new Runnable() {
+					@Override
+					public void run() {
+						renameSelectedTrigger();
+					}
+				});
+		btnRemoveTrigger = lay.addButton("Remove", "list-remove", "",
+				new Runnable() {
+					@Override
+					public void run() {
+						removeSelectedTrigger();
+					}
+
+				});
+
+		lay.addSpacer();
+		lay.newLine();
 
 		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
 		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
@@ -197,7 +216,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			Log.error(e);
 		}
 
-		updateComboBoxModel();
+		updateTriggerModel();
 		updateState();
 
 		Log.detail("DataSequenceEditorFrame created");
@@ -205,12 +224,64 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		setVisible(true);
 	}
 
-	protected ConfigDataMap getMap() {
-		return map;
+	protected void triggerIndexChanged() {
+		final Object newTrigger = triggerList.getSelectedValue();
+		if (trigger == newTrigger) return;
+		writeTextPaneToMap();
+		trigger = (String) newTrigger;
+		updateState();
+		updateTextPaneFromMap();
 	}
 
-	protected JComboBox getCBTrigger() {
-		return cbTrigger;
+	protected void updateTriggerModel() {
+		final Object lastSelected = trigger;
+		triggerModel.set(map.getAllKeysSorted(new Comparator<String>() {
+			@Override
+			public int compare(final String o1, final String o2) {
+				return o1.compareTo(o2);
+			}
+		}));
+		triggerList.setSelectedValue(lastSelected, true);
+		updateState(); // TODO needed?
+	}
+
+	protected void addNewTrigger() {
+		final String name = JOptionPane.showInputDialog(this,
+				"Name of the new trigger", "Add new trigger",
+				JOptionPane.PLAIN_MESSAGE);
+		if (name != null) {
+			map.createContent(name);
+			updateTriggerModel();
+			triggerList.setSelectedValue(name, true);
+		}
+	}
+
+	protected void renameSelectedTrigger() {
+		if (trigger != null) {
+			final String name = (String) JOptionPane.showInputDialog(this,
+					"New Name of the trigger", "Rename trigger",
+					JOptionPane.PLAIN_MESSAGE, null, null, trigger);
+			if (name != null) {
+				map.renameContent(trigger, name);
+				trigger = name;
+				updateTriggerModel();
+				triggerList.setSelectedValue(name, true);
+			}
+		}
+	}
+
+	protected void removeSelectedTrigger() {
+		if (trigger != null) {
+			map.removeContent(trigger);
+			final StyledDocument doc = tpDataSequence.getStyledDocument();
+			try {
+				doc.remove(0, doc.getLength());
+			} catch (final BadLocationException e) {
+				Log.error(e);
+			}
+			trigger = null;
+			updateTriggerModel();
+		}
 	}
 
 	public void addFromInputHistory() {
@@ -306,7 +377,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	}
 
 	public void saveChanges() {
-		writeTextPaneToMap(cbTrigger.getSelectedItem());
+		writeTextPaneToMap();
 		mapOrg.assignFrom(map);
 		try {
 			Configuration.the().writeToDefaultFile();
@@ -315,31 +386,21 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		}
 	}
 
-	protected void updateComboBoxModel() {
-		final Object lastSelected = cbTrigger.getSelectedItem();
-		cbModel.removeAllElements();
-		for (final String trigger : map.getAllKeys())
-			cbModel.addElement(trigger);
-		if (lastSelected == null || cbModel.getIndexOf(lastSelected) >= 0)
-			getCBTrigger().setSelectedItem(lastSelected);
-		updateTextPaneFromMap(getCBTrigger().getSelectedItem());
-	}
-
-	protected void writeTextPaneToMap(final Object triggerName) {
+	protected void writeTextPaneToMap() {
+		Log.detail("Writing TextPane to map with '%s'", trigger);
 		try {
-			if (triggerName == null) {
+			if (trigger == null) {
 				if (tpDataSequence.getDocument().getLength() == 0) return;
-				throw new IOException("No name selected in ComboBox");
+				throw new IOException("No name selected in JList");
 			}
-			map.clearContent(triggerName.toString());
+			map.clearContent(trigger);
 			final BufferedReader in = new BufferedReader(new StringReader(
 					tpDataSequence.getText()));
 			String line;
 			while ((line = in.readLine()) != null) {
 				line = line.trim();
 				if (!line.isEmpty() && line.charAt(0) != '#')
-					map.addContent(triggerName.toString(), Data
-							.createFromAscii(line));
+					map.addContent(trigger, Data.createFromAscii(line));
 			}
 			in.close();
 		} catch (final IOException e) {
@@ -347,13 +408,13 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		}
 	}
 
-	protected void updateTextPaneFromMap(final Object triggerName) {
+	protected void updateTextPaneFromMap() {
+		Log.detail("Updating TextPane from map with '%s'", trigger);
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			doc.remove(0, doc.getLength());
-			if (triggerName != null) {
-				final List<Data> dataList = map.getContent(triggerName
-						.toString());
+			if (trigger != null) {
+				final List<Data> dataList = map.getContent(trigger);
 				if (dataList != null)
 					for (final Data data : dataList)
 						doc.insertString(doc.getLength(), data.toString()
@@ -365,9 +426,13 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	}
 
 	public void updateState() {
-		btnCopyInput.setEnabled(!MainFrame.the().getMainInputPanel()
-				.getHistory().isEmpty());
-		btnAddFile.setEnabled(true);
+		btnAddTrigger.setEnabled(true);
+		btnRenameTrigger.setEnabled(trigger != null);
+		btnRemoveTrigger.setEnabled(trigger != null);
+		tpDataSequence.setEnabled(trigger != null);
+		btnCopyInput.setEnabled(trigger != null
+				&& !MainFrame.the().getMainInputPanel().getHistory().isEmpty());
+		btnAddFile.setEnabled(trigger != null);
 		btnPlaySel.setEnabled(false);// TODO
 		btnPlayAll.setEnabled(false);// TODO
 		btnUndo.setEnabled(false);// TODO
