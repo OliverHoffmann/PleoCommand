@@ -1,7 +1,7 @@
 package pleocmd.itfc.gui.log;
 
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyBoundsAdapter;
+import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -51,12 +51,11 @@ public final class LogTable extends JTable {
 			}
 		});
 
-		addComponentListener(new ComponentAdapter() {
+		addHierarchyBoundsListener(new HierarchyBoundsAdapter() {
 			@Override
-			public void componentResized(final ComponentEvent e) {
+			public void ancestorResized(final HierarchyEvent e) {
 				scheduleUpdate();
 			}
-
 		});
 
 	}
