@@ -18,6 +18,8 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	private final Map<K, List<V>> content;
 
+	private JLabel shortDescription;
+
 	public ConfigMap(final String label) {
 		super(label);
 		content = new HashMap<K, List<V>>();
@@ -47,6 +49,14 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	public final void setContent(final K key, final List<V> list) {
 		content.put(key, list);
+	}
+
+	public final void renameContent(final K key, final K newKey) {
+		final List<V> list = content.remove(key);
+		if (list == null)
+			throw new IllegalArgumentException(String.format(
+					"Key '%s' was not in the map", key));
+		content.put(newKey, list);
 	}
 
 	public final void addContent(final K key, final V value) {
@@ -155,11 +165,12 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	@Override
 	public final void insertGUIComponents(final Layouter lay) {
-		lay.add(new JLabel(ConfigMap.this.asString()), false);
+		lay.add(shortDescription = new JLabel(asString()), false);
 		lay.addButton(Button.Modify, "Modifies the map", new Runnable() {
 			@Override
 			public void run() {
 				modifiyMapViaGUI();
+				getShortDescription().setText(asString());
 			}
 		});
 	}
@@ -167,6 +178,10 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	@Override
 	public final void setFromGUIComponents() {
 		// handled internally
+	}
+
+	public final JLabel getShortDescription() {
+		return shortDescription;
 	}
 
 }
