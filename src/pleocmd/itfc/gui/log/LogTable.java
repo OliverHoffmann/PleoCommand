@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui.log;
 
+import java.awt.EventQueue;
 import java.awt.event.HierarchyBoundsAdapter;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.KeyAdapter;
@@ -127,7 +128,12 @@ public final class LogTable extends JTable {
 					.getPreferredSize().height;
 		setRowHeight(row, 2 + Math.max(minRowHeight, prepareRenderer(
 				getCellRenderer(row, 3), row, 3).getPreferredSize().height));
-		scrollRectToVisible(getCellRect(row, 0, true));
-	}
 
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				scrollRectToVisible(getCellRect(Integer.MAX_VALUE, 0, true));
+			}
+		});
+	}
 }
