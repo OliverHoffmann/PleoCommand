@@ -88,9 +88,11 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	public final <F extends K, W extends V> void assignFrom(
 			final ConfigMap<F, W> map) {
 		clearContent();
-		for (final F key : map.getAllKeys())
+		for (final F key : map.getAllKeys()) {
+			createContent(key);
 			for (final W v : map.getContent(key))
 				addContent(key, v);
+		}
 	}
 
 	@Override
