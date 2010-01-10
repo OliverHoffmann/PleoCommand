@@ -105,39 +105,39 @@ public abstract class StateHandling {
 
 	public final void configure() throws PipeException {
 		ensureConstructed();
+		setState(State.Configured);
 		try {
 			configure0();
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot configure '%s'",
-					getClass().getSimpleName());
+					toString());
 		}
-		setState(State.Configured);
 	}
 
 	protected abstract void configure0() throws PipeException, IOException;
 
 	public final void init() throws PipeException {
 		ensureConfigured();
+		setState(State.Initialized);
 		try {
 			init0();
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot initialize '%s'",
-					getClass().getSimpleName());
+					toString());
 		}
-		setState(State.Initialized);
 	}
 
 	protected abstract void init0() throws PipeException, IOException;
 
 	public final void close() throws PipeException {
 		ensureInitialized();
+		setState(State.Configured);
 		try {
 			close0();
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot close '%s'",
-					getClass().getSimpleName());
+					toString());
 		}
-		setState(State.Configured);
 	}
 
 	protected abstract void close0() throws PipeException, IOException;
@@ -146,19 +146,19 @@ public abstract class StateHandling {
 		if (!checkValidChange(this.state, state))
 			throw new StateException(this, true,
 					"Cannot change state from '%s' to '%s'", this.state, state);
-		Log.detail("'%s' changed state: '%s' => '%s'", getClass()
-				.getSimpleName(), this.state, state);
+		Log.detail("'%s' changed state: '%s' => '%s'", toString(), this.state,
+				state);
 		this.state = state;
 	}
 
 	private void throwException(final String msg) throws StateException {
 		throw new StateException(this, true, "'%s' is in a wrong state: %s",
-				getClass().getSimpleName(), msg);
+				toString(), msg);
 	}
 
 	private void throwUnknownState() throws StateException {
 		throw new StateException(this, true, "'%s' is in an unknown state: %s",
-				getClass().getSimpleName(), state);
+				toString(), state);
 	}
 
 	/**
