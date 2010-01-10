@@ -317,13 +317,16 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	public void addSequenceFromFile(final File fileToAdd) {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
-			final int offset = doc.getParagraphElement(
+			int offset = doc.getParagraphElement(
 					tpDataSequence.getCaretPosition()).getEndOffset();
 			final BufferedReader in = new BufferedReader(new FileReader(
 					fileToAdd));
 			String line;
-			while ((line = in.readLine()) != null)
-				doc.insertString(offset, line.trim() + "\n", null);
+			while ((line = in.readLine()) != null) {
+				line = line.trim() + "\n";
+				doc.insertString(offset, line, null);
+				offset += line.length();
+			}
 			in.close();
 		} catch (final IOException e) {
 			Log.error(e);
