@@ -15,7 +15,7 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 4577491604077043435L;
 
-	private static final Color CLR_MARK = new Color(1.0f, 1.0f, 0.5f, 1.0f);
+	private static final Color CLR_MARK = new Color(1.0f, 1.0f, 0.8f, 1.0f);
 
 	private final List<Log> list = new ArrayList<Log>();
 
