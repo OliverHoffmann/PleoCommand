@@ -26,7 +26,7 @@ public final class LogTable extends JTable {
 
 	private int minRowHeight;
 
-	private final Timer timer = new Timer();
+	private final Timer timer = new Timer("LogTable-Update", true);
 
 	private TimerTask updateTask;
 
