@@ -769,6 +769,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	@Override
 	public void configurationChanged(final Group group)
 			throws ConfigurationException {
+		try {
+			ensureNoLongerInitialized();
+		} catch (final StateException e) {
+			throw new ConfigurationException(e, "Cannot change configuration");
+		}
 		// TODO if config loaded before register...() getUser() will return null
 		// because getSkeleton() has never been executed
 		if (group.getUser() instanceof PipePart) {
