@@ -32,6 +32,8 @@ import pleocmd.pipe.out.Output;
  */
 public final class Pipe extends StateHandling implements ConfigurationInterface {
 
+	private static Pipe pipe;
+
 	/**
 	 * Number of milliseconds to reduce waiting-time in the input thread for
 	 * timed {@link Data}. before it's passed to the output thread's
@@ -44,7 +46,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * a timed {@link Data} with a different priority follows.<br>
 	 * Typical values are in [0, 40] for fast and [25, 200] for a slow computer.
 	 */
-	private static final long OVERHEAD_REDUCTION_TIME = 10;
+	private final ConfigInt cfgOverheadReductionTime = new ConfigInt(
+			"Overhead Reduction Time", 10, 0, 1000);
 
 	/**
 	 * Number of milliseconds it approximately takes from
@@ -54,13 +57,34 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * If too small, very short delays for timed {@link Data} may occur.<br>
 	 * If too large, timed {@link Data}s may be executed too early.<br>
 	 * Typical values are in [0, 10].<br>
-	 * Should not be larger than {@link #OVERHEAD_REDUCTION_TIME}<br>
-	 * Note that if {@link DataQueue#OUTPUT_THREAD_SLEEP_TIME} is too large, a
-	 * delay may already have occurred which can't be compensated here.
+	 * Should not be larger than {@link #cfgOverheadReductionTime}<br>
+	 * Note that if {@link #cfgOutputThreadSleepTime} is too large, a delay may
+	 * already have occurred which can't be compensated here.
 	 */
-	private static final long OUTPUT_INIT_OVERHEAD = 2;
+	private final ConfigInt cfgOutputInitOverhead = new ConfigInt(
+			"Output Init Overhead", 2, 0, 1000);
 
-	private static Pipe pipe;
+	/**
+	 * Number of milliseconds which an output may be behind for a timed
+	 * {@link Data} before a warning will be logged.
+	 * <p>
+	 * If too small, nearly every timed {@link Data} will be reported.<br>
+	 * If too large, even very long delays may not be detected.<br>
+	 * Typical values are in [50, 5000].
+	 */
+	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
+			60000);
+
+	/**
+	 * Number of milliseconds to wait until data is available in
+	 * {@link DataQueue#get(long)}.
+	 * <p>
+	 * If too small, cpu usage may increase during idle times.<br>
+	 * If too large, short delays for timed {@link Data} may occur.<br>
+	 * Typical values are in [5, 30].
+	 */
+	private final ConfigInt cfgOutputThreadSleepTime = new ConfigInt(
+			"Output-Thread Sleep Time", 10, 0, 300);
 
 	private final List<Input> inputList = new ArrayList<Input>();
 
@@ -87,9 +111,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private boolean inputThreadInterruped;
 
 	private PipeFeedback feedback;
-
-	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
-			10000);
 
 	/**
 	 * Creates a new {@link Pipe}.
@@ -384,7 +405,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				// fetch next data block ...
 				final Data data;
 				try {
-					data = dataQueue.get();
+					data = dataQueue.get(cfgOutputThreadSleepTime.getContent());
 				} catch (final InterruptedException e1) {
 					Log.detail("Reading next data has been interrupted");
 					feedback.incInterruptionCount();
@@ -412,7 +433,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (data.getTime() == Data.TIME_NOTIME) return true;
 		final long execTime = feedback.getStartTime() + data.getTime();
 		final long delta = execTime - System.currentTimeMillis()
-				- OUTPUT_INIT_OVERHEAD;
+				- cfgOutputInitOverhead.getContent();
 		if (delta > 0) {
 			Log.detail("Waiting %d ms", delta);
 			try {
@@ -526,7 +547,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			if (data.getTime() != Data.TIME_NOTIME) {
 				final long execTime = feedback.getStartTime() + data.getTime();
 				final long delta = execTime - System.currentTimeMillis()
-						- OVERHEAD_REDUCTION_TIME;
+						- cfgOverheadReductionTime.getContent();
 				if (delta > 0) {
 					Log.detail("Waiting %d ms", delta);
 					try {
@@ -712,7 +733,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	@Override
 	public Group getSkeleton(final String groupName) {
 		if (groupName.equals(getClass().getSimpleName()))
-			return new Group(groupName).add(cfgMaxBehind);
+			return new Group(groupName).add(cfgMaxBehind).add(
+					cfgOutputInitOverhead).add(cfgOverheadReductionTime).add(
+					cfgOutputThreadSleepTime);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
 			throw new InternalError("Wrong groupName for skeleton creation");

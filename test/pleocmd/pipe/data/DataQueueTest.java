@@ -17,6 +17,8 @@ public final class DataQueueTest extends Testcases {
 
 	private static final int BUF_SIZE = 1024;
 
+	private static final int SLEEP_TIME = 30;
+
 	@Test(timeout = 60000)
 	public void testPutAndGet() throws IOException, InterruptedException {
 		// no need for detailed output
@@ -35,7 +37,7 @@ public final class DataQueueTest extends Testcases {
 				queue.put(data);
 			Log.consoleOut("Put Data into DataQueue '%s'", queue);
 			for (int j = 0; j < BUF_SIZE; ++j)
-				buf1[j] = queue.get();
+				buf1[j] = queue.get(SLEEP_TIME);
 			Log.consoleOut("Read Data from DataQueue '%s'", queue);
 			assertArrayEquals(buf0, buf1);
 
@@ -43,7 +45,7 @@ public final class DataQueueTest extends Testcases {
 			Log.consoleOut("Closed DataQueue '%s'", queue);
 
 			// now get should fail
-			assertNull(queue.get());
+			assertNull(queue.get(SLEEP_TIME));
 
 			queue.resetCache();
 			Log.consoleOut("Reset DataQueue '%s'", queue);
@@ -54,7 +56,7 @@ public final class DataQueueTest extends Testcases {
 			queue.put(data);
 		Data d = createData(1);
 		queue.put(d);
-		assertSame(d, queue.get());
+		assertSame(d, queue.get(SLEEP_TIME));
 		Log.consoleOut("Tested High-Priority Data in DataQueue '%s'", queue);
 
 		queue.resetCache();
@@ -65,7 +67,7 @@ public final class DataQueueTest extends Testcases {
 			queue.put(data);
 		d = createData(-1);
 		queue.put(d);
-		assertSame(buf0[0], queue.get());
+		assertSame(buf0[0], queue.get(SLEEP_TIME));
 		Log.consoleOut("Tested Low-Priority Data in DataQueue '%s'", queue);
 
 		Log.consoleOut("Done testing DataQueue");
