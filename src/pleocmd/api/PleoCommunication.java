@@ -20,6 +20,11 @@ import java.util.TooManyListenersException;
 import java.util.concurrent.TimeoutException;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 
 /**
  * This is the central communication class with the Pleo.<br>
@@ -28,15 +33,17 @@ import pleocmd.Log;
  * 
  * @author oliver
  */
-public final class PleoCommunication implements SerialPortEventListener {
+public final class PleoCommunication implements SerialPortEventListener,
+		ConfigurationInterface {
 
-	private static final int OPEN_TIMEOUT = 5000;
+	private final ConfigInt cfgOpenTimeout = new ConfigInt("Open Timeout",
+			5000, 100, 60000);
 
-	private static final int ANSWER_TIMEOUT_1 = 6000;
+	private final ConfigInt cfgAnswerTimeout = new ConfigInt("Answer Timeout",
+			60000, 1000, 60 * 60 * 1000);
 
-	private static final int ANSWER_TIMEOUT_N = 3000;
-
-	private static final int BAUDRATE = 115200;
+	private final ConfigInt cfgBaudrate = new ConfigInt("Baudrate", 115200,
+			110, 256000);
 
 	private final CommPortIdentifier portID;
 
@@ -63,6 +70,12 @@ public final class PleoCommunication implements SerialPortEventListener {
 		this.portID = portID;
 		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(), portID
 				.getCurrentOwner());
+		try {
+			Configuration.the().registerConfigurableObject(this,
+					getClass().getSimpleName());
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
 	}
 
 	/**
@@ -87,7 +100,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 	 * Opens a new connection to the port specified in
 	 * {@link #PleoCommunication(CommPortIdentifier)}. If a connection is
 	 * already open, it will be closed first.<br>
-	 * Blocks until the connection has been opened or {@link #OPEN_TIMEOUT}
+	 * Blocks until the connection has been opened or {@link #cfgOpenTimeout}
 	 * milliseconds have been elapsed.
 	 * 
 	 * @throws IOException
@@ -98,7 +111,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 		close();
 		Log.detail("Connecting");
 		try {
-			port = (SerialPort) portID.open("PleoCommand", OPEN_TIMEOUT);
+			port = (SerialPort) portID.open("PleoCommand", (int) cfgOpenTimeout
+					.getContent());
 		} catch (final PortInUseException e) {
 			throw new IOException("Port already in use");
 		}
@@ -112,8 +126,9 @@ public final class PleoCommunication implements SerialPortEventListener {
 		}
 		port.notifyOnDataAvailable(true);
 		try {
-			port.setSerialPortParams(BAUDRATE, SerialPort.DATABITS_8,
-					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			port.setSerialPortParams((int) cfgBaudrate.getContent(),
+					SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+					SerialPort.PARITY_NONE);
 			Log.detail("Done initializing '%s'", toString());
 		} catch (final UnsupportedCommOperationException e) {
 			throw new IOException("Cannot set serial-port parameters");
@@ -164,8 +179,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 		inBuffer.trimToSize();
 		// add additional seconds to wait-time in readAnswer() before the
 		// first packet of data has been received
-		inBufferLastRead = System.currentTimeMillis() + ANSWER_TIMEOUT_1
-				- ANSWER_TIMEOUT_N;
+		inBufferLastRead = System.currentTimeMillis();
 		out.write((command + "\n").getBytes("ISO-8859-1"));
 		out.flush();
 		Log.detail("Sent '%s'", command);
@@ -180,8 +194,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 	 * @return the answer read from the connection converted via ISO-8859-1
 	 * @throws TimeoutException
 	 *             if the answer could not be read (completely) within a given
-	 *             time ({@link #ANSWER_TIMEOUT_1} and {@link #ANSWER_TIMEOUT_N}
-	 *             ).
+	 *             time ({@link #cfgAnswerTimeout}).
 	 */
 	public String readAnswer() throws TimeoutException {
 		// wait until "> " has been received which marks the end of the answer
@@ -194,7 +207,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 			if (++cnt % 4 == 0)
 				Log.detail("Waiting for answer since %d ms - got %d chars yet",
 						wait, inBuffer.length());
-			if (wait > ANSWER_TIMEOUT_N) //
+			if (wait > cfgAnswerTimeout.getContent()) //
 				// no response within a few seconds =>
 				// handle as unexpected end of received data
 				throw new TimeoutException(String.format(
@@ -280,6 +293,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 
 	@Override
 	public String toString() {
+		if (port == null) return "<No port assigned>";
 		try {
 			return String.format("'%s' with %d %d %d %d @ "
 					+ "EOI %d flowctrl %d in_size %d out_size %d "
@@ -294,6 +308,29 @@ public final class PleoCommunication implements SerialPortEventListener {
 			Log.error(e);
 			return "[Exception while fetching port information]";
 		}
+	}
+
+	@Override
+	public Group getSkeleton(final String groupName)
+			throws ConfigurationException {
+		return new Group(groupName).add(cfgOpenTimeout).add(cfgAnswerTimeout)
+				.add(cfgBaudrate);
+	}
+
+	@Override
+	public void configurationAboutToBeChanged() throws ConfigurationException {
+		// nothing to do
+	}
+
+	@Override
+	public void configurationChanged(final Group group)
+			throws ConfigurationException {
+		// nothing to do
+	}
+
+	@Override
+	public List<Group> configurationWriteback() throws ConfigurationException {
+		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
 }
