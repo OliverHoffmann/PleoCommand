@@ -46,13 +46,31 @@ public final class Group {
 
 	/**
 	 * Adds a {@link ConfigValue} to this {@link Group}.<br>
-	 * If one with the same label already exists, it will be replaced.
+	 * If one with the same label already exists, an
+	 * {@link IllegalArgumentException} will be thrown.
 	 * 
 	 * @param value
 	 *            the new {@link ConfigValue}
 	 * @return the {@link Group} itself
 	 */
 	public Group add(final ConfigValue value) {
+		if (valueMap.containsKey(value.getLabel()))
+			throw new IllegalArgumentException(String.format(
+					"Key already contained in Group: %s", value.getLabel()));
+		valueMap.put(value.getLabel(), value);
+		return this;
+	}
+
+	/**
+	 * Sets a {@link ConfigValue} in this {@link Group}.<br>
+	 * If one with the same label already exists, it will be replaced, otherwise
+	 * it will be added to the {@link Group}.
+	 * 
+	 * @param value
+	 *            the new {@link ConfigValue}
+	 * @return the {@link Group} itself
+	 */
+	public Group set(final ConfigValue value) {
 		valueMap.put(value.getLabel(), value);
 		return this;
 	}

@@ -267,7 +267,7 @@ public final class Configuration {
 				value.setFromString(content);
 			else
 				value.setFromStrings(readList(in, nr));
-			group.add(value);
+			group.set(value);
 		}
 
 		if (co == null)
