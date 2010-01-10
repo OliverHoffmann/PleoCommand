@@ -30,7 +30,9 @@ public interface ConfigurationInterface {
 	 * the order they appear in the configuration file.
 	 * 
 	 * @param group
-	 *            one of the {@link Group}s that have been changed
+	 *            one of the {@link Group}s that have been changed. If the
+	 *            {@link #getSkeleton(String)} for this group-name returned a
+	 *            {@link Group}, exactly the same one will be given here.
 	 * @throws ConfigurationException
 	 *             if reading {@link ConfigValue}s from the {@link Group} fails
 	 */

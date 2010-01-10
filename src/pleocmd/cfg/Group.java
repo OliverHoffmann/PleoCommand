@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import pleocmd.Log;
+
 public final class Group {
 
 	private final String name;
@@ -113,6 +115,31 @@ public final class Group {
 	public void remove(final String label) {
 		if (label == null) throw new NullPointerException();
 		valueMap.remove(label);
+	}
+
+	/**
+	 * Assigns all {@link ConfigValue}s from another {@link Group} to this one.<br>
+	 * Does not replace the {@link ConfigValue}s itself but only their content.
+	 * 
+	 * @param src
+	 *            the other Group from which all {@link ConfigValue}s will be
+	 *            copied.
+	 * @throws ConfigurationException
+	 *             if assigning a {@link ConfigValue} fails
+	 */
+	public void assign(final Group src) throws ConfigurationException {
+		for (final ConfigValue vt : valueMap.values()) {
+			final ConfigValue vs = src.get(vt.getLabel());
+			if (vs == null)
+				Log.warn("Cannot assign to '%s', because the value does not "
+						+ "exist in the source group", vt);
+			else
+				vt.assign(vs);
+		}
+		for (final ConfigValue vs : src.valueMap.values())
+			if (!valueMap.containsKey(vs.getLabel()))
+				Log.warn("Ignoring value with unknown label '%s' "
+						+ "for group '%s'", vs.getLabel(), this);
 	}
 
 	@Override

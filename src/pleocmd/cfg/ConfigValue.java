@@ -46,4 +46,12 @@ public abstract class ConfigValue {
 
 	public abstract void setFromGUIComponents();
 
+	public final void assign(final ConfigValue src)
+			throws ConfigurationException {
+		if (isSingleLined())
+			setFromString(src.asString());
+		else
+			setFromStrings(src.asStrings());
+	}
+
 }

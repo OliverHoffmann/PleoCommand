@@ -85,21 +85,31 @@ public final class Configuration {
 		if (configObjects.contains(co))
 			throw new IllegalStateException("Already registered");
 
-		writeToDefaultFile();
-
+		// register the new object and assign group-names to it
 		for (final String groupName : groupNames)
 			groupsRegistered.put(groupName, co);
 		configObjects.add(co);
 
+		// load the external object from the currently unassigned groups
 		// only keep groups which are not registered by the new external object
 		final List<Group> groupsKeep = new ArrayList<Group>(groupsUnassigned
 				.size());
+		co.configurationAboutToBeChanged();
 		for (final Group group : groupsUnassigned)
-			if (!groupNames.contains(group.getName())) groupsKeep.add(group);
+			if (groupNames.contains(group.getName())) {
+				final Group skelGroup = co.getSkeleton(group.getName());
+				if (skelGroup == null)
+					// no skeleton? just feed co with the unassigned group
+					co.configurationChanged(group);
+				else {
+					// we have to copy data from unassigned to skeleton group
+					skelGroup.assign(group);
+					co.configurationChanged(skelGroup);
+				}
+			} else
+				groupsKeep.add(group);
 		groupsUnassigned.clear();
 		groupsUnassigned.addAll(groupsKeep);
-
-		readFromDefaultFile();
 	}
 
 	/**
