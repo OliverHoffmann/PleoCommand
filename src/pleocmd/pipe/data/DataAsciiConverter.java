@@ -52,8 +52,9 @@ import pleocmd.pipe.val.ValueType;
 public final class DataAsciiConverter extends AbstractDataConverter {
 
 	/**
-	 * 10 => valid decimal number<br>
-	 * 20 => valid floating point number<br>
+	 * 08 => may be part of a decimal number (string otherwise)<br>
+	 * 09 => may be part of a floating point (string otherwise)<br>
+	 * 10 => valid decimal / floating point number<br>
 	 * 30 => valid string<br>
 	 * 40 => invalid
 	 */
@@ -63,14 +64,14 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 			40, 40, 40, 40, 40, 40, 40, 40, // 10 - 17
 			40, 40, 40, 40, 40, 40, 40, 40, // 18 - 1F
 			30, 30, 30, 30, 30, 30, 30, 30, // 20 - 27
-			30, 30, 30, 30, 20, 10, 20, 30, // 28 - 2F
+			30, 30, 30, +8, 30, +8, +9, 30, // 28 - 2F
 			10, 10, 10, 10, 10, 10, 10, 10, // 30 - 37
 			10, 10, 30, 30, 30, 30, 30, 30, // 38 - 3F
-			30, 30, 30, 30, 30, 20, 30, 30, // 40 - 47
+			30, 30, 30, 30, 30, +9, 30, 30, // 40 - 47
 			30, 30, 30, 30, 30, 30, 30, 30, // 48 - 4F
 			30, 30, 30, 30, 30, 30, 30, 30, // 50 - 57
 			30, 30, 30, 30, 30, 30, 30, 30, // 58 - 5F
-			30, 30, 30, 30, 30, 20, 30, 30, // 60 - 67
+			30, 30, 30, 30, 30, +9, 30, 30, // 60 - 67
 			30, 30, 30, 30, 30, 30, 30, 30, // 68 - 6F
 			30, 30, 30, 30, 30, 30, 30, 30, // 70 - 77
 			30, 30, 30, 30, 40, 30, 30, 40, // 78 - 7F
@@ -407,22 +408,26 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 */
 	private static ValueType detectDataType(final byte[] data, final int len)
 			throws IOException {
-		int res = 0;
 		Log.detail("Autodetecting data type of %d bytes", len);
-		for (int i = 0; i < len; ++i)
-			if ((res = Math.max(res, TYPE_AUTODETECT_TABLE[data[i] & 0xFF])) == 4)
+		int tat;
+		int res = 0;
+		final boolean[] found = new boolean[256];
+		for (int i = 0; i < len; ++i) {
+			found[tat = TYPE_AUTODETECT_TABLE[data[i] & 0xFF]] = true;
+			if ((res = Math.max(res, tat)) == 4)
 				throw new IOException(String.format(
 						"Invalid character for any known data type: 0x%02X "
 								+ "at position %d in '%s'", data[i], i,
 						toHexString(data, len)));
+		}
 		switch (res) {
-		case 10:
-			return ValueType.Int64;
-		case 20:
-			return ValueType.Float64;
 		case 0: // treat empty data as string
-		case 30:
+		case 8: // treat incomplete decimal number as string
+		case 9: // treat incomplete floating point as string
+		case 30: // valid string characters
 			return ValueType.NullTermString;
+		case 10: // valid digits
+			return found[9] ? ValueType.Float64 : ValueType.Int64;
 		default:
 			throw new InternalError("Invalid entry in TYPE_AUTODETECT_TABLE");
 		}
