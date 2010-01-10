@@ -55,7 +55,11 @@ public final class IntValue extends Value {
 	@Override
 	public void readFromAscii(final byte[] in, final int len)
 			throws IOException {
-		val = Long.valueOf(new String(in, 0, len, "US-ASCII"));
+		// work around for java bug: Long.valueOf can't handle "\+[0-9]+"
+		if (in.length > 0 && in[0] == '+')
+			val = Long.valueOf(new String(in, 1, len - 1, "US-ASCII"));
+		else
+			val = Long.valueOf(new String(in, 0, len, "US-ASCII"));
 	}
 
 	@Override
