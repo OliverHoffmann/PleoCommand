@@ -68,7 +68,7 @@ public final class PleoRXTXOutput extends Output {
 		if ("PMC".equals(data.getSafe(0).asString())) {
 			pc.send(data.get(1).asString());
 			try {
-				pc.readAnswer();
+				Log.consoleOut(pc.readAnswer());
 			} catch (final TimeoutException e) {
 				throw new OutputException(this, true, e,
 						"Cannot read answer for command '%s'", data);
