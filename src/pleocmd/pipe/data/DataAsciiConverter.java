@@ -414,7 +414,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		final boolean[] found = new boolean[256];
 		for (int i = 0; i < len; ++i) {
 			found[tat = TYPE_AUTODETECT_TABLE[data[i] & 0xFF]] = true;
-			if ((res = Math.max(res, tat)) == 4)
+			if ((res = Math.max(res, tat)) == 40)
 				throw new IOException(String.format(
 						"Invalid character for any known data type: 0x%02X "
 								+ "at position %d in '%s'", data[i], i,
