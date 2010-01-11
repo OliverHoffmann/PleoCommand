@@ -746,7 +746,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					return pp.newInstance().getGroup();
 			throw new ConfigurationException("Cannot find any PipePart "
 					+ "with class-name '%s'", name);
-		} catch (final Exception e) {
+		} catch (final Exception e) { // CS_IGNORE shortcut for the following:
 			// ConfigurationException,
 			// InstantiationException,
 			// IllegalAccessException

@@ -64,6 +64,7 @@ public final class ConfigValueTest extends Testcases {
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Test-Bounds");
 
+	// CS_IGNORE_NEXT very long but well-structured test-case
 	@Test
 	public void testAllConfigValues() throws ConfigurationException,
 			IOException {
@@ -192,4 +193,10 @@ public final class ConfigValueTest extends Testcases {
 
 		Log.consoleOut("Checked all ConfigValue implementations");
 	}
+
+	@Test
+	public void testIdentifiers() {
+
+	}
+
 }

@@ -12,8 +12,7 @@ import pleocmd.Testcases;
 public final class ConfigurationTest extends Testcases {
 
 	@Test
-	public void testCreateWriteAndRead() throws ConfigurationException,
-			IOException {
+	public void testCreateWriteAndRead() throws IOException {
 		Configuration.setDefaultConfigFile(File.createTempFile(
 				"ConfigurationTest", null));
 		Configuration.getDefaultConfigFile().deleteOnExit();
@@ -26,11 +25,11 @@ public final class ConfigurationTest extends Testcases {
 
 		// test group
 
+		// TODO
 	}
 
 	@Test
-	public void testReadUsercreatedFiles() throws ConfigurationException,
-			IOException {
+	public void testReadUsercreatedFiles() throws IOException {
 		Configuration.setDefaultConfigFile(File.createTempFile(
 				"ConfigurationTest", null));
 		Configuration.getDefaultConfigFile().deleteOnExit();
@@ -64,6 +63,7 @@ public final class ConfigurationTest extends Testcases {
 
 		// unregister object A
 
+		// TODO
 	}
 
 }

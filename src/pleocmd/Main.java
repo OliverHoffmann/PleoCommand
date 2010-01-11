@@ -11,6 +11,8 @@ import pleocmd.itfc.gui.MainFrame;
  * implement DataFilter<br>
  * check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)<br>
  * add javadoc<br>
+ * <br>
+ * more Log.debug<br>
  */
 
 public final class Main {

@@ -42,12 +42,6 @@ public final class PipePartTest extends Testcases {
 			protected void close0() throws PipeException, IOException {
 				throw new UnsupportedOperationException();
 			}
-
-			// TODO
-			@Override
-			public String toString() {
-				return "Test-PipePart";
-			}
 		};
 	}
 
