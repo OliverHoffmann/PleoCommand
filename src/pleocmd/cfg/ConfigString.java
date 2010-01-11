@@ -28,11 +28,40 @@ public final class ConfigString extends ConfigValue {
 		return content;
 	}
 
+	public List<String> getContentList() {
+		final List<String> res = new ArrayList<String>();
+		final StringTokenizer st = new StringTokenizer(content, "\n");
+		while (st.hasMoreTokens())
+			res.add(st.nextToken());
+		return res;
+	}
+
 	public void setContent(final String content) throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine && content.contains("\n"))
 			throw new ConfigurationException("content contains line-feeds");
 		this.content = content;
+	}
+
+	public void setContent(final List<String> content)
+			throws ConfigurationException {
+		if (content == null) throw new NullPointerException("content");
+		if (!multiLine)
+			throw new ConfigurationException("content must be single lined");
+		final StringBuilder sb = new StringBuilder();
+		for (final String str : content) {
+			sb.append(str);
+			sb.append('\n');
+		}
+		try {
+			setContent(sb.toString());
+		} catch (final ConfigurationException e) {
+			throw new InternalError("Caught exception which should never occur");
+		}
+	}
+
+	public void clearContent() {
+		content = "";
 	}
 
 	@Override
@@ -47,25 +76,13 @@ public final class ConfigString extends ConfigValue {
 
 	@Override
 	List<String> asStrings() {
-		final List<String> res = new ArrayList<String>();
-		final StringTokenizer st = new StringTokenizer(content, "\n");
-		while (st.hasMoreTokens())
-			res.add(st.nextToken());
-		return res;
+		return getContentList();
 	}
 
 	@Override
-	void setFromStrings(final List<String> strings) {
-		final StringBuilder sb = new StringBuilder();
-		for (final String str : strings) {
-			sb.append(str);
-			sb.append('\n');
-		}
-		try {
-			setContent(sb.toString());
-		} catch (final ConfigurationException e) {
-			throw new InternalError("Caught exception which should never occur");
-		}
+	void setFromStrings(final List<String> strings)
+			throws ConfigurationException {
+		setContent(strings);
 	}
 
 	@Override

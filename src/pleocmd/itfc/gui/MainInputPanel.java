@@ -1,6 +1,7 @@
 package pleocmd.itfc.gui;
 
 import java.awt.EventQueue;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -9,15 +10,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
@@ -34,6 +32,8 @@ public final class MainInputPanel extends JPanel {
 
 	private final JList historyList;
 
+	private final JScrollPane historyScrollPane;
+
 	private final JTextField consoleInput;
 
 	private final JButton btnSend;
@@ -44,22 +44,23 @@ public final class MainInputPanel extends JPanel {
 
 	private final JButton btnClear;
 
+	private int historyIndex = Integer.MAX_VALUE;
+
 	public MainInputPanel() {
 		final Layouter lay = new Layouter(this);
 
 		historyListModel = new HistoryListModel();
-		historyList = new JList(getHistoryListModel());
-		lay.addWholeLine(new JScrollPane(getHistoryList(),
+		historyList = new JList(historyListModel);
+		lay.addWholeLine(historyScrollPane = new JScrollPane(historyList,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), true);
-		getHistoryList().addMouseListener(new MouseAdapter() {
+		historyList.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(final MouseEvent e) {
-				if (e.getClickCount() == 2) {
-					final int idx = getHistoryList().getSelectedIndex();
-					if (idx != -1)
-						putInput(getHistoryListModel().getElementAt(idx)
-								.toString());
+				final int idx = getHistoryList().getSelectedIndex();
+				if (idx != -1) {
+					setConsoleInput(idx);
+					if (e.getClickCount() == 2) putInput();
 				}
 			}
 		});
@@ -68,8 +69,9 @@ public final class MainInputPanel extends JPanel {
 		consoleInput.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(final KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) putConsoleInput();
+				handleConsoleKeys(e.getKeyCode(), e.getModifiersEx());
 			}
+
 		});
 		lay.addWholeLine(consoleInput, false);
 
@@ -77,7 +79,7 @@ public final class MainInputPanel extends JPanel {
 				"Send text from input-field to the pipe", new Runnable() {
 					@Override
 					public void run() {
-						putConsoleInput();
+						putInput();
 					}
 				});
 		btnSendEOS = lay.addButton("Send EOS", "media-playback-stop",
@@ -106,15 +108,113 @@ public final class MainInputPanel extends JPanel {
 				});
 	}
 
-	public void putConsoleInput() {
-		putInput(consoleInput.getText());
-		consoleInput.setText("");
+	protected void handleConsoleKeys(final int key, final int modifiers) {
+		switch (key) {
+		case KeyEvent.VK_ENTER:
+			putInput();
+			break;
+		case KeyEvent.VK_UP:
+			moveInHistory(-1);
+			break;
+		case KeyEvent.VK_DOWN:
+			moveInHistory(1);
+			break;
+		case KeyEvent.VK_PAGE_UP:
+			scrollInHistory(-1);
+			break;
+		case KeyEvent.VK_PAGE_DOWN:
+			scrollInHistory(1);
+			break;
+		case KeyEvent.VK_R:
+			if ((modifiers & InputEvent.CTRL_DOWN_MASK) != 0)
+				searchInHistory();
+			break;
+		}
 	}
 
-	public void putInput(final String input) {
+	/**
+	 * Scrolls in the history just like the scroll bar has been dragged.
+	 * 
+	 * @param direction
+	 *            -1 to scroll upwards and +1 to scroll downwards
+	 */
+	private void scrollInHistory(final int direction) {
+		final JScrollBar sb = historyScrollPane.getVerticalScrollBar();
+		sb.setValue(sb.getValue() + sb.getUnitIncrement(direction) * direction);
+	}
+
+	/**
+	 * Moves the current active history line marker and sets the console input
+	 * to the contents of the now active line.
+	 * 
+	 * @param direction
+	 *            -1 to move upwards and +1 to move downwards
+	 */
+	private void moveInHistory(final int direction) {
+		setConsoleInput(Math.max(0, Math.min(historyListModel.getSize(),
+				historyIndex + direction)));
+	}
+
+	/**
+	 * Searches for the first line in history which matches the current console
+	 * input and sets the console input to this line.<br>
+	 * Does nothing if no match can be found.
+	 */
+	private void searchInHistory() {
+		final String expr = String.format(".*%s.*", consoleInput.getText());
+		for (int idx = historyListModel.getSize() - 1; idx >= 0; --idx)
+			if (historyListModel.getElementAt(idx).toString().matches(expr)) {
+				setConsoleInput(idx);
+				return;
+			}
+	}
+
+	/**
+	 * Sets the console input to the history at the given position.<br>
+	 * If the position equals the size of the history, an empty {@link String}
+	 * will be used.
+	 * 
+	 * @param index
+	 *            index of the history
+	 */
+	protected void setConsoleInput(final int index) {
+		final String hist = index == historyListModel.getSize() ? ""
+				: historyListModel.getElementAt(index).toString();
+		consoleInput.setText(hist);
+		consoleInput.setCaretPosition(hist.length());
+		historyIndex = index;
+		if (index == historyListModel.getSize())
+			historyList.clearSelection();
+		else
+			historyList.setSelectedIndex(index);
+	}
+
+	/**
+	 * Sets the console input to the given {@link String} and resets the active
+	 * history line marker.
+	 * 
+	 * @param str
+	 *            new text to display in the console input field
+	 */
+	protected void setConsoleInput(final String str) {
+		consoleInput.setText(str);
+		consoleInput.setCaretPosition(str.length());
+		historyIndex = Integer.MAX_VALUE;
+		historyList.clearSelection();
+	}
+
+	/**
+	 * Sends the current input to the {@link StandardInput}, adds it to the
+	 * history and resets the console input field.<br>
+	 * Does nothing if the console input is empty.
+	 */
+	public void putInput() {
 		try {
+			final String input = consoleInput.getText();
+			if (input.isEmpty()) return;
+			setConsoleInput("");
 			StandardInput.the().put((input + "\n").getBytes("ISO-8859-1"));
-			getHistoryListModel().add(input);
+			historyListModel.add(input);
 			EventQueue.invokeLater(new Runnable() {
 				@Override
 				public void run() {
@@ -168,12 +268,8 @@ public final class MainInputPanel extends JPanel {
 	}
 
 	public void clearHistory() {
-		getHistoryListModel().clear();
+		historyListModel.clear();
 		updateState();
-	}
-
-	public List<String> getHistory() {
-		return getHistoryListModel().getAll();
 	}
 
 	protected JList getHistoryList() {
@@ -182,39 +278,6 @@ public final class MainInputPanel extends JPanel {
 
 	protected HistoryListModel getHistoryListModel() {
 		return historyListModel;
-	}
-
-	class HistoryListModel extends AbstractListModel {
-
-		private static final long serialVersionUID = 4510015901086617192L;
-
-		private final List<String> history = new ArrayList<String>();
-
-		@Override
-		public int getSize() {
-			return history.size();
-		}
-
-		@Override
-		public Object getElementAt(final int index) {
-			return history.get(index);
-		}
-
-		public void add(final String line) {
-			history.add(line);
-			fireIntervalAdded(this, history.size() - 1, history.size() - 1);
-		}
-
-		public void clear() {
-			final int size = history.size();
-			history.clear();
-			fireIntervalRemoved(this, 0, size - 1);
-		}
-
-		public List<String> getAll() {
-			return Collections.unmodifiableList(history);
-		}
-
 	}
 
 	public void updateState() {

@@ -289,7 +289,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
 					tpDataSequence.getCaretPosition()).getEndOffset();
-			for (final String data : MainFrame.the().getHistory())
+			for (final String data : MainFrame.the().getMainInputPanel()
+					.getHistoryListModel().getAll())
 				doc.insertString(offset, data + "\n", null);
 		} catch (final BadLocationException e) {
 			Log.error(e);
@@ -429,7 +430,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		btnRemoveTrigger.setEnabled(trigger != null);
 		tpDataSequence.setEnabled(trigger != null);
 		btnCopyInput.setEnabled(trigger != null
-				&& !MainFrame.the().getMainInputPanel().getHistory().isEmpty());
+				&& MainFrame.the().getMainInputPanel().getHistoryListModel()
+						.getSize() > 0);
 		btnAddFile.setEnabled(trigger != null);
 		btnPlaySel.setEnabled(false);// TODO
 		btnPlayAll.setEnabled(false);// TODO

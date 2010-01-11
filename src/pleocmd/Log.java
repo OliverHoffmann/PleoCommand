@@ -180,7 +180,7 @@ public final class Log {
 		if (type.ordinal() >= minLogType.ordinal()) {
 			if (type == Type.Console) System.out.println(getMsg()); // CS_IGNORE
 			if (MainFrame.hasGUI())
-				MainFrame.the().addLog(this);
+				MainFrame.the().getMainLogPanel().addLog(this);
 			else if (type != Type.Console) System.err.println(toString()); // CS_IGNORE
 		}
 	}

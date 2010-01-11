@@ -18,7 +18,6 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
-import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.Pipe;
 
@@ -122,14 +121,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	public MainInputPanel getMainInputPanel() {
 		return mainInputPanel;
-	}
-
-	public List<String> getHistory() {
-		return mainInputPanel.getHistory();
-	}
-
-	public void addLog(final Log log) {
-		mainLogPanel.addLog(log);
 	}
 
 	public void exit() {
