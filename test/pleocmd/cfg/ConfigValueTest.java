@@ -194,9 +194,39 @@ public final class ConfigValueTest extends Testcases {
 		Log.consoleOut("Checked all ConfigValue implementations");
 	}
 
+	private void compareIdentifier(final ConfigValue cv,
+			final Class<? extends ConfigValue> expected) {
+		Log.consoleOut("Testing class '%s'", cv.getClass().getName());
+		final String ident = cv.getIdentifier();
+		final ConfigValue cvFromIdent = ConfigValue.createValue(ident, "foo",
+				true);
+		Log.consoleOut("Got identifier '%s' which constructs '%s' which "
+				+ "in return has identifier '%s'", ident, cvFromIdent
+				.getClass().getName(), cvFromIdent.getIdentifier());
+		assertEquals("Wrong class returned by createValue():", expected,
+				cvFromIdent.getClass());
+		assertEquals("Newly constructed by createValue() has "
+				+ "other identifier:", ident, cvFromIdent.getIdentifier());
+	}
+
 	@Test
 	public void testIdentifiers() {
-
+		compareIdentifier(new ConfigBounds("foo"), ConfigBounds.class);
+		compareIdentifier(new ConfigDataMap("foo"), ConfigString.class);
+		compareIdentifier(new ConfigEnum<TestEnum>("foo", TestEnum.class),
+				ConfigString.class);
+		compareIdentifier(new ConfigFloat("foo", 0, 0, 0), ConfigFloat.class);
+		compareIdentifier(new ConfigInt("foo", 0, 0, 0), ConfigInt.class);
+		compareIdentifier(new ConfigItem("foo", true, new String[] { "FOO" }),
+				ConfigString.class);
+		compareIdentifier(new ConfigPath("foo", PathType.Directory),
+				ConfigPath.class);
+		compareIdentifier(new ConfigPath("foo", PathType.FileForReading),
+				ConfigPath.class);
+		compareIdentifier(new ConfigPath("foo", PathType.FileForWriting),
+				ConfigPath.class);
+		compareIdentifier(new ConfigString("foo", true), ConfigString.class);
+		compareIdentifier(new ConfigString("foo", false), ConfigString.class);
 	}
 
 }

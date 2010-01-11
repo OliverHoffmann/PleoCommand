@@ -73,6 +73,8 @@ public abstract class ConfigValue {
 		if ("write".equals(identifier))
 			return new ConfigPath(label, PathType.FileForWriting);
 
+		if ("bounds".equals(identifier)) return new ConfigBounds(label);
+
 		// "str", "item", null
 		return new ConfigString(label, !singleLined);
 	}

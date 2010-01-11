@@ -123,7 +123,7 @@ public class ConfigItem extends ConfigValue {
 
 	@Override
 	final String getIdentifier() {
-		return "item";
+		return null;
 	}
 
 	@Override

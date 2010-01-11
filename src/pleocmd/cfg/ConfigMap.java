@@ -157,7 +157,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	@Override
 	final String getIdentifier() {
-		return "map";
+		return null;
 	}
 
 	@Override
