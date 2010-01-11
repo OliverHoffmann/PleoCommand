@@ -105,9 +105,9 @@ public abstract class StateHandling {
 
 	public final void configure() throws PipeException {
 		ensureConstructed();
-		setState(State.Configured);
 		try {
 			configure0();
+			setState(State.Configured);
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot configure '%s'",
 					toString());
@@ -118,9 +118,9 @@ public abstract class StateHandling {
 
 	public final void init() throws PipeException {
 		ensureConfigured();
-		setState(State.Initialized);
 		try {
 			init0();
+			setState(State.Initialized);
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot initialize '%s'",
 					toString());
@@ -131,8 +131,8 @@ public abstract class StateHandling {
 
 	public final void close() throws PipeException {
 		ensureInitialized();
-		setState(State.Configured);
 		try {
+			setState(State.Configured);
 			close0();
 		} catch (final IOException e) {
 			throw new PipeException(this, true, e, "Cannot close '%s'",
