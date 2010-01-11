@@ -382,11 +382,6 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	public void saveChanges() {
 		writeTextPaneToMap();
 		mapOrg.assignFrom(map);
-		try {
-			Configuration.the().writeToDefaultFile();
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-		}
 	}
 
 	protected void writeTextPaneToMap() {
