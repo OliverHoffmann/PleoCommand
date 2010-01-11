@@ -28,6 +28,8 @@ public final class MainInputPanel extends JPanel {
 
 	private static final long serialVersionUID = 8130292678723649962L;
 
+	private static final int INVALID_INDEX = 0x7FFFFF00;
+
 	private final HistoryListModel historyListModel;
 
 	private final JList historyList;
@@ -44,7 +46,7 @@ public final class MainInputPanel extends JPanel {
 
 	private final JButton btnClear;
 
-	private int historyIndex = Integer.MAX_VALUE;
+	private int historyIndex = INVALID_INDEX;
 
 	public MainInputPanel() {
 		final Layouter lay = new Layouter(this);
@@ -60,7 +62,7 @@ public final class MainInputPanel extends JPanel {
 				final int idx = getHistoryList().getSelectedIndex();
 				if (idx != -1) {
 					setConsoleInput(idx);
-					if (e.getClickCount() == 2) putInput();
+					if (e.getClickCount() == 2) sendConsoleInput();
 				}
 			}
 		});
@@ -79,7 +81,7 @@ public final class MainInputPanel extends JPanel {
 				"Send text from input-field to the pipe", new Runnable() {
 					@Override
 					public void run() {
-						putInput();
+						sendConsoleInput();
 					}
 				});
 		btnSendEOS = lay.addButton("Send EOS", "media-playback-stop",
@@ -106,12 +108,21 @@ public final class MainInputPanel extends JPanel {
 						clearHistory();
 					}
 				});
+
+		// an old history list may have been loaded from the configuration
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				scrollToBottom();
+				updateState();
+			}
+		});
 	}
 
 	protected void handleConsoleKeys(final int key, final int modifiers) {
 		switch (key) {
 		case KeyEvent.VK_ENTER:
-			putInput();
+			sendConsoleInput();
 			break;
 		case KeyEvent.VK_UP:
 			moveInHistory(-1);
@@ -151,8 +162,10 @@ public final class MainInputPanel extends JPanel {
 	 *            -1 to move upwards and +1 to move downwards
 	 */
 	private void moveInHistory(final int direction) {
-		setConsoleInput(Math.max(0, Math.min(historyListModel.getSize(),
-				historyIndex + direction)));
+		final int idx = Math.max(0, Math.min(historyListModel.getSize(),
+				historyIndex));
+		setConsoleInput(Math.max(0, Math.min(historyListModel.getSize(), idx
+				+ direction)));
 	}
 
 	/**
@@ -178,6 +191,8 @@ public final class MainInputPanel extends JPanel {
 	 *            index of the history
 	 */
 	protected void setConsoleInput(final int index) {
+		Log.detail("Setting console input to index %d (history index: %d)",
+				index, historyIndex);
 		final String hist = index == historyListModel.getSize() ? ""
 				: historyListModel.getElementAt(index).toString();
 		consoleInput.setText(hist);
@@ -197,9 +212,11 @@ public final class MainInputPanel extends JPanel {
 	 *            new text to display in the console input field
 	 */
 	protected void setConsoleInput(final String str) {
+		Log.detail("Setting console input to '%s' (history index: %d)", str,
+				historyIndex);
 		consoleInput.setText(str);
 		consoleInput.setCaretPosition(str.length());
-		historyIndex = Integer.MAX_VALUE;
+		historyIndex = INVALID_INDEX;
 		historyList.clearSelection();
 	}
 
@@ -208,7 +225,8 @@ public final class MainInputPanel extends JPanel {
 	 * history and resets the console input field.<br>
 	 * Does nothing if the console input is empty.
 	 */
-	public void putInput() {
+	public void sendConsoleInput() {
+		Log.detail("Sending console input (history index: %d)", historyIndex);
 		try {
 			final String input = consoleInput.getText();
 			if (input.isEmpty()) return;
@@ -218,9 +236,7 @@ public final class MainInputPanel extends JPanel {
 			EventQueue.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					final int size = getHistoryListModel().getSize() - 1;
-					getHistoryList().scrollRectToVisible(
-							getHistoryList().getCellBounds(size, size));
+					scrollToBottom();
 					updateState();
 				}
 			});
@@ -259,8 +275,10 @@ public final class MainInputPanel extends JPanel {
 		try {
 			final BufferedReader in = new BufferedReader(new FileReader(file));
 			String line;
-			while ((line = in.readLine()) != null)
-				StandardInput.the().put((line + '\n').getBytes("ISO-8859-1"));
+			while ((line = in.readLine()) != null) {
+				setConsoleInput(line);
+				sendConsoleInput();
+			}
 			in.close();
 		} catch (final IOException exc) {
 			Log.error(exc);
@@ -278,6 +296,11 @@ public final class MainInputPanel extends JPanel {
 
 	protected HistoryListModel getHistoryListModel() {
 		return historyListModel;
+	}
+
+	protected void scrollToBottom() {
+		final int size = historyListModel.getSize() - 1;
+		historyList.scrollRectToVisible(historyList.getCellBounds(size, size));
 	}
 
 	public void updateState() {
