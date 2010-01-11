@@ -193,6 +193,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	}
 
 	public void updateState() {
+		// update all which depend on isPipeRunning()
 		btnExit.setEnabled(!isPipeRunning());
 		getMainPipePanel().updateState();
 		getMainLogPanel().updateState();

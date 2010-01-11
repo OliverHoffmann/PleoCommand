@@ -44,14 +44,14 @@ public final class MainPipePanel extends JPanel {
 				"Save the current pipe to a file", new Runnable() {
 					@Override
 					public void run() {
-						writeConfigToFile();
+						writePipeConfigToFile();
 					}
 				});
 		btnLoad = lay.addButton(Button.LoadFrom,
 				"Load a previously saved pipe from a file", new Runnable() {
 					@Override
 					public void run() {
-						readConfigFromFile();
+						readPipeConfigFromFile();
 					}
 				});
 	}
@@ -71,7 +71,7 @@ public final class MainPipePanel extends JPanel {
 		Log.detail("GUI-Frame is done with configuration");
 	}
 
-	public void writeConfigToFile() {
+	public void writePipeConfigToFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
@@ -80,34 +80,33 @@ public final class MainPipePanel extends JPanel {
 			File file = fc.getSelectedFile();
 			if (!file.getName().contains("."))
 				file = new File(file.getPath() + ".pca");
-			writeConfigToFile(file);
+			writePipeConfigToFile(file);
 		}
 	}
 
-	public void writeConfigToFile(final File file) {
+	public void writePipeConfigToFile(final File file) {
 		try {
-			// TODO write only pipe specific groups
-			Configuration.the().writeToFile(file);
+			Configuration.the().writeToFile(file, Pipe.the());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}
 
-	public void readConfigFromFile() {
+	public void readPipeConfigFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
 				"Pipe-Configuration", "pca"));
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			readConfigFromFile(fc.getSelectedFile());
+			readPipeConfigFromFile(fc.getSelectedFile());
 	}
 
-	public void readConfigFromFile(final File file) {
+	public void readPipeConfigFromFile(final File file) {
 		try {
-			// TODO read only pipe-specific groups
-			Configuration.the().readFromFile(file);
-			updatePipeLabel();
+			Configuration.the().readFromFile(file, Pipe.the());
 			Configuration.the().writeToDefaultFile();
+			updateState();
+			updatePipeLabel();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}

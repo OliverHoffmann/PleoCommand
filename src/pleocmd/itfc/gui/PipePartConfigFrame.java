@@ -101,6 +101,7 @@ public final class PipePartConfigFrame extends JDialog implements
 			for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
 				Pipe.the().addOutput(pppOutput.getTableModel().getPipePart(i));
 			Configuration.the().writeToDefaultFile();
+			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();
 			Log.detail("Applied Config-Frame");
 		} catch (final PipeException e) {
