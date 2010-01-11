@@ -432,4 +432,13 @@ public final class Configuration {
 		return res;
 	}
 
+	/**
+	 * Only for test-cases.
+	 */
+	public void reset() {
+		groupsUnassigned.clear();
+		groupsRegistered.clear();
+		configObjects.clear();
+	}
+
 }
