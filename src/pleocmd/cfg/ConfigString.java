@@ -40,6 +40,7 @@ public final class ConfigString extends ConfigValue {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine && content.contains("\n"))
 			throw new ConfigurationException("content contains line-feeds");
+		checkValidString(content, multiLine);
 		this.content = content;
 	}
 
@@ -50,12 +51,14 @@ public final class ConfigString extends ConfigValue {
 			throw new ConfigurationException("content must be single lined");
 		final StringBuilder sb = new StringBuilder();
 		for (final String str : content) {
+			checkValidString(str, false);
 			sb.append(str);
 			sb.append('\n');
 		}
 		try {
 			setContent(sb.toString());
 		} catch (final ConfigurationException e) {
+			e.printStackTrace();
 			throw new InternalError("Caught exception which should never occur");
 		}
 	}

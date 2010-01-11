@@ -55,6 +55,31 @@ public abstract class ConfigValue {
 			setFromStrings(src.asStrings());
 	}
 
+	protected final void checkValidString(final String str,
+			final boolean allowLineFeed) throws ConfigurationException {
+		final String trimmed = str.trim();
+		if (!str.equals(trimmed) && !str.equals(trimmed + "\n"))
+			throw new ConfigurationException("Cannot save this string "
+					+ "in a configuration file - will be trimmed: '%s'", str);
+		if ("{".equals(trimmed))
+			throw new ConfigurationException("Cannot save this string "
+					+ "in a configuration file - must not equal '{': '%s'", str);
+		if (str.contains("\0"))
+			throw new ConfigurationException("Cannot save this string "
+					+ "in a configuration file - must not contain "
+					+ "null-terminator: '%s'", str);
+		if (!allowLineFeed && str.contains("\n"))
+			throw new ConfigurationException("Cannot save this string "
+					+ "in a configuration file - must not contain "
+					+ "line-feed: '%s'", str);
+		if (allowLineFeed)
+			if (trimmed.contains("\n}\n") || trimmed.startsWith("}\n")
+					|| trimmed.endsWith("\n}"))
+				throw new ConfigurationException(
+						"Cannot save this string in a configuration file - "
+								+ "no line must equal '}': '%s'", str);
+	}
+
 	public static ConfigValue createValue(final String identifier,
 			final String label, final boolean singleLined) {
 		if ("int".equals(identifier))

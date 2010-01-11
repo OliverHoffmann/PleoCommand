@@ -250,7 +250,11 @@ public final class DataSequenceEditorFrame extends JDialog implements
 				"Name of the new trigger", "Add new trigger",
 				JOptionPane.PLAIN_MESSAGE);
 		if (name != null) {
-			map.createContent(name);
+			try {
+				map.createContent(name);
+			} catch (final ConfigurationException e) {
+				Log.error(e);
+			}
 			updateTriggerModel();
 			triggerList.setSelectedValue(name, true);
 		}
@@ -262,7 +266,11 @@ public final class DataSequenceEditorFrame extends JDialog implements
 					"New Name of the trigger", "Rename trigger",
 					JOptionPane.PLAIN_MESSAGE, null, null, trigger);
 			if (name != null) {
-				map.renameContent(trigger, name);
+				try {
+					map.renameContent(trigger, name);
+				} catch (final ConfigurationException e) {
+					Log.error(e);
+				}
 				trigger = name;
 				updateTriggerModel();
 				triggerList.setSelectedValue(name, true);
@@ -403,6 +411,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			}
 			in.close();
 		} catch (final IOException e) {
+			Log.error(e);
+		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}

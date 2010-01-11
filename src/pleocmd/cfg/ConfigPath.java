@@ -60,6 +60,7 @@ public final class ConfigPath extends ConfigValue {
 		default:
 			throw new InternalError("Invalid PathType");
 		}
+		checkValidString(content.getPath(), false);
 		this.content = content;
 	}
 

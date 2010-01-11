@@ -47,11 +47,17 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		return content.containsKey(key);
 	}
 
-	public final void setContent(final K key, final List<V> list) {
+	public final void setContent(final K key, final List<V> list)
+			throws ConfigurationException {
+		checkValidString(key.toString(), false);
+		for (final V v : list)
+			checkValidString(v.toString(), false);
 		content.put(key, list);
 	}
 
-	public final void renameContent(final K key, final K newKey) {
+	public final void renameContent(final K key, final K newKey)
+			throws ConfigurationException {
+		checkValidString(newKey.toString(), false);
 		final List<V> list = content.remove(key);
 		if (list == null)
 			throw new IllegalArgumentException(String.format(
@@ -59,17 +65,23 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		content.put(newKey, list);
 	}
 
-	public final void addContent(final K key, final V value) {
+	public final void addContent(final K key, final V value)
+			throws ConfigurationException {
 		List<V> list = content.get(key);
 		if (list == null) {
+			checkValidString(key.toString(), false);
 			list = new ArrayList<V>();
 			content.put(key, list);
 		}
+		checkValidString(value.toString(), false);
 		list.add(value);
 	}
 
-	public final void createContent(final K key) {
-		if (!content.containsKey(key)) content.put(key, new ArrayList<V>());
+	public final void createContent(final K key) throws ConfigurationException {
+		if (!content.containsKey(key)) {
+			checkValidString(key.toString(), false);
+			content.put(key, new ArrayList<V>());
+		}
 	}
 
 	public final void removeContent(final K key) {
@@ -88,10 +100,15 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	public final <F extends K, W extends V> void assignFrom(
 			final ConfigMap<F, W> map) {
 		clearContent();
-		for (final F key : map.getAllKeys()) {
-			createContent(key);
-			for (final W v : map.getContent(key))
-				addContent(key, v);
+		try {
+			for (final F key : map.getAllKeys()) {
+				createContent(key);
+				for (final W v : map.getContent(key))
+					addContent(key, v);
+			}
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Exception should never occur: %s", e.getMessage()));
 		}
 	}
 
@@ -131,12 +148,12 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	@Override
 	final void setFromStrings(final List<String> strings)
 			throws ConfigurationException {
-		content.clear();
+		clearContent();
 		List<V> list = null;
 		for (final String str : strings)
 			if (str.endsWith("=>")) {
 				list = new ArrayList<V>();
-				content.put(
+				setContent(
 						createKey(str.substring(0, str.length() - 2).trim()),
 						list);
 			} else {

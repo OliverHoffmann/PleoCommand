@@ -39,6 +39,13 @@ public class ConfigItem extends ConfigValue {
 		super(label);
 		this.freeAssign = freeAssign;
 		this.identifiers.addAll(identifiers);
+		try {
+			for (final String id : identifiers)
+				checkValidString(id, false);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"List of identifiers is invalid", e);
+		}
 		finalCtor();
 	}
 
@@ -62,8 +69,15 @@ public class ConfigItem extends ConfigValue {
 			final Object[] identifiers) {
 		super(label);
 		this.freeAssign = freeAssign;
-		for (final Object id : identifiers)
-			this.identifiers.add(id.toString());
+		try {
+			for (final Object id : identifiers) {
+				checkValidString(id.toString(), false);
+				this.identifiers.add(id.toString());
+			}
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"List of identifiers is invalid", e);
+		}
 		finalCtor();
 	}
 
@@ -84,6 +98,7 @@ public class ConfigItem extends ConfigValue {
 			throw new ConfigurationException("Invalid constant "
 					+ "for '%s': '%s' - must be one of '%s'", getLabel(),
 					content, Arrays.toString(identifiers.toArray()));
+		checkValidString(content, false);
 		this.content = content;
 	}
 
