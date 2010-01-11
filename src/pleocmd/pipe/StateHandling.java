@@ -52,8 +52,8 @@ public abstract class StateHandling {
 			ensureConstructing();
 			setState(State.Constructed);
 		} catch (final StateException e) {
-			Log.error(e);
-			throw new InternalError("Invalid state during ctor");
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
 		}
 	}
 

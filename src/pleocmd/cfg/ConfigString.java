@@ -58,8 +58,8 @@ public final class ConfigString extends ConfigValue {
 		try {
 			setContent(sb.toString());
 		} catch (final ConfigurationException e) {
-			e.printStackTrace();
-			throw new InternalError("Caught exception which should never occur");
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
 		}
 	}
 
@@ -110,7 +110,8 @@ public final class ConfigString extends ConfigValue {
 		try {
 			setContent(tc.getText());
 		} catch (final ConfigurationException e) {
-			throw new InternalError("Caught exception which should never occur");
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
 		}
 	}
 

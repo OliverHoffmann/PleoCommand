@@ -108,7 +108,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 			}
 		} catch (final ConfigurationException e) {
 			throw new InternalError(String.format(
-					"Exception should never occur: %s", e.getMessage()));
+					"Caught exception which should never occur: %s", e));
 		}
 	}
 

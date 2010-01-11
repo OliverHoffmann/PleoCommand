@@ -738,7 +738,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					cfgOutputThreadSleepTime);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
-			throw new InternalError("Wrong groupName for skeleton creation");
+			throw new InternalError(String.format("Wrong groupName for "
+					+ "skeleton creation: '%s' should start with '%s'",
+					groupName, prefix));
 		final String name = groupName.substring(prefix.length()).trim();
 		try {
 			for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
@@ -795,7 +797,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 						"Cannot configure PipePart with group '%s'", group);
 			}
 		} else if (!group.getName().equals(getClass().getSimpleName()))
-			throw new InternalError("Unknown group: " + group);
+			throw new InternalError(String.format("Unknown group: %s", group));
 	}
 
 	@Override

@@ -190,7 +190,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 
 		// create fitting value
 		final Value val = Value.createForType(type);
-		if (val == null) throw new InternalError("Invalid value type");
+		if (val == null)
+			throw new InternalError(String.format("Invalid value type: %s",
+					type));
 
 		if (isHex) {
 			// we need to decode the data from a hex string
@@ -429,7 +431,8 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		case 10: // valid digits
 			return found[9] ? ValueType.Float64 : ValueType.Int64;
 		default:
-			throw new InternalError("Invalid entry in TYPE_AUTODETECT_TABLE");
+			throw new InternalError(String.format(
+					"Invalid entry in TYPE_AUTODETECT_TABLE: %d", res));
 		}
 	}
 
