@@ -157,7 +157,9 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			@Override
 			public void run() {
 				try {
-					pipeCore();
+					StandardInput.the().resetCache();
+					Pipe.the().configure();
+					Pipe.the().pipeAllData();
 				} catch (final Throwable t) { // CS_IGNORE
 					Log.error(t);
 				}
@@ -184,12 +186,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		} catch (final StateException e) {
 			Log.error(e);
 		}
-	}
-
-	protected void pipeCore() throws PipeException, InterruptedException {
-		StandardInput.the().resetCache();
-		Pipe.the().configure();
-		Pipe.the().pipeAllData();
 	}
 
 	public void updateState() {
