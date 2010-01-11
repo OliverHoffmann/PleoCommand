@@ -217,21 +217,31 @@ public final class PipeFeedback {
 		behindSum += behind;
 	}
 
+	private String getCurrentRunningState() {
+		if (stopTime != 0)
+			return String.format("has run %d milliseconds", getElapsed());
+		if (startTime != 0)
+			return String.format("is running since %d milliseconds",
+					getElapsed());
+		return "has never been run";
+	}
+
 	@Override
 	public synchronized String toString() {
-		// TODO add number of read, converted and output data
-		return String.format("Pipe %s %d milliseconds, has read %d, "
+		if (startTime == 0 && stopTime == 0)
+			return String.format("Pipe %s", getCurrentRunningState());
+		return String.format("Pipe %s, has read %d, "
 				+ "converted %d and written %d data(s), encountered %d "
 				+ "temporary and %d permanent error(s), "
 				+ "output has been %d time(s) interrupted "
 				+ "due to high-priority data and a data block "
 				+ "has %d time(s) been dropped due to low-priority and "
 				+ "it was %d time(s) behind (average %d, max %d, sum %d).",
-				stopTime == 0 ? "is running since" : "has run", getElapsed(),
-				dataInputCount, dataConvertedCount, dataOutputCount,
-				temporaryErrors.size(), permanentErrors.size(),
-				interruptionCount, dropCount, behindCountSignificant,
-				getBehindAverage(), behindMax, behindSum);
+				getCurrentRunningState(), dataInputCount, dataConvertedCount,
+				dataOutputCount, temporaryErrors.size(),
+				permanentErrors.size(), interruptionCount, dropCount,
+				behindCountSignificant, getBehindAverage(), behindMax,
+				behindSum);
 	}
 
 }

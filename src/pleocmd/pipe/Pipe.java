@@ -323,7 +323,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	/**
 	 * Aborts the pipe if one is currently running.<br>
 	 * Note that {@link #pipeAllData()} itself blocks until the pipe has
-	 * finished, so {@link #abortPipe()} only makes sence if
+	 * finished, so {@link #abortPipe()} only makes sense if
 	 * {@link #pipeAllData()} is called from another thread. <br>
 	 * This method waits until the abort has been accepted.
 	 * 
@@ -823,9 +823,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	@Override
 	public String toString() {
-		return String.format("%s: %s - %s - %s <%s>", getClass()
+		return String.format("%s: %s - %s - %s <%s> %s", getClass()
 				.getSimpleName(), inputList, converterList, outputList,
-				getState());
+				getState(), getFeedback());
 	}
 
 }
