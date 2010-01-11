@@ -16,7 +16,6 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import pleocmd.Log;
-import pleocmd.cfg.ConfigPath.PathType;
 
 public final class Configuration {
 
@@ -51,10 +50,8 @@ public final class Configuration {
 		return config;
 	}
 
-	public static void setDefaultConfigFile(final File file)
-			throws ConfigurationException {
+	public static void setDefaultConfigFile(final File file) {
 		defaultConfigFile = file;
-		if (config != null) config.writeToDefaultFile();
 	}
 
 	public static File getDefaultConfigFile() {
@@ -153,15 +150,19 @@ public final class Configuration {
 		if (!configObjects.contains(co))
 			throw new IllegalStateException("Not registered");
 
-		writeToDefaultFile();
+		// write back configuration for all groups of the object
+		final List<Group> groups = co.configurationWriteback();
 
+		// put all groups of the object into the list of unassigned groups
+		for (final Group group : groups)
+			groupsUnassigned.add(group);
+
+		// remove registration of this object
 		final Iterator<Entry<String, ConfigurationInterface>> it = groupsRegistered
 				.entrySet().iterator();
 		while (it.hasNext())
 			if (it.next().getValue() == co) it.remove();
 		configObjects.remove(co);
-
-		readFromDefaultFile();
 	}
 
 	public void readFromDefaultFile() throws ConfigurationException {
@@ -169,22 +170,31 @@ public final class Configuration {
 	}
 
 	public void readFromFile(final File file) throws ConfigurationException {
+		readFromFile(file, null);
+	}
+
+	public void readFromFile(final File file,
+			final ConfigurationInterface coOnly) throws ConfigurationException {
 		try {
 			final BufferedReader in = new BufferedReader(new FileReader(file));
-			readFromReader(in);
+			readFromReader(in, coOnly);
 			in.close();
 		} catch (final IOException e) {
 			throw new ConfigurationException(e, "Cannot read from '%s'", file);
 		}
 	}
 
-	public void readFromReader(final BufferedReader in)
-			throws ConfigurationException, IOException {
+	public void readFromReader(final BufferedReader in,
+			final ConfigurationInterface coOnly) throws ConfigurationException,
+			IOException {
 		Log.detail("Reading configuration");
 
-		for (final ConfigurationInterface co : configObjects)
-			co.configurationAboutToBeChanged();
-		groupsUnassigned.clear();
+		if (coOnly == null) {
+			for (final ConfigurationInterface co : configObjects)
+				co.configurationAboutToBeChanged();
+			groupsUnassigned.clear();
+		} else
+			coOnly.configurationAboutToBeChanged();
 
 		final int[] nr = new int[1];
 		String line;
@@ -202,18 +212,24 @@ public final class Configuration {
 				throw new ConfigurationException(nr[0], line,
 						"Expected a group name between '[' and ']'");
 			line = readGroup(in, nr, line.substring(1, line.length() - 1)
-					.trim());
+					.trim(), coOnly);
 		}
 		Log.detail("Done reading %d configuration line(s)", nr[0]);
 	}
 
 	private String readGroup(final BufferedReader in, final int[] nr,
-			final String groupName) throws ConfigurationException, IOException {
+			final String groupName, final ConfigurationInterface coOnly)
+			throws ConfigurationException, IOException {
 		Log.detail("Reading config group '%s' at line %d", groupName, nr[0]);
 
-		Group group = null;
 		final ConfigurationInterface co = groupsRegistered.get(groupName);
-		if (co != null) group = co.getSkeleton(groupName);
+		if (coOnly != null && co != coOnly) {
+			Log.warn("Ignoring group '%s' because it doesn't belong to '%s'",
+					groupName, coOnly);
+			return fastSkipGroup(in, nr);
+		}
+
+		Group group = co == null ? null : co.getSkeleton(groupName);
 		final boolean hasSkeleton = group != null;
 		if (group == null)
 			group = new Group(groupName);
@@ -228,65 +244,71 @@ public final class Configuration {
 			line = line.trim();
 			if (line.isEmpty() || line.charAt(0) == '#') continue;
 			if (line.charAt(0) == '[') break; // done with this group
-			final int colIdx = line.indexOf(':');
-			if (colIdx == -1)
-				throw new ConfigurationException(nr[0], line,
-						"Expected a label name followed by ':' or "
-								+ "a group name between '[' and ']'");
-			String label = line.substring(0, colIdx).trim();
-			final String content = line.substring(colIdx + 1).trim();
-			String type = null;
-			if (label.isEmpty())
-				throw new ConfigurationException(nr[0], line,
-						"Expected a non-empty label name followed by ':'");
-			if (label.charAt(label.length() - 1) == '>') {
-				final int brkIdx = label.indexOf('<');
-				if (brkIdx == -1)
-					throw new ConfigurationException(nr[0], line,
-							"Missing '<' for type in label name");
-				type = label.substring(brkIdx + 1, label.length() - 1).trim();
-				label = label.substring(0, brkIdx).trim();
-			}
-			Log.detail("Parsed label '%s', type '%s', content '%s'", label,
-					type, content);
-			ConfigValue value = null;
-			final boolean singleLined = !"{".equals(content);
-			if (hasSkeleton) {
-				value = group.get(label);
-				if (value == null)
-					Log.warn("Ignoring value with unknown label '%s' "
-							+ "for group '%s'", label, groupName);
-			}
-			if (value == null)
-				if ("int".equals(type))
-					value = new ConfigInt(label, 0, Integer.MIN_VALUE,
-							Integer.MAX_VALUE);
-				else if ("float".equals(type))
-					value = new ConfigFloat(label, .0, Double.MIN_VALUE,
-							Double.MAX_VALUE);
-				else if ("dir".equals(type))
-					value = new ConfigPath(label, PathType.Directory);
-				else if ("read".equals(type))
-					value = new ConfigPath(label, PathType.FileForReading);
-				else if ("write".equals(type))
-					value = new ConfigPath(label, PathType.FileForWriting);
-				else
-					// "str", "item", null
-					value = new ConfigString(label, !singleLined);
-			if (singleLined)
-				value.setFromString(content);
-			else
-				value.setFromStrings(readList(in, nr));
-			group.set(value);
+			readValue(in, nr, group, hasSkeleton, line);
 		}
 
-		if (co == null)
+		if (co == null) {
+			assert coOnly == null;
 			groupsUnassigned.add(group);
-		else
+		} else
 			co.configurationChanged(group);
 		Log.detail("Done reading config group '%s' at line %d "
 				+ "registered by '%s'", group, nr[0], co);
 		return line;
+	}
+
+	private String fastSkipGroup(final BufferedReader in, final int[] nr)
+			throws IOException {
+		String line;
+		while ((line = in.readLine()) != null) {
+			++nr[0];
+			line = line.trim();
+			if (line.isEmpty() || line.charAt(0) == '#') continue;
+			if (line.charAt(0) == '[') break; // done with this group
+		}
+		return line;
+	}
+
+	private void readValue(final BufferedReader in, final int[] nr,
+			final Group group, final boolean hasSkeleton, final String line)
+			throws ConfigurationException, IOException {
+		final int colIdx = line.indexOf(':');
+		if (colIdx == -1)
+			throw new ConfigurationException(nr[0], line,
+					"Expected a label name followed by ':' or "
+							+ "a group name between '[' and ']'");
+		String label = line.substring(0, colIdx).trim();
+		final String content = line.substring(colIdx + 1).trim();
+		String identifier = null;
+		if (label.isEmpty())
+			throw new ConfigurationException(nr[0], line,
+					"Expected a non-empty label name followed by ':'");
+		if (label.charAt(label.length() - 1) == '>') {
+			final int brkIdx = label.indexOf('<');
+			if (brkIdx == -1)
+				throw new ConfigurationException(nr[0], line,
+						"Missing '<' for type in label name");
+			identifier = label.substring(brkIdx + 1, label.length() - 1).trim();
+			label = label.substring(0, brkIdx).trim();
+		}
+		Log.detail("Parsed label '%s', identifier '%s', content '%s'", label,
+				identifier, content);
+
+		ConfigValue value = null;
+		final boolean singleLined = !"{".equals(content);
+		if (hasSkeleton) {
+			value = group.get(label);
+			if (value == null)
+				Log.warn("Ignoring value with unknown label '%s' "
+						+ "for group '%s'", label, group.getName());
+		}
+		if (value == null)
+			value = ConfigValue.createValue(identifier, label, singleLined);
+		if (singleLined)
+			value.setFromString(content);
+		else
+			value.setFromStrings(readList(in, nr));
+		group.set(value);
 	}
 
 	private List<String> readList(final BufferedReader in, final int[] nr)
@@ -310,35 +332,50 @@ public final class Configuration {
 	}
 
 	public void writeToFile(final File file) throws ConfigurationException {
+		writeToFile(file, null);
+	}
+
+	public void writeToFile(final File file, final ConfigurationInterface coOnly)
+			throws ConfigurationException {
 		try {
 			final FileWriter out = new FileWriter(file);
-			writeToWriter(out);
+			writeToWriter(out, coOnly);
 			out.close();
 		} catch (final IOException e) {
 			throw new ConfigurationException(e, "Cannot write to '%s'", file);
 		}
 	}
 
-	public void writeToWriter(final Writer out) throws IOException {
+	public void writeToWriter(final Writer out,
+			final ConfigurationInterface coOnly) throws IOException {
 		Log.detail("Writing configuration");
+		if (coOnly == null)
+			writeAll(out);
+		else
+			writeConfigurationInterface(out, coOnly);
+		out.flush();
+		Log.detail("Done writing configuration");
+	}
 
+	private void writeAll(final Writer out) throws IOException {
 		for (final ConfigurationInterface co : configObjects)
-			try {
-				final List<Group> list = co.configurationWriteback();
-				Log.detail("Got groups by '%s': %s", co, list);
-				for (final Group group : list)
-					writeGroup(out, group);
-			} catch (final ConfigurationException e) {
-				Log.error(e, "Part of configuration could not be saved:");
-			}
+			writeConfigurationInterface(out, co);
 
-		Log.detail("Unassigned groups which will be " + "kept: %s",
-				groupsUnassigned);
+		Log.detail("Writing unassigned groups");
 		for (final Group group : groupsUnassigned)
 			writeGroup(out, group);
+	}
 
-		Log.detail("Done writing configuration");
-
+	private void writeConfigurationInterface(final Writer out,
+			final ConfigurationInterface co) throws IOException {
+		try {
+			final List<Group> list = co.configurationWriteback();
+			Log.detail("Got groups by '%s': %s", co, list);
+			for (final Group group : list)
+				writeGroup(out, group);
+		} catch (final ConfigurationException e) {
+			Log.error(e, "Part of configuration could not be saved:");
+		}
 	}
 
 	private void writeGroup(final Writer out, final Group group)

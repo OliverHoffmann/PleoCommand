@@ -2,6 +2,7 @@ package pleocmd.cfg;
 
 import java.util.List;
 
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.pipe.PipePart;
 
@@ -52,6 +53,28 @@ public abstract class ConfigValue {
 			setFromString(src.asString());
 		else
 			setFromStrings(src.asStrings());
+	}
+
+	public static ConfigValue createValue(final String identifier,
+			final String label, final boolean singleLined) {
+		if ("int".equals(identifier))
+			return new ConfigInt(label, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+
+		if ("float".equals(identifier))
+			return new ConfigFloat(label, .0, Double.MIN_VALUE,
+					Double.MAX_VALUE);
+
+		if ("dir".equals(identifier))
+			return new ConfigPath(label, PathType.Directory);
+
+		if ("read".equals(identifier))
+			return new ConfigPath(label, PathType.FileForReading);
+
+		if ("write".equals(identifier))
+			return new ConfigPath(label, PathType.FileForWriting);
+
+		// "str", "item", null
+		return new ConfigString(label, !singleLined);
 	}
 
 }
