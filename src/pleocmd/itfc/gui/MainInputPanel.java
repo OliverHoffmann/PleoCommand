@@ -300,7 +300,9 @@ public final class MainInputPanel extends JPanel {
 
 	protected void scrollToBottom() {
 		final int size = historyListModel.getSize() - 1;
-		historyList.scrollRectToVisible(historyList.getCellBounds(size, size));
+		if (size >= 0)
+			historyList.scrollRectToVisible(historyList.getCellBounds(size,
+					size));
 	}
 
 	public void updateState() {
