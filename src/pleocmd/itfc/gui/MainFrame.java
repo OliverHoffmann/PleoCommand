@@ -30,6 +30,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private static MainFrame guiFrame;
 
+	private static boolean hasGUI;
+
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
 	private final MainPipePanel mainPipePanel;
@@ -45,10 +47,14 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	private Thread pipeThread;
 
 	private MainFrame() {
+		// don't change the order of the following lines !!!
+		// we need this order to avoid race conditions
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
+		hasGUI = true;
 		mainInputPanel = new MainInputPanel();
 		mainPipePanel = new MainPipePanel();
+		// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 		ToolTipManager.sharedInstance().setInitialDelay(50);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
@@ -108,7 +114,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	}
 
 	public static boolean hasGUI() {
-		return guiFrame != null;
+		return hasGUI;
 	}
 
 	public MainPipePanel getMainPipePanel() {

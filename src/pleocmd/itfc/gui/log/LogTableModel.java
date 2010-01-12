@@ -54,6 +54,7 @@ public final class LogTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
+		if (rowIndex >= list.size()) return null;
 		return new LogTableStyledCell(getCell(rowIndex, columnIndex),
 				columnIndex == 3, list.get(rowIndex).getTypeColor(),
 				getBackgroundColor(rowIndex, columnIndex), false, false);

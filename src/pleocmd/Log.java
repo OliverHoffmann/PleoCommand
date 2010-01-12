@@ -3,7 +3,14 @@ package pleocmd;
 import java.awt.Color;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
+import pleocmd.cfg.ConfigEnum;
+import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationException;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.itfc.gui.MainFrame;
 
 /**
@@ -43,10 +50,14 @@ public final class Log {
 		Console
 	}
 
-	public static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
-			"HH:mm:ss.SSS");
+	private static final ConfigString CFG_TIMEFORMAT = new ConfigString(
+			"Time Format", "HH:mm:ss.SSS");
 
-	private static Type minLogType = Type.Detail;
+	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
+			CFG_TIMEFORMAT.getContent());
+
+	private static ConfigEnum<Type> cfgMinLogType = new ConfigEnum<Type>(
+			"Minimal Log-Type", Type.Detail);
 
 	/**
 	 * Needed to inline next line after a line-break when writing messages to a
@@ -54,6 +65,11 @@ public final class Log {
 	 * {@link #toString()} and the length of the {@link #DATE_FORMATTER}.
 	 */
 	private static final String SPACES = String.format("%68s", "");
+
+	static {
+		// must be *after* declaration of all static fields !!!
+		new LogConfig();
+	}
 
 	private final Type type;
 
@@ -72,7 +88,6 @@ public final class Log {
 		this.msg = msg;
 		this.backtrace = backtrace;
 		time = System.currentTimeMillis();
-		process();
 	}
 
 	/**
@@ -99,7 +114,8 @@ public final class Log {
 
 	/**
 	 * @return the complete backtrace for this log entry if this log is an
-	 *         {@link Type#Error} or null if not.
+	 *         {@link Type#Error} or backtracing for all kind of logs has been
+	 *         enabled or <b>null</b> if not.
 	 */
 	public Throwable getBacktrace() {
 		return backtrace;
@@ -169,22 +185,6 @@ public final class Log {
 				getTypeShortString(), caller, msg.replace("\n", "\n" + SPACES));
 	}
 
-	/**
-	 * Prints messages to the GUI's log, if any, or to the standard error
-	 * otherwise if their {@link #type} is not "lower" than the
-	 * {@link #minLogType}.<br>
-	 * Always prints messages of type Console to the standard output (instead of
-	 * standard error) no matter if a GUI exists or not.
-	 */
-	private void process() {
-		if (type.ordinal() >= minLogType.ordinal()) {
-			if (type == Type.Console) System.out.println(getMsg()); // CS_IGNORE
-			if (MainFrame.hasGUI())
-				MainFrame.the().getMainLogPanel().addLog(this);
-			else if (type != Type.Console) System.err.println(toString()); // CS_IGNORE
-		}
-	}
-
 	private static String getCallersName(final int stepsBack) {
 		return getCallersName(new Throwable(), stepsBack);
 	}
@@ -196,11 +196,33 @@ public final class Log {
 						"$1"), st[stepsBack].getMethodName());
 	}
 
-	// TODO creates Log even if logging is disabled for this type
+	/**
+	 * Prints messages to the GUI's log, if any, or to the standard error
+	 * otherwise if their {@link #type} is not "lower" than the
+	 * {@link #cfgMinLogType}.<br>
+	 * Always prints messages of type Console to the standard output (instead of
+	 * standard error) no matter if a GUI exists or not.
+	 * 
+	 * @param type
+	 *            type {@link Type} of the message
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
 	private static void msg(final Type type, final String msg,
 			final Object... args) {
-		new Log(type, getCallersName(3), args.length == 0 ? msg : String
-				.format(msg, args), null);
+		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
+			final Log log = new Log(type, getCallersName(3),
+					args.length == 0 ? msg : String.format(msg, args), null);
+			if (type == Type.Console) System.out.println(log.getMsg()); // CS_IGNORE
+			if (MainFrame.hasGUI())
+				MainFrame.the().getMainLogPanel().addLog(log);
+			else if (type != Type.Console) System.err.println(log.toString()); // CS_IGNORE
+		}
 	}
 
 	/**
@@ -375,7 +397,7 @@ public final class Log {
 		if (minLogType.ordinal() < Type.Detail.ordinal()
 				|| minLogType.ordinal() > Type.Console.ordinal())
 			throw new IllegalArgumentException("Invalid value for minLogType");
-		Log.minLogType = minLogType;
+		cfgMinLogType.setEnum(minLogType);
 	}
 
 	/**
@@ -383,7 +405,7 @@ public final class Log {
 	 *         "lower" types will be ignored.
 	 */
 	public static Type getMinLogType() {
-		return minLogType;
+		return cfgMinLogType.getEnum();
 	}
 
 	/**
@@ -392,35 +414,73 @@ public final class Log {
 	 * @return true if messages of the given {@link Type} can be logged
 	 */
 	public static boolean canLog(final Type type) {
-		return type.ordinal() >= minLogType.ordinal();
+		return type.ordinal() >= cfgMinLogType.getEnum().ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Detail} can be logged
 	 */
 	public static boolean canLogDetail() {
-		return Type.Detail.ordinal() >= minLogType.ordinal();
+		return Type.Detail.ordinal() >= cfgMinLogType.getEnum().ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Info} can be logged
 	 */
 	public static boolean canLogInfo() {
-		return Type.Info.ordinal() >= minLogType.ordinal();
+		return Type.Info.ordinal() >= cfgMinLogType.getEnum().ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Warn} can be logged
 	 */
 	public static boolean canLogWarning() {
-		return Type.Warn.ordinal() >= minLogType.ordinal();
+		return Type.Warn.ordinal() >= cfgMinLogType.getEnum().ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Error} can be logged
 	 */
 	public static boolean canLogError() {
-		return Type.Error.ordinal() >= minLogType.ordinal();
+		return Type.Error.ordinal() >= cfgMinLogType.getEnum().ordinal();
+	}
+
+	static class LogConfig implements ConfigurationInterface {
+
+		LogConfig() {
+			try {
+				Configuration.the().registerConfigurableObject(this,
+						getClass().getSimpleName());
+			} catch (final ConfigurationException e) {
+				Log.error(e);
+			}
+		}
+
+		@Override
+		@SuppressWarnings("synthetic-access")
+		public Group getSkeleton(final String groupName) {
+			return new Group(groupName).add(CFG_TIMEFORMAT).add(cfgMinLogType);
+		}
+
+		@Override
+		public void configurationAboutToBeChanged() {
+			// nothing to do
+		}
+
+		@Override
+		@SuppressWarnings("synthetic-access")
+		public void configurationChanged(final Group group) {
+			DATE_FORMATTER.applyPattern(CFG_TIMEFORMAT.getContent());
+			if (MainFrame.hasGUI())
+				MainFrame.the().getMainLogPanel().updateState();
+		}
+
+		@Override
+		public List<Group> configurationWriteback() {
+			return Configuration
+					.asList(getSkeleton(getClass().getSimpleName()));
+		}
+
 	}
 
 }

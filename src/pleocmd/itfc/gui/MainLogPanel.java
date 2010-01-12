@@ -39,6 +39,9 @@ public final class MainLogPanel extends JPanel {
 	private final JButton btnClear;
 
 	public MainLogPanel() {
+		// avoid to access Log class here !!!
+		// Log will be written to stderr otherwise and be lost for the GUI
+
 		final Layouter lay = new Layouter(this);
 
 		logTable = new LogTable();
@@ -64,6 +67,7 @@ public final class MainLogPanel extends JPanel {
 					}
 				});
 		lay.addSpacer();
+		// checkbox state will later be set to the correct value
 		cbShowDetail = new JCheckBox("Show detailed log", true);
 		cbShowDetail.addActionListener(new ActionListener() {
 			@Override
@@ -130,6 +134,10 @@ public final class MainLogPanel extends JPanel {
 	}
 
 	public void updateState() {
+		if (cbShowDetail.isSelected() ^ Log.canLogDetail()) {
+			cbShowDetail.setSelected(Log.canLogDetail());
+			logModel.refresh();
+		}
 		btnStart.setEnabled(!MainFrame.the().isPipeRunning());
 		btnAbort.setEnabled(MainFrame.the().isPipeRunning());
 		btnSave.setEnabled(logModel.getRowCount() > 0);

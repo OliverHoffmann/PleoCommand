@@ -121,6 +121,12 @@ public final class LogTable extends JTable {
 	}
 
 	public void addLog(final Log log) {
+
+		// we have to check this here again, because this method
+		// is called from the EventQueue and therefore the conditions
+		// may have changed meanwhile.
+		if (!Log.canLog(log.getType())) return;
+
 		logModel.addLog(log);
 		final int row = logModel.getRowCount() - 1;
 		if (minRowHeight == 0)
