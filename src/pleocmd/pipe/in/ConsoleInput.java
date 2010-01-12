@@ -13,7 +13,7 @@ public final class ConsoleInput extends Input {
 	private final ConfigEnum<ReadType> cfgType;
 
 	public ConsoleInput() {
-		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.class));
+		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.Ascii));
 		constructed();
 	}
 

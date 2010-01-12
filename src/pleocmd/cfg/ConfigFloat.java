@@ -15,12 +15,44 @@ public final class ConfigFloat extends ConfigValue {
 
 	private JSpinner sp;
 
-	public ConfigFloat(final String label, final double content,
-			final double min, final double max) {
+	public ConfigFloat(final String label) {
+		this(label, Double.MIN_VALUE, Double.MAX_VALUE);
+	}
+
+	public ConfigFloat(final String label, final double content) {
+		this(label);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
+		}
+	}
+
+	public ConfigFloat(final String label, final double min, final double max) {
 		super(label);
-		this.content = content; // TODO may be out of bounds
+		if (min > max)
+			throw new IllegalArgumentException(String.format(
+					"min (%f) must not be larger than max (%f)", min, max));
 		this.min = min;
 		this.max = max;
+		try {
+			setContent(min);
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
+		}
+	}
+
+	public ConfigFloat(final String label, final double content,
+			final double min, final double max) {
+		this(label, min, max);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"Cannot initialize default content", e);
+		}
 	}
 
 	public double getContent() {

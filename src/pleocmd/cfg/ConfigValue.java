@@ -8,6 +8,25 @@ import pleocmd.pipe.PipePart;
 
 /**
  * Base class for a value inside a {@link PipePart}'s configuration.
+ * <p>
+ * All of the sub classes must have a constructor which uses only a label and
+ * sets all other fields to default values and should have a constructor which
+ * takes an initial content as an additional parameter.<br>
+ * The constructors must not throw anything but {@link RuntimeException}s (like
+ * {@link NullPointerException}, {@link IllegalArgumentException} or
+ * {@link IndexOutOfBoundsException}).
+ * <p>
+ * All of the sub classes have something like getContent() to retrieve the
+ * current value and setContent() to set it to a new one.<br>
+ * Implementations of setContent() may throw {@link ConfigurationException} if
+ * the input is invalid.
+ * <p>
+ * If the {@link ConfigValue} is single-lined ({@link #isSingleLined()} returns
+ * true) it must support {@link #asString()} and {@link #setFromString(String)},
+ * and if it is multi-lined ( {@link #isSingleLined()} returns false) it must at
+ * least support {@link #asString()}, {@link #asStrings()} and
+ * {@link #setFromStrings(List)}, whereby "supporting" means not throwing an
+ * {@link UnsupportedOperationException}.
  * 
  * @author oliver
  */
@@ -82,12 +101,9 @@ public abstract class ConfigValue {
 
 	public static ConfigValue createValue(final String identifier,
 			final String label, final boolean singleLined) {
-		if ("int".equals(identifier))
-			return new ConfigInt(label, 0, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		if ("int".equals(identifier)) return new ConfigInt(label);
 
-		if ("float".equals(identifier))
-			return new ConfigFloat(label, .0, Double.MIN_VALUE,
-					Double.MAX_VALUE);
+		if ("float".equals(identifier)) return new ConfigFloat(label);
 
 		if ("dir".equals(identifier))
 			return new ConfigPath(label, PathType.Directory);

@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.Test;
 
@@ -47,8 +48,9 @@ public final class ConfigValueTest extends Testcases {
 		}
 	};
 
-	private final ConfigItem cfgItem = new ConfigItem("Test-List", true,
-			new String[] { "A", "B", "C", "D", "E" });
+	private final ConfigItem<String> cfgItem = new ConfigItem<String>(
+			"Test-List", "A", Arrays.asList(new String[] { "A", "B", "C", "D",
+					"E" }));
 
 	private final ConfigEnum<TestEnum> cfgEnum = new ConfigEnum<TestEnum>(
 			TestEnum.class);
@@ -215,10 +217,10 @@ public final class ConfigValueTest extends Testcases {
 		compareIdentifier(new ConfigDataMap("foo"), ConfigString.class);
 		compareIdentifier(new ConfigEnum<TestEnum>("foo", TestEnum.class),
 				ConfigString.class);
-		compareIdentifier(new ConfigFloat("foo", 0, 0, 0), ConfigFloat.class);
-		compareIdentifier(new ConfigInt("foo", 0, 0, 0), ConfigInt.class);
-		compareIdentifier(new ConfigItem("foo", true, new String[] { "FOO" }),
-				ConfigString.class);
+		compareIdentifier(new ConfigFloat("foo"), ConfigFloat.class);
+		compareIdentifier(new ConfigInt("foo"), ConfigInt.class);
+		compareIdentifier(new ConfigItem<String>("foo", true, Arrays
+				.asList(new String[] { "FOO" })), ConfigString.class);
 		compareIdentifier(new ConfigPath("foo", PathType.Directory),
 				ConfigPath.class);
 		compareIdentifier(new ConfigPath("foo", PathType.FileForReading),

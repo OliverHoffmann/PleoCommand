@@ -16,12 +16,44 @@ public final class ConfigInt extends ConfigValue {
 
 	private JSpinner sp;
 
-	public ConfigInt(final String label, final long content, final long min,
-			final long max) {
+	public ConfigInt(final String label) {
+		this(label, Long.MIN_VALUE, Long.MAX_VALUE);
+	}
+
+	public ConfigInt(final String label, final long content) {
+		this(label);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
+		}
+	}
+
+	public ConfigInt(final String label, final long min, final long max) {
 		super(label);
-		this.content = content; // TODO may be out of bounds
+		if (min > max)
+			throw new IllegalArgumentException(String.format(
+					"min (%d) must not be larger than max (%d)", min, max));
 		this.min = min;
 		this.max = max;
+		try {
+			setContent(min);
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
+		}
+	}
+
+	public ConfigInt(final String label, final long content, final long min,
+			final long max) {
+		this(label, min, max);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"Cannot initialize default content", e);
+		}
 	}
 
 	public long getContent() {

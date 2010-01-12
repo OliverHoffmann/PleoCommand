@@ -21,7 +21,29 @@ public final class ConfigString extends ConfigValue {
 	public ConfigString(final String label, final boolean multiLine) {
 		super(label);
 		this.multiLine = multiLine;
-		content = "";
+		clearContent();
+	}
+
+	public ConfigString(final String label, final String content) {
+		super(label);
+		multiLine = false;
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"Cannot initialize default content", e);
+		}
+	}
+
+	public ConfigString(final String label, final List<String> content) {
+		super(label);
+		multiLine = true;
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"Cannot initialize default content", e);
+		}
 	}
 
 	public String getContent() {

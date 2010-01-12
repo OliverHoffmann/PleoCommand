@@ -16,12 +16,12 @@ import pleocmd.pipe.data.Data;
 
 public final class PleoRXTXOutput extends Output {
 
-	private final ConfigItem cfgDevice;
+	private final ConfigItem<String> cfgDevice;
 
 	private PleoCommunication pc;
 
 	public PleoRXTXOutput() {
-		addConfig(cfgDevice = new ConfigItem("Device", true,
+		addConfig(cfgDevice = new ConfigItem<String>("Device", "",
 				getAllDeviceNames()));
 		constructed();
 	}

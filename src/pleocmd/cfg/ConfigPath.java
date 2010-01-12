@@ -29,6 +29,17 @@ public final class ConfigPath extends ConfigValue {
 		content = new File("");
 	}
 
+	public ConfigPath(final String label, final File content,
+			final PathType type) {
+		this(label, type);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new IllegalArgumentException(
+					"Cannot initialize default content", e);
+		}
+	}
+
 	public File getContent() {
 		return content;
 	}

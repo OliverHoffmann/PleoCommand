@@ -10,7 +10,7 @@ import javax.swing.JComboBox;
 import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter;
 
-public class ConfigItem extends ConfigValue {
+public class ConfigItem<E> extends ConfigValue {
 
 	private final List<String> identifiers = new ArrayList<String>();
 
@@ -35,56 +35,41 @@ public class ConfigItem extends ConfigValue {
 	 *            proposals for GUI mode configuration.
 	 */
 	public ConfigItem(final String label, final boolean freeAssign,
-			final List<String> identifiers) {
+			final List<E> identifiers) {
 		super(label);
-		this.freeAssign = freeAssign;
-		this.identifiers.addAll(identifiers);
-		try {
-			for (final String id : identifiers)
-				checkValidString(id, false);
-		} catch (final ConfigurationException e) {
-			throw new IllegalArgumentException(
-					"List of identifiers is invalid", e);
-		}
-		finalCtor();
-	}
 
-	/**
-	 * Creates a new {@link ConfigItem}.
-	 * 
-	 * @param label
-	 *            name of this {@link ConfigItem} - used in GUI mode
-	 *            configuration and for configuration files
-	 * @param freeAssign
-	 *            if true any string may be assigned to this {@link ConfigItem},
-	 *            if false only the ones in the list of identifiers may be used
-	 * @param identifiers
-	 *            array of valid {@link Object}s that can be used for this
-	 *            {@link ConfigItem} or - if freeAssign is true - a list of
-	 *            proposals for GUI mode configuration.<br>
-	 *            Only the result of {@link Object#toString()} from each of the
-	 *            entries is stored internally.
-	 */
-	public ConfigItem(final String label, final boolean freeAssign,
-			final Object[] identifiers) {
-		super(label);
-		this.freeAssign = freeAssign;
+		if (identifiers.isEmpty())
+			throw new IllegalArgumentException("list of identifiers is empty");
 		try {
-			for (final Object id : identifiers) {
-				checkValidString(id.toString(), false);
-				this.identifiers.add(id.toString());
+			for (final E id : identifiers) {
+				final String idStr = id.toString();
+				checkValidString(idStr, false);
+				this.identifiers.add(idStr);
 			}
 		} catch (final ConfigurationException e) {
 			throw new IllegalArgumentException(
 					"List of identifiers is invalid", e);
 		}
-		finalCtor();
+
+		this.freeAssign = freeAssign;
+		setContentIndex(0);
 	}
 
-	private void finalCtor() {
-		if (identifiers.isEmpty())
-			throw new IllegalArgumentException("list of identifiers is empty");
-		content = identifiers.get(0);
+	public ConfigItem(final String label, final String content,
+			final List<E> identifiers) {
+		this(label, true, identifiers);
+		try {
+			setContent(content);
+		} catch (final ConfigurationException e) {
+			throw new InternalError(String.format(
+					"Caught exception which should never occur: %s", e));
+		}
+	}
+
+	public ConfigItem(final String label, final int contentIndex,
+			final List<E> identifiers) {
+		this(label, true, identifiers);
+		setContentIndex(contentIndex);
 	}
 
 	public final String getContent() {

@@ -20,7 +20,7 @@ public final class TcpIpInput extends Input {
 	private DataInputStream in;
 
 	public TcpIpInput() {
-		addConfig(cfgHost = new ConfigString("Host", false));
+		addConfig(cfgHost = new ConfigString("Host", ""));
 		addConfig(cfgPort = new ConfigInt("Port", 19876, 1, 65535));
 		constructed();
 	}

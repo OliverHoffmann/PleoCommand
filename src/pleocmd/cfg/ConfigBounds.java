@@ -11,7 +11,12 @@ public final class ConfigBounds extends ConfigValue {
 
 	public ConfigBounds(final String label) {
 		super(label);
-		content = new Rectangle(-1, -1, -1, -1);
+		clearContent();
+	}
+
+	public ConfigBounds(final String label, final Rectangle content) {
+		super(label);
+		setContent(content);
 	}
 
 	public Rectangle getContent() {
@@ -21,6 +26,10 @@ public final class ConfigBounds extends ConfigValue {
 	public void setContent(final Rectangle content) {
 		if (content == null) throw new NullPointerException();
 		this.content = content;
+	}
+
+	public void clearContent() {
+		setContent(new Rectangle(-1, -1, -1, -1));
 	}
 
 	@Override
