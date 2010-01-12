@@ -57,7 +57,7 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigItem<E> {
 	}
 
 	public E getEnum() {
-		return enumClass.getEnumConstants()[0];
+		return Enum.valueOf(enumClass, getContent());
 	}
 
 	public void setEnum(final E e) {
