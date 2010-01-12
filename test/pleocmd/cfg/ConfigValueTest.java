@@ -25,7 +25,7 @@ public final class ConfigValueTest extends Testcases {
 	private final ConfigString cfgStrS = new ConfigString("Test-String", false);
 	private final ConfigString cfgStrM = new ConfigString("Test-String", true);
 	private final ConfigInt cfgInt = new ConfigInt("Test-Int", 5, 5, 12);
-	private final ConfigFloat cfgFloat = new ConfigFloat("Test-Float", 0.4,
+	private final ConfigDouble cfgFloat = new ConfigDouble("Test-Float", 0.4,
 			0.3, 0.5);
 
 	private final ConfigMap<String, String> cfgMap = new ConfigMap<String, String>(
@@ -66,6 +66,8 @@ public final class ConfigValueTest extends Testcases {
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Test-Bounds");
 
+	private final ConfigBoolean cfgBool = new ConfigBoolean("Test-Boolean");
+
 	// CS_IGNORE_NEXT very long but well-structured test-case
 	@Test
 	public void testAllConfigValues() throws ConfigurationException,
@@ -94,12 +96,12 @@ public final class ConfigValueTest extends Testcases {
 
 		cfgFloat.setContent(0.5);
 		try {
-			cfgFloat.setContent(0);
+			cfgFloat.setContent(0.);
 			fail("ConfigFloat can be set out of bounds");
 		} catch (final ConfigurationException e) {
 			assertTrue(e.toString(), e.getMessage().contains("not between"));
 		}
-		Log.consoleOut("Tested ConfigFloat");
+		Log.consoleOut("Tested ConfigDouble");
 
 		cfgMap.clearContent();
 		cfgMap.createContent("foo");
@@ -193,6 +195,23 @@ public final class ConfigValueTest extends Testcases {
 		}
 		Log.consoleOut("Tested ConfigBounds");
 
+		cfgBool.setContent(true);
+		cfgBool.setFromString("true");
+		cfgBool.setFromString("false");
+		try {
+			cfgBool.setFromString("TRUE");
+			fail("ConfigBoolean can be set via an invalid boolean string");
+		} catch (final ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("Invalid boolean"));
+		}
+		try {
+			cfgBool.setFromString("falseXYZ");
+			fail("ConfigBoolean can be set via an invalid boolean string");
+		} catch (final ConfigurationException e) {
+			assertTrue(e.toString(), e.getMessage().contains("Invalid boolean"));
+		}
+		Log.consoleOut("Tested ConfigBoolean");
+
 		Log.consoleOut("Checked all ConfigValue implementations");
 	}
 
@@ -213,14 +232,16 @@ public final class ConfigValueTest extends Testcases {
 
 	@Test
 	public void testIdentifiers() {
+		compareIdentifier(new ConfigBoolean("foo"), ConfigBoolean.class);
 		compareIdentifier(new ConfigBounds("foo"), ConfigBounds.class);
 		compareIdentifier(new ConfigDataMap("foo"), ConfigString.class);
 		compareIdentifier(new ConfigEnum<TestEnum>("foo", TestEnum.class),
 				ConfigString.class);
-		compareIdentifier(new ConfigFloat("foo"), ConfigFloat.class);
+		compareIdentifier(new ConfigDouble("foo"), ConfigDouble.class);
 		compareIdentifier(new ConfigInt("foo"), ConfigInt.class);
 		compareIdentifier(new ConfigItem<String>("foo", true, Arrays
 				.asList(new String[] { "FOO" })), ConfigString.class);
+		compareIdentifier(new ConfigLong("foo"), ConfigLong.class);
 		compareIdentifier(new ConfigPath("foo", PathType.Directory),
 				ConfigPath.class);
 		compareIdentifier(new ConfigPath("foo", PathType.FileForReading),

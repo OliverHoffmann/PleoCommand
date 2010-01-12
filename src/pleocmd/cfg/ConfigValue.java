@@ -103,7 +103,11 @@ public abstract class ConfigValue {
 			final String label, final boolean singleLined) {
 		if ("int".equals(identifier)) return new ConfigInt(label);
 
-		if ("float".equals(identifier)) return new ConfigFloat(label);
+		if ("long".equals(identifier)) return new ConfigLong(label);
+
+		if ("double".equals(identifier)) return new ConfigDouble(label);
+
+		if ("bool".equals(identifier)) return new ConfigBoolean(label);
 
 		if ("dir".equals(identifier))
 			return new ConfigPath(label, PathType.Directory);

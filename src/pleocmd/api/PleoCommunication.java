@@ -111,7 +111,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 		close();
 		Log.detail("Connecting");
 		try {
-			port = (SerialPort) portID.open("PleoCommand", (int) cfgOpenTimeout
+			port = (SerialPort) portID.open("PleoCommand", cfgOpenTimeout
 					.getContent());
 		} catch (final PortInUseException e) {
 			throw new IOException("Port already in use");
@@ -126,7 +126,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 		}
 		port.notifyOnDataAvailable(true);
 		try {
-			port.setSerialPortParams((int) cfgBaudrate.getContent(),
+			port.setSerialPortParams(cfgBaudrate.getContent(),
 					SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 					SerialPort.PARITY_NONE);
 			Log.detail("Done initializing '%s'", toString());

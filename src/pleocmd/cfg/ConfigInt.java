@@ -1,26 +1,12 @@
 package pleocmd.cfg;
 
-import java.util.List;
-
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-
-import pleocmd.Log;
-import pleocmd.itfc.gui.Layouter;
-
-public final class ConfigInt extends ConfigValue {
-
-	private long content;
-
-	private final long min, max;
-
-	private JSpinner sp;
+public final class ConfigInt extends ConfigNumber<Integer> {
 
 	public ConfigInt(final String label) {
-		this(label, Long.MIN_VALUE, Long.MAX_VALUE);
+		this(label, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
 
-	public ConfigInt(final String label, final long content) {
+	public ConfigInt(final String label, final int content) {
 		this(label);
 		try {
 			setContent(content);
@@ -30,24 +16,18 @@ public final class ConfigInt extends ConfigValue {
 		}
 	}
 
-	public ConfigInt(final String label, final long min, final long max) {
-		super(label);
-		if (min > max)
-			throw new IllegalArgumentException(String.format(
-					"min (%d) must not be larger than max (%d)", min, max));
-		this.min = min;
-		this.max = max;
-		try {
-			setContent(min);
-		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
-		}
+	public ConfigInt(final String label, final int min, final int max) {
+		this(label, min, min, max, 1);
 	}
 
-	public ConfigInt(final String label, final long content, final long min,
-			final long max) {
-		this(label, min, max);
+	public ConfigInt(final String label, final int content, final int min,
+			final int max) {
+		this(label, content, min, max, 1);
+	}
+
+	public ConfigInt(final String label, final int content, final int min,
+			final int max, final int step) {
+		super(label, min, max, step);
 		try {
 			setContent(content);
 		} catch (final ConfigurationException e) {
@@ -56,72 +36,19 @@ public final class ConfigInt extends ConfigValue {
 		}
 	}
 
-	public long getContent() {
-		return content;
-	}
-
-	public void setContent(final long content) throws ConfigurationException {
-		if (content < min || content > max)
-			throw new ConfigurationException("%d not between %d and %d",
-					content, min, max);
-		this.content = content;
-	}
-
-	public long getMin() {
-		return min;
-	}
-
-	public long getMax() {
-		return max;
-	}
-
-	@Override
-	String asString() {
-		return String.valueOf(content);
-	}
-
-	@Override
-	void setFromString(final String string) throws ConfigurationException {
-		try {
-			setContent(Long.valueOf(string));
-		} catch (final NumberFormatException e) {
-			throw new ConfigurationException("Invalid number: '%s'", string);
-		}
-	}
-
-	@Override
-	List<String> asStrings() {
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	void setFromStrings(final List<String> strings) {
-		throw new UnsupportedOperationException();
-	}
-
 	@Override
 	String getIdentifier() {
 		return "int";
 	}
 
 	@Override
-	boolean isSingleLined() {
-		return true;
+	protected boolean lessThan(final Integer nr1, final Integer nr2) {
+		return nr1 < nr2;
 	}
 
 	@Override
-	public void insertGUIComponents(final Layouter lay) {
-		sp = new JSpinner(new SpinnerNumberModel(content, min, max, 1));
-		lay.add(sp, true);
-	}
-
-	@Override
-	public void setFromGUIComponents() {
-		try {
-			setContent(((Double) sp.getValue()).longValue());
-		} catch (final ConfigurationException e) {
-			Log.error(e, "Cannot set value '%s'", getLabel());
-		}
+	protected Integer valueOf(final String str) throws ConfigurationException {
+		return Integer.valueOf(str);
 	}
 
 }

@@ -43,7 +43,7 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	protected void init0() throws IOException {
-		socket = new Socket(cfgHost.getContent(), (int) cfgPort.getContent());
+		socket = new Socket(cfgHost.getContent(), cfgPort.getContent());
 		in = new DataInputStream(socket.getInputStream());
 	}
 
