@@ -14,6 +14,7 @@ import javax.swing.ToolTipManager;
 import pleocmd.Log;
 import pleocmd.StandardInput;
 import pleocmd.cfg.ConfigBounds;
+import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
@@ -33,6 +34,9 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	private static boolean hasGUI;
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
+
+	private final ConfigInt cfgSplitterPos = new ConfigInt("Splitter Position",
+			-1);
 
 	private final MainPipePanel mainPipePanel;
 
@@ -78,6 +82,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true,
 				mainLogPanel, mainInputPanel);
 		splitPane.setResizeWeight(0.75);
+
 		lay.addWholeLine(splitPane, true);
 
 		lay.addSpacer();
@@ -203,7 +208,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	@Override
 	public Group getSkeleton(final String groupName) {
-		return new Group(groupName).add(cfgBounds);
+		return new Group(groupName).add(cfgBounds).add(cfgSplitterPos);
 	}
 
 	@Override
@@ -214,11 +219,13 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	@Override
 	public void configurationChanged(final Group group) {
 		setBounds(cfgBounds.getContent());
+		splitPane.setDividerLocation(cfgSplitterPos.getContent());
 	}
 
 	@Override
-	public List<Group> configurationWriteback() {
+	public List<Group> configurationWriteback() throws ConfigurationException {
 		cfgBounds.setContent(getBounds());
+		cfgSplitterPos.setContent(splitPane.getDividerLocation());
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 

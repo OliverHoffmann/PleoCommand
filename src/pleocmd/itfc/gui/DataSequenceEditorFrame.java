@@ -16,7 +16,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -28,6 +30,7 @@ import javax.swing.text.StyledDocument;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigDataMap;
+import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
@@ -47,9 +50,14 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
+	private final ConfigInt cfgSplitterPos = new ConfigInt("Splitter Position",
+			-1);
+
 	private final ConfigDataMap map;
 
 	private final ConfigDataMap mapOrg;
+
+	private final JSplitPane splitPane;
 
 	private final JList triggerList;
 
@@ -91,10 +99,12 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 		// Add components
 		final Layouter lay = new Layouter(this);
+		final JPanel panel = new JPanel();
+		final Layouter layInner = new Layouter(panel);
 		triggerModel = new DataSequenceEditorListModel();
 		triggerList = new JList(triggerModel);
 		triggerList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		lay.addWholeLine(new JScrollPane(triggerList), false);
+		layInner.addWholeLine(new JScrollPane(triggerList), true);
 		triggerList.addListSelectionListener(new ListSelectionListener() {
 
 			@Override
@@ -103,22 +113,25 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			}
 
 		});
-		lay.add(new JLabel("Trigger:"), false);
-		btnAddTrigger = lay.addButton("Add", "list-add", "", new Runnable() {
-			@Override
-			public void run() {
-				addNewTrigger();
-			}
-		});
-		btnRenameTrigger = lay.addButton("Rename", "edit-rename", "",
-				new Runnable() {
+
+		layInner.add(new JLabel("Trigger:"), false);
+		btnAddTrigger = layInner.addButton("Add", "list-add",
+				"Add a new trigger to the list", new Runnable() {
+					@Override
+					public void run() {
+						addNewTrigger();
+					}
+				});
+		btnRenameTrigger = layInner.addButton("Rename", "edit-rename",
+				"Change the name of the select trigger", new Runnable() {
 					@Override
 					public void run() {
 						renameSelectedTrigger();
 					}
 				});
-		btnRemoveTrigger = lay.addButton("Remove", "list-remove", "",
-				new Runnable() {
+		layInner.addSpacer();
+		btnRemoveTrigger = layInner.addButton("Remove", "list-remove",
+				"Remove the selected trigger from the list", new Runnable() {
 					@Override
 					public void run() {
 						removeSelectedTrigger();
@@ -126,26 +139,29 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 				});
 
-		lay.addSpacer();
-		lay.newLine();
-
 		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
 		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
 				.getFontMetrics(tpDataSequence.getFont()).getHeight()));
-		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
 
-		lay.addSpacer();
+		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
+				new JScrollPane(tpDataSequence));
+		splitPane.setResizeWeight(0.25);
+		lay.addWholeLine(splitPane, true);
 
 		lay.setSpan(2);
 		btnCopyInput = lay.addButton("Copy From Input History",
-				"bookmark-new.png", "", new Runnable() {
+				"bookmark-new.png",
+				"Copy all history from console input into this Data list",
+				new Runnable() {
 					@Override
 					public void run() {
 						addFromInputHistory();
 					}
 				});
 		btnAddFile = lay.addButton("Add From File ...",
-				"edit-text-frame-update.png", "", new Runnable() {
+				"edit-text-frame-update.png",
+				"Copy the contents of a file into this Data list",
+				new Runnable() {
 					@Override
 					public void run() {
 						addFromFile();
@@ -451,7 +467,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 	@Override
 	public Group getSkeleton(final String groupName) {
-		return new Group(groupName).add(cfgBounds);
+		return new Group(groupName).add(cfgBounds).add(cfgSplitterPos);
 	}
 
 	@Override
@@ -462,11 +478,13 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	@Override
 	public void configurationChanged(final Group group) {
 		setBounds(cfgBounds.getContent());
+		splitPane.setDividerLocation(cfgSplitterPos.getContent());
 	}
 
 	@Override
-	public List<Group> configurationWriteback() {
+	public List<Group> configurationWriteback() throws ConfigurationException {
 		cfgBounds.setContent(getBounds());
+		cfgSplitterPos.setContent(splitPane.getDividerLocation());
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
