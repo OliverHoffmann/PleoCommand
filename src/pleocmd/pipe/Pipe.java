@@ -1,6 +1,7 @@
 package pleocmd.pipe;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,6 +34,9 @@ import pleocmd.pipe.out.Output;
 public final class Pipe extends StateHandling implements ConfigurationInterface {
 
 	private static Pipe pipe;
+
+	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
+			"HH:mm:ss.SSS");
 
 	/**
 	 * Number of milliseconds to reduce waiting-time in the input thread for
@@ -451,11 +455,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (significant)
 			// TODO only warn for the first in dataList?
 			Log.warn("Output of '%s' is %d ms behind (should have been "
-					+ "executed at '%s')", data, -delta, Log.DATE_FORMATTER
+					+ "executed at '%s')", data, -delta, DATE_FORMATTER
 					.format(new Date(execTime)));
 		else if (Log.canLog(Log.Type.Detail))
 			Log.detail("Output of '%s' is %d ms behind (should have been "
-					+ "executed at '%s')", data, -delta, Log.DATE_FORMATTER
+					+ "executed at '%s')", data, -delta, DATE_FORMATTER
 					.format(new Date(execTime)));
 		return true;
 	}
