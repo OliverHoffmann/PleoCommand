@@ -23,6 +23,9 @@ import javax.swing.filechooser.FileFilter;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
+import pleocmd.pipe.Pipe;
+import pleocmd.pipe.in.ConsoleInput;
+import pleocmd.pipe.in.Input;
 
 public final class MainInputPanel extends JPanel {
 
@@ -306,8 +309,15 @@ public final class MainInputPanel extends JPanel {
 	}
 
 	public void updateState() {
-		final boolean ready = MainFrame.the().isPipeRunning()
+		boolean ready = MainFrame.the().isPipeRunning()
 				&& !StandardInput.the().isClosed();
+		boolean found = false;
+		if (ready) for (final Input in : Pipe.the().getInputList())
+			if (in instanceof ConsoleInput) {
+				found = true;
+				break;
+			}
+		ready &= found;
 		consoleInput.setEnabled(ready);
 		btnSend.setEnabled(ready);
 		btnSendEOS.setEnabled(ready);
