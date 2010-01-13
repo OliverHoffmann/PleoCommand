@@ -30,19 +30,23 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 
 import pleocmd.Log;
+import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigDataMap;
 import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.ConfigItem;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
+import pleocmd.pipe.Pipe;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
+import pleocmd.pipe.out.PrintType;
 
 // CS_IGNORE_NEXT The classes this one relies on are mainly GUI components
 public final class DataSequenceEditorFrame extends JDialog implements
@@ -388,23 +392,45 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	}
 
 	public void play(final Data data) {
-		if (playOutputList == null) try {
-			playOutputList = new ArrayList<Output>(2);
-			Output out = new ConsoleOutput();
-			out.configure();
-			out.init();
-			playOutputList.add(out);
-			out = new PleoRXTXOutput();
-			out.configure();
-			out.init();
-			playOutputList.add(out);
-		} catch (final PipeException e) {
-			Log.error(e);
-		}
+		if (playOutputList == null)
+			try {
+				String device = null;
+				for (final Output out : Pipe.the().getOutputList())
+					if (out instanceof PleoRXTXOutput)
+						device = ((ConfigItem<?>) out.getGroup().get("Device"))
+								.getContent();
+				if (device == null)
+					device = JOptionPane.showInputDialog(this,
+							"Set Pleo device name for playback:",
+							PleoCommunication.getHighestPort().getName());
+				if (device == null) return;
+				playOutputList = new ArrayList<Output>(2);
+				final Output outC = new ConsoleOutput(PrintType.DataAscii);
+				outC.configure();
+				outC.init();
+				playOutputList.add(outC);
+				final Output outP = new PleoRXTXOutput(device);
+				outP.configure();
+				outP.init();
+				playOutputList.add(outP);
+
+			} catch (final Throwable e) { // CS_IGNORE catch all here
+				Log.error(e);
+			}
+
 		try {
 			for (final Output out : playOutputList)
 				out.write(data);
 		} catch (final Throwable e) { // CS_IGNORE catch all here
+			Log.error(e);
+		}
+	}
+
+	public void freeResources() {
+		try {
+			if (playOutputList != null) for (final Output out : playOutputList)
+				out.close();
+		} catch (final PipeException e) {
 			Log.error(e);
 		}
 	}

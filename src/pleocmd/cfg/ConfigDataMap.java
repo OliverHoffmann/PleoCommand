@@ -32,7 +32,7 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 
 	@Override
 	protected void modifiyMapViaGUI() {
-		new DataSequenceEditorFrame(this);
+		new DataSequenceEditorFrame(this).freeResources();
 	}
 
 	/**
