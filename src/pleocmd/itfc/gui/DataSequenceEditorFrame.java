@@ -21,6 +21,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.filechooser.FileFilter;
@@ -35,7 +37,7 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
-import pleocmd.exc.OutputException;
+import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.out.ConsoleOutput;
@@ -142,6 +144,12 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
 		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
 				.getFontMetrics(tpDataSequence.getFont()).getHeight()));
+		tpDataSequence.addCaretListener(new CaretListener() {
+			@Override
+			public void caretUpdate(final CaretEvent e) {
+				updateState();
+			}
+		});
 
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
 				new JScrollPane(tpDataSequence));
@@ -361,35 +369,42 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	}
 
 	public void playSelected() {
-		/*
-		 * TODO implement play final Object triggerName =
-		 * cbTrigger.getSelectedItem(); writeTextPaneToMap(triggerName); if
-		 * (triggerName != null) { final List<String> trigger =
-		 * map.get(triggerName); if (trigger != null) for (final String command
-		 * : trigger) play(command); }
-		 */
+		final String sel = tpDataSequence.getSelectedText();
+		if (sel != null) for (final String line : sel.split("\n"))
+			try {
+				play(Data.createFromAscii(line));
+			} catch (final IOException e) {
+				Log.error(e);
+			}
 	}
 
 	public void playAll() {
-		/*
-		 * TODO implement play final Object triggerName =
-		 * cbTrigger.getSelectedItem(); writeTextPaneToMap(triggerName); if
-		 * (triggerName != null) { final List<String> trigger =
-		 * map.get(triggerName); if (trigger != null) for (final String command
-		 * : trigger) play(command); }
-		 */
+		writeTextPaneToMap();
+		if (trigger != null) {
+			final List<Data> list = map.getContent(trigger);
+			for (final Data data : list)
+				play(data);
+		}
 	}
 
 	public void play(final Data data) {
-		if (playOutputList == null) {
+		if (playOutputList == null) try {
 			playOutputList = new ArrayList<Output>(2);
-			playOutputList.add(new ConsoleOutput());
-			playOutputList.add(new PleoRXTXOutput());
+			Output out = new ConsoleOutput();
+			out.configure();
+			out.init();
+			playOutputList.add(out);
+			out = new PleoRXTXOutput();
+			out.configure();
+			out.init();
+			playOutputList.add(out);
+		} catch (final PipeException e) {
+			Log.error(e);
 		}
 		try {
 			for (final Output out : playOutputList)
 				out.write(data);
-		} catch (final OutputException e) {
+		} catch (final Throwable e) { // CS_IGNORE catch all here
 			Log.error(e);
 		}
 	}
@@ -459,8 +474,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 				&& MainFrame.the().getMainInputPanel().getHistoryListModel()
 						.getSize() > 0);
 		btnAddFile.setEnabled(trigger != null);
-		btnPlaySel.setEnabled(false);// TODO
-		btnPlayAll.setEnabled(false);// TODO
+		btnPlaySel.setEnabled(tpDataSequence.getSelectedText() != null);
+		btnPlayAll.setEnabled(tpDataSequence.getDocument().getLength() > 0);
 		btnUndo.setEnabled(false);// TODO
 		btnRedo.setEnabled(false); // TODO
 	}
