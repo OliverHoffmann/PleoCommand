@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -18,7 +19,7 @@ import pleocmd.itfc.gui.icons.IconLoader;
 public final class Layouter {
 
 	public enum Button {
-		Ok, Apply, Cancel, Add, Remove, Clear, Modify, Up, Down, Undo, Redo, Browse, SaveTo, LoadFrom
+		Ok, Apply, Cancel, Help, Add, Remove, Clear, Modify, Up, Down, Undo, Redo, Browse, SaveTo, LoadFrom
 	}
 
 	private static final class ButtonText {
@@ -49,34 +50,36 @@ public final class Layouter {
 				"Accept the modifications"));
 		DEFAULT.put(Button.Cancel, new ButtonText("Cancel", "dialog-cancel",
 				"Close this dialog without accepting any modifications"));
+		DEFAULT.put(Button.Help, new ButtonText("Help", "help-contents",
+				"Display context sensitive help"));
 
 		DEFAULT.put(Button.Add, new ButtonText("Add", "list-add",
-				"Adds a new entry to the list"));
+				"Add a new entry to the list"));
 		DEFAULT.put(Button.Remove, new ButtonText("Remove", "list-remove",
-				"Removes all selected entries from the list"));
+				"Remove all selected entries from the list"));
 		DEFAULT.put(Button.Clear, new ButtonText("Clear", "archive-remove",
-				"Removes all entries from the list"));
+				"Remove all entries from the list"));
 		DEFAULT.put(Button.Modify, new ButtonText("Modify", "document-edit",
-				"Modifies the currently focused entry in the list"));
+				"Modify the currently focused entry in the list"));
 
 		DEFAULT.put(Button.Up, new ButtonText("Up", "arrow-up",
-				"Moves the currently focused entry one position upwards"));
+				"Move the currently focused entry one position upwards"));
 		DEFAULT.put(Button.Down, new ButtonText("Down", "arrow-down",
-				"Moves the currently focused entry one position downwards"));
+				"Move the currently focused entry one position downwards"));
 
 		DEFAULT.put(Button.Undo, new ButtonText("Undo", "edit-undo",
-				"Undoes the last action"));
+				"Undo the last action"));
 		DEFAULT.put(Button.Redo, new ButtonText("Redo", "edit-redo",
-				"Repeats the last undone action"));
+				"Repeat the last undone action"));
 
 		DEFAULT.put(Button.Browse, new ButtonText("...", "edit-rename",
-				"Opens a file selection dialog"));
+				"Open a file selection dialog"));
 
 		DEFAULT.put(Button.SaveTo, new ButtonText("Save To ...",
-				"document-save-as", "Saves the document to a file"));
-		DEFAULT.put(Button.LoadFrom, new ButtonText("Load From ...",
-				"document-open",
-				"Loads a previously saved document from a file"));
+				"document-save-as", "Save the document to a file"));
+		DEFAULT.put(Button.LoadFrom,
+				new ButtonText("Load From ...", "document-open",
+						"Load a previously saved document from a file"));
 	}
 
 	public Layouter(final Container container) {
@@ -159,6 +162,15 @@ public final class Layouter {
 
 	public int getSpan() {
 		return span;
+	}
+
+	public static Runnable help(final Window owner, final String category) {
+		return new Runnable() {
+			@Override
+			public void run() {
+				HelpDialog.the(owner).display(category);
+			}
+		};
 	}
 
 }

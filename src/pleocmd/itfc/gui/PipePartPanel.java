@@ -201,6 +201,9 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		lay.addWholeLine(new JLabel(), true);
 		lay.addWholeLine(buttons, false);
 
+		lb
+				.addButton(Button.Help, Layouter.help(dlg,
+						"PipePartConfigureDialog"));
 		lb.addSpacer();
 		dlg.getRootPane().setDefaultButton(
 				lb.addButton(Button.Ok, new Runnable() {
@@ -226,7 +229,9 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		dlg.pack();
 		dlg.setLocationRelativeTo(null);
 		dlg.setModal(true);
+		HelpDialog.closeHelpIfOpen();
 		dlg.setVisible(true);
+		HelpDialog.closeHelpIfOpen();
 
 		return okPressed;
 	}

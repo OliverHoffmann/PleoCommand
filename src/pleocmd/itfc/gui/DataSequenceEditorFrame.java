@@ -179,13 +179,12 @@ public final class DataSequenceEditorFrame extends JDialog implements
 						addFromFile();
 					}
 				});
-		lay.setSpan(3);
-		lay.addSpacer();
+		lay.addButton(Button.Help, Layouter.help(this, getClass()
+				.getSimpleName()));
 		lay.setSpan(1);
+		lay.addSpacer();
 
 		lay.newLine();
-
-		lay.addSpacer();
 
 		btnPlaySel = lay.addButton("Play Selected", "unknownapp",
 				"Sends all currently selected data to "
@@ -228,6 +227,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 				saveChanges();
 			}
 		});
+		lay.addSpacer();
 		lay.addButton(Button.Cancel, new Runnable() {
 			@Override
 			public void run() {
@@ -249,7 +249,9 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 		Log.detail("DataSequenceEditorFrame created");
 		setModal(true);
+		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+		HelpDialog.closeHelpIfOpen();
 	}
 
 	protected void triggerIndexChanged() {

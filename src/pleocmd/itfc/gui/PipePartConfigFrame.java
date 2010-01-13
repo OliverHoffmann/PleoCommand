@@ -54,6 +54,8 @@ public final class PipePartConfigFrame extends JDialog implements
 		tabs.addTab("Output", pppOutput);
 		lay.addWholeLine(tabs, true);
 
+		lay.addButton(Button.Help, Layouter.help(this, getClass()
+				.getSimpleName()));
 		lay.addSpacer();
 		getRootPane().setDefaultButton(lay.addButton(Button.Ok, new Runnable() {
 			@Override
@@ -87,7 +89,9 @@ public final class PipePartConfigFrame extends JDialog implements
 
 		Log.detail("Config-Frame created");
 		setModal(true);
+		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+		HelpDialog.closeHelpIfOpen();
 	}
 
 	public void applyChanges() {

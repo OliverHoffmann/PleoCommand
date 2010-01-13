@@ -20,6 +20,7 @@ import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.StateException;
+import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
 /**
@@ -47,6 +48,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	private final JSplitPane splitPane;
 
 	private final JButton btnExit;
+
+	private final JButton btnHelp;
 
 	private Thread pipeThread;
 
@@ -85,6 +88,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 		lay.addWholeLine(splitPane, true);
 
+		btnHelp = lay.addButton(Button.Help, Layouter.help(this, getClass()
+				.getSimpleName()));
 		lay.addSpacer();
 		btnExit = lay.addButton("Exit", "application-exit",
 				"Cancels running pipe (if any) and exits the application",
@@ -110,6 +115,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	public void showModalGUI() {
 		Log.info("Application started");
 		updateState();
+		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
 	}
 
@@ -143,13 +149,14 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 					null, null, null) != JOptionPane.YES_OPTION) return;
 			abortPipeThread();
 		}
-		Log.detail("GUI-Frame has been closed");
 		try {
 			Configuration.the().writeToDefaultFile();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 		dispose();
+		HelpDialog.closeHelpIfOpen();
+		Log.detail("GUI-Frame has been closed");
 	}
 
 	public synchronized void startPipeThread() {
@@ -192,6 +199,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	public void updateState() {
 		// update all which depend on isPipeRunning()
+		btnHelp.setEnabled(true);
 		btnExit.setEnabled(!isPipeRunning());
 		getMainPipePanel().updateState();
 		getMainLogPanel().updateState();
