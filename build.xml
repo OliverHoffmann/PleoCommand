@@ -87,6 +87,7 @@
 		<jar jarfile="${jarloc}"
 		     basedir="${bin}"
 		     duplicate="fail"
+		     includes="pleocmd/**"
 		     strict="warn">
 			<manifest>
 				<attribute name="Implementation-Vendor"
