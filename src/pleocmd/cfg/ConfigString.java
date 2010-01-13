@@ -8,6 +8,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigString extends ConfigValue {
@@ -80,8 +83,7 @@ public final class ConfigString extends ConfigValue {
 		try {
 			setContent(sb.toString());
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 
@@ -132,8 +134,7 @@ public final class ConfigString extends ConfigValue {
 		try {
 			setContent(tc.getText());
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
 	}
 

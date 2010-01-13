@@ -5,6 +5,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import pleocmd.exc.InternalException;
+
 public final class StringValue extends Value {
 
 	public static final char TYPE_CHAR = 'S';
@@ -122,7 +124,8 @@ public final class StringValue extends Value {
 		try {
 			return val.getBytes("ISO-8859-1");
 		} catch (final UnsupportedEncodingException e) {
-			throw new InternalError("Character-Set ISO-8859-1 not supported!");
+			throw new InternalException(
+					"Character-Set ISO-8859-1 not supported!");
 		}
 	}
 

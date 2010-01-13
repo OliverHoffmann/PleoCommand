@@ -12,17 +12,19 @@ import java.util.Set;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataQueue;
+import pleocmd.pipe.data.DataQueue.PutResult;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
@@ -355,18 +357,19 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * {@link Converter} and puts it into the {@link DataQueue} in a loop until
 	 * all {@link Input}s have finished or the thread gets interrupted.
 	 * 
-	 * @throws StateException
-	 *             if, during looping, the {@link Pipe} exits the "Initialized"
-	 *             state, which should never occur
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been closed during looping
 	 */
-	protected void runInputThread() throws StateException, IOException {
+	protected void runInputThread() throws IOException {
 		inputThreadInterruped = false;
 		try {
 			Log.info("Input-Thread started");
 			while (!inputThreadInterruped) {
-				ensureInitialized();
+				try {
+					ensureInitialized();
+				} catch (final StateException e) {
+					throw new InternalException(e);
+				}
 
 				// read next data block ...
 				final Data data = getFromInput();
@@ -395,16 +398,16 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * If the thread gets interrupted, only writing of the current {@link Data}
 	 * will be aborted. To interrupt the thread itself, one has to close the
 	 * {@link DataQueue}.
-	 * 
-	 * @throws StateException
-	 *             if, during looping, the {@link Pipe} exits the "Initialized"
-	 *             state, which should never occur
 	 */
-	protected void runOutputThread() throws StateException {
+	protected void runOutputThread() {
 		Log.info("Output-Thread started");
 		try {
 			while (true) {
-				ensureInitialized();
+				try {
+					ensureInitialized();
+				} catch (final StateException e) {
+					throw new InternalException(e);
+				}
 
 				// fetch next data block ...
 				final Data data;
@@ -512,6 +515,12 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					Log.info("Skipping one data block from input '%s'", in);
 				// try next data packet / try from next input
 				continue;
+			} catch (final Throwable e) {
+				Log.error(e);
+				feedback.addError(e, false);
+				Log.info("Skipping one data block from input '%s'", in);
+				// try next data packet / try from next input
+				continue;
 			}
 			// no more data available in this Input, so
 			// switch to the next one
@@ -565,7 +574,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				}
 			}
 
-			switch (dataQueue.put(data)) {
+			final PutResult res = dataQueue.put(data);
+			switch (res) {
 			case ClearedAndPut:
 				Log.info("Canceling current command, "
 						+ "because of higher-priority command '%s'", data);
@@ -577,6 +587,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				break;
 			case Put:
 				break;
+			default:
+				throw new InternalException(res);
 			}
 		}
 	}
@@ -651,6 +663,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			} else
 				Log.info("Skipping converter '%s' for one data block '%s'",
 						cvt, data);
+		} catch (final Throwable e) { // CS_IGNORE catch all what may go wrong
+			Log.error(e);
+			feedback.addError(e, false);
+			Log.info("Skipping converter '%s' for one data block '%s'", cvt,
+					data);
 		}
 		return null;
 	}
@@ -706,6 +723,10 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			} else
 				Log.info("Skipping output '%s' for one data block '%s'", out,
 						data);
+		} catch (final Throwable e) { // CS_IGNORE catch all what may go wrong
+			Log.error(e);
+			feedback.addError(e, false);
+			Log.info("Skipping output '%s' for one data block '%s'", out, data);
 		}
 		feedback.incDataOutputCount();
 		return true;
@@ -742,9 +763,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					cfgOutputThreadSleepTime);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
-			throw new InternalError(String.format("Wrong groupName for "
+			throw new InternalException("Wrong groupName for "
 					+ "skeleton creation: '%s' should start with '%s'",
-					groupName, prefix));
+					groupName, prefix);
 		final String name = groupName.substring(prefix.length()).trim();
 		try {
 			for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
@@ -791,8 +812,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			else if (pp instanceof Output)
 				outputList.add((Output) pp);
 			else
-				throw new InternalError(String.format(
-						"Superclass of PipePart '%s' unknown", pp));
+				throw new InternalException(
+						"Superclass of PipePart '%s' unknown", pp);
 			pp.connectedToPipe(this);
 			try {
 				pp.configure();
@@ -801,7 +822,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 						"Cannot configure PipePart with group '%s'", group);
 			}
 		} else if (!group.getName().equals(getClass().getSimpleName()))
-			throw new InternalError(String.format("Unknown group: %s", group));
+			throw new InternalException("Unknown group: %s", group);
 	}
 
 	@Override

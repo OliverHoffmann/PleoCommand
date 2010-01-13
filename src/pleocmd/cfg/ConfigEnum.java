@@ -2,6 +2,9 @@ package pleocmd.cfg;
 
 import java.util.Arrays;
 
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
+
 public final class ConfigEnum<E extends Enum<E>> extends ConfigItem<E> {
 
 	private final Class<E> enumClass;
@@ -64,8 +67,8 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigItem<E> {
 		try {
 			setContent(e.toString());
 		} catch (final ConfigurationException exc) {
-			throw new InternalError(String.format(
-					"Name of enum not recognized !? ('%s')", exc));
+			throw new InternalException(
+					"Name of enum not recognized !? ('%s')", exc);
 		}
 	}
 }

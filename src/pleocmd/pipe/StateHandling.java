@@ -3,6 +3,7 @@ package pleocmd.pipe;
 import java.io.IOException;
 
 import pleocmd.Log;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 
@@ -52,8 +53,7 @@ public abstract class StateHandling {
 			ensureConstructing();
 			setState(State.Constructed);
 		} catch (final StateException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 

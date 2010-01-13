@@ -1,5 +1,4 @@
-package pleocmd.cfg;
-
+package pleocmd.exc;
 
 public class ConfigurationException extends Exception {
 
@@ -7,7 +6,7 @@ public class ConfigurationException extends Exception {
 
 	public ConfigurationException(final Throwable cause, final String msg,
 			final Object... args) {
-		super(String.format(msg, args), cause);
+		super(args.length == 0 ? msg : String.format(msg, args), cause);
 	}
 
 	public ConfigurationException(final int nr, final String line,
@@ -16,7 +15,7 @@ public class ConfigurationException extends Exception {
 	}
 
 	public ConfigurationException(final String msg, final Object... args) {
-		super(String.format(msg, args));
+		super(args.length == 0 ? msg : String.format(msg, args));
 	}
 
 }

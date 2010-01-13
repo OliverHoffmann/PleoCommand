@@ -8,6 +8,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.Layouter.Button;
 
@@ -69,7 +71,7 @@ public final class ConfigPath extends ConfigValue {
 						content);
 			break;
 		default:
-			throw new InternalError("Invalid PathType");
+			throw new InternalException(type);
 		}
 		checkValidString(content.getPath(), false);
 		this.content = content;
@@ -109,7 +111,7 @@ public final class ConfigPath extends ConfigValue {
 		case Directory:
 			return "dir";
 		default:
-			throw new InternalError("Invalid PathType");
+			throw new InternalException(type);
 		}
 	}
 
@@ -148,7 +150,7 @@ public final class ConfigPath extends ConfigValue {
 				tf.setText(fc.getSelectedFile().getPath());
 			break;
 		default:
-			throw new InternalError("Invalid PathType");
+			throw new InternalException(type);
 		}
 	}
 
@@ -157,7 +159,7 @@ public final class ConfigPath extends ConfigValue {
 		try {
 			setContent(new File(tf.getText()));
 		} catch (final ConfigurationException e) {
-			Log.error(e);
+			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
 	}
 

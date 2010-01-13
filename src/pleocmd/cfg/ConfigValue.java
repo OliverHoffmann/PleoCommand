@@ -3,6 +3,7 @@ package pleocmd.cfg;
 import java.util.List;
 
 import pleocmd.cfg.ConfigPath.PathType;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.pipe.PipePart;
 

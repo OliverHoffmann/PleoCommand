@@ -22,9 +22,10 @@ import java.util.concurrent.TimeoutException;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 
 /**
  * This is the central communication class with the Pleo.<br>
@@ -122,7 +123,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 		try {
 			port.addEventListener(this);
 		} catch (final TooManyListenersException e) {
-			throw new InternalError("Only one, but too many listeners");
+			throw new InternalException("Only one, but too many listeners");
 		}
 		port.notifyOnDataAvailable(true);
 		try {

@@ -9,9 +9,9 @@ import javax.swing.AbstractListModel;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigString;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.exc.ConfigurationException;
 
 public final class HistoryListModel extends AbstractListModel implements
 		ConfigurationInterface {

@@ -1,5 +1,8 @@
 package pleocmd.cfg;
 
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
+
 public final class ConfigLong extends ConfigNumber<Long> {
 
 	public ConfigLong(final String label) {
@@ -11,8 +14,7 @@ public final class ConfigLong extends ConfigNumber<Long> {
 		try {
 			setContent(content);
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 

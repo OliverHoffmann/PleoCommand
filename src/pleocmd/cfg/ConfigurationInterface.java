@@ -3,6 +3,8 @@ package pleocmd.cfg;
 import java.util.List;
 import java.util.Set;
 
+import pleocmd.exc.ConfigurationException;
+
 public interface ConfigurationInterface {
 
 	/**

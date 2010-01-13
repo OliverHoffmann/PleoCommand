@@ -4,6 +4,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
 
 /**
@@ -104,7 +105,7 @@ public abstract class Value {
 		case Data:
 			return new BinaryValue(type);
 		default:
-			return null;
+			throw new InternalException(type);
 		}
 	}
 
@@ -124,9 +125,8 @@ public abstract class Value {
 					.get(null);
 		} catch (final Throwable t) {
 			// CS_IGNORE_PREV Catch everything that may go wrong here
-			throw new InternalError(String.format(
-					"Cannot access field TYPE_CHAR "
-							+ "of a subclass of Value: %s", t));
+			throw new InternalException("Cannot access field TYPE_CHAR "
+					+ "of a subclass of Value: %s", t);
 		}
 	}
 

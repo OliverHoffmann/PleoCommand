@@ -8,9 +8,9 @@ import java.util.List;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigString;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.MainFrame;
 
 /**
@@ -205,19 +205,23 @@ public final class Log {
 	 * 
 	 * @param type
 	 *            type {@link Type} of the message
+	 * @param throwable
+	 *            a backtrace for the message or <b>null</b>
 	 * @param msg
 	 *            the message - interpreted as a format string (like in
 	 *            {@link String#format(String, Object...)}) if any arguments are
 	 *            given or just used as is otherwise.
+	 * @param caller
+	 *            the name of the creator of this message
 	 * @param args
 	 *            arbitrary number of arguments for the format string (may also
 	 *            be zero)
 	 */
-	private static void msg(final Type type, final String msg,
-			final Object... args) {
+	private static void msg(final Type type, final Throwable throwable,
+			final String caller, final String msg, final Object... args) {
 		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
-			final Log log = new Log(type, getCallersName(3),
-					args.length == 0 ? msg : String.format(msg, args), null);
+			final Log log = new Log(type, caller, args.length == 0 ? msg
+					: String.format(msg, args), throwable);
 			if (type == Type.Console) System.out.println(log.getMsg()); // CS_IGNORE
 			if (MainFrame.hasGUI())
 				MainFrame.the().getMainLogPanel().addLog(log);
@@ -238,7 +242,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void detail(final String msg, final Object... args) {
-		msg(Type.Detail, msg, args);
+		msg(Type.Detail, null, getCallersName(2), msg, args);
 	}
 
 	/**
@@ -254,7 +258,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void info(final String msg, final Object... args) {
-		msg(Type.Info, msg, args);
+		msg(Type.Info, null, getCallersName(2), msg, args);
 	}
 
 	/**
@@ -270,7 +274,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void warn(final String msg, final Object... args) {
-		msg(Type.Warn, msg, args);
+		msg(Type.Warn, null, getCallersName(2), msg, args);
 	}
 
 	/**
@@ -286,7 +290,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void error(final String msg, final Object... args) {
-		msg(Type.Error, msg, args);
+		msg(Type.Error, null, getCallersName(2), msg, args);
 	}
 
 	/**
@@ -302,7 +306,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void consoleOut(final String msg, final Object... args) {
-		msg(Type.Console, msg, args);
+		msg(Type.Console, null, getCallersName(2), msg, args);
 	}
 
 	/**
@@ -355,7 +359,7 @@ public final class Log {
 			sb.append(" caused by ");
 		}
 
-		new Log(Type.Error, getCallersName(t, 0), sb.toString(), throwable);
+		msg(Type.Error, throwable, getCallersName(t, 0), sb.toString());
 	}
 
 	/**

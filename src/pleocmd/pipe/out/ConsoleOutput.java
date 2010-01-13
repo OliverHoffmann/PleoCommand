@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.data.Data;
 
@@ -72,8 +73,7 @@ public final class ConsoleOutput extends Output {
 				Log.consoleOut(data.get(1).asString());
 			break;
 		default:
-			throw new InternalError(String.format("Invalid print-type: %s",
-					cfgType.getEnum()));
+			throw new InternalException(cfgType.getEnum());
 		}
 		return false;
 	}

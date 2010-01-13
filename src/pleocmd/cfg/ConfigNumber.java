@@ -6,6 +6,8 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 
 public abstract class ConfigNumber<E extends Number> extends ConfigValue {
@@ -30,8 +32,7 @@ public abstract class ConfigNumber<E extends Number> extends ConfigValue {
 		try {
 			setContent(min);
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 

@@ -3,6 +3,7 @@ package pleocmd.cfg;
 import java.awt.Rectangle;
 import java.util.List;
 
+import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigBounds extends ConfigValue {

@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
+import pleocmd.exc.ConfigurationException;
 
 public final class ConfigurationTest extends Testcases {
 

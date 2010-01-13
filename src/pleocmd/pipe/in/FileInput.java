@@ -8,9 +8,10 @@ import java.io.IOException;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigPath.PathType;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InputException;
+import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input {
@@ -65,8 +66,7 @@ public final class FileInput extends Input {
 		case Binary:
 			return Data.createFromBinary(in);
 		default:
-			throw new InternalError(String.format("Invalid read-type: %s",
-					cfgType.getEnum()));
+			throw new InternalException(cfgType.getEnum());
 		}
 	}
 

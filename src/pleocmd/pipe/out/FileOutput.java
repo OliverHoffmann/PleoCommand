@@ -8,8 +8,9 @@ import java.io.IOException;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigPath.PathType;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.data.Data;
 
@@ -84,8 +85,7 @@ public final class FileOutput extends Output {
 				Log.consoleOut(data.get(1).asString());
 			break;
 		default:
-			throw new InternalError(String.format("Invalid print-type: %s",
-					cfgType.getEnum()));
+			throw new InternalException(cfgType.getEnum());
 		}
 		return false;
 	}

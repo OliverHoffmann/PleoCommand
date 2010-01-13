@@ -16,6 +16,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import pleocmd.Log;
+import pleocmd.exc.InternalException;
 import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
@@ -80,7 +81,7 @@ public final class PipePartDetection {
 				path = URLDecoder.decode(resources.nextElement().getFile(),
 						"UTF-8");
 			} catch (final UnsupportedEncodingException e) {
-				throw new InternalError("UTF-8 encoding not supported");
+				throw new InternalException("UTF-8 encoding not supported");
 			}
 			final File dir = new File(path);
 			if (dir.isDirectory())

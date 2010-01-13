@@ -5,7 +5,7 @@ import java.io.DataInputStream;
 import java.io.IOException;
 
 import pleocmd.cfg.ConfigString;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
 

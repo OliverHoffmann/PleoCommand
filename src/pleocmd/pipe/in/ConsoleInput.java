@@ -6,6 +6,7 @@ import java.io.IOException;
 import pleocmd.StandardInput;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.exc.InputException;
+import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleInput extends Input {
@@ -52,8 +53,7 @@ public final class ConsoleInput extends Input {
 			return Data.createFromBinary(new DataInputStream(StandardInput
 					.the()));
 		default:
-			throw new InternalError(String.format("Invalid read-type: %s",
-					cfgType.getEnum()));
+			throw new InternalException(cfgType.getEnum());
 		}
 	}
 

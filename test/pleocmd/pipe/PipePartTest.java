@@ -11,7 +11,7 @@ import org.junit.Test;
 import pleocmd.Log;
 import pleocmd.Testcases;
 import pleocmd.cfg.ConfigString;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 
 public final class PipePartTest extends Testcases {

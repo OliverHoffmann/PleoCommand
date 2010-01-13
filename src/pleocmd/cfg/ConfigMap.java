@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import javax.swing.JLabel;
 
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.Layouter.Button;
 
@@ -107,8 +109,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 					addContent(key, v);
 			}
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 

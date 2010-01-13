@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.ConfigString;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.pipe.data.Data;
 
 public final class TcpIpInput extends Input {

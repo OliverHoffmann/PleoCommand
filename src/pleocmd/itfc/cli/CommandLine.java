@@ -5,7 +5,7 @@ import java.io.File;
 import pleocmd.Log;
 import pleocmd.Log.Type;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 

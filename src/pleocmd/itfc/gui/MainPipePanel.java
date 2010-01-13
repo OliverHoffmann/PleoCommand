@@ -10,7 +10,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 

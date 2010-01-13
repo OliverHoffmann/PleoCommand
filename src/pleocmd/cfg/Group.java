@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
 
 public final class Group {
 

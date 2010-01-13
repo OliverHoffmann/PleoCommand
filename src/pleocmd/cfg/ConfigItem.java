@@ -8,6 +8,8 @@ import java.util.List;
 import javax.swing.JComboBox;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 
 public class ConfigItem<E> extends ConfigValue {
@@ -61,8 +63,7 @@ public class ConfigItem<E> extends ConfigValue {
 		try {
 			setContent(content);
 		} catch (final ConfigurationException e) {
-			throw new InternalError(String.format(
-					"Caught exception which should never occur: %s", e));
+			throw new InternalException(e);
 		}
 	}
 
@@ -144,7 +145,7 @@ public class ConfigItem<E> extends ConfigValue {
 		try {
 			setContent(cb.getSelectedItem().toString());
 		} catch (final ConfigurationException e) {
-			Log.error(e);
+			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
 	}
 

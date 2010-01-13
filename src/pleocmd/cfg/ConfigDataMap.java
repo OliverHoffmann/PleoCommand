@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.DataSequenceEditorFrame;
 import pleocmd.pipe.data.Data;
 

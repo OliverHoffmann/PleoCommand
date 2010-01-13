@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import pleocmd.Log;
+import pleocmd.exc.ConfigurationException;
 
 public final class Configuration {
 

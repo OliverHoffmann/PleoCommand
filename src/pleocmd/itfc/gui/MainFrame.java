@@ -16,9 +16,9 @@ import pleocmd.StandardInput;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationException;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.Pipe;
 

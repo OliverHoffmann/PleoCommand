@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
-import pleocmd.cfg.ConfigurationException;
+import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.in.FileInput;
 import pleocmd.pipe.in.ReadType;
