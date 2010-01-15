@@ -18,6 +18,55 @@ import java.util.Map.Entry;
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
 
+/**
+ * The global, persistent configuration of the application.
+ * <p>
+ * A class which needs persistent configurable data, must implement the
+ * {@link ConfigurationInterface} and invoke
+ * {@link #registerConfigurableObject(ConfigurationInterface, Set)} or
+ * {@link #registerConfigurableObject(ConfigurationInterface, String)} during
+ * its construction.<br>
+ * If its a singleton class, there's no need to unregister, otherwise during
+ * "destruction" (means in Java: at the time a class's instance is no longer
+ * used) {@link #unregisterConfigurableObject(ConfigurationInterface)} should be
+ * invoked.<br>
+ * If there are more than one instances of the class at the same time, you
+ * should consider creating a singleton class which handles the configuration
+ * like:<br>
+ * <code><pre>
+ * class Foo {
+ * 	private final static ConfigString cfg0 = new ConfigString(...);
+ * 	private final static ConfigString cfg1 = new ConfigString(...);
+ * 	...
+ * 	static {
+ * 		// must be *after* declaration of all static fields !!!
+ * 		new FooConfig();
+ * 	}
+ * 	static class FooConfig implements ConfigurationInterface {
+ * 		FooConfig() {
+ * 			try {
+ * 				Configuration.the().registerConfigurableObject(this,
+ * 						getClass().getSimpleName());
+ * 			} catch (final ConfigurationException e) {
+ * 				Log.error(e);
+ * 			}
+ * 		}
+ * 		public Group getSkeleton(final String groupName) {
+ * 			return new Group(groupName).add(cfg0).add(cfg1);
+ * 		}
+ * 		public void configurationAboutToBeChanged() {
+ * 		}
+ * 		public void configurationChanged(final Group group) {
+ * 		}
+ * 		public List<Group> configurationWriteback() {
+ * 			return Configuration.asList(getSkeleton(getClass().getSimpleName()));
+ * 		}
+ * 	}
+ * };
+ * </pre></code>
+ * 
+ * @author oliver
+ */
 public final class Configuration {
 
 	private static File defaultConfigFile;
@@ -82,6 +131,11 @@ public final class Configuration {
 			final Set<String> groupNames) throws ConfigurationException {
 		if (configObjects.contains(co))
 			throw new IllegalStateException("Already registered");
+		for (final String groupName : groupNames)
+			if (groupsRegistered.containsKey(groupName))
+				throw new IllegalArgumentException(String.format(
+						"The group-name '%s' is already registered for '%s'",
+						groupName, groupsRegistered.get(groupName)));
 
 		// register the new object and assign group-names to it
 		for (final String groupName : groupNames)
@@ -90,24 +144,33 @@ public final class Configuration {
 
 		// load the external object from the currently unassigned groups
 		// only keep groups which are not registered by the new external object
+		//
+		// concurrent modification is possible if one of co's methods call
+		// registerConfigurableObject() again, so we have to split into feed and
+		// keep lists first
 		final List<Group> groupsKeep = new ArrayList<Group>(groupsUnassigned
 				.size());
-		co.configurationAboutToBeChanged();
+		final List<Group> groupsFeed = new ArrayList<Group>(groupsUnassigned
+				.size());
 		for (final Group group : groupsUnassigned)
-			if (groupNames.contains(group.getName())) {
-				final Group skelGroup = co.getSkeleton(group.getName());
-				if (skelGroup == null)
-					// no skeleton? just feed co with the unassigned group
-					co.configurationChanged(group);
-				else {
-					// we have to copy data from unassigned to skeleton group
-					skelGroup.assign(group);
-					co.configurationChanged(skelGroup);
-				}
-			} else
+			if (groupNames.contains(group.getName()))
+				groupsFeed.add(group);
+			else
 				groupsKeep.add(group);
 		groupsUnassigned.clear();
 		groupsUnassigned.addAll(groupsKeep);
+		co.configurationAboutToBeChanged();
+		for (final Group group : groupsFeed) {
+			final Group skelGroup = co.getSkeleton(group.getName());
+			if (skelGroup == null)
+				// no skeleton? just feed co with the unassigned group
+				co.configurationChanged(group);
+			else {
+				// we have to copy data from unassigned to skeleton group
+				skelGroup.assign(group);
+				co.configurationChanged(skelGroup);
+			}
+		}
 	}
 
 	/**
