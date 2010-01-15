@@ -1,5 +1,7 @@
 package pleocmd.itfc.gui;
 
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.List;
 
 import javax.swing.JDialog;
@@ -40,7 +42,13 @@ public final class PipePartConfigFrame extends JDialog implements
 
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(final WindowEvent e) {
+				close();
+			}
+		});
 
 		pppInput.assignPipeParts(Pipe.the().getInputList());
 		pppConverter.assignPipeParts(Pipe.the().getConverterList());
@@ -61,7 +69,7 @@ public final class PipePartConfigFrame extends JDialog implements
 			@Override
 			public void run() {
 				applyChanges();
-				dispose();
+				close();
 			}
 		}));
 		lay.addButton(Button.Apply, new Runnable() {
@@ -74,7 +82,7 @@ public final class PipePartConfigFrame extends JDialog implements
 			@Override
 			public void run() {
 				Log.detail("Canceled Config-Frame");
-				dispose();
+				close();
 			}
 		});
 
@@ -91,6 +99,15 @@ public final class PipePartConfigFrame extends JDialog implements
 		setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+	}
+
+	protected void close() {
+		try {
+			Configuration.the().unregisterConfigurableObject(this);
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
+		dispose();
 		HelpDialog.closeHelpIfOpen();
 	}
 

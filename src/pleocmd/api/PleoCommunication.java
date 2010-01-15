@@ -34,17 +34,21 @@ import pleocmd.exc.InternalException;
  * 
  * @author oliver
  */
-public final class PleoCommunication implements SerialPortEventListener,
-		ConfigurationInterface {
+public final class PleoCommunication implements SerialPortEventListener {
 
-	private final ConfigInt cfgOpenTimeout = new ConfigInt("Open Timeout",
-			5000, 100, 60000);
+	private static final ConfigInt CFG_OPEN_TIMEOUT = new ConfigInt(
+			"Open Timeout", 5000, 100, 60000);
 
-	private final ConfigInt cfgAnswerTimeout = new ConfigInt("Answer Timeout",
-			60000, 1000, 60 * 60 * 1000);
+	private static final ConfigInt CFG_ANSWER_TIMEOUT = new ConfigInt(
+			"Answer Timeout", 60000, 1000, 60 * 60 * 1000);
 
-	private final ConfigInt cfgBaudrate = new ConfigInt("Baudrate", 115200,
-			110, 256000);
+	private static final ConfigInt CFG_BAUDRATE = new ConfigInt("Baudrate",
+			115200, 110, 256000);
+
+	static {
+		// must be *after* declaration of all static fields !!!
+		new PleoCommunicationConfig();
+	}
 
 	private final CommPortIdentifier portID;
 
@@ -71,12 +75,6 @@ public final class PleoCommunication implements SerialPortEventListener,
 		this.portID = portID;
 		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(), portID
 				.getCurrentOwner());
-		try {
-			Configuration.the().registerConfigurableObject(this,
-					getClass().getSimpleName());
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-		}
 	}
 
 	/**
@@ -101,7 +99,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 	 * Opens a new connection to the port specified in
 	 * {@link #PleoCommunication(CommPortIdentifier)}. If a connection is
 	 * already open, it will be closed first.<br>
-	 * Blocks until the connection has been opened or {@link #cfgOpenTimeout}
+	 * Blocks until the connection has been opened or {@link #CFG_OPEN_TIMEOUT}
 	 * milliseconds have been elapsed.
 	 * 
 	 * @throws IOException
@@ -112,7 +110,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 		close();
 		Log.detail("Connecting");
 		try {
-			port = (SerialPort) portID.open("PleoCommand", cfgOpenTimeout
+			port = (SerialPort) portID.open("PleoCommand", CFG_OPEN_TIMEOUT
 					.getContent());
 		} catch (final PortInUseException e) {
 			throw new IOException("Port already in use");
@@ -127,7 +125,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 		}
 		port.notifyOnDataAvailable(true);
 		try {
-			port.setSerialPortParams(cfgBaudrate.getContent(),
+			port.setSerialPortParams(CFG_BAUDRATE.getContent(),
 					SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 					SerialPort.PARITY_NONE);
 			Log.detail("Done initializing '%s'", toString());
@@ -195,7 +193,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 	 * @return the answer read from the connection converted via ISO-8859-1
 	 * @throws TimeoutException
 	 *             if the answer could not be read (completely) within a given
-	 *             time ({@link #cfgAnswerTimeout}).
+	 *             time ({@link #CFG_ANSWER_TIMEOUT}).
 	 */
 	public String readAnswer() throws TimeoutException {
 		// wait until "> " has been received which marks the end of the answer
@@ -208,7 +206,7 @@ public final class PleoCommunication implements SerialPortEventListener,
 			if (++cnt % 4 == 0)
 				Log.detail("Waiting for answer since %d ms - got %d chars yet",
 						wait, inBuffer.length());
-			if (wait > cfgAnswerTimeout.getContent()) //
+			if (wait > CFG_ANSWER_TIMEOUT.getContent()) //
 				// no response within a few seconds =>
 				// handle as unexpected end of received data
 				throw new TimeoutException(String.format(
@@ -311,27 +309,40 @@ public final class PleoCommunication implements SerialPortEventListener,
 		}
 	}
 
-	@Override
-	public Group getSkeleton(final String groupName)
-			throws ConfigurationException {
-		return new Group(groupName).add(cfgOpenTimeout).add(cfgAnswerTimeout)
-				.add(cfgBaudrate);
-	}
+	static class PleoCommunicationConfig implements ConfigurationInterface {
 
-	@Override
-	public void configurationAboutToBeChanged() throws ConfigurationException {
-		// nothing to do
-	}
+		PleoCommunicationConfig() {
+			try {
+				Configuration.the().registerConfigurableObject(this,
+						getClass().getSimpleName());
+			} catch (final ConfigurationException e) {
+				Log.error(e);
+			}
+		}
 
-	@Override
-	public void configurationChanged(final Group group)
-			throws ConfigurationException {
-		// nothing to do
-	}
+		@Override
+		@SuppressWarnings("synthetic-access")
+		public Group getSkeleton(final String groupName) {
+			return new Group(groupName).add(CFG_OPEN_TIMEOUT).add(
+					CFG_ANSWER_TIMEOUT).add(CFG_BAUDRATE);
+		}
 
-	@Override
-	public List<Group> configurationWriteback() throws ConfigurationException {
-		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
+		@Override
+		public void configurationAboutToBeChanged() {
+			// nothing to do
+		}
+
+		@Override
+		public void configurationChanged(final Group group) {
+			// nothing to do
+		}
+
+		@Override
+		public List<Group> configurationWriteback() {
+			return Configuration
+					.asList(getSkeleton(getClass().getSimpleName()));
+		}
+
 	}
 
 }

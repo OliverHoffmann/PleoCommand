@@ -150,6 +150,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			abortPipeThread();
 		}
 		try {
+			Configuration.the().unregisterConfigurableObject(this);
 			Configuration.the().writeToDefaultFile();
 		} catch (final ConfigurationException e) {
 			Log.error(e);

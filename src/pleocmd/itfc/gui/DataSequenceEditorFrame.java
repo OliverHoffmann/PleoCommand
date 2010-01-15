@@ -1,6 +1,8 @@
 package pleocmd.itfc.gui;
 
 import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -101,7 +103,13 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 		Log.detail("Creating DataSequenceEditorFrame");
 		setTitle("Edit Data Sequence");
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(final WindowEvent e) {
+				close();
+			}
+		});
 
 		// Add components
 		final Layouter lay = new Layouter(this);
@@ -218,7 +226,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 			@Override
 			public void run() {
 				saveChanges();
-				dispose();
+				close();
 			}
 		});
 		lay.addButton(Button.Apply, new Runnable() {
@@ -231,7 +239,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		lay.addButton(Button.Cancel, new Runnable() {
 			@Override
 			public void run() {
-				dispose();
+				close();
 			}
 		});
 
@@ -251,6 +259,15 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+	}
+
+	protected void close() {
+		try {
+			Configuration.the().unregisterConfigurableObject(this);
+		} catch (final ConfigurationException e) {
+			Log.error(e);
+		}
+		dispose();
 		HelpDialog.closeHelpIfOpen();
 	}
 
