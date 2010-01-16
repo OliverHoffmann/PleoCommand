@@ -2,6 +2,7 @@ package pleocmd.cfg;
 
 import java.util.List;
 
+import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
@@ -120,6 +121,24 @@ public abstract class ConfigValue {
 			return new ConfigPath(label, PathType.FileForWriting);
 
 		if ("bounds".equals(identifier)) return new ConfigBounds(label);
+
+		if ("list".equals(identifier))
+			return new ConfigCollection<String>(label, Type.List) {
+				@Override
+				protected String createItem(final String itemAsString)
+						throws ConfigurationException {
+					return itemAsString;
+				}
+			};
+
+		if ("set".equals(identifier))
+			return new ConfigCollection<String>(label, Type.Set) {
+				@Override
+				protected String createItem(final String itemAsString)
+						throws ConfigurationException {
+					return itemAsString;
+				}
+			};
 
 		// "str", "item", null
 		return new ConfigString(label, !singleLined);

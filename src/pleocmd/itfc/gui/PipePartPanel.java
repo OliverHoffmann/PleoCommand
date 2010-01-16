@@ -198,7 +198,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		final JPanel buttons = new JPanel();
 		final Layouter lb = new Layouter(buttons);
 
-		lay.addWholeLine(new JLabel(), true);
+		lay.addVerticalSpacer();
 		lay.addWholeLine(buttons, false);
 
 		lb

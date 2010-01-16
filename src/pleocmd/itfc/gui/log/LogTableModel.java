@@ -44,7 +44,7 @@ public final class LogTableModel extends AbstractTableModel {
 		case 1:
 			return list.get(rowIndex).getType().toString();
 		case 2:
-			return list.get(rowIndex).getCaller();
+			return list.get(rowIndex).getFormattedCaller();
 		case 3:
 			return list.get(rowIndex).getMsg();
 		default:
@@ -54,7 +54,6 @@ public final class LogTableModel extends AbstractTableModel {
 
 	@Override
 	public Object getValueAt(final int rowIndex, final int columnIndex) {
-		if (rowIndex >= list.size()) return null;
 		return new LogTableStyledCell(getCell(rowIndex, columnIndex),
 				columnIndex == 3, list.get(rowIndex).getTypeColor(),
 				getBackgroundColor(rowIndex, columnIndex), false, false);
@@ -62,7 +61,8 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private Color getBackgroundColor(final int rowIndex, final int columnIndex) {
 		if (columnIndex != 2) return null;
-		if (list.get(rowIndex).getCaller().startsWith(mark)) return CLR_MARK;
+		if (list.get(rowIndex).getFormattedCaller().startsWith(mark))
+			return CLR_MARK;
 		return null;
 	}
 
@@ -104,7 +104,7 @@ public final class LogTableModel extends AbstractTableModel {
 	}
 
 	public void setMark(final int index) {
-		mark = list.get(index).getCaller();
+		mark = list.get(index).getFormattedCaller();
 		table.repaint();
 	}
 

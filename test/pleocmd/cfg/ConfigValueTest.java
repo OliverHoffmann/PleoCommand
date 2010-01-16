@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
+import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 
@@ -251,6 +252,19 @@ public final class ConfigValueTest extends Testcases {
 				ConfigPath.class);
 		compareIdentifier(new ConfigString("foo", true), ConfigString.class);
 		compareIdentifier(new ConfigString("foo", false), ConfigString.class);
+		compareIdentifier(new ConfigCollection<String>("foo", Type.List) {
+			@Override
+			protected String createItem(final String itemAsString)
+					throws ConfigurationException {
+				return itemAsString;
+			}
+		}, ConfigCollection.class);
+		compareIdentifier(new ConfigCollection<String>("foo", Type.Set) {
+			@Override
+			protected String createItem(final String itemAsString)
+					throws ConfigurationException {
+				return itemAsString;
+			}
+		}, ConfigCollection.class);
 	}
-
 }

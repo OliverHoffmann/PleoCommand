@@ -14,6 +14,7 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.icons.IconLoader;
 
 public final class Layouter {
@@ -37,11 +38,17 @@ public final class Layouter {
 
 	private static final Map<Button, ButtonText> DEFAULT = new HashMap<Button, ButtonText>();
 
+	private static final int MAX_ROWS = 10 * 1024;
+
+	private static final int LAST_ROW = MAX_ROWS - 1;
+
 	private final Container container;
 
 	private final GridBagConstraints gbc;
 
 	private int span = 1;
+
+	private int gridYStored;
 
 	static {
 		DEFAULT.put(Button.Ok, new ButtonText("Ok", "dialog-ok",
@@ -100,7 +107,7 @@ public final class Layouter {
 		gbc.ipady = 0;
 	}
 
-	public Component getContainer() {
+	public Container getContainer() {
 		return container;
 	}
 
@@ -120,13 +127,33 @@ public final class Layouter {
 		newLine();
 	}
 
+	/**
+	 * The following components will always appear in the last row no matter how
+	 * many components will be inserted afterwards.<br>
+	 * This mode stops (and Components will be inserted on the current position
+	 * again) after {@link #newLine()} or
+	 * {@link #addWholeLine(Component, boolean)} or {@link #addVerticalSpacer()}
+	 * is invoked.
+	 */
+	public void nextComponentsAlwaysOnLastLine() {
+		gridYStored = gbc.gridy;
+		gbc.gridy = LAST_ROW;
+	}
+
 	public void newLine() {
 		gbc.gridx = 0;
-		++gbc.gridy;
+		if (gbc.gridy == LAST_ROW)
+			gbc.gridy = gridYStored;
+		else if (++gbc.gridy == LAST_ROW)
+			throw new InternalException("Too many rows in the Layouter");
 	}
 
 	public void addSpacer() {
 		add(new JLabel(), true);
+	}
+
+	public void addVerticalSpacer() {
+		addWholeLine(new JLabel(), true);
 	}
 
 	public JButton addButton(final Button button, final Runnable run) {
@@ -162,6 +189,10 @@ public final class Layouter {
 
 	public int getSpan() {
 		return span;
+	}
+
+	public void clear() {
+		container.removeAll();
 	}
 
 	public static Runnable help(final Window owner, final String category) {

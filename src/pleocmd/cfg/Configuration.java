@@ -58,7 +58,7 @@ import pleocmd.exc.ConfigurationException;
  * 		}
  * 		public void configurationChanged(final Group group) {
  * 		}
- * 		public List<Group> configurationWriteback() {
+ * 		public List&lt;Group&gt; configurationWriteback() {
  * 			return Configuration.asList(getSkeleton(getClass().getSimpleName()));
  * 		}
  * 	}

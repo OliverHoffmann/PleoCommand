@@ -11,6 +11,7 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.itfc.gui.ErrorDialog;
 import pleocmd.itfc.gui.MainFrame;
 
 /**
@@ -73,7 +74,7 @@ public final class Log {
 
 	private final Type type;
 
-	private final String caller;
+	private final StackTraceElement caller;
 
 	private final String msg;
 
@@ -81,13 +82,33 @@ public final class Log {
 
 	private final long time;
 
-	private Log(final Type type, final String caller, final String msg,
-			final Throwable backtrace) {
+	private Log(final Type type, final StackTraceElement caller,
+			final String msg, final Throwable backtrace) {
 		this.type = type;
 		this.caller = caller;
 		this.msg = msg;
 		this.backtrace = backtrace;
 		time = System.currentTimeMillis();
+		switch (type) {
+		case Error:
+			if (MainFrame.hasGUI()) {
+				MainFrame.the().getMainLogPanel().addLog(this);
+				ErrorDialog.show(this);
+			} else
+				System.err.println(toString()); // CS_IGNORE
+			break;
+		case Console:
+			System.out.println(msg); // CS_IGNORE
+			if (MainFrame.hasGUI())
+				MainFrame.the().getMainLogPanel().addLog(this);
+			break;
+		default:
+			if (MainFrame.hasGUI())
+				MainFrame.the().getMainLogPanel().addLog(this);
+			else
+				System.err.println(toString()); // CS_IGNORE
+			break;
+		}
 	}
 
 	/**
@@ -98,11 +119,20 @@ public final class Log {
 	}
 
 	/**
+	 * @return a {@link StackTraceElement} describing the method which created
+	 *         this log entry.
+	 */
+	public StackTraceElement getCaller() {
+		return caller;
+	}
+
+	/**
 	 * @return a {@link String} describing the class and method which created
 	 *         this log entry.
 	 */
-	public String getCaller() {
-		return caller;
+	public String getFormattedCaller() {
+		return String.format("%s.%s()", caller.getClassName().replaceFirst(
+				"^.*\\.([^.]*)$", "$1"), caller.getMethodName());
 	}
 
 	/**
@@ -185,15 +215,9 @@ public final class Log {
 				getTypeShortString(), caller, msg.replace("\n", "\n" + SPACES));
 	}
 
-	private static String getCallersName(final int stepsBack) {
-		return getCallersName(new Throwable(), stepsBack);
-	}
-
-	private static String getCallersName(final Throwable t, final int stepsBack) {
-		final StackTraceElement[] st = t.getStackTrace();
-		return String.format("%s.%s()", st.length < stepsBack ? "???"
-				: st[stepsBack].getClassName().replaceFirst("^.*\\.([^.]*)$",
-						"$1"), st[stepsBack].getMethodName());
+	private static StackTraceElement getCallerSTE(final int stepsBack) {
+		final StackTraceElement[] st = new Throwable().getStackTrace();
+		return st.length < stepsBack ? st[st.length - 1] : st[stepsBack];
 	}
 
 	/**
@@ -218,15 +242,11 @@ public final class Log {
 	 *            be zero)
 	 */
 	private static void msg(final Type type, final Throwable throwable,
-			final String caller, final String msg, final Object... args) {
-		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
-			final Log log = new Log(type, caller, args.length == 0 ? msg
-					: String.format(msg, args), throwable);
-			if (type == Type.Console) System.out.println(log.getMsg()); // CS_IGNORE
-			if (MainFrame.hasGUI())
-				MainFrame.the().getMainLogPanel().addLog(log);
-			else if (type != Type.Console) System.err.println(log.toString()); // CS_IGNORE
-		}
+			final StackTraceElement caller, final String msg,
+			final Object... args) {
+		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal())
+			new Log(type, caller, args.length == 0 ? msg : String.format(msg,
+					args), throwable);
 	}
 
 	/**
@@ -242,7 +262,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void detail(final String msg, final Object... args) {
-		msg(Type.Detail, null, getCallersName(2), msg, args);
+		msg(Type.Detail, null, getCallerSTE(2), msg, args);
 	}
 
 	/**
@@ -258,7 +278,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void info(final String msg, final Object... args) {
-		msg(Type.Info, null, getCallersName(2), msg, args);
+		msg(Type.Info, null, getCallerSTE(2), msg, args);
 	}
 
 	/**
@@ -274,7 +294,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void warn(final String msg, final Object... args) {
-		msg(Type.Warn, null, getCallersName(2), msg, args);
+		msg(Type.Warn, null, getCallerSTE(2), msg, args);
 	}
 
 	/**
@@ -290,7 +310,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void error(final String msg, final Object... args) {
-		msg(Type.Error, null, getCallersName(2), msg, args);
+		msg(Type.Error, null, getCallerSTE(2), msg, args);
 	}
 
 	/**
@@ -306,7 +326,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void consoleOut(final String msg, final Object... args) {
-		msg(Type.Console, null, getCallersName(2), msg, args);
+		msg(Type.Console, null, getCallerSTE(2), msg, args);
 	}
 
 	/**
@@ -359,7 +379,7 @@ public final class Log {
 			sb.append(" caused by ");
 		}
 
-		msg(Type.Error, throwable, getCallersName(t, 0), sb.toString());
+		msg(Type.Error, throwable, t.getStackTrace()[0], sb.toString());
 	}
 
 	/**

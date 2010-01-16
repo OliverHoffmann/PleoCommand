@@ -156,6 +156,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			Log.error(e);
 		}
 		dispose();
+		ErrorDialog.canDisposeIfHidden();
 		HelpDialog.closeHelpIfOpen();
 		Log.detail("GUI-Frame has been closed");
 	}
