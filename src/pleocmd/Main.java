@@ -25,8 +25,12 @@ public final class Main {
 
 	public static void main(final String[] args) {
 		try {
+			System.setProperty("java.library.path", System
+					.getProperty("java.library.path")
+					+ ":.");
 			System.setProperty("sun.awt.exception.handler",
 					MainExceptionHandler.class.getName());
+
 			if (args.length > 0)
 				CommandLine.the().parse(args);
 			else

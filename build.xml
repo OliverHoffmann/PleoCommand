@@ -12,7 +12,6 @@
 	<property name="jarfile" value="${ant.project.name}.jar" />
 	<property name="jarloc" location="${dist}/${jarfile}" />
 	<property name="exefile" value="${ant.project.name}.exe" />
-	<property name="exeloc" location="${dist}/${exefile}" />
 
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
@@ -84,11 +83,9 @@
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
 	<target name="dist" depends="build">
 		<delete file="${jarloc}" verbose="${verb}" />
-		<jar jarfile="${jarloc}"
-		     basedir="${bin}"
-		     duplicate="fail"
-		     includes="pleocmd/**"
-		     strict="warn">
+		<jar jarfile="${jarloc}" duplicate="fail" strict="warn">
+			<zipfileset dir="${bin}/pleocmd" prefix="pleocmd" />
+			<zipfileset src="${lib}/RXTXcomm.jar" />
 			<manifest>
 				<attribute name="Implementation-Vendor"
 				           value="Oliver Hoffmann" />
@@ -97,6 +94,7 @@
 				<attribute name="Implementation-Version"
 				           value="0.1 @ ${java.vm.name} ${os.name}-${os.version}" />
 				<attribute name="Main-Class" value="${mainclass}" />
+				<attribute name="Class-Path" value="." />
 			</manifest>
 		</jar>
 
@@ -127,8 +125,18 @@
 		<jsmoothgen skeletonroot="${lib}/skeletons"
 		            verbose="${verb}"
 		            project="${jsloc}" />
-		<move file="${bin}/${exefile}" tofile="${exeloc}" verbose="${verb}" />
-		<chmod file="${exeloc}" perm="ugo+rx" verbose="${verb}" />
+
+		<copy todir="${dist}" verbose="${verb}">
+			<fileset file="${bin}/${exefile}" />
+			<fileset file="${lib}/pleocommand" />
+			<fileset file="${lib}/librxtxSerial.so" />
+			<fileset file="${lib}/rxtxSerial.dll" />
+		</copy>
+		<chmod perm="ugo+rx" verbose="${verb}">
+			<fileset file="${dist}/pleocommand" />
+			<fileset file="${dist}/librxtxSerial.so" />
+			<fileset file="${dist}/${exefile}" />
+		</chmod>
 	</target>
 
 	<target name="rebuild" depends="clean, build, dist">
