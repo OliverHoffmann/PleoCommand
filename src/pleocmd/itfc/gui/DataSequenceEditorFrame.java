@@ -27,9 +27,15 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 
 import pleocmd.Log;
 import pleocmd.api.PleoCommunication;
@@ -78,6 +84,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 	private final JButton btnRemoveTrigger;
 
 	private final JTextPane tpDataSequence;
+
+	private final UndoManager tpUndoManager;
 
 	private final JButton btnCopyInput;
 
@@ -153,6 +161,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 				});
 
+		tpUndoManager = new UndoManager();
 		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
 		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
 				.getFontMetrics(tpDataSequence.getFont()).getHeight()));
@@ -162,6 +171,13 @@ public final class DataSequenceEditorFrame extends JDialog implements
 				updateState();
 			}
 		});
+		tpDataSequence.getDocument().addUndoableEditListener(
+				new UndoableEditListener() {
+					@Override
+					public void undoableEditHappened(final UndoableEditEvent e) {
+						addUndo(e.getEdit());
+					}
+				});
 
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
 				new JScrollPane(tpDataSequence));
@@ -276,8 +292,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		if (trigger == newTrigger) return;
 		writeTextPaneToMap();
 		trigger = (String) newTrigger;
-		updateState();
 		updateTextPaneFromMap();
+		updateState();
 	}
 
 	protected void updateTriggerModel() {
@@ -454,14 +470,27 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		}
 	}
 
-	public void undo() {
-		// TODO Auto-generated method stub
+	protected void addUndo(final UndoableEdit edit) {
+		if (edit.isSignificant()) {
+			tpUndoManager.addEdit(edit);
+			updateState();
+		}
+	}
 
+	public void undo() {
+		try {
+			tpUndoManager.undo();
+		} catch (final CannotUndoException e) {
+			Log.error(e);
+		}
 	}
 
 	public void redo() {
-		// TODO Auto-generated method stub
-
+		try {
+			tpUndoManager.redo();
+		} catch (final CannotRedoException e) {
+			Log.error(e);
+		}
 	}
 
 	public void saveChanges() {
@@ -505,6 +534,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 						doc.insertString(doc.getLength(), data.toString()
 								+ "\n", null);
 			}
+			tpUndoManager.discardAllEdits();
 		} catch (final BadLocationException e) {
 			Log.error(e);
 		}
@@ -521,8 +551,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		btnAddFile.setEnabled(trigger != null);
 		btnPlaySel.setEnabled(tpDataSequence.getSelectedText() != null);
 		btnPlayAll.setEnabled(tpDataSequence.getDocument().getLength() > 0);
-		btnUndo.setEnabled(false);// TODO
-		btnRedo.setEnabled(false); // TODO
+		btnUndo.setEnabled(tpUndoManager.canUndo());
+		btnRedo.setEnabled(tpUndoManager.canRedo());
 	}
 
 	@Override
