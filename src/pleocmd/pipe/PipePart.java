@@ -130,6 +130,7 @@ public abstract class PipePart extends StateHandling {
 					newPipe, pipe));
 
 		pipe = newPipe;
+		Log.detail("Connected '%s' to '%s'", this, pipe);
 	}
 
 	final void disconnectedFromPipe(final Pipe curPipe) {
@@ -147,6 +148,7 @@ public abstract class PipePart extends StateHandling {
 					curPipe, pipe));
 
 		pipe = null;
+		Log.detail("Disconnected '%s' from '%s'", this, curPipe);
 	}
 
 }

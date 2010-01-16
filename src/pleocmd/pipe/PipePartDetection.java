@@ -65,6 +65,8 @@ public final class PipePartDetection {
 				+ subPackage;
 
 		// Get all paths which may contain classes for this package
+		Log.detail("Searching PipeParts of sub-package '%s' resolved to '%s'",
+				subPackage, pkg);
 		Enumeration<URL> resources;
 		try {
 			resources = Thread.currentThread().getContextClassLoader()
@@ -83,6 +85,7 @@ public final class PipePartDetection {
 			} catch (final UnsupportedEncodingException e) {
 				throw new InternalException("UTF-8 encoding not supported");
 			}
+			Log.detail("Found resource path '%s'", path);
 			final File dir = new File(path);
 			if (dir.isDirectory())
 				addFromDirectory(res, pkg, dir);
@@ -93,11 +96,13 @@ public final class PipePartDetection {
 						"Don't know how to list the contents of the "
 								+ "resource-path '%s'", path));
 		}
+		Log.detail("Searching resulted in '%s'", res);
 		return res;
 	}
 
 	private static <E extends PipePart> void addFromDirectory(
 			final List<Class<E>> list, final String pkg, final File dir) {
+		Log.detail("Looking in directory '%s'", dir);
 		final File[] files = dir.listFiles();
 		if (files == null)
 			Log.error("Cannot list the contents of "
@@ -111,13 +116,17 @@ public final class PipePartDetection {
 
 	private static <E extends PipePart> void addFromArchive(
 			final List<Class<E>> list, final String pkg, final String path) {
+		Log.detail("Looking in archive '%s'", path);
 		String jarPath = path.substring(5);
 		final String jarPrefix = jarPath
 				.substring(jarPath.lastIndexOf('!') + 2);
+		Log.detail("Using prefix '%s'", jarPrefix);
 		jarPath = jarPath.substring(0, jarPath.lastIndexOf('!'));
 		try {
 			final JarFile jar = new JarFile(new File(jarPath));
 			final Enumeration<JarEntry> content = jar.entries();
+			Log.detail("Archive '%s' contains %d entries", jar.getName(), jar
+					.size());
 
 			while (content.hasMoreElements()) {
 				final JarEntry entry = content.nextElement();
@@ -137,6 +146,7 @@ public final class PipePartDetection {
 	@SuppressWarnings("unchecked")
 	private static <E extends PipePart> Class<E> loadClass(final String pkg,
 			final String fileName) {
+		Log.detail("Loading class from '%s' in '%s'", fileName, pkg);
 		if (!fileName.endsWith(".class")) return null;
 		final String clsName = fileName.substring(0, fileName.length() - 6);
 		try {
