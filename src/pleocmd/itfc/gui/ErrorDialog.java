@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -75,8 +76,8 @@ public final class ErrorDialog extends JDialog implements
 		layErrorPanel.nextComponentsAlwaysOnLastLine();
 		layErrorPanel.addVerticalSpacer();
 		final JScrollPane sp = new JScrollPane(panel,
-				ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
-				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		lay.addWholeLine(sp, true);
 		sp.setBorder(null);
 
@@ -88,12 +89,14 @@ public final class ErrorDialog extends JDialog implements
 					}
 				});
 		lay.addSpacer();
-		lay.addButton(Button.Ok, new Runnable() {
+		final JButton btn = lay.addButton(Button.Ok, new Runnable() {
 			@Override
 			public void run() {
 				close();
 			}
 		});
+		getRootPane().setDefaultButton(btn);
+		btn.requestFocusInWindow();
 
 		setAlwaysOnTop(true);
 
@@ -155,10 +158,11 @@ public final class ErrorDialog extends JDialog implements
 			}
 		});
 
-		if (++errorCount <= 5 || !isVisible()) {
-			pack();
-			setLocationRelativeTo(null);
-		}
+		++errorCount;
+		final Dimension pref = getPreferredSize();
+		setSize(Math.max(getWidth(), pref.width), errorCount <= 5 ? pref.height
+				: getHeight());
+		setLocationRelativeTo(null);
 		setVisible(true);
 	}
 

@@ -41,12 +41,12 @@ public final class HelpDialog extends JDialog {
 		lay.addWholeLine(new JScrollPane(tpHelp), true);
 
 		lay.addSpacer();
-		lay.addButton(Button.Ok, new Runnable() {
+		getRootPane().setDefaultButton(lay.addButton(Button.Ok, new Runnable() {
 			@Override
 			public void run() {
 				closeHelp();
 			}
-		});
+		}));
 
 		setSize(300, Toolkit.getDefaultToolkit().getScreenSize().height);
 		setLocation(0, 0);
