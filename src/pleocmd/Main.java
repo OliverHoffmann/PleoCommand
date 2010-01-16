@@ -1,18 +1,20 @@
 package pleocmd;
 
+import java.awt.EventQueue;
+
 import pleocmd.itfc.cli.CommandLine;
 import pleocmd.itfc.gui.MainFrame;
 
 /**
  * TODO: List of tasks:<br>
  * make all Data timed Data before writing to Output<br>
- * only enable InputPanel if a ConsoleInput is in the pipe<br>
  * checkstyle: no exception handling in pipe's, only pass them thru<br>
  * implement DataFilter<br>
  * check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)<br>
  * add javadoc<br>
  * <br>
  * more Log.debug<br>
+ * display power status<br>
  */
 
 public final class Main {
@@ -22,23 +24,22 @@ public final class Main {
 	}
 
 	public static void main(final String[] args) {
-		System.setProperty("sun.awt.exception.handler",
-				MainExceptionHandler.class.getName());
-		if (args.length > 0)
-			CommandLine.the().parse(args);
-		else
-			new Thread(new ThreadGroup("Exception-handling Group") {
-				@Override
-				public void uncaughtException(final Thread thread,
-						final Throwable thrown) {
-					new MainExceptionHandler().handle(thrown);
-				}
-			}, "GUI-Thread") {
-				@Override
-				public void run() {
-					MainFrame.the().showModalGUI();
-				}
-			}.start();
+		try {
+			System.setProperty("sun.awt.exception.handler",
+					MainExceptionHandler.class.getName());
+			if (args.length > 0)
+				CommandLine.the().parse(args);
+			else
+				EventQueue.invokeAndWait(new Runnable() {
+					@Override
+					public void run() {
+						MainFrame.the().showModalGUI();
+					}
+				});
+		} catch (final Throwable t) { // CS_IGNORE catch all here
+			t.printStackTrace(); // CS_IGNORE logging may not work here
+			Log.error(t);
+		}
 	}
 
 }
