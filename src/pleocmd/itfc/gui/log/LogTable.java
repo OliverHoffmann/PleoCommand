@@ -66,7 +66,12 @@ public final class LogTable extends JTable {
 		updateTask = new TimerTask() {
 			@Override
 			public void run() {
-				updateRowHeights();
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						updateRowHeights();
+					}
+				});
 			}
 		};
 		timer.schedule(updateTask, 200);
