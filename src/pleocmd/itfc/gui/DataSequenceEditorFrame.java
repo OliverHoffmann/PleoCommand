@@ -1,6 +1,7 @@
 package pleocmd.itfc.gui;
 
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -162,7 +163,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 				});
 
 		tpUndoManager = new UndoManager();
-		tpDataSequence = new JTextPane(); // TODO add syntax highlighting
+		tpDataSequence = new JTextPane();
 		tpDataSequence.setPreferredSize(new Dimension(0, 10 * tpDataSequence
 				.getFontMetrics(tpDataSequence.getFont()).getHeight()));
 		tpDataSequence.addCaretListener(new CaretListener() {
@@ -178,6 +179,10 @@ public final class DataSequenceEditorFrame extends JDialog implements
 						addUndo(e.getEdit());
 					}
 				});
+		tpDataSequence.setEditorKitForContentType("text/datasequence",
+				new DataSequenceEditorKit());
+		tpDataSequence.setContentType("text/datasequence");
+		tpDataSequence.setFont(tpDataSequence.getFont().deriveFont(Font.BOLD));
 
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
 				new JScrollPane(tpDataSequence));
