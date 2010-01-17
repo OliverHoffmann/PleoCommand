@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
 import pleocmd.Log;
@@ -99,6 +100,7 @@ public final class ErrorDialog extends JDialog implements
 		btn.requestFocusInWindow();
 
 		setAlwaysOnTop(true);
+		setModal(true);
 
 		try {
 			Configuration.the().registerConfigurableObject(this,
@@ -126,7 +128,8 @@ public final class ErrorDialog extends JDialog implements
 		final String caller = log.getCaller().toString();
 		if (cfgSuppressed.contains(caller)) return;
 
-		final JLabel lblT, lblC, lblM;
+		final JLabel lblT, lblC;
+		final JTextArea lblM;
 		final JCheckBox cbS;
 		if (errorCount > 0)
 			layErrorPanel.addWholeLine(new JSeparator(), false);
@@ -135,12 +138,13 @@ public final class ErrorDialog extends JDialog implements
 		layErrorPanel.addSpacer();
 		layErrorPanel.add(cbS = new JCheckBox("Suppress"), false);
 		layErrorPanel.newLine();
-		layErrorPanel.addWholeLine(lblM = new JLabel("<html>" + log.getMsg()
-				+ "</html>"), false);
+		layErrorPanel.addWholeLine(lblM = new JTextArea(log.getMsg()), false);
 
+		lblM.setLineWrap(true);
+		lblM.setWrapStyleWord(true);
+		lblM.setEditable(false);
+		lblM.setOpaque(false);
 		lblM.setForeground(Color.RED);
-		lblM.setPreferredSize(new Dimension(0,
-				lblM.getPreferredSize().height * 3));
 
 		map.put(cbS, caller);
 		cbS.addActionListener(new ActionListener() {
