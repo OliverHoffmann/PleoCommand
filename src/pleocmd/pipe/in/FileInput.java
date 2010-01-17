@@ -4,6 +4,10 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
@@ -12,6 +16,7 @@ import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.DataFileEditFrame;
 import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input {
@@ -25,6 +30,17 @@ public final class FileInput extends Input {
 	public FileInput() {
 		addConfig(cfgFile = new ConfigPath("File", PathType.FileForReading));
 		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.class));
+		cfgFile.setFileFilter(Arrays.asList(new FileFilter[] {
+				new FileNameExtensionFilter("Ascii-Textfiles", "txt"),
+				new FileNameExtensionFilter("Pleo Ascii Data", "pad"),
+				new FileNameExtensionFilter("Pleo Binary Data", "pbd") }));
+		cfgFile.setModifyFile(new Runnable() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void run() {
+				new DataFileEditFrame(cfgFile.getContent()).freeResources();
+			}
+		});
 		constructed();
 	}
 

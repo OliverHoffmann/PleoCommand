@@ -2,10 +2,12 @@ package pleocmd.cfg;
 
 import java.awt.Container;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -23,7 +25,13 @@ public final class ConfigPath extends ConfigValue {
 
 	private final PathType type;
 
+	private Runnable modifyFile;
+
 	private JTextField tf;
+
+	private boolean acceptAllFileFilter = true;
+
+	private final List<FileFilter> filters = new ArrayList<FileFilter>();
 
 	public ConfigPath(final String label, final PathType type) {
 		super(label);
@@ -130,11 +138,23 @@ public final class ConfigPath extends ConfigValue {
 				selectPath(lay.getContainer().getParent());
 			}
 		});
+		if (modifyFile != null)
+			lay.addButton(Button.Modify, "Edit the selected file",
+					new Runnable() {
+						@Override
+						public void run() {
+							setFromGUIComponents();
+							if (getModifyFile() != null) getModifyFile().run();
+						}
+					});
 	}
 
 	protected void selectPath(final Container parent) {
 		final JFileChooser fc = new JFileChooser(getContent());
-		// TODO file extensioon?
+		fc.setAcceptAllFileFilterUsed(acceptAllFileFilter);
+		for (final FileFilter filter : filters)
+			fc.addChoosableFileFilter(filter);
+
 		switch (type) {
 		case FileForReading:
 			if (fc.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION)
@@ -161,6 +181,55 @@ public final class ConfigPath extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	/**
+	 * Sets the method which will be invoked if the user clicks on "Modify".<br>
+	 * If <b>null</b> the "Modify" button will not be available.
+	 * 
+	 * @param modifyFile
+	 *            {@link Runnable} or <b>null</b>
+	 */
+	public void setModifyFile(final Runnable modifyFile) {
+		this.modifyFile = modifyFile;
+	}
+
+	/**
+	 * @return {@link Runnable} invoked after the user clicked on "Modify" or
+	 *         <b>null</b>
+	 */
+	public Runnable getModifyFile() {
+		return modifyFile;
+	}
+
+	/**
+	 * Sets the list of {@link FileFilter}s available in the file selection
+	 * dialog via {@link JFileChooser}.
+	 * 
+	 * @param filters
+	 *            {@link List} of {@link FileFilter}
+	 */
+	public void setFileFilter(final List<FileFilter> filters) {
+		this.filters.clear();
+		this.filters.addAll(filters);
+	}
+
+	/**
+	 * Determines whether the "Accept All" {@link FileFilter} is used as an
+	 * available choice in the file selection dialog via {@link JFileChooser}.
+	 * 
+	 * @param acceptAllFileFilter
+	 *            whether to accept all files
+	 */
+	public void setAcceptAllFileFilter(final boolean acceptAllFileFilter) {
+		this.acceptAllFileFilter = acceptAllFileFilter;
+	}
+
+	/**
+	 * @return true if "Accept All" {@link FileFilter} will be available
+	 */
+	public boolean isAcceptAllFileFilter() {
+		return acceptAllFileFilter;
 	}
 
 }

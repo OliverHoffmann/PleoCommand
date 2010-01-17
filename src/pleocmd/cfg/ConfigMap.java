@@ -186,7 +186,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	@Override
 	public final void insertGUIComponents(final Layouter lay) {
 		lay.add(shortDescription = new JLabel(asString()), false);
-		lay.addButton(Button.Modify, "Modifies the map", new Runnable() {
+		lay.addButton(Button.Modify, "Modify the map", new Runnable() {
 			@Override
 			public void run() {
 				modifiyMapViaGUI();
