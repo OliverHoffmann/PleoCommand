@@ -101,6 +101,7 @@ public abstract class ConfigValue {
 								+ "no line must equal '}': '%s'", str);
 	}
 
+	// CS_IGNORE_NEXT NPath complexity - just a listing
 	public static ConfigValue createValue(final String identifier,
 			final String label, final boolean singleLined) {
 		if ("int".equals(identifier)) return new ConfigInt(label);

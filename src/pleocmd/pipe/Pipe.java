@@ -515,7 +515,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					Log.info("Skipping one data block from input '%s'", in);
 				// try next data packet / try from next input
 				continue;
-			} catch (final Throwable e) {
+			} catch (final Throwable e) { // CS_IGNORE catch any Input-problems
 				Log.error(e);
 				feedback.addError(e, false);
 				Log.info("Skipping one data block from input '%s'", in);

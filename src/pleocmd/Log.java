@@ -244,9 +244,11 @@ public final class Log {
 	private static void msg(final Type type, final Throwable throwable,
 			final StackTraceElement caller, final String msg,
 			final Object... args) {
-		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal())
-			new Log(type, caller, args.length == 0 ? msg : String.format(msg,
-					args), throwable);
+		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
+			final String msgStr = args.length == 0 ? msg : String.format(msg,
+					args);
+			new Log(type, caller, msgStr, throwable);
+		}
 	}
 
 	/**

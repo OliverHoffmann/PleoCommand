@@ -64,7 +64,6 @@ public final class TcpIpInput extends Input {
 	}
 
 	public static String help(final HelpKind kind) {
-		// TODO
 		switch (kind) {
 		case Name:
 			return "TCP/IP Input";
