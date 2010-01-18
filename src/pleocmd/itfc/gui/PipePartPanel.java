@@ -46,8 +46,6 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 	private final JButton btnClear;
 
-	private boolean okPressed;
-
 	public PipePartPanel(final List<Class<E>> availableParts) {
 		this.availableParts = availableParts;
 
@@ -139,7 +137,12 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 	public void addPipePart(final Class<E> part) {
 		try {
 			final E pp = part.newInstance();
-			if (createConfigureDialog("Add", pp)) tableModel.addPipePart(pp);
+			createConfigureDialog("Add", pp, new Runnable() {
+				@Override
+				public void run() {
+					getTableModel().addPipePart(pp);
+				}
+			});
 		} catch (final InstantiationException e) {
 			Log.error(e);
 		} catch (final IllegalAccessException e) {
@@ -155,7 +158,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 	}
 
 	public void modifyPipePart(final int index) {
-		createConfigureDialog("Configure", tableModel.getPipePart(index));
+		createConfigureDialog("Configure", tableModel.getPipePart(index), null);
 	}
 
 	public void movePipePartUp(final int indexOld, final int indexNew) {
@@ -169,10 +172,13 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 		return tableModel;
 	}
 
-	public boolean createConfigureDialog(final String prefix, final PipePart pp) {
+	public void createConfigureDialog(final String prefix, final PipePart pp,
+			final Runnable runIfOK) {
 		// no need to configure if no values assigned
-		if (pp.getGroup().isEmpty()) return true;
-		okPressed = false;
+		if (pp.getGroup().isEmpty()) {
+			runIfOK.run();
+			return;
+		}
 
 		final JDialog dlg = new JDialog();
 		dlg.setTitle(String.format("%s %s", prefix, pp));
@@ -211,6 +217,7 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 					public void run() {
 						saveConfigChanges(pp);
 						dlg.dispose();
+						if (runIfOK != null) runIfOK.run();
 					}
 				}));
 		lb.addButton(Button.Apply, new Runnable() {
@@ -228,12 +235,10 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 
 		dlg.pack();
 		dlg.setLocationRelativeTo(null);
-		dlg.setModal(true);
+		// dlg.setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		dlg.setVisible(true);
 		HelpDialog.closeHelpIfOpen();
-
-		return okPressed;
 	}
 
 	protected void saveConfigChanges(final PipePart pp) {
@@ -241,7 +246,6 @@ public final class PipePartPanel<E extends PipePart> extends JPanel {
 			for (final ConfigValue v : pp.getGroup().getValueMap().values())
 				v.setFromGUIComponents();
 			pp.configure();
-			okPressed = true;
 		} catch (final PipeException e) {
 			Log.error(e);
 		}

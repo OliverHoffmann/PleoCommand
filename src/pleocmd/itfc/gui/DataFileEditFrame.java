@@ -57,7 +57,7 @@ public final class DataFileEditFrame extends JDialog implements
 		}
 
 		Log.detail("DataFileEditFrame created");
-		setModal(true);
+		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
 	}

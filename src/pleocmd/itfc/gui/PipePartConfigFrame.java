@@ -4,6 +4,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
 
@@ -33,6 +34,10 @@ public final class PipePartConfigFrame extends JDialog implements
 	private final PipePartPanel<Converter> pppConverter;
 
 	private final PipePartPanel<Output> pppOutput;
+
+	private final JButton btnOk;
+
+	private final JButton btnApply;
 
 	public PipePartConfigFrame() {
 		pppInput = new PipePartPanel<Input>(PipePartDetection.ALL_INPUT);
@@ -65,14 +70,15 @@ public final class PipePartConfigFrame extends JDialog implements
 		lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
 		lay.addSpacer();
-		getRootPane().setDefaultButton(lay.addButton(Button.Ok, new Runnable() {
+		btnOk = lay.addButton(Button.Ok, new Runnable() {
 			@Override
 			public void run() {
 				applyChanges();
 				close();
 			}
-		}));
-		lay.addButton(Button.Apply, new Runnable() {
+		});
+		getRootPane().setDefaultButton(btnOk);
+		btnApply = lay.addButton(Button.Apply, new Runnable() {
 			@Override
 			public void run() {
 				applyChanges();
@@ -96,7 +102,7 @@ public final class PipePartConfigFrame extends JDialog implements
 		}
 
 		Log.detail("Config-Frame created");
-		setModal(true);
+		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
 	}
@@ -151,6 +157,11 @@ public final class PipePartConfigFrame extends JDialog implements
 	public List<Group> configurationWriteback() {
 		cfgBounds.setContent(getBounds());
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
+	}
+
+	public void updateState() {
+		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
+		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
 	}
 
 }

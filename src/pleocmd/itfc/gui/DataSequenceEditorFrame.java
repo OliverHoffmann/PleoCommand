@@ -146,7 +146,7 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		updateState();
 
 		Log.detail("DataSequenceEditorFrame created");
-		setModal(true);
+		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
 	}

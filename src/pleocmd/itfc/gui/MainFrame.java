@@ -212,6 +212,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		getMainPipePanel().updateState();
 		getMainLogPanel().updateState();
 		getMainInputPanel().updateState();
+		// TODO update PipePartConfigFrame
 	}
 
 	private void updateStatusLabel() {
