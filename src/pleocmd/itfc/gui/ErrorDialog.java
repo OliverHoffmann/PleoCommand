@@ -40,6 +40,8 @@ public final class ErrorDialog extends JDialog implements
 
 	private final Layouter layErrorPanel;
 
+	private final JScrollPane spErrorPanel;
+
 	private boolean canDisposeIfHidden;
 
 	private int errorCount;
@@ -76,11 +78,11 @@ public final class ErrorDialog extends JDialog implements
 		layErrorPanel = new Layouter(panel);
 		layErrorPanel.nextComponentsAlwaysOnLastLine();
 		layErrorPanel.addVerticalSpacer();
-		final JScrollPane sp = new JScrollPane(panel,
+		spErrorPanel = new JScrollPane(panel,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		lay.addWholeLine(sp, true);
-		sp.setBorder(null);
+		lay.addWholeLine(spErrorPanel, true);
+		spErrorPanel.setBorder(null);
 
 		lay.addButton("Reset", "",
 				"Clears the list of suppressed error messages", new Runnable() {
@@ -164,8 +166,11 @@ public final class ErrorDialog extends JDialog implements
 
 		++errorCount;
 		final Dimension pref = getPreferredSize();
-		setSize(Math.max(getWidth(), pref.width), errorCount <= 5 ? pref.height
-				: getHeight());
+		if (errorCount > 5) {
+			pref.height = getHeight();
+			pref.width += spErrorPanel.getVerticalScrollBar().getWidth();
+		}
+		setSize(pref);
 		setLocationRelativeTo(null);
 		setVisible(true);
 	}
@@ -212,6 +217,7 @@ public final class ErrorDialog extends JDialog implements
 		layErrorPanel.clear();
 		layErrorPanel.nextComponentsAlwaysOnLastLine();
 		layErrorPanel.addVerticalSpacer();
+		pack();
 		if (canDisposeIfHidden)
 			dispose();
 		else
