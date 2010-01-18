@@ -103,6 +103,7 @@ public final class ErrorDialog extends JDialog implements
 
 		setAlwaysOnTop(true);
 		setModal(true);
+		pack();
 
 		try {
 			Configuration.the().registerConfigurableObject(this,
