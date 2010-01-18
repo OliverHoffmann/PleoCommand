@@ -7,8 +7,10 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JSplitPane;
+import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
@@ -47,9 +49,11 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private final JSplitPane splitPane;
 
-	private final JButton btnExit;
-
 	private final JButton btnHelp;
+
+	private final JLabel lblStatus;
+
+	private final JButton btnExit;
 
 	private Thread pipeThread;
 
@@ -90,7 +94,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 		btnHelp = lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
-		lay.addSpacer();
+		lblStatus = new JLabel("...", SwingConstants.CENTER);
+		lay.add(lblStatus, true);
 		btnExit = lay.addButton("Exit", "application-exit",
 				"Cancels running pipe (if any) and exits the application",
 				new Runnable() {
@@ -109,6 +114,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			Log.error(e);
 		}
 
+		updateStatusLabel();
 		Log.detail("GUI-Frame created");
 	}
 
@@ -206,6 +212,10 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		getMainPipePanel().updateState();
 		getMainLogPanel().updateState();
 		getMainInputPanel().updateState();
+	}
+
+	private void updateStatusLabel() {
+		lblStatus.setText("Battery power: ???"); // TODO
 	}
 
 	protected synchronized void resetPipeThread() {
