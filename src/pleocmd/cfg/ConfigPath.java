@@ -5,11 +5,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.filechooser.FileFilter;
 
 import pleocmd.Log;
+import pleocmd.RunnableWithArgument;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
@@ -25,7 +29,7 @@ public final class ConfigPath extends ConfigValue {
 
 	private final PathType type;
 
-	private Runnable modifyFile;
+	private RunnableWithArgument modifyFile;
 
 	private JTextField tf;
 
@@ -138,15 +142,25 @@ public final class ConfigPath extends ConfigValue {
 				selectPath(lay.getContainer().getParent());
 			}
 		});
-		if (modifyFile != null)
-			lay.addButton(Button.Modify, "Edit the selected file",
-					new Runnable() {
+		if (modifyFile != null) {
+			final JButton btnModify = lay.addButton(Button.Modify,
+					"Edit the selected file", new Runnable() {
 						@Override
+						@SuppressWarnings("synthetic-access")
 						public void run() {
-							setFromGUIComponents();
-							if (getModifyFile() != null) getModifyFile().run();
+							if (getModifyFile() != null)
+								getModifyFile().run(tf.getText());
 						}
 					});
+			btnModify.setEnabled(!tf.getText().isEmpty());
+			tf.addCaretListener(new CaretListener() {
+				@Override
+				@SuppressWarnings("synthetic-access")
+				public void caretUpdate(final CaretEvent e) {
+					btnModify.setEnabled(!tf.getText().isEmpty());
+				}
+			});
+		}
 	}
 
 	protected void selectPath(final Container parent) {
@@ -190,7 +204,7 @@ public final class ConfigPath extends ConfigValue {
 	 * @param modifyFile
 	 *            {@link Runnable} or <b>null</b>
 	 */
-	public void setModifyFile(final Runnable modifyFile) {
+	public void setModifyFile(final RunnableWithArgument modifyFile) {
 		this.modifyFile = modifyFile;
 	}
 
@@ -198,7 +212,7 @@ public final class ConfigPath extends ConfigValue {
 	 * @return {@link Runnable} invoked after the user clicked on "Modify" or
 	 *         <b>null</b>
 	 */
-	public Runnable getModifyFile() {
+	public RunnableWithArgument getModifyFile() {
 		return modifyFile;
 	}
 

@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
+import pleocmd.RunnableWithArgument;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.ConfigPath.PathType;
@@ -34,11 +35,12 @@ public final class FileInput extends Input {
 				new FileNameExtensionFilter("Ascii-Textfiles", "txt"),
 				new FileNameExtensionFilter("Pleo Ascii Data", "pad"),
 				new FileNameExtensionFilter("Pleo Binary Data", "pbd") }));
-		cfgFile.setModifyFile(new Runnable() {
+		cfgFile.setModifyFile(new RunnableWithArgument() {
 			@Override
-			@SuppressWarnings("synthetic-access")
-			public void run() {
-				new DataFileEditFrame(cfgFile.getContent()).freeResources();
+			public Object run(final Object... args) {
+				new DataFileEditFrame(new File((String) args[0]))
+						.freeResources();
+				return null;
 			}
 		});
 		constructed();
