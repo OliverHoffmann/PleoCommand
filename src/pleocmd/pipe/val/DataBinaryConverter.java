@@ -1,12 +1,12 @@
-package pleocmd.pipe.data;
+package pleocmd.pipe.val;
 
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
 import pleocmd.Log;
-import pleocmd.pipe.val.Value;
-import pleocmd.pipe.val.ValueType;
+import pleocmd.pipe.data.AbstractDataConverter;
+import pleocmd.pipe.data.Data;
 
 /**
  * Helper class for converting {@link Data} objects from and to binary.

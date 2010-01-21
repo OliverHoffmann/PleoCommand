@@ -20,7 +20,7 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	public void readFromBinary(final DataInput in) throws IOException {
+	void readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
 		case Int8:
 			val = in.readByte();
@@ -43,7 +43,7 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	public void writeToBinary(final DataOutput out) throws IOException {
+	void writeToBinary(final DataOutput out) throws IOException {
 		switch (getType()) {
 		case Int8:
 			out.writeByte((int) val);
@@ -66,13 +66,12 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	public void readFromAscii(final byte[] in, final int len)
-			throws IOException {
+	void readFromAscii(final byte[] in, final int len) throws IOException {
 		val = Double.valueOf(new String(in, 0, len, "US-ASCII"));
 	}
 
 	@Override
-	public void writeToAscii(final DataOutput out) throws IOException {
+	void writeToAscii(final DataOutput out) throws IOException {
 		out.write(String.valueOf(val).getBytes("US-ASCII"));
 	}
 
@@ -92,7 +91,7 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	public boolean mustWriteAsciiAsHex() {
+	boolean mustWriteAsciiAsHex() {
 		return false;
 	}
 

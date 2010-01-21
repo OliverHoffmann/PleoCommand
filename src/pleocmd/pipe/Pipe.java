@@ -81,6 +81,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
 			60000);
 
+	// TODO use a notify on the Output-Thread everytime a DataBlock is available
+	// to avoid the need for sleeping in the DataQueue if currently empty?
 	/**
 	 * Number of milliseconds to wait until data is available in
 	 * {@link DataQueue#get(long)}.

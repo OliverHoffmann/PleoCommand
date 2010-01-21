@@ -1,4 +1,4 @@
-package pleocmd.pipe.data;
+package pleocmd.pipe.val;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -9,8 +9,8 @@ import java.io.IOException;
 import pleocmd.Log;
 import pleocmd.exc.InternalException;
 import pleocmd.pipe.Pipe;
-import pleocmd.pipe.val.Value;
-import pleocmd.pipe.val.ValueType;
+import pleocmd.pipe.data.AbstractDataConverter;
+import pleocmd.pipe.data.Data;
 
 /**
  * Helper class for converting {@link Data} objects from and to Ascii.

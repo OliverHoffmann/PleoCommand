@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-import pleocmd.pipe.data.DataAsciiConverter;
 
 public final class BinaryValue extends Value {
 

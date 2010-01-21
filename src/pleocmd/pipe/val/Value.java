@@ -8,7 +8,9 @@ import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
 
 /**
- * Contains one (of possibly more) information from a {@link Data}.
+ * Contains one (of possibly more) information from a {@link Data}.<br>
+ * This class is immutable as long as {@link #set(String)} is not called
+ * directly from the user.
  * 
  * @author oliver
  */
@@ -109,7 +111,7 @@ public abstract class Value {
 		}
 	}
 
-	public static ValueType detectFromTypeChar(final char c, final int index)
+	static ValueType detectFromTypeChar(final char c, final int index)
 			throws IOException {
 		if (c == IntValue.TYPE_CHAR) return IntValue.RECOMMENDED_TYPE;
 		if (c == FloatValue.TYPE_CHAR) return FloatValue.RECOMMENDED_TYPE;
@@ -120,7 +122,7 @@ public abstract class Value {
 				index));
 	}
 
-	public static int getAsciiTypeChar(final Value value) {
+	static int getAsciiTypeChar(final Value value) {
 		try {
 			return (Character) value.getClass().getDeclaredField("TYPE_CHAR")
 					.get(null);
@@ -131,20 +133,46 @@ public abstract class Value {
 		}
 	}
 
-	public abstract void readFromBinary(final DataInput in) throws IOException;
+	/**
+	 * Should only be called from {@link DataBinaryConverter}.
+	 * 
+	 * @param in
+	 *            from which to read the {@link Value} in binary form.
+	 * @throws IOException
+	 *             if reading failed
+	 */
+	abstract void readFromBinary(final DataInput in) throws IOException;
 
-	public abstract void writeToBinary(final DataOutput out) throws IOException;
+	abstract void writeToBinary(final DataOutput out) throws IOException;
 
-	public abstract void readFromAscii(final byte[] in, int len)
-			throws IOException;
+	/**
+	 * Should only be called from {@link DataAsciiConverter}.
+	 * 
+	 * @param in
+	 *            from which to read the {@link Value} in ISO-8859-1 form
+	 * @param len
+	 *            the length in bytes of the valid part of "in"
+	 * @throws IOException
+	 *             if reading failed
+	 */
+	abstract void readFromAscii(final byte[] in, int len) throws IOException;
 
-	public abstract void writeToAscii(DataOutput out) throws IOException;
+	abstract void writeToAscii(DataOutput out) throws IOException;
 
 	@Override
 	public abstract String toString();
 
-	public abstract boolean mustWriteAsciiAsHex();
+	abstract boolean mustWriteAsciiAsHex();
 
+	/**
+	 * Must only be used from test cases.
+	 * 
+	 * @param content
+	 *            the new content
+	 * @return the {@link Value} itself
+	 * @throws IOException
+	 *             if the new content is invalid
+	 */
 	public abstract Value set(final String content) throws IOException;
 
 	@Override

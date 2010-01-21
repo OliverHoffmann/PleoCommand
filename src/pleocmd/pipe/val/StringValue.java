@@ -56,7 +56,7 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	public void readFromBinary(final DataInput in) throws IOException {
+	void readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
 		case UTFString:
 			val = in.readUTF();
@@ -84,7 +84,7 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	public void writeToBinary(final DataOutput out) throws IOException {
+	void writeToBinary(final DataOutput out) throws IOException {
 		switch (getType()) {
 		case UTFString:
 			out.writeUTF(val);
@@ -99,13 +99,12 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	public void readFromAscii(final byte[] in, final int len)
-			throws IOException {
+	void readFromAscii(final byte[] in, final int len) throws IOException {
 		val = new String(in, 0, len, "ISO-8859-1");
 	}
 
 	@Override
-	public void writeToAscii(final DataOutput out) throws IOException {
+	void writeToAscii(final DataOutput out) throws IOException {
 		out.write(val.getBytes("ISO-8859-1"));
 	}
 
@@ -130,7 +129,7 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	public boolean mustWriteAsciiAsHex() {
+	boolean mustWriteAsciiAsHex() {
 		for (int i = 0; i < val.length(); ++i)
 			switch (ASCII_TABLE[val.charAt(i)]) {
 			case 0:

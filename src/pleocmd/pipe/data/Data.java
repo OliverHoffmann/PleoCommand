@@ -16,13 +16,16 @@ import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
+import pleocmd.pipe.val.DataAsciiConverter;
+import pleocmd.pipe.val.DataBinaryConverter;
 import pleocmd.pipe.val.DummyValue;
 import pleocmd.pipe.val.Value;
 
 /**
  * Contains information about one command which will be created from
  * {@link Input}s, converted by {@link Converter}s and then written out by
- * {@link Output}s inside the {@link Pipe}.
+ * {@link Output}s inside the {@link Pipe}.<br>
+ * Is immutable.
  * 
  * @author oliver
  */

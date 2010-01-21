@@ -21,28 +21,27 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	public void readFromBinary(final DataInput in) throws IOException {
+	void readFromBinary(final DataInput in) throws IOException {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	public void writeToBinary(final DataOutput out) throws IOException {
+	void writeToBinary(final DataOutput out) throws IOException {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	public void readFromAscii(final byte[] in, final int len)
-			throws IOException {
+	void readFromAscii(final byte[] in, final int len) throws IOException {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	public void writeToAscii(final DataOutput out) throws IOException {
+	void writeToAscii(final DataOutput out) throws IOException {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	public boolean mustWriteAsciiAsHex() {
+	boolean mustWriteAsciiAsHex() {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 

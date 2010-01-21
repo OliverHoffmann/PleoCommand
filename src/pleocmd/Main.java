@@ -19,7 +19,9 @@ import pleocmd.itfc.gui.MainFrame;
  * disable "OK" and "Apply" if bad input in PipePart configuration<br>
  * online help<br>
  * combine History and {@link DataSequenceEditorFrame}<br>
- * make dialogs non-modal?<br>
+ * make dialogs non-modal? (some fixes still needed)<br>
+ * document which classes are immutable<br>
+ * size of error dialog may be wrong under windows<br>
  */
 
 public final class Main {
