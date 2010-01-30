@@ -11,6 +11,7 @@ import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.RunnableWithArgument;
@@ -165,6 +166,7 @@ public final class ConfigPath extends ConfigValue {
 
 	protected void selectPath(final Container parent) {
 		final JFileChooser fc = new JFileChooser(getContent());
+		fc.setSelectedFile(new File(tf.getText()));
 		fc.setAcceptAllFileFilterUsed(acceptAllFileFilter);
 		for (final FileFilter filter : filters)
 			fc.addChoosableFileFilter(filter);
@@ -175,8 +177,15 @@ public final class ConfigPath extends ConfigValue {
 				tf.setText(fc.getSelectedFile().getPath());
 			break;
 		case FileForWriting:
-			if (fc.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION)
-				tf.setText(fc.getSelectedFile().getPath());
+			if (fc.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+				final FileFilter ff = fc.getFileFilter();
+				String path = fc.getSelectedFile().getPath();
+				if (ff instanceof FileNameExtensionFilter
+						&& !fc.getSelectedFile().getName().contains("."))
+					path = path + "."
+							+ ((FileNameExtensionFilter) ff).getExtensions()[0];
+				tf.setText(path);
+			}
 			break;
 		case Directory:
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
