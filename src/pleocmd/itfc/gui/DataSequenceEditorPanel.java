@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Window;
@@ -11,9 +12,12 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -66,6 +70,11 @@ public final class DataSequenceEditorPanel extends JPanel {
 
 	private List<Output> playOutputList;
 
+	private final JLabel lblErrorFeedback;
+
+	private final Timer errorLabelTimer = new Timer("ErrorLabelTimer", true);
+	private TimerTask errorLabelTimerTask;
+
 	public DataSequenceEditorPanel(final Window owner,
 			final Runnable saveChanges, final Runnable close) {
 		final Layouter lay = new Layouter(this);
@@ -87,12 +96,16 @@ public final class DataSequenceEditorPanel extends JPanel {
 						addUndo(e.getEdit());
 					}
 				});
-		tpDataSequence.setEditorKitForContentType("text/datasequence",
-				new DataSequenceEditorKit());
+		final DataSequenceEditorKit kit = new DataSequenceEditorKit(this);
+		tpDataSequence.setEditorKitForContentType("text/datasequence", kit);
 		tpDataSequence.setContentType("text/datasequence");
 		tpDataSequence.setFont(tpDataSequence.getFont().deriveFont(Font.BOLD));
 
 		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
+
+		lblErrorFeedback = new JLabel("");
+		lblErrorFeedback.setForeground(Color.RED);
+		lay.addWholeLine(lblErrorFeedback, false);
 
 		lay.setSpan(2);
 		btnCopyInput = lay.addButton("Copy From Input History",
@@ -369,6 +382,19 @@ public final class DataSequenceEditorPanel extends JPanel {
 		updateState(); // TODO needed?
 	}
 
+	void updateErrorLabel(final String text) {
+		if (text.equals(lblErrorFeedback.getText())) return;
+		lblErrorFeedback.setText(text);
+		Color.RGBtoHSB(255, 0, 0, null);
+		final Color src = Color.RED;
+		final Color trg = lblErrorFeedback.getBackground();
+		lblErrorFeedback.setForeground(src);
+		if (errorLabelTimerTask != null) errorLabelTimerTask.cancel();
+		errorLabelTimerTask = new FadeTimerTask(src.getRed(), src.getGreen(),
+				src.getBlue(), trg.getRed(), trg.getGreen(), trg.getBlue());
+		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
+	}
+
 	public void updateState() {
 		tpDataSequence.setEnabled(true);
 		btnCopyInput.setEnabled(MainFrame.the().getMainInputPanel()
@@ -378,6 +404,38 @@ public final class DataSequenceEditorPanel extends JPanel {
 		btnPlayAll.setEnabled(tpDataSequence.getDocument().getLength() > 0);
 		btnUndo.setEnabled(tpUndoManager.canUndo());
 		btnRedo.setEnabled(tpUndoManager.canRedo());
+	}
+
+	protected JLabel getLblErrorFeedback() {
+		return lblErrorFeedback;
+	}
+
+	private class FadeTimerTask extends TimerTask {
+
+		private double cur0, cur1, cur2;
+		private final double inc0, inc1, inc2;
+		private int steps;
+
+		FadeTimerTask(final int src0, final int src1, final int src2,
+				final int trg0, final int trg1, final int trg2) {
+			cur0 = src0;
+			cur1 = src1;
+			cur2 = src2;
+			inc0 = (trg0 - src0) / 10.0;
+			inc1 = (trg1 - src1) / 10.0;
+			inc2 = (trg2 - src2) / 10.0;
+		}
+
+		@Override
+		public void run() {
+			cur0 = Math.min(255, Math.max(0, cur0 + inc0));
+			cur1 = Math.min(255, Math.max(0, cur1 + inc1));
+			cur2 = Math.min(255, Math.max(0, cur2 + inc2));
+			getLblErrorFeedback().setForeground(
+					new Color((int) cur0, (int) cur1, (int) cur2));
+			if (++steps == 10) cancel();
+		}
+
 	}
 
 }

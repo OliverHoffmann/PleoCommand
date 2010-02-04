@@ -13,22 +13,18 @@ import javax.swing.text.PlainView;
 import javax.swing.text.Segment;
 import javax.swing.text.Utilities;
 
-import pleocmd.Log;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Syntax;
 import pleocmd.pipe.val.Syntax.Type;
 
 public final class DataSequenceView extends PlainView {
 
-	// FIXME if only part of line given to draw... pattern doesn't match
-	// FIXME redundant parsing with AsciiDataConverter
-	// FIXME doesn't detect erroneous input
-	// TODO:
-	// cache Syntax[] for every line in DataSequenceView
-	// update cache on document changes
+	private final DataSequenceEditorPanel panel;
 
-	public DataSequenceView(final Element elem) {
+	public DataSequenceView(final Element elem,
+			final DataSequenceEditorPanel panel) {
 		super(elem);
+		this.panel = panel;
 	}
 
 	@Override
@@ -51,7 +47,7 @@ public final class DataSequenceView extends PlainView {
 		try {
 			Data.createFromAscii(wholeLine, syntaxList);
 		} catch (final Throwable t) {
-			Log.warn(t.getMessage());
+			panel.updateErrorLabel(t.getMessage());
 		}
 
 		int curX = xp;

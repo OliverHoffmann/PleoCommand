@@ -10,6 +10,12 @@ public final class DataSequenceEditorKit extends StyledEditorKit implements
 
 	private static final long serialVersionUID = -7824068672374046824L;
 
+	private final DataSequenceEditorPanel panel;
+
+	public DataSequenceEditorKit(final DataSequenceEditorPanel panel) {
+		this.panel = panel;
+	}
+
 	@Override
 	public ViewFactory getViewFactory() {
 		return this;
@@ -17,7 +23,7 @@ public final class DataSequenceEditorKit extends StyledEditorKit implements
 
 	@Override
 	public View create(final Element elem) {
-		return new DataSequenceView(elem);
+		return new DataSequenceView(elem, panel);
 	}
 
 	@Override
