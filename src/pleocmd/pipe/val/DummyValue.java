@@ -2,7 +2,6 @@ package pleocmd.pipe.val;
 
 import java.io.DataInput;
 import java.io.DataOutput;
-import java.io.IOException;
 
 import pleocmd.pipe.data.Data;
 
@@ -21,22 +20,22 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	void readFromBinary(final DataInput in) throws IOException {
+	void readFromBinary(final DataInput in) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	void writeToBinary(final DataOutput out) throws IOException {
+	void writeToBinary(final DataOutput out) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	void readFromAscii(final byte[] in, final int len) throws IOException {
+	void readFromAscii(final byte[] in, final int len) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 
 	@Override
-	void writeToAscii(final DataOutput out) throws IOException {
+	void writeToAscii(final DataOutput out) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 

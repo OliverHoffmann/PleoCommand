@@ -16,13 +16,14 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
+import pleocmd.exc.FormatException;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
 public final class DataTest extends Testcases {
 
 	@Test
-	public void testConversion() throws IOException {
+	public void testConversion() throws IOException, FormatException {
 
 		final List<Value> values = new ArrayList<Value>();
 		final Data d1 = new Data(values, null);
@@ -112,7 +113,8 @@ public final class DataTest extends Testcases {
 		assertEquals(data, newData);
 	}
 
-	private void testAsciiConversion(final Data data) throws IOException {
+	private void testAsciiConversion(final Data data) throws IOException,
+			FormatException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data.writeToAscii(new DataOutputStream(out), true);
 

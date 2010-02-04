@@ -6,6 +6,7 @@ import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.FormatException;
 import pleocmd.itfc.gui.DataSequenceEditorFrame;
 import pleocmd.pipe.data.Data;
 
@@ -26,6 +27,8 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 		try {
 			return Data.createFromAscii(valueAsString);
 		} catch (final IOException e) {
+			throw new ConfigurationException(e, "Cannot convert String to Data");
+		} catch (final FormatException e) {
 			throw new ConfigurationException(e, "Cannot convert String to Data");
 		}
 	}

@@ -11,7 +11,8 @@ public class ConfigurationException extends Exception {
 
 	public ConfigurationException(final int nr, final String line,
 			final String msg, final Object... args) {
-		super(String.format("At line %d - '%s': " + msg, nr, line, args));
+		super(String.format("At line %d - '%s': ", nr, line)
+				+ String.format(msg, args));
 	}
 
 	public ConfigurationException(final String msg, final Object... args) {

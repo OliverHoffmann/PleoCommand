@@ -33,6 +33,7 @@ import javax.swing.undo.UndoableEdit;
 import pleocmd.Log;
 import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigItem;
+import pleocmd.exc.FormatException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
@@ -227,6 +228,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 				play(Data.createFromAscii(line));
 			} catch (final IOException e) {
 				Log.error(e);
+			} catch (final FormatException e) {
+				Log.error(e);
 			}
 	}
 
@@ -236,6 +239,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 			try {
 				play(Data.createFromAscii(line));
 			} catch (final IOException e) {
+				Log.error(e);
+			} catch (final FormatException e) {
 				Log.error(e);
 			}
 	}
@@ -307,7 +312,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected List<Data> writeTextPaneToList() throws IOException {
+	protected List<Data> writeTextPaneToList() throws IOException,
+			FormatException {
 		final List<Data> res = new ArrayList<Data>();
 		final BufferedReader in = new BufferedReader(new StringReader(
 				tpDataSequence.getText()));

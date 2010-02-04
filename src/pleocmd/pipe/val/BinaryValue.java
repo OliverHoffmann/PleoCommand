@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-
 public final class BinaryValue extends Value {
 
 	public static final char TYPE_CHAR = 'B';
@@ -46,8 +45,7 @@ public final class BinaryValue extends Value {
 	}
 
 	@Override
-	public void readFromAscii(final byte[] in, final int len)
-			throws IOException {
+	public void readFromAscii(final byte[] in, final int len) {
 		val = new byte[len];
 		System.arraycopy(in, 0, val, 0, len);
 	}

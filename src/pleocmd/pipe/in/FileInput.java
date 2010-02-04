@@ -15,6 +15,7 @@ import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.DataFileEditFrame;
@@ -80,7 +81,12 @@ public final class FileInput extends Input {
 	protected Data readData0() throws InputException, IOException {
 		switch (cfgType.getEnum()) {
 		case Ascii:
-			return Data.createFromAscii(in);
+			try {
+				return Data.createFromAscii(in);
+			} catch (final FormatException e) {
+				throw new InputException(this, false, e,
+						"Cannot read from file");
+			}
 		case Binary:
 			return Data.createFromBinary(in);
 		default:

@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
 
@@ -49,7 +50,11 @@ public final class StaticInput extends Input {
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		return Data.createFromAscii(in);
+		try {
+			return Data.createFromAscii(in);
+		} catch (final FormatException e) {
+			throw new InputException(this, false, e, "Cannot read static data");
+		}
 	}
 
 	public static String help(final HelpKind kind) {

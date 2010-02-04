@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.exc.FormatException;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
@@ -19,6 +20,7 @@ import pleocmd.pipe.out.Output;
 import pleocmd.pipe.val.DataAsciiConverter;
 import pleocmd.pipe.val.DataBinaryConverter;
 import pleocmd.pipe.val.DummyValue;
+import pleocmd.pipe.val.Syntax;
 import pleocmd.pipe.val.Value;
 
 /**
@@ -208,12 +210,15 @@ public final class Data extends AbstractList<Value> {
 	 *            Input Stream with text data in ISO-8859-1 encoding
 	 * @return new {@link Data} with a list of {@link Value}s read from stream
 	 * @throws IOException
-	 *             if data could not be read from {@link DataInput}, is of an
-	 *             invalid type or is of an invalid format for its type
+	 *             if data could not be read from {@link DataInput}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
 	 * @see DataAsciiConverter
 	 */
-	public static Data createFromAscii(final DataInput in) throws IOException {
-		return new DataAsciiConverter(in).createDataFromFields();
+	public static Data createFromAscii(final DataInput in) throws IOException,
+			FormatException {
+		return new DataAsciiConverter(in, null).createDataFromFields();
 	}
 
 	/**
@@ -225,13 +230,43 @@ public final class Data extends AbstractList<Value> {
 	 * @return new {@link Data} with a list of {@link Value}s read from
 	 *         {@link String}
 	 * @throws IOException
-	 *             if data could not be read from {@link String}, is of an
-	 *             invalid type or is of an invalid format for its type
+	 *             if data could not be read from {@link String}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
 	 * @see DataAsciiConverter
 	 */
-	public static Data createFromAscii(final String string) throws IOException {
-		return createFromAscii(new DataInputStream(new ByteArrayInputStream(
-				(string + '\n').getBytes("ISO-8859-1"))));
+	public static Data createFromAscii(final String string) throws IOException,
+			FormatException {
+		return new DataAsciiConverter(
+				new DataInputStream(new ByteArrayInputStream((string + '\n')
+						.getBytes("ISO-8859-1"))), null).createDataFromFields();
+	}
+
+	/**
+	 * Creates a new {@link Data} object from a {@link String}.
+	 * 
+	 * @param string
+	 *            {@link String} to read the data block from (optionally with a
+	 *            line-break)
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements found during
+	 *            parsing - may be <b>null</b>
+	 * @return new {@link Data} with a list of {@link Value}s read from
+	 *         {@link String}
+	 * @throws IOException
+	 *             if data could not be read from {@link String}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
+	 * @see DataAsciiConverter
+	 */
+	public static Data createFromAscii(final String string,
+			final List<Syntax> syntaxList) throws IOException, FormatException {
+		return new DataAsciiConverter(
+				new DataInputStream(new ByteArrayInputStream((string + '\n')
+						.getBytes("ISO-8859-1"))), syntaxList)
+				.createDataFromFields();
 	}
 
 	/**

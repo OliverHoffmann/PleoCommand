@@ -99,8 +99,12 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	void readFromAscii(final byte[] in, final int len) throws IOException {
-		val = new String(in, 0, len, "ISO-8859-1");
+	void readFromAscii(final byte[] in, final int len) {
+		try {
+			val = new String(in, 0, len, "ISO-8859-1");
+		} catch (final UnsupportedEncodingException e) {
+			throw new InternalException(e);
+		}
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import pleocmd.StandardInput;
 import pleocmd.cfg.ConfigEnum;
+import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
@@ -47,8 +48,13 @@ public final class ConsoleInput extends Input {
 	protected Data readData0() throws InputException, IOException {
 		switch (cfgType.getEnum()) {
 		case Ascii:
-			return Data
-					.createFromAscii(new DataInputStream(StandardInput.the()));
+			try {
+				return Data.createFromAscii(new DataInputStream(StandardInput
+						.the()));
+			} catch (final FormatException e) {
+				throw new InputException(this, false, e,
+						"Cannot read from console");
+			}
 		case Binary:
 			return Data.createFromBinary(new DataInputStream(StandardInput
 					.the()));

@@ -26,6 +26,7 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.Data;
 
 // CS_IGNORE_NEXT The classes this one relies on are mainly GUI components
@@ -187,6 +188,8 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		} catch (final IOException e) {
+			Log.error(e);
+		} catch (final FormatException e) {
 			Log.error(e);
 		}
 	}

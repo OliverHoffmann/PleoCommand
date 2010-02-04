@@ -5,12 +5,15 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.exc.FormatException;
 import pleocmd.exc.InternalException;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.data.AbstractDataConverter;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Syntax.Type;
 
 /**
  * Helper class for converting {@link Data} objects from and to Ascii.
@@ -97,6 +100,8 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	private static final byte[] HEX_TABLE = new byte[] { '0', '1', '2', '3',
 			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
+	private final List<Syntax> syntaxList;
+
 	private byte[] buf;
 
 	private int buflen;
@@ -116,6 +121,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 */
 	public DataAsciiConverter(final Data data) {
 		super(data);
+		syntaxList = null;
 	}
 
 	/**
@@ -125,12 +131,19 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 * 
 	 * @param in
 	 *            Input Stream with text data in ISO-8859-1 encoding
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements found during
+	 *            parsing - may be <b>null</b>
 	 * @throws IOException
-	 *             if data could not be read from {@link DataInput}, is of an
-	 *             invalid type or is of an invalid format for its type
+	 *             if data could not be read from {@link DataInput}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
 	 */
-	public DataAsciiConverter(final DataInput in) throws IOException {
+	public DataAsciiConverter(final DataInput in, final List<Syntax> syntaxList)
+			throws IOException, FormatException {
 		Log.detail("Started parsing an ASCII Data object");
+		this.syntaxList = syntaxList;
 		buf = new byte[64];
 		index = -1;
 		while (true) {
@@ -145,6 +158,8 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 				return;
 			case '|':
 				parseValue(false);
+				if (this.syntaxList != null)
+					this.syntaxList.add(new Syntax(Type.FieldDelim, index));
 				// prepare for the next value
 				type = null;
 				isHex = false;
@@ -175,8 +190,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		}
 	}
 
-	private void parseValue(final boolean ignoreIfEmpty) throws IOException {
+	private void parseValue(final boolean ignoreIfEmpty) throws FormatException {
 		// trim whitespaces
+		final int orgbuflen = buflen;
 		while (buflen > 0 && buf[buflen - 1] == ' ')
 			--buflen;
 
@@ -185,36 +201,74 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		if (type == null) {
 			// autodetect type
 			isHex = false;
-			type = detectDataType(buf, buflen);
+			type = detectDataType(buf, buflen, orgbuflen);
 			Log.detail("Autodetecting resulted in: %s", type);
 		}
 
 		// create fitting value
 		final Value val = Value.createForType(type);
 
+		if (syntaxList != null) {
+			final int si = index - orgbuflen; // start index
+			// DataField has precedence over HexField
+			if (isHex && type != ValueType.Data)
+				syntaxList.add(new Syntax(Type.HexField, si));
+			else
+				switch (type) {
+				case Float32:
+				case Float64:
+					syntaxList.add(new Syntax(Type.FloatField, si));
+					break;
+				case Int8:
+				case Int32:
+				case Int64:
+					syntaxList.add(new Syntax(Type.IntField, si));
+					break;
+				case NullTermString:
+				case UTFString:
+					syntaxList.add(new Syntax(Type.StringField, si));
+					break;
+				case Data:
+					syntaxList.add(new Syntax(Type.DataField, si));
+					break;
+				}
+		}
+
 		if (isHex) {
 			// we need to decode the data from a hex string
 			Log.detail("Converting hex data with length %d", buflen);
-			if (buflen % 2 != 0)
-				throw new IOException(String.format("Broken hexadecimal data: "
-						+ "Length must be multiple of two: %d", buflen));
 			final byte[] buf2 = new byte[buflen / 2];
 			for (int i = 0, j = 0; i < buflen;) {
 				final int d1 = Character.digit(buf[i++], 16); // CS_IGNORE
+				final int si = index - orgbuflen + i;
+				if (i == buflen)
+					throw new FormatException(syntaxList, si - 1,
+							"Broken hexadecimal data: Length must be "
+									+ "multiple of two but is %d", buflen);
 				final int d2 = Character.digit(buf[i++], 16); // CS_IGNORE
 				if (d1 == -1)
-					throw new IOException(String.format("Broken hexadecimal "
-							+ "data: Invalid character at %d: 0x%02X", index
-							- buflen + i - 2, buf[i - 2]));
+					throw new FormatException(syntaxList, si - 1,
+							"Broken hexadecimal data: Invalid "
+									+ "character: 0x%02X", buf[i - 2]);
 				if (d2 == -1)
-					throw new IOException(String.format("Broken hexadecimal "
-							+ "data: Invalid character at %d: 0x%02X", index
-							- buflen + i - 1, buf[i - 1]));
+					throw new FormatException(syntaxList, si,
+							"Broken hexadecimal data: Invalid "
+									+ "character: 0x%02X", buf[i - 1]);
 				buf2[j++] = (byte) (d1 << 4 | d2); // CS_IGNORE
 			}
-			val.readFromAscii(buf2, buf2.length);
+			try {
+				val.readFromAscii(buf2, buf2.length);
+			} catch (final Throwable t) {
+				throw new FormatException(syntaxList, index - orgbuflen, t
+						.getMessage());
+			}
 		} else
-			val.readFromAscii(buf, buflen);
+			try {
+				val.readFromAscii(buf, buflen);
+			} catch (final Throwable t) {
+				throw new FormatException(syntaxList, index - orgbuflen, t
+						.getMessage());
+			}
 		getValues().add(val);
 	}
 
@@ -284,7 +338,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		out.writeByte(' ');
 	}
 
-	private void parseFlags(final DataInput in) throws IOException {
+	private void parseFlags(final DataInput in) throws IOException,
+			FormatException {
+		if (syntaxList != null) syntaxList.add(new Syntax(Type.Flags, index));
 		while (true) {
 			++index;
 			final byte b = in.readByte();
@@ -292,6 +348,8 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 			case ' ': // just ignore any spaces in flag list
 				break;
 			case ']': // end of flag list
+				if (syntaxList != null)
+					syntaxList.add(new Syntax(Type.Flags, index));
 				return;
 			case 'P':
 			case 'p':
@@ -302,13 +360,16 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 				parseFlagTime(in);
 				break;
 			default:
-				throw new IOException(String.format("Invalid character 0x%02X "
-						+ "in flag list at position %d", b, index));
+				throw new FormatException(syntaxList, index,
+						"Invalid character 0x%02X in flag list", b);
 			}
 		}
 	}
 
-	private void parseFlagPriority(final DataInput in) throws IOException {
+	private void parseFlagPriority(final DataInput in) throws IOException,
+			FormatException {
+		if (syntaxList != null)
+			syntaxList.add(new Syntax(Type.FlagPrio, index));
 		++index;
 		byte b = in.readByte();
 		final boolean neg = b == '-';
@@ -318,27 +379,30 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		}
 		byte res = 0;
 		if (b < '0' || b > '9')
-			throw new IOException(String.format("Invalid character 0x%02X "
-					+ "in priority at position %d", b, index));
+			throw new FormatException(syntaxList, index,
+					"Invalid character 0x%02X in priority", b);
 		res += (b - '0') * 10;
 		++index;
 		b = in.readByte();
 		if (b < '0' || b > '9')
-			throw new IOException(String.format("Invalid character 0x%02X "
-					+ "in priority at position %d", b, index));
+			throw new FormatException(syntaxList, index,
+					"Invalid character 0x%02X in priority", b);
 		res += b - '0';
 		if (neg) res = (byte) -res;
 
 		Log.detail("Parsed priority: %d", res);
 
 		if (res < Data.PRIO_LOWEST || res > Data.PRIO_HIGHEST)
-			throw new IOException(String.format("Priority is out of range: "
-					+ "%d not between %d and %d", res, Data.PRIO_LOWEST,
-					Data.PRIO_HIGHEST));
+			throw new FormatException(syntaxList, index,
+					"Priority is out of range: %d not between %d and %d", res,
+					Data.PRIO_LOWEST, Data.PRIO_HIGHEST);
 		setPriority(res);
 	}
 
-	private void parseFlagTime(final DataInput in) throws IOException {
+	private void parseFlagTime(final DataInput in) throws IOException,
+			FormatException {
+		if (syntaxList != null)
+			syntaxList.add(new Syntax(Type.FlagTime, index));
 		long res = 0;
 		while (true) {
 			++index;
@@ -347,8 +411,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 				++index;
 				final byte b2 = in.readByte();
 				if (b2 != 's')
-					throw new IOException(String.format("Invalid character "
-							+ "0x%02X in time at position %d", b2, index));
+					throw new FormatException(syntaxList, index, "Invalid "
+							+ "character 0x%02X in time at position %d", b2,
+							index);
 				break;
 			}
 			if (b == 's') {
@@ -356,8 +421,8 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 				break;
 			}
 			if (b < '0' || b > '9')
-				throw new IOException(String.format("Invalid character 0x%02X "
-						+ "in time at position %d", b, index));
+				throw new FormatException(syntaxList, index, "Invalid "
+						+ "character 0x%02X in time at position %d", b, index);
 			res *= 10;
 			res += b - '0';
 		}
@@ -365,18 +430,23 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		Log.detail("Parsed time: %d ms", res);
 
 		if (res > 0xFFFFFFFFL)
-			throw new IOException(String.format("Time is out of range: "
-					+ "%d not between 0 and 0xFFFFFFFF", res));
+			throw new FormatException(syntaxList, index,
+					"Time is out of range: %d not between "
+							+ "0 and 0xFFFFFFFF", res);
 		setTime(res);
 	}
 
-	private void parseTypeIdentifier() throws IOException {
-		type = Value.detectFromTypeChar((char) buf[0], index - buflen);
+	private void parseTypeIdentifier() throws FormatException {
+		if (syntaxList != null)
+			syntaxList.add(new Syntax(Type.TypeIdent, index - buflen));
+		type = Value.detectFromTypeChar((char) buf[0]);
+		if (type == null)
+			throw new FormatException(syntaxList, index - buflen,
+					"Invalid type identifier: 0x%02X", (int) buf[0]);
 		if (buflen == 2) {
 			if (buf[1] != 'x')
-				throw new IOException(String.format(
-						"Invalid type modifier: 0x%02X at " + "position %d",
-						buf[1], index - 1));
+				throw new FormatException(syntaxList, index - 1,
+						"Invalid type modifier: 0x%02X", (int) buf[1]);
 			isHex = true;
 		} else
 			isHex = false;
@@ -401,13 +471,16 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 *            the Ascii data which should be converted
 	 * @param len
 	 *            length of the data
+	 * @param orgbuflen
+	 *            original length of the data (length including any removed
+	 *            suffixed spaces)
 	 * @return one of {@link ValueType#Int64}, {@link ValueType#Float64} or
 	 *         {@link ValueType#NullTermString}
-	 * @throws IOException
+	 * @throws FormatException
 	 *             if the data is not in one of the known data formats
 	 */
-	private static ValueType detectDataType(final byte[] data, final int len)
-			throws IOException {
+	private ValueType detectDataType(final byte[] data, final int len,
+			final int orgbuflen) throws FormatException {
 		Log.detail("Autodetecting data type of %d bytes", len);
 		int tat;
 		int res = 0;
@@ -415,10 +488,9 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		for (int i = 0; i < len; ++i) {
 			found[tat = TYPE_AUTODETECT_TABLE[data[i] & 0xFF]] = true;
 			if ((res = Math.max(res, tat)) == 40)
-				throw new IOException(String.format(
-						"Invalid character for any known data type: 0x%02X "
-								+ "at position %d in '%s'", data[i], i,
-						toHexString(data, len)));
+				throw new FormatException(syntaxList, index - orgbuflen + i,
+						"Invalid character for any known data type: 0x%02X",
+						data[i]);
 		}
 		switch (res) {
 		case 0: // treat empty data as string
