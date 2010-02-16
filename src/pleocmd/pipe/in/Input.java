@@ -42,7 +42,7 @@ public abstract class Input extends PipePart {
 			ensureInitialized();
 			return readData0();
 		} catch (final IOException e) {
-			throw new InputException(this, false, e, "Cannot read data block");
+			throw new InputException(this, true, e, "Cannot read data block");
 		} catch (final StateException e) {
 			throw new InputException(this, true, e, "Cannot read data block");
 		}
