@@ -2,6 +2,8 @@ package pleocmd.pipe.in;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 import pleocmd.cfg.ConfigInt;
@@ -11,11 +13,13 @@ import pleocmd.pipe.data.Data;
 
 public final class TcpIpInput extends Input {
 
-	private final ConfigString cfgHost;
+	private final ConfigString cfgHost;// TODO not used
 
 	private final ConfigInt cfgPort;
 
 	private Socket socket;
+
+	private ServerSocket serverSocket;
 
 	private DataInputStream in;
 
@@ -43,19 +47,26 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	protected void init0() throws IOException {
-		socket = new Socket(cfgHost.getContent(), cfgPort.getContent());
+		serverSocket = new ServerSocket();
+		serverSocket.setPerformancePreferences(0, 2, 1);
+		serverSocket.setReuseAddress(true);
+		serverSocket.setSoTimeout(60000);
+		serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
+		socket = serverSocket.accept();
+		socket.setSoTimeout(10000);
 		in = new DataInputStream(socket.getInputStream());
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		socket.close(); // closes "in", too
+		in.close();
+		socket.close();
+		serverSocket.close();
 	}
 
 	@Override
 	protected boolean canReadData0() throws IOException {
-		// TODO use a put-back stream and just read one byte?
-		return true; // impossible to detect beforehand on socket stream
+		return socket.isConnected() && !socket.isInputShutdown();
 	}
 
 	@Override
