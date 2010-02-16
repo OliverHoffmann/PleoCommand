@@ -823,8 +823,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				throw new ConfigurationException(e,
 						"Cannot configure PipePart with group '%s'", group);
 			}
-		} else if (!group.getName().equals(getClass().getSimpleName()))
-			throw new InternalException("Unknown group: %s", group);
+		} else if (!group.getName().equals(getClass().getSimpleName())) {
+			// this may occur if getSkeleton() returned null due to an error
+			// silently ignore here because getSkeleton() should have already
+			// printed something
+		}
 	}
 
 	@Override
