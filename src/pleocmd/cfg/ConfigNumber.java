@@ -89,20 +89,12 @@ public abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
+	// all Number implementations are Comparable to themselves
+	// but we can't express this in Java genericals :(
 	public final void insertGUIComponents(final Layouter lay) {
-		sp = new JSpinner(new SpinnerNumberModel(content, new Comparable<E>() {
-			@Override
-			public int compareTo(final E nr) {
-				return lessThan(getMin(), nr) ? -1 : lessThan(nr, getMin()) ? 1
-						: 0;
-			}
-		}, new Comparable<E>() {
-			@Override
-			public int compareTo(final E nr) {
-				return lessThan(getMax(), nr) ? -1 : lessThan(nr, getMax()) ? 1
-						: 0;
-			}
-		}, step));
+		sp = new JSpinner(new SpinnerNumberModel(content, (Comparable<E>) min,
+				(Comparable<E>) max, step));
 		lay.add(sp, true);
 	}
 
