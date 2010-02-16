@@ -7,13 +7,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import pleocmd.cfg.ConfigInt;
-import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.pipe.data.Data;
 
 public final class TcpIpInput extends Input {
 
-	private final ConfigString cfgHost;// TODO not used
+	private final ConfigInt cfgTimeoutConn;
+
+	private final ConfigInt cfgTimeoutRead;
 
 	private final ConfigInt cfgPort;
 
@@ -24,15 +25,16 @@ public final class TcpIpInput extends Input {
 	private DataInputStream in;
 
 	public TcpIpInput() {
-		addConfig(cfgHost = new ConfigString("Host", ""));
 		addConfig(cfgPort = new ConfigInt("Port", 19876, 1, 65535));
+		addConfig(cfgTimeoutConn = new ConfigInt("Connection-Timeout (sec)",
+				60, 0, 3600));
+		addConfig(cfgTimeoutRead = new ConfigInt("Read-Timeout (sec)", 10, 0,
+				3600));
 		constructed();
 	}
 
-	public TcpIpInput(final String host, final int port)
-			throws ConfigurationException {
+	public TcpIpInput(final int port) {
 		this();
-		cfgHost.setContent(host);
 		try {
 			cfgPort.setContent(port);
 		} catch (final ConfigurationException e) {
@@ -50,10 +52,10 @@ public final class TcpIpInput extends Input {
 		serverSocket = new ServerSocket();
 		serverSocket.setPerformancePreferences(0, 2, 1);
 		serverSocket.setReuseAddress(true);
-		serverSocket.setSoTimeout(60000);
+		serverSocket.setSoTimeout(cfgTimeoutConn.getContent() * 1000);
 		serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
 		socket = serverSocket.accept();
-		socket.setSoTimeout(10000);
+		socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
 		in = new DataInputStream(socket.getInputStream());
 	}
 
@@ -81,9 +83,9 @@ public final class TcpIpInput extends Input {
 		case Description:
 			return "Reads Data blocks from a TCP/IP connection";
 		case Configuration:
-			return "1: Name of the Host (machine name or IP address), "
-					+ "empty for loopback device\n"
-					+ "2: Port number of the Host\n";
+			return "1: Port number of the Host\n"
+					+ "2: Connection Timeout in seconds (0 means infinite)\n"
+					+ "3: Timeout for reading in seconds (0 means infinite)";
 		default:
 			return "???";
 		}
