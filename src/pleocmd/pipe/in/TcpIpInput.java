@@ -24,6 +24,8 @@ public final class TcpIpInput extends Input {
 
 	private DataInputStream in;
 
+	private boolean delayedInit;
+
 	public TcpIpInput() {
 		addConfig(cfgPort = new ConfigInt("Port", 19876, 1, 65535));
 		addConfig(cfgTimeoutConn = new ConfigInt("Connection-Timeout (sec)",
@@ -49,30 +51,37 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	protected void init0() throws IOException {
-		serverSocket = new ServerSocket();
-		serverSocket.setPerformancePreferences(0, 2, 1);
-		serverSocket.setReuseAddress(true);
-		serverSocket.setSoTimeout(cfgTimeoutConn.getContent() * 1000);
-		serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
-		socket = serverSocket.accept();
-		socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
-		in = new DataInputStream(socket.getInputStream());
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		in.close();
-		socket.close();
-		serverSocket.close();
+		if (delayedInit) {
+			delayedInit = false;
+			in.close();
+			socket.close();
+			serverSocket.close();
+		}
 	}
 
 	@Override
 	protected boolean canReadData0() throws IOException {
-		return socket.isConnected() && !socket.isInputShutdown();
+		return !delayedInit
+				|| (socket.isConnected() && !socket.isInputShutdown());
 	}
 
 	@Override
 	protected Data readData0() throws IOException {
+		if (!delayedInit) {
+			delayedInit = true;
+			serverSocket = new ServerSocket();
+			serverSocket.setPerformancePreferences(0, 2, 1);
+			serverSocket.setReuseAddress(true);
+			serverSocket.setSoTimeout(cfgTimeoutConn.getContent() * 1000);
+			serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
+			socket = serverSocket.accept();
+			socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
+			in = new DataInputStream(socket.getInputStream());
+		}
 		return Data.createFromBinary(in);
 	}
 
