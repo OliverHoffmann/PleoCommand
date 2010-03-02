@@ -73,8 +73,9 @@ public final class ConfigPath extends ConfigValue {
 						content);
 			break;
 		case FileForWriting:
-			if (content.exists() ? !content.canWrite() : !content
-					.getParentFile().canWrite())
+			if (content.exists() ? !content.canWrite() : content
+					.getParentFile() != null
+					&& !content.getParentFile().canWrite())
 				throw new ConfigurationException("Cannot write to file '%s'",
 						content);
 			break;
