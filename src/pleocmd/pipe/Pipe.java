@@ -1,5 +1,6 @@
 package pleocmd.pipe;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,9 +12,11 @@ import java.util.Set;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
@@ -93,6 +96,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 */
 	private final ConfigInt cfgOutputThreadSleepTime = new ConfigInt(
 			"Output-Thread Sleep Time", 10, 0, 300);
+
+	private final ConfigPath cfgLastSaveFile = new ConfigPath("Last Save-File",
+			PathType.FileForWriting);
 
 	private final List<Input> inputList = new ArrayList<Input>();
 
@@ -762,7 +768,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (groupName.equals(getClass().getSimpleName()))
 			return new Group(groupName).add(cfgMaxBehind).add(
 					cfgOutputInitOverhead).add(cfgOverheadReductionTime).add(
-					cfgOutputThreadSleepTime);
+					cfgOutputThreadSleepTime).add(cfgLastSaveFile);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
 			throw new InternalException("Wrong groupName for "
@@ -851,6 +857,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	public PipeFeedback getFeedback() {
 		return feedback;
+	}
+
+	public File getLastSaveFile() {
+		return cfgLastSaveFile.getContent();
+	}
+
+	public void setLastSaveFile(File file) throws ConfigurationException {
+		cfgLastSaveFile.setContent(file);
 	}
 
 	@Override

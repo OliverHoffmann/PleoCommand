@@ -57,12 +57,15 @@ public final class MainPipePanel extends JPanel {
 	}
 
 	public void updatePipeLabel() {
+		String fn = Pipe.the().getLastSaveFile().getName();
+		if (fn.contains("."))
+			fn = ": \"" + fn.substring(0, fn.lastIndexOf('.')) + "\"";
 		pipeLabel.setText(String.format(
-				"Pipe has %d input%s, %d converter and %d output%s", Pipe.the()
-						.getInputList().size(), Pipe.the().getInputList()
+				"Pipe has %d input%s, %d converter and %d output%s%s", Pipe
+						.the().getInputList().size(), Pipe.the().getInputList()
 						.size() == 1 ? "" : "s", Pipe.the().getConverterList()
 						.size(), Pipe.the().getOutputList().size(), Pipe.the()
-						.getOutputList().size() == 1 ? "" : "s"));
+						.getOutputList().size() == 1 ? "" : "s", fn));
 	}
 
 	public void changeConfig() {
@@ -76,6 +79,7 @@ public final class MainPipePanel extends JPanel {
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
 				"Pipe-Configuration", "pca"));
+		fc.setSelectedFile(Pipe.the().getLastSaveFile());
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			if (!file.getName().contains("."))
@@ -87,6 +91,7 @@ public final class MainPipePanel extends JPanel {
 	public void writePipeConfigToFile(final File file) {
 		try {
 			Configuration.the().writeToFile(file, Pipe.the());
+			Pipe.the().setLastSaveFile(file);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -97,6 +102,7 @@ public final class MainPipePanel extends JPanel {
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
 				"Pipe-Configuration", "pca"));
+		fc.setSelectedFile(Pipe.the().getLastSaveFile());
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			readPipeConfigFromFile(fc.getSelectedFile());
 	}
@@ -105,6 +111,7 @@ public final class MainPipePanel extends JPanel {
 		try {
 			Configuration.the().readFromFile(file, Pipe.the());
 			Configuration.the().writeToDefaultFile();
+			Pipe.the().setLastSaveFile(file);
 			updateState();
 			updatePipeLabel();
 		} catch (final ConfigurationException e) {
