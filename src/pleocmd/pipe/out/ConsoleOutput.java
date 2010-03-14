@@ -75,7 +75,7 @@ public final class ConsoleOutput extends Output {
 		default:
 			throw new InternalException(cfgType.getEnum());
 		}
-		return false;
+		return true;
 	}
 
 	public static String help(final HelpKind kind) {
