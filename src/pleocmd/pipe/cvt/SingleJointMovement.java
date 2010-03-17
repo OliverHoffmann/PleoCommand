@@ -23,14 +23,12 @@ public final class SingleJointMovement extends Converter {
 
 	private static final int ANGLE_UNDEFINED = 1000000;
 
-	private final ConfigInt cfgChannelNumber;
 	private final ConfigInt cfgJointNumber;
 	private final ConfigInt cfgMinAngleMovement;
 
 	private int currentAngle;
 
 	public SingleJointMovement() {
-		addConfig(cfgChannelNumber = new ConfigInt("Channel-Number", 0, 0, 31));
 		addConfig(cfgJointNumber = new ConfigInt("Joint-Number", 9, 0, 13));
 		addConfig(cfgMinAngleMovement = new ConfigInt("Minimal Angle-Movement",
 				3, 0, 50));
@@ -53,14 +51,18 @@ public final class SingleJointMovement extends Converter {
 	}
 
 	@Override
-	public boolean canHandleData(final Data data) {
-		return "BCIChannel".equals(data.getSafe(0).asString())
-				&& data.getSafe(1).asLong() == cfgChannelNumber.getContent()
-				&& (data.getSafe(3).asLong() & BCICodomainAdaption.FEATURE_CODOMAIN_ADAPTED) != 0;
+	public String getInputDescription() {
+		return "BCIChannel";
+	}
+
+	@Override
+	public String getOutputDescription() {
+		return "PMC";
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
+		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
 		final List<Data> res = new ArrayList<Data>(1);
 		final List<Value> vals = new ArrayList<Value>(2);
 		try {
@@ -87,9 +89,8 @@ public final class SingleJointMovement extends Converter {
 			return "Produces a JOINT MOVE command for the Pleo for one joint and"
 					+ "a codomain-adapted value of the given BCI channel";
 		case Configuration:
-			return "1: Number of codomain-adapted BCI channel\n"
-					+ "2: Number of Pleo joint (motor) to move\n"
-					+ "3: Minimal angle - movements below this will be ignored";
+			return "1: Number of Pleo joint (motor) to move\n"
+					+ "2: Minimal angle - movements below this will be ignored";
 		default:
 			return "???";
 		}

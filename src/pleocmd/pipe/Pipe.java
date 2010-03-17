@@ -6,8 +6,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import pleocmd.Log;
@@ -219,19 +221,52 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		((PipePart) converter).connectedToPipe(this);
 	}
 
+	private void resolveConnectionUIDs() {
+		// create a map from UID to PipePart
+		final Map<Long, PipePart> map = new HashMap<Long, PipePart>();
+		for (final PipePart pp : inputList)
+			if (map.put(pp.getUID(), pp) != null)
+				throw new InternalException("UIDs not really unique");
+		for (final PipePart pp : converterList)
+			if (map.put(pp.getUID(), pp) != null)
+				throw new InternalException("UIDs not really unique");
+		for (final PipePart pp : outputList)
+			if (map.put(pp.getUID(), pp) != null)
+				throw new InternalException("UIDs not really unique");
+
+		// create the connections (if they are valid connections)
+		Log.detail("Resolving Connection-UIDs for all input");
+		for (final PipePart pp : inputList)
+			pp.resolveConnectionUIDs(map);
+
+		Log.detail("Resolving Connection-UIDs for all converter");
+		for (final PipePart pp : converterList)
+			pp.resolveConnectionUIDs(map);
+
+		Log.detail("Resolving Connection-UIDs for all output");
+		for (final PipePart pp : outputList)
+			pp.resolveConnectionUIDs(map);
+	}
+
 	@Override
 	protected void configure0() throws PipeException {
 		Log.detail("Configuring all input");
-		for (final PipePart pp : inputList)
+		for (final PipePart pp : inputList) {
+			pp.assertAllConnectionUIDsResolved();
 			if (!pp.tryConfigure()) ignoredInputs.add(pp);
+		}
 
 		Log.detail("Configuring all converter");
-		for (final PipePart pp : converterList)
+		for (final PipePart pp : converterList) {
+			pp.assertAllConnectionUIDsResolved();
 			if (!pp.tryConfigure()) ignoredConverter.add(pp);
+		}
 
 		Log.detail("Configuring all output");
-		for (final PipePart pp : outputList)
+		for (final PipePart pp : outputList) {
+			pp.assertAllConnectionUIDsResolved();
 			if (!pp.tryConfigure()) ignoredOutputs.add(pp);
+		}
 	}
 
 	@Override
@@ -504,12 +539,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				continue;
 			}
 			try {
-				if (in.canReadData()) {
-					final Data res = in.readData();
-					feedback.incDataInputCount();
-					if (res == null)
-						throw new InputException(in, false,
-								"readData() returned null");
+				final Data res = in.readData();
+				feedback.incDataInputCount();
+				if (res != null) {
+					// found a valid data packet
+					res.setOrigin(in);
 					return res;
 				}
 			} catch (final InputException e) {
@@ -618,9 +652,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private List<Data> convertDataToDataList(final Data data) {
 		Log.detail("Converting data block to list of data blocks");
 		List<Data> res = null;
-		for (final Converter cvt : converterList)
-			if (!ignoredConverter.contains(cvt)
-					&& (res = convertOneData(data, cvt)) != null) return res;
+		for (final PipePart pp : data.getOrigin().getConnectedPipeParts())
+			if (pp instanceof Converter && !ignoredConverter.contains(pp)
+					&& (res = convertOneData(data, (Converter) pp)) != null)
+				return res; // TODO implement "AND" in pipe-structure, not "OR"
+		// i.e. continue calling convertOneData() for all converter
 
 		// no fitting (and not ignored and working) converter found
 		Log.info("No Converter found, returning data as is: '%s'", data);
@@ -648,17 +684,18 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 */
 	private List<Data> convertOneData(final Data data, final Converter cvt) {
 		try {
-			if (cvt.canHandleData(data)) {
-				Log.detail("Converting '%s' with '%s'", data, cvt);
-				final long id = (long) cvt.hashCode() << 32 | data.hashCode();
-				if (!deadlockDetection.add(id))
-					throw new ConverterException(cvt, true,
-							"Detected dead-lock");
-				feedback.incDataConvertedCount();
-				final List<Data> newDatas = cvt.convert(data);
+			Log.detail("Converting '%s' with '%s'", data, cvt);
+			final long id = (long) cvt.hashCode() << 32 | data.hashCode();
+			if (!deadlockDetection.add(id))
+				throw new ConverterException(cvt, true, "Detected dead-lock");
+			feedback.incDataConvertedCount();
+			final List<Data> newDatas = cvt.convert(data);
+			if (newDatas != null) {
 				final List<Data> res = new ArrayList<Data>(newDatas.size());
-				for (final Data newData : newDatas)
+				for (final Data newData : newDatas) {
+					newData.setOrigin(cvt);
 					res.addAll(convertDataToDataList(newData));
+				}
 				return res;
 			}
 		} catch (final ConverterException e) {
@@ -681,8 +718,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	}
 
 	/**
-	 * Writes the given {@link Data} to all {@link Output}s ignoring those which
-	 * have permanently failed.<br>
+	 * Writes the given {@link Data} to all {@link Output}s connected to
+	 * {@link Data}'s origin, ignoring those which have permanently failed.<br>
 	 * Complains if the {@link Data} has not been accepted by at least one
 	 * {@link Output}.
 	 * 
@@ -693,9 +730,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		Log.detail("Writing data block '%s' to %d output(s)", data, outputList
 				.size());
 		boolean foundOne = false;
-		for (final Output out : outputList)
-			if (!ignoredOutputs.contains(out))
-				foundOne |= writeToOutput(data, out);
+		for (final PipePart trg : data.getOrigin().getConnectedPipeParts())
+			if (trg instanceof Output && !ignoredOutputs.contains(trg))
+				foundOne |= writeToOutput(data, (Output) trg);
 		if (!foundOne) {
 			final Throwable t = new OutputException(null, false,
 					"Skipping data block '%s' because no fitting "
@@ -716,8 +753,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 */
 	private boolean writeToOutput(final Data data, final Output out) {
 		try {
-			if (!out.write(data)) return false;
+			final boolean succeeded = out.write(data);
+			data.setOrigin(out);
+			if (!succeeded) return false;
 		} catch (final OutputException e) {
+			data.setOrigin(out);
 			Log.error(e);
 			if (!e.isPermanent()
 					&& e.getCause() instanceof InterruptedException)
@@ -732,6 +772,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				Log.info("Skipping output '%s' for one data block '%s'", out,
 						data);
 		} catch (final Throwable e) { // CS_IGNORE catch all what may go wrong
+			data.setOrigin(out);
 			Log.error(e);
 			feedback.addError(e, false);
 			Log.info("Skipping output '%s' for one data block '%s'", out, data);
@@ -823,6 +864,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				throw new InternalException(
 						"Superclass of PipePart '%s' unknown", pp);
 			pp.connectedToPipe(this);
+			resolveConnectionUIDs(); // TODO correct here?
 			try {
 				pp.configure();
 			} catch (final PipeException e) {
@@ -863,7 +905,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		return cfgLastSaveFile.getContent();
 	}
 
-	public void setLastSaveFile(File file) throws ConfigurationException {
+	public void setLastSaveFile(final File file) throws ConfigurationException {
 		cfgLastSaveFile.setContent(file);
 	}
 

@@ -32,12 +32,18 @@ public final class SimpleConverter extends Converter {
 	}
 
 	@Override
-	public boolean canHandleData(final Data data) {
-		return "DO".equals(data.getSafe(0).asString());
+	public String getInputDescription() {
+		return "DO";
+	}
+
+	@Override
+	public String getOutputDescription() {
+		return "";
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
+		if (!"DO".equals(data.getSafe(0).asString())) return null;
 		final String s = data.get(1).asString();
 		if (!cfgMap.hasContent(s))
 			throw new ConverterException(this, false,

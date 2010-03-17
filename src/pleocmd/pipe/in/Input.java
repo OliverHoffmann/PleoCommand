@@ -21,21 +21,7 @@ public abstract class Input extends PipePart {
 	@Override
 	protected abstract void close0() throws InputException, IOException;
 
-	public final boolean canReadData() throws InputException {
-		try {
-			ensureInitialized();
-			return canReadData0();
-		} catch (final IOException e) {
-			throw new InputException(this, false, e,
-					"Cannot check for available data blocks");
-		} catch (final StateException e) {
-			throw new InputException(this, true, e,
-					"Cannot check for available data blocks");
-		}
-	}
-
-	protected abstract boolean canReadData0() throws InputException,
-			IOException;
+	public abstract String getOutputDescription();
 
 	public final Data readData() throws InputException {
 		try {

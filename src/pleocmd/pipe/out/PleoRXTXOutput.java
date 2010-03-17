@@ -63,6 +63,11 @@ public final class PleoRXTXOutput extends Output {
 	}
 
 	@Override
+	public String getInputDescription() {
+		return "PMC";
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		if ("PMC".equals(data.getSafe(0).asString())) {

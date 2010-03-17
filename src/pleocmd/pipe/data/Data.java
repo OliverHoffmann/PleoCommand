@@ -14,6 +14,7 @@ import java.util.List;
 import pleocmd.Log;
 import pleocmd.exc.FormatException;
 import pleocmd.pipe.Pipe;
+import pleocmd.pipe.PipePart;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -60,6 +61,8 @@ public final class Data extends AbstractList<Value> {
 	public static final long TIME_NOTIME = -1;
 
 	private final List<Value> values;
+
+	private PipePart origin;
 
 	private final Data parent;
 
@@ -153,6 +156,25 @@ public final class Data extends AbstractList<Value> {
 	@Override
 	public int size() {
 		return values.size();
+	}
+
+	/**
+	 * @return the {@link PipePart} which has created or most recently "touched"
+	 *         this {@link Data}.
+	 */
+	public PipePart getOrigin() {
+		return origin;
+	}
+
+	/**
+	 * Sets the {@link PipePart} which has most recently "touched" this
+	 * {@link Data}.
+	 * 
+	 * @param origin
+	 *            creator or processor of this {@link Data}.
+	 */
+	public void setOrigin(final PipePart origin) {
+		this.origin = origin;
 	}
 
 	/**

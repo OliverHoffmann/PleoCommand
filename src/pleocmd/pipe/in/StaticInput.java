@@ -44,12 +44,13 @@ public final class StaticInput extends Input {
 	}
 
 	@Override
-	protected boolean canReadData0() throws IOException {
-		return in.available() > 0;
+	public String getOutputDescription() {
+		return "";
 	}
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
+		if (in.available() <= 0) return null;
 		try {
 			return Data.createFromAscii(in);
 		} catch (final FormatException e) {

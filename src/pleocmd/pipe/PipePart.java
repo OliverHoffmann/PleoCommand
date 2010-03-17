@@ -1,8 +1,21 @@
 package pleocmd.pipe;
 
+import java.awt.Rectangle;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+
 import pleocmd.Log;
+import pleocmd.cfg.ConfigBounds;
+import pleocmd.cfg.ConfigCollection;
+import pleocmd.cfg.ConfigLong;
 import pleocmd.cfg.ConfigValue;
 import pleocmd.cfg.Group;
+import pleocmd.cfg.ConfigCollection.Type;
+import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.pipe.cvt.Converter;
@@ -17,17 +30,48 @@ import pleocmd.pipe.out.Output;
  */
 public abstract class PipePart extends StateHandling {
 
+	private static final Random RAND = new Random();
+
 	public enum HelpKind {
 		Name, Description, Configuration
 	}
+
+	private final ConfigLong cfgUID;
 
 	private final Group group;
 
 	private Pipe pipe;
 
+	private final Set<PipePart> connected;
+
+	private final ConfigCollection<Long> cfgConnectedUIDs;
+
+	private final ConfigBounds cfgGuiPosition;
+
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
+		connected = new HashSet<PipePart>();
+		group.add(cfgUID = new ConfigLong("UID", RAND.nextLong()));
+		group.add(cfgConnectedUIDs = new ConfigCollection<Long>(
+				"Connected UIDs", Type.Set) {
+			@Override
+			protected Long createItem(final String itemAsString)
+					throws ConfigurationException {
+				try {
+					return Long.parseLong(itemAsString);
+				} catch (final NumberFormatException e) {
+					throw new ConfigurationException("Not a valid UID: "
+							+ itemAsString, e);
+				}
+			}
+		});
+		group.add(cfgGuiPosition = new ConfigBounds("GUI-Position"));
+		cfgGuiPosition.getContent().setBounds(0, 0, 150, 20);
+	}
+
+	long getUID() {
+		return cfgUID.getContent();
 	}
 
 	/**
@@ -149,6 +193,60 @@ public abstract class PipePart extends StateHandling {
 
 		pipe = null;
 		Log.detail("Disconnected '%s' from '%s'", this, curPipe);
+	}
+
+	public Set<PipePart> getConnectedPipeParts() {
+		return Collections.unmodifiableSet(connected);
+	}
+
+	public void connectToPipePart(final PipePart target) {
+		connected.add(target);
+		try {
+			cfgConnectedUIDs.addContent(target.getUID());
+		} catch (final ConfigurationException e) {
+			throw new InternalException(e);
+		}
+	}
+
+	public void disconnectFromPipePart(final PipePart target) {
+		connected.remove(target);
+		cfgConnectedUIDs.removeContent(target.getUID());
+	}
+
+	public void assertAllConnectionUIDsResolved() throws PipeException {
+		if (cfgConnectedUIDs.getContent().size() != connected.size()) {
+			final Set<Long> goodUIDs = new HashSet<Long>();
+			final Set<Long> badUIDs = new HashSet<Long>();
+			for (final Long trgUID : cfgConnectedUIDs.getContent()) {
+				boolean found = false;
+				for (final PipePart pp : connected)
+					if (pp.getUID() == trgUID) {
+						found = true;
+						break;
+					}
+				if (found)
+					goodUIDs.add(trgUID);
+				else
+					badUIDs.add(trgUID);
+			}
+			try {
+				cfgConnectedUIDs.setContent(goodUIDs);
+			} catch (final ConfigurationException e) {
+				throw new InternalException(e);
+			}
+			throw new PipeException(this, true, "Some UIDs could not "
+					+ "be resolved: %s. Check connections of Pipe.", badUIDs);
+		}
+	}
+
+	public void resolveConnectionUIDs(final Map<Long, PipePart> map) {
+		connected.clear();
+		for (final Long trgUID : cfgConnectedUIDs.getContent())
+			if (map.containsKey(trgUID)) connected.add(map.get(trgUID));
+	}
+
+	public Rectangle getGuiPosition() {
+		return cfgGuiPosition.getContent();
 	}
 
 }

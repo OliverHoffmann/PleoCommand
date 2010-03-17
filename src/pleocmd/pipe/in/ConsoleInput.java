@@ -40,12 +40,13 @@ public final class ConsoleInput extends Input {
 	}
 
 	@Override
-	protected boolean canReadData0() throws IOException {
-		return StandardInput.the().available() > 0;
+	public String getOutputDescription() {
+		return "";
 	}
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
+		if (StandardInput.the().available() <= 0) return null;
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			try {

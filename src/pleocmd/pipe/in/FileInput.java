@@ -73,12 +73,13 @@ public final class FileInput extends Input {
 	}
 
 	@Override
-	protected boolean canReadData0() throws IOException {
-		return in.available() > 0;
+	public String getOutputDescription() {
+		return "";
 	}
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
+		if (in.available() <= 0) return null;
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			try {

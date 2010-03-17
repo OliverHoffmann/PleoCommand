@@ -21,6 +21,8 @@ public abstract class Output extends PipePart {
 	@Override
 	protected abstract void close0() throws OutputException, IOException;
 
+	public abstract String getInputDescription();
+
 	public final boolean write(final Data data) throws OutputException {
 		try {
 			ensureInitialized();

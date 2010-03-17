@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JTabbedPane;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBounds;
@@ -17,34 +16,24 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
-import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public final class PipePartConfigFrame extends JDialog implements
+public final class PipeConfigDialog extends JDialog implements
 		ConfigurationInterface {
 
-	private static final long serialVersionUID = -1967218353263515865L;
+	private static final long serialVersionUID = 145574241927303337L;
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
-
-	private final PipePartPanel<Input> pppInput;
-
-	private final PipePartPanel<Converter> pppConverter;
-
-	private final PipePartPanel<Output> pppOutput;
 
 	private final JButton btnOk;
 
 	private final JButton btnApply;
 
-	public PipePartConfigFrame() {
-		pppInput = new PipePartPanel<Input>(PipePartDetection.ALL_INPUT);
-		pppConverter = new PipePartPanel<Converter>(
-				PipePartDetection.ALL_CONVERTER);
-		pppOutput = new PipePartPanel<Output>(PipePartDetection.ALL_OUTPUT);
+	private final PipeConfigBoard board;
 
+	public PipeConfigDialog() {
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -55,17 +44,10 @@ public final class PipePartConfigFrame extends JDialog implements
 			}
 		});
 
-		pppInput.assignPipeParts(Pipe.the().getInputList());
-		pppConverter.assignPipeParts(Pipe.the().getConverterList());
-		pppOutput.assignPipeParts(Pipe.the().getOutputList());
-
 		// Add components
 		final Layouter lay = new Layouter(this);
-		final JTabbedPane tabs = new JTabbedPane();
-		tabs.addTab("Input", pppInput);
-		tabs.addTab("Converter", pppConverter);
-		tabs.addTab("Output", pppOutput);
-		lay.addWholeLine(tabs, true);
+		board = new PipeConfigBoard();
+		lay.addWholeLine(board, true);
 
 		lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
@@ -120,13 +102,12 @@ public final class PipePartConfigFrame extends JDialog implements
 	public void applyChanges() {
 		try {
 			Pipe.the().reset();
-			for (int i = 0; i < pppInput.getTableModel().getRowCount(); ++i)
-				Pipe.the().addInput(pppInput.getTableModel().getPipePart(i));
-			for (int i = 0; i < pppConverter.getTableModel().getRowCount(); ++i)
-				Pipe.the().addConverter(
-						pppConverter.getTableModel().getPipePart(i));
-			for (int i = 0; i < pppOutput.getTableModel().getRowCount(); ++i)
-				Pipe.the().addOutput(pppOutput.getTableModel().getPipePart(i));
+			for (final Input pp : board.getSortedParts(Input.class))
+				Pipe.the().addInput(pp);
+			for (final Converter pp : board.getSortedParts(Converter.class))
+				Pipe.the().addConverter(pp);
+			for (final Output pp : board.getSortedParts(Output.class))
+				Pipe.the().addOutput(pp);
 			Configuration.the().writeToDefaultFile();
 			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();

@@ -9,6 +9,8 @@ import java.net.Socket;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Value;
+import pleocmd.pipe.val.ValueType;
 
 public final class TcpIpInput extends Input {
 
@@ -64,9 +66,8 @@ public final class TcpIpInput extends Input {
 	}
 
 	@Override
-	protected boolean canReadData0() throws IOException {
-		return !delayedInit
-				|| (socket.isConnected() && !socket.isInputShutdown());
+	public String getOutputDescription() {
+		return "FromBCI";
 	}
 
 	@Override
@@ -82,7 +83,12 @@ public final class TcpIpInput extends Input {
 			socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
 			in = new DataInputStream(socket.getInputStream());
 		}
-		return Data.createFromBinary(in);
+		if (!socket.isConnected() || socket.isInputShutdown()) return null;
+		final Data res = Data.createFromBinary(in);
+		res
+				.add(0, Value.createForType(ValueType.NullTermString).set(
+						"FromBCI"));
+		return res;
 	}
 
 	public static String help(final HelpKind kind) {

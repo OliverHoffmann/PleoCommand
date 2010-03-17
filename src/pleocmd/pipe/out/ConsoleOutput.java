@@ -42,6 +42,11 @@ public final class ConsoleOutput extends Output {
 	}
 
 	@Override
+	public String getInputDescription() {
+		return "";
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		Data root;

@@ -32,12 +32,18 @@ public final class BCIChannelSplitter extends Converter {
 	}
 
 	@Override
-	public boolean canHandleData(final Data data) {
-		return "FromBCI".equals(data.getSafe(0).asString());
+	public String getInputDescription() {
+		return "FromBCI";
+	}
+
+	@Override
+	public String getOutputDescription() {
+		return "BCIChannel";
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
+		if (!"FromBCI".equals(data.getSafe(0).asString())) return null;
 		final List<Data> res = new ArrayList<Data>(data.size() - 1);
 		for (int i = 1; i < data.size(); ++i) {
 			final List<Value> vals = new ArrayList<Value>(4);

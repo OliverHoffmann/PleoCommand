@@ -21,9 +21,6 @@ public final class BCICodomainAdaption extends Converter {
 		Linear
 	}
 
-	public static final int FEATURE_CODOMAIN_ADAPTED = 1;
-
-	private final ConfigInt cfgChannelNumber;
 	private final ConfigInt cfgSourceMin;
 	private final ConfigInt cfgSourceMax;
 	private final ConfigInt cfgTargetMin;
@@ -36,7 +33,6 @@ public final class BCICodomainAdaption extends Converter {
 	private double fl; // factor for linear transformation
 
 	public BCICodomainAdaption() {
-		addConfig(cfgChannelNumber = new ConfigInt("Channel-Number", 0, 0, 31));
 		addConfig(cfgSourceMin = new ConfigInt("Source-Minimum", -1000));
 		addConfig(cfgSourceMax = new ConfigInt("Source-Maximum", 1000));
 		addConfig(cfgTargetMin = new ConfigInt("Target-Minimum", -64));
@@ -68,14 +64,18 @@ public final class BCICodomainAdaption extends Converter {
 	}
 
 	@Override
-	public boolean canHandleData(final Data data) {
-		return "BCIChannel".equals(data.getSafe(0).asString())
-				&& data.getSafe(1).asLong() == cfgChannelNumber.getContent()
-				&& (data.getSafe(3).asLong() & FEATURE_CODOMAIN_ADAPTED) == 0;
+	public String getInputDescription() {
+		return "BCIChannel";
+	}
+
+	@Override
+	public String getOutputDescription() {
+		return "BCIChannel";
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
+		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
 		final List<Data> res = new ArrayList<Data>(1);
 		final List<Value> vals = new ArrayList<Value>(data);
 		try {
@@ -97,9 +97,6 @@ public final class BCICodomainAdaption extends Converter {
 			case Linear:
 				vals.get(2).set(String.valueOf((val - dec) * fl + inc));
 			}
-			vals.get(3).set(
-					String.valueOf(vals.get(3).asLong()
-							| FEATURE_CODOMAIN_ADAPTED));
 		} catch (final IOException e) {
 			throw new InternalException(e);
 		}
@@ -115,14 +112,13 @@ public final class BCICodomainAdaption extends Converter {
 			return "Reduces or enlarges the range of possible values for a "
 					+ "single BCI channel";
 		case Configuration:
-			return "1: Number of a BCI channel\n"
-					+ "2: Minimum value of source range\n"
-					+ "3: Maximum value of source range\n"
-					+ "4: Minimum value of target range\n"
-					+ "5: Maximum value of target range\n"
-					+ "6: Whether to fit values out of the source range to min/max "
+			return "1: Minimum value of source range\n"
+					+ "2: Maximum value of source range\n"
+					+ "3: Minimum value of target range\n"
+					+ "4: Maximum value of target range\n"
+					+ "5: Whether to fit values out of the source range to min/max "
 					+ "or just drop their data packets\n"
-					+ "7: Kind of transformation from source range to target range";
+					+ "6: Kind of transformation from source range to target range";
 		default:
 			return "???";
 		}

@@ -30,6 +30,11 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
+	public String getInputDescription() {
+		return "SC";
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		if ("SC".equals(data.getSafe(0).asString())) {

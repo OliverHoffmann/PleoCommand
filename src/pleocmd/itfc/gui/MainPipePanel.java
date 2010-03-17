@@ -70,7 +70,7 @@ public final class MainPipePanel extends JPanel {
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		new PipePartConfigFrame();
+		new PipeConfigDialog();
 		Log.detail("GUI-Frame is done with configuration");
 	}
 

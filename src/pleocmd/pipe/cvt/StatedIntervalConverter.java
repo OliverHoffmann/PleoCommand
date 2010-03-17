@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.FormatException;
@@ -12,7 +11,6 @@ import pleocmd.pipe.data.Data;
 
 public final class StatedIntervalConverter extends Converter {
 
-	private final ConfigInt cfgChannelNumber;
 	private final ConfigString cfgCommand1;
 	private final ConfigString cfgCommand2;
 
@@ -20,7 +18,6 @@ public final class StatedIntervalConverter extends Converter {
 	private int nextCommand;
 
 	public StatedIntervalConverter() {
-		addConfig(cfgChannelNumber = new ConfigInt("Channel-Number", 0, 0, 31));
 		addConfig(cfgCommand1 = new ConfigString("Command 1",
 				"PMC|JOINT MOVE 0 0"));
 		addConfig(cfgCommand2 = new ConfigString(
@@ -45,27 +42,18 @@ public final class StatedIntervalConverter extends Converter {
 	}
 
 	@Override
-	public boolean canHandleData(final Data data) {
-		return "BCIChannel".equals(data.getSafe(0).asString())
-				&& data.getSafe(1).asLong() == cfgChannelNumber.getContent()
-				&& (data.getSafe(3).asLong() & BCICodomainAdaption.FEATURE_CODOMAIN_ADAPTED) != 0;
+	public String getInputDescription() {
+		return "BCIChannel";
 	}
 
-	private Data createCommand(final ConfigString cfg, final Data parent)
-			throws ConverterException {
-		try {
-			return new Data(Data.createFromAscii(cfg.getContent()), parent);
-		} catch (final IOException e) {
-			throw new ConverterException(this, true, "Invalid "
-					+ cfg.getLabel(), e);
-		} catch (final FormatException e) {
-			throw new ConverterException(this, true, "Invalid "
-					+ cfg.getLabel(), e);
-		}
+	@Override
+	public String getOutputDescription() {
+		return "";
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
+		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
 		final List<Data> res = new ArrayList<Data>(1);
 		sum += 1.0 / data.get(2).asDouble();
 		if (sum < 1) return res;
@@ -83,6 +71,19 @@ public final class StatedIntervalConverter extends Converter {
 		return res;
 	}
 
+	private Data createCommand(final ConfigString cfg, final Data parent)
+			throws ConverterException {
+		try {
+			return new Data(Data.createFromAscii(cfg.getContent()), parent);
+		} catch (final IOException e) {
+			throw new ConverterException(this, true, "Invalid "
+					+ cfg.getLabel(), e);
+		} catch (final FormatException e) {
+			throw new ConverterException(this, true, "Invalid "
+					+ cfg.getLabel(), e);
+		}
+	}
+
 	public static String help(final HelpKind kind) {
 		switch (kind) {
 		case Name:
@@ -93,9 +94,9 @@ public final class StatedIntervalConverter extends Converter {
 					+ "output would be [-, C, -, C, C, C] where C is command "
 					+ "and - marks a dropped data packet";
 		case Configuration:
-			return "1: Number of codomain-adapted BCI channel\n"
-					+ "2: First command to send (alternating with the second one)\n"
-					+ "3: Second command to send (if empty, only first one will be used)";
+			return "1: First command to send (alternating with the second one)\n"
+					+ "2: Second command to send (if empty, "
+					+ "only first one will be used)";
 		default:
 			return "???";
 		}

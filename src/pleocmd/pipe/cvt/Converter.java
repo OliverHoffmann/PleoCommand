@@ -22,8 +22,9 @@ public abstract class Converter extends PipePart {
 	@Override
 	protected abstract void close0() throws ConverterException, IOException;
 
-	public abstract boolean canHandleData(final Data data)
-			throws ConverterException;
+	public abstract String getInputDescription();
+
+	public abstract String getOutputDescription();
 
 	public final List<Data> convert(final Data data) throws ConverterException {
 		try {
