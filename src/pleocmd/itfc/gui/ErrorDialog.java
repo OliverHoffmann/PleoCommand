@@ -59,8 +59,11 @@ public final class ErrorDialog extends JDialog implements
 		}
 	};
 
+	private final Map<String, MessageCount> messageCount;
+
 	private ErrorDialog() {
 		errorDialog = this;
+		messageCount = new HashMap<String, MessageCount>();
 
 		setTitle("Error");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -130,8 +133,20 @@ public final class ErrorDialog extends JDialog implements
 	protected void showLog(final Log log) {
 		final String caller = log.getCaller().toString();
 		if (cfgSuppressed.contains(caller)) return;
+		MessageCount mc = messageCount.get(caller);
+		if (mc == null) {
+			mc = new MessageCount();
+			messageCount.put(caller, mc);
+		}
+		if (mc.inc() > 5) {
+			mc.getMostRecent().setVisible(true);
+			mc.getMostRecent().setText(
+					String.format("%d more from the same caller",
+							mc.getCount() - 5));
+			return;
+		}
 
-		final JLabel lblT, lblC;
+		final JLabel lblT, lblC, lblS;
 		final JTextArea lblM;
 		final JCheckBox cbS;
 		if (errorCount > 0)
@@ -142,14 +157,17 @@ public final class ErrorDialog extends JDialog implements
 		layErrorPanel.add(cbS = new JCheckBox("Suppress"), false);
 		layErrorPanel.newLine();
 		layErrorPanel.addWholeLine(lblM = new JTextArea(log.getMsg()), false);
+		layErrorPanel.addWholeLine(lblS = new JLabel(""), false);
 
 		lblM.setLineWrap(true);
 		lblM.setWrapStyleWord(true);
 		lblM.setEditable(false);
 		lblM.setOpaque(false);
 		lblM.setForeground(Color.RED);
+		lblS.setVisible(false);
 
 		map.put(cbS, caller);
+		mc.setMostRecent(lblS);
 		cbS.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -157,6 +175,7 @@ public final class ErrorDialog extends JDialog implements
 				lblT.setForeground(sel ? Color.GRAY : cbS.getForeground());
 				lblC.setForeground(sel ? Color.GRAY : cbS.getForeground());
 				lblM.setForeground(sel ? Color.GRAY : Color.RED);
+				lblS.setForeground(sel ? Color.GRAY : cbS.getForeground());
 				try {
 					changeSuppress(caller, sel);
 				} catch (final ConfigurationException exc) {
@@ -215,6 +234,7 @@ public final class ErrorDialog extends JDialog implements
 	protected void close() {
 		errorCount = 0;
 		map.clear();
+		messageCount.clear();
 		layErrorPanel.clear();
 		layErrorPanel.nextComponentsAlwaysOnLastLine();
 		layErrorPanel.addVerticalSpacer();
@@ -246,6 +266,28 @@ public final class ErrorDialog extends JDialog implements
 
 	public List<Group> configurationWriteback() {
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
+	}
+
+	class MessageCount {
+		private int count;
+		private JLabel mostRecent;
+
+		public int inc() {
+			return ++count;
+		}
+
+		public int getCount() {
+			return count;
+		}
+
+		public JLabel getMostRecent() {
+			return mostRecent;
+		}
+
+		public void setMostRecent(final JLabel mostRecent) {
+			this.mostRecent = mostRecent;
+		}
+
 	}
 
 }
