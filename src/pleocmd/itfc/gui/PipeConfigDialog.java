@@ -2,6 +2,10 @@ package pleocmd.itfc.gui;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.CharArrayReader;
+import java.io.CharArrayWriter;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -13,6 +17,7 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
@@ -33,6 +38,8 @@ public final class PipeConfigDialog extends JDialog implements
 
 	private final PipeConfigBoard board;
 
+	private char[] originalPipe;
+
 	public PipeConfigDialog() {
 		Log.detail("Creating Config-Frame");
 		setTitle("Configure Pipe");
@@ -40,9 +47,12 @@ public final class PipeConfigDialog extends JDialog implements
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				close();
+				close(true);
 			}
 		});
+
+		// Save current pipe's configuration
+		saveCurrentPipe();
 
 		// Add components
 		final Layouter lay = new Layouter(this);
@@ -56,7 +66,7 @@ public final class PipeConfigDialog extends JDialog implements
 			@Override
 			public void run() {
 				applyChanges();
-				close();
+				close(false);
 			}
 		});
 		getRootPane().setDefaultButton(btnOk);
@@ -70,7 +80,7 @@ public final class PipeConfigDialog extends JDialog implements
 			@Override
 			public void run() {
 				Log.detail("Canceled Config-Frame");
-				close();
+				close(true);
 			}
 		});
 
@@ -89,7 +99,29 @@ public final class PipeConfigDialog extends JDialog implements
 		setVisible(true);
 	}
 
-	protected void close() {
+	private void saveCurrentPipe() {
+		final CharArrayWriter out = new CharArrayWriter();
+		try {
+			Configuration.the().writeToWriter(out, Pipe.the());
+		} catch (final IOException e) {
+			throw new InternalException(e);
+		}
+		originalPipe = out.toCharArray();
+	}
+
+	protected void close(final boolean resetChanges) {
+		if (resetChanges) {
+			final CharArrayReader in = new CharArrayReader(originalPipe);
+			try {
+				Configuration.the().readFromReader(new BufferedReader(in),
+						Pipe.the());
+			} catch (final ConfigurationException e) {
+				Log.error(e, "Cannot restore old pipe");
+			} catch (final IOException e) {
+				Log.error(e, "Cannot restore old pipe");
+			}
+			in.close();
+		}
 		try {
 			Configuration.the().unregisterConfigurableObject(this);
 		} catch (final ConfigurationException e) {
@@ -108,6 +140,7 @@ public final class PipeConfigDialog extends JDialog implements
 				Pipe.the().addConverter(pp);
 			for (final Output pp : board.getSortedParts(Output.class))
 				Pipe.the().addOutput(pp);
+			saveCurrentPipe();
 			Configuration.the().writeToDefaultFile();
 			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();
