@@ -143,6 +143,10 @@ public abstract class PipePart extends StateHandling {
 		}
 	}
 
+	public abstract String getInputDescription();
+
+	public abstract String getOutputDescription();
+
 	@Override
 	public String toString() { // CS_IGNORE_PREV keep overridable
 		return group.toString();

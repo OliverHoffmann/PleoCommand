@@ -21,7 +21,10 @@ public abstract class Input extends PipePart {
 	@Override
 	protected abstract void close0() throws InputException, IOException;
 
-	public abstract String getOutputDescription();
+	@Override
+	public String getInputDescription() {
+		return "";
+	}
 
 	public final Data readData() throws InputException {
 		try {
