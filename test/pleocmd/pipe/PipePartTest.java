@@ -42,6 +42,17 @@ public final class PipePartTest extends Testcases {
 			protected void close0() throws PipeException, IOException {
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public String getInputDescription() {
+				return "";
+			}
+
+			@Override
+			public String getOutputDescription() {
+				return "";
+			}
+
 		};
 	}
 
