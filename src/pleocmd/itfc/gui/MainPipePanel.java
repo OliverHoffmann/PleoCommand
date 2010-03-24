@@ -92,6 +92,7 @@ public final class MainPipePanel extends JPanel {
 		try {
 			Configuration.the().writeToFile(file, Pipe.the());
 			Pipe.the().setLastSaveFile(file);
+			updatePipeLabel();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
