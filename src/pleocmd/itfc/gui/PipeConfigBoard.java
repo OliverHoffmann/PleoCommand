@@ -83,6 +83,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private PipePart currentConnectionsTarget;
 
+	private boolean currentConnectionValid;
+
 	private PipePart underCursor;
 
 	private int grayVal = 128;
@@ -206,6 +208,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentPart.disconnectFromPipePart(currentConnectionsTarget);
 			currentConnection = null;
 			currentConnectionsTarget = null;
+			currentConnectionValid = false;
 			repaint();
 		}
 	}
@@ -218,6 +221,7 @@ public final class PipeConfigBoard extends JPanel {
 				currentPart.disconnectFromPipePart(pp);
 			currentConnection = null;
 			currentConnectionsTarget = null;
+			currentConnectionValid = false;
 			repaint();
 		}
 	}
@@ -231,6 +235,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentPart = null;
 			currentConnection = null;
 			currentConnectionsTarget = null;
+			currentConnectionValid = false;
 			repaint();
 		}
 	}
@@ -284,7 +289,7 @@ public final class PipeConfigBoard extends JPanel {
 				drawConnection(g2, src.getGuiPosition(), trg.getGuiPosition(),
 						src, trg);
 		if (currentConnection != null && currentConnectionsTarget == null) {
-			g2.setColor(Color.BLUE);
+			g2.setColor(currentConnectionValid ? Color.BLUE : Color.RED);
 			drawConnection(g2, currentPart.getGuiPosition(), currentConnection,
 					currentPart, underCursor);
 		}
@@ -450,6 +455,13 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection.setLocation(p.x, p.y);
 			currentConnection.setSize(0, 0);
 			check(currentConnection, null);
+			currentConnectionValid = false;
+			for (final PipePart pp : set)
+				if (pp.getGuiPosition().contains(p)) {
+					currentConnectionValid = isConnectionAllowed(currentPart,
+							pp);
+					break;
+				}
 			mouseMoved(p);
 
 			r = r.union(currentConnection);
@@ -539,6 +551,7 @@ public final class PipeConfigBoard extends JPanel {
 				currentConnection = inner.contains(p) ? null : new Rectangle(
 						p.x, p.y, 0, 0);
 				currentConnectionsTarget = null;
+				currentConnectionValid = false;
 				return;
 			}
 
@@ -553,6 +566,7 @@ public final class PipeConfigBoard extends JPanel {
 					currentPart = srcPP;
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					currentConnectionsTarget = trgPP;
+					currentConnectionValid = false;
 					return;
 				}
 			}
@@ -560,6 +574,7 @@ public final class PipeConfigBoard extends JPanel {
 		currentPart = null;
 		currentConnection = null;
 		currentConnectionsTarget = null;
+		currentConnectionValid = false;
 	}
 
 	/**
@@ -574,21 +589,40 @@ public final class PipeConfigBoard extends JPanel {
 		if (currentConnection != null && currentConnectionsTarget == null) {
 			final Point p = new Point(currentConnection.getLocation());
 			for (final PipePart pp : set)
-				if (isConnectionAllowed(currentPart, pp)
-						&& pp.getGuiPosition().contains(p)) {
+				if (pp.getGuiPosition().contains(p)
+						&& isConnectionAllowed(currentPart, pp)) {
 					currentPart.connectToPipePart(pp);
 					break;
 				}
 		}
 		// currentPart = null;
 		currentConnection = null;
+		currentConnectionValid = false;
 		// currentConnectionsTarget = null;
 		repaint();
 	}
 
+	/**
+	 * @param s1
+	 *            first string
+	 * @param s2
+	 *            second string
+	 * @return true only if both strings contain something and that is not the
+	 *         same.
+	 */
+	private static boolean strDiffer(final String s1, final String s2) {
+		return s1 != null && s2 != null && !s1.isEmpty() && !s2.isEmpty()
+				&& !s1.equals(s2);
+	}
+
+	// TODO move to PipePart
 	private boolean isConnectionAllowed(final PipePart src, final PipePart trg) {
 		if (src == trg) return false;
-		return true; // TODO
+		if (src instanceof Output) return false;
+		if (trg instanceof Input) return false;
+		if (strDiffer(src.getOutputDescription(), trg.getInputDescription()))
+			return false;
+		return true;
 	}
 
 	/**
