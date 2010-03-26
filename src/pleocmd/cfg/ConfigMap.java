@@ -114,7 +114,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	}
 
 	@Override
-	final String asString() {
+	public final String asString() {
 		final StringBuilder sb = new StringBuilder("[");
 		for (final Entry<K, List<V>> entry : content.entrySet()) {
 			sb.append(entry.getKey());

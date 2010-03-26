@@ -769,7 +769,19 @@ public final class PipeConfigBoard extends JPanel {
 
 	@Override
 	public String getToolTipText(final MouseEvent event) {
-		return underCursor == null ? null : underCursor.toString();
+		if (underCursor == null) return null;
+		final StringBuilder sb = new StringBuilder("<html><b>");
+		sb.append(underCursor.getClass().getSimpleName());
+		sb.append("</b><table>");
+		for (final ConfigValue v : underCursor.getGuiConfigs()) {
+			sb.append("<tr><td align=right>");
+			sb.append(v.getLabel().replace("<", "&lt;"));
+			sb.append("</td><td align=left>");
+			sb.append(v.asString().replace("<", "&lt;"));
+			sb.append("</td></tr>");
+		}
+		sb.append("</table></html>");
+		return sb.toString();
 	}
 
 }

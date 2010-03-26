@@ -34,7 +34,7 @@ public final class ConfigBounds extends ConfigValue {
 	}
 
 	@Override
-	String asString() {
+	public String asString() {
 		return String.format("%d, %d / %d x %d", (int) content.getX(),
 				(int) content.getY(), (int) content.getWidth(), (int) content
 						.getHeight());

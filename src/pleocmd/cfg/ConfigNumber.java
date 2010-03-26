@@ -60,7 +60,7 @@ public abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	}
 
 	@Override
-	final String asString() {
+	public final String asString() {
 		return String.valueOf(content);
 	}
 

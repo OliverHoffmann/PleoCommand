@@ -103,7 +103,7 @@ public class ConfigItem<E> extends ConfigValue {
 	}
 
 	@Override
-	final String asString() {
+	public final String asString() {
 		return content;
 	}
 

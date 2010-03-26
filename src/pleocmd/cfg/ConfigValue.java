@@ -50,7 +50,7 @@ public abstract class ConfigValue {
 		return str == null ? getLabel() : getLabel() + ": " + str;
 	}
 
-	abstract String asString();
+	public abstract String asString();
 
 	abstract void setFromString(final String string)
 			throws ConfigurationException;

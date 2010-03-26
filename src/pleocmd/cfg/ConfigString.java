@@ -92,7 +92,7 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	String asString() {
+	public String asString() {
 		return content;
 	}
 

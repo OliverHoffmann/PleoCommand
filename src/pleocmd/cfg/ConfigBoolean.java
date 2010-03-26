@@ -32,7 +32,7 @@ public final class ConfigBoolean extends ConfigValue {
 	}
 
 	@Override
-	String asString() {
+	public String asString() {
 		return String.valueOf(content);
 	}
 

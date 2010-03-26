@@ -96,7 +96,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	String asString() {
+	public String asString() {
 		return content.getPath();
 	}
 

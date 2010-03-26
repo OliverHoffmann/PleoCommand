@@ -94,7 +94,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	@Override
-	final String asString() {
+	public final String asString() {
 		return content.toString();
 	}
 
