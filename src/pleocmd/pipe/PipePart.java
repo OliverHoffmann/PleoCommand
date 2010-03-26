@@ -1,8 +1,10 @@
 package pleocmd.pipe;
 
 import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
@@ -40,6 +42,8 @@ public abstract class PipePart extends StateHandling {
 
 	private final Group group;
 
+	private final List<ConfigValue> guiConfigs;
+
 	private Pipe pipe;
 
 	private final Set<PipePart> connected;
@@ -51,6 +55,7 @@ public abstract class PipePart extends StateHandling {
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
+		guiConfigs = new ArrayList<ConfigValue>();
 		connected = new HashSet<PipePart>();
 		group.add(cfgUID = new ConfigLong("UID", RAND.nextLong()));
 		group.add(cfgConnectedUIDs = new ConfigCollection<Long>(
@@ -84,12 +89,30 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	public final void addConfig(final ConfigValue value) {
+		addConfig(value, true);
+	}
+
+	public final void addConfig(final ConfigValue value,
+			final boolean visibleInGUI) {
 		try {
 			ensureConstructing();
 		} catch (final StateException e) {
 			throw new IllegalStateException("Cannot add ConfigValue", e);
 		}
 		group.add(value);
+		if (visibleInGUI) guiConfigs.add(value);
+	}
+
+	public List<ConfigValue> getGuiConfigs() {
+		return Collections.unmodifiableList(guiConfigs);
+	}
+
+	public void addConfigToGUI(final ConfigValue value) {
+		if (group.get(value.getLabel()) != value)
+			throw new IllegalArgumentException("ConfigValue is not registered");
+		if (guiConfigs.contains(value))
+			throw new IllegalArgumentException("ConfigValue is already in GUI");
+		guiConfigs.add(value);
 	}
 
 	/**

@@ -701,10 +701,9 @@ public final class PipeConfigBoard extends JPanel {
 		final JDialog dlg = new JDialog();
 		dlg.setTitle(String.format("%s %s", prefix, pp));
 		final Layouter lay = new Layouter(dlg);
-		for (final ConfigValue v : pp.getGroup().getValueMap().values()) {
+		for (final ConfigValue v : pp.getGuiConfigs()) {
 			// each config-value gets its own JPanel so they don't
-			// interfere with each other. JPanels covering
-			// more than one line are not yet tested.
+			// interfere with each other.
 			// LBL1 SUB1
 			// LBL2 SUB2
 			// LBL3 SUB3
@@ -760,7 +759,7 @@ public final class PipeConfigBoard extends JPanel {
 	protected void saveConfigChanges(final PipePart pp) {
 		// TODO pp.getGroup().assertContextSensitiveCorrectness();
 		try {
-			for (final ConfigValue v : pp.getGroup().getValueMap().values())
+			for (final ConfigValue v : pp.getGuiConfigs())
 				v.setFromGUIComponents();
 			pp.configure();
 		} catch (final PipeException e) {
