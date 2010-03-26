@@ -547,8 +547,8 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnectionValid = false;
 			for (final PipePart pp : set)
 				if (pp.getGuiPosition().contains(p)) {
-					currentConnectionValid = isConnectionAllowed(currentPart,
-							pp);
+					currentConnectionValid = currentPart
+							.isConnectionAllowed(pp);
 					break;
 				}
 			mouseMoved(p);
@@ -679,7 +679,7 @@ public final class PipeConfigBoard extends JPanel {
 			final Point p = new Point(currentConnection.getLocation());
 			for (final PipePart pp : set)
 				if (pp.getGuiPosition().contains(p)
-						&& isConnectionAllowed(currentPart, pp)) {
+						&& currentPart.isConnectionAllowed(pp)) {
 					currentPart.connectToPipePart(pp);
 					updateSaneConfigCache();
 					break;
@@ -690,29 +690,6 @@ public final class PipeConfigBoard extends JPanel {
 		currentConnectionValid = false;
 		// currentConnectionsTarget = null;
 		repaint();
-	}
-
-	/**
-	 * @param s1
-	 *            first string
-	 * @param s2
-	 *            second string
-	 * @return true only if both strings contain something and that is not the
-	 *         same.
-	 */
-	private static boolean strDiffer(final String s1, final String s2) {
-		return s1 != null && s2 != null && !s1.isEmpty() && !s2.isEmpty()
-				&& !s1.equals(s2);
-	}
-
-	// TODO move to PipePart
-	private boolean isConnectionAllowed(final PipePart src, final PipePart trg) {
-		if (src == trg) return false;
-		if (src instanceof Output) return false;
-		if (trg instanceof Input) return false;
-		if (strDiffer(src.getOutputDescription(), trg.getInputDescription()))
-			return false;
-		return true;
 	}
 
 	/**

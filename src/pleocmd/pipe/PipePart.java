@@ -242,6 +242,28 @@ public abstract class PipePart extends StateHandling {
 		cfgConnectedUIDs.removeContent(target.getUID());
 	}
 
+	/**
+	 * @param s1
+	 *            first string
+	 * @param s2
+	 *            second string
+	 * @return true only if both strings contain something and that is not the
+	 *         same.
+	 */
+	private static boolean strDiffer(final String s1, final String s2) {
+		return s1 != null && s2 != null && !s1.isEmpty() && !s2.isEmpty()
+				&& !s1.equals(s2);
+	}
+
+	public boolean isConnectionAllowed(final PipePart trg) {
+		return this != trg
+				&& !(trg instanceof Input)
+				&& isConnectionAllowed0(trg)
+				&& !strDiffer(getOutputDescription(), trg.getInputDescription());
+	}
+
+	protected abstract boolean isConnectionAllowed0(final PipePart trg);
+
 	public void assertAllConnectionUIDsResolved() throws PipeException {
 		if (cfgConnectedUIDs.getContent().size() != connected.size()) {
 			final Set<Long> goodUIDs = new HashSet<Long>();

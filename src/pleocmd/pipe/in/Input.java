@@ -26,6 +26,11 @@ public abstract class Input extends PipePart {
 		return "";
 	}
 
+	@Override
+	public boolean isConnectionAllowed0(final PipePart trg) {
+		return true;
+	}
+
 	public final Data readData() throws InputException {
 		try {
 			ensureInitialized();

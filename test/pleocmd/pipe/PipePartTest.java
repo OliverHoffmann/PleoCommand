@@ -54,6 +54,11 @@ public final class PipePartTest extends Testcases {
 			}
 
 			@Override
+			protected boolean isConnectionAllowed0(final PipePart trg) {
+				return false;
+			}
+
+			@Override
 			public boolean isConfigurationSane() {
 				return true;
 			}

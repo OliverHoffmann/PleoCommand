@@ -26,6 +26,11 @@ public abstract class Output extends PipePart {
 		return "";
 	}
 
+	@Override
+	public boolean isConnectionAllowed0(final PipePart trg) {
+		return false;
+	}
+
 	public final boolean write(final Data data) throws OutputException {
 		try {
 			ensureInitialized();

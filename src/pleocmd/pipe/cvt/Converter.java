@@ -22,6 +22,11 @@ public abstract class Converter extends PipePart {
 	@Override
 	protected abstract void close0() throws ConverterException, IOException;
 
+	@Override
+	public boolean isConnectionAllowed0(final PipePart trg) {
+		return true;
+	}
+
 	public final List<Data> convert(final Data data) throws ConverterException {
 		try {
 			ensureInitialized();
