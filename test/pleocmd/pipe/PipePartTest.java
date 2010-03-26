@@ -53,6 +53,11 @@ public final class PipePartTest extends Testcases {
 				return "";
 			}
 
+			@Override
+			public boolean isConfigurationSane() {
+				return true;
+			}
+
 		};
 	}
 

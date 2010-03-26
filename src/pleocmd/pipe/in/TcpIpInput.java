@@ -106,4 +106,17 @@ public final class TcpIpInput extends Input {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		try {
+			final ServerSocket ss = new ServerSocket(0);
+			ss.setReuseAddress(true);
+			ss.bind(new InetSocketAddress(cfgPort.getContent()));
+			ss.close();
+		} catch (final IOException e) {
+			return false; // port already in use
+		}
+		return true;
+	}
+
 }

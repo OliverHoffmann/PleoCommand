@@ -111,4 +111,9 @@ public final class FileInput extends Input {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		return cfgFile.getContent().canRead();
+	}
+
 }

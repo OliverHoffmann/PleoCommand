@@ -63,4 +63,9 @@ public class BCISingleChannel extends Converter {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		return true;
+	}
+
 }

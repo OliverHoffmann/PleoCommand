@@ -115,6 +115,8 @@ public abstract class PipePart extends StateHandling {
 		guiConfigs.add(value);
 	}
 
+	public abstract boolean isConfigurationSane();
+
 	/**
 	 * Tries to call {@link #configure()} and writes an error message to the
 	 * {@link Log} if configuring fails.

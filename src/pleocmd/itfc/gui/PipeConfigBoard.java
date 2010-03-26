@@ -99,6 +99,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private int idxMenuDelConn;
 
+	private final Set<PipePart> saneConfigCache;
+
 	public PipeConfigBoard() {
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
@@ -111,6 +113,9 @@ public final class PipeConfigBoard extends JPanel {
 			set.add(pp);
 		for (final PipePart pp : Pipe.the().getOutputList())
 			set.add(pp);
+
+		saneConfigCache = new HashSet<PipePart>();
+		updateSaneConfigCache();
 
 		addMouseListener(new MouseAdapter() {
 			@Override
@@ -228,6 +233,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
+			updateSaneConfigCache();
 			repaint();
 		}
 	}
@@ -241,6 +247,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
+			updateSaneConfigCache();
 			repaint();
 		}
 	}
@@ -255,6 +262,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
+			updateSaneConfigCache();
 			repaint();
 		}
 	}
@@ -282,6 +290,54 @@ public final class PipeConfigBoard extends JPanel {
 		return underCursor;
 	}
 
+	protected void updateSaneConfigCache() {
+		final Set<PipePart> sane = new HashSet<PipePart>();
+		final Set<PipePart> visited = new HashSet<PipePart>();
+		final Set<PipePart> deadLocked = new HashSet<PipePart>();
+		for (final PipePart pp : set)
+			if (pp instanceof Input)
+				topDownCheck(pp, sane, visited, deadLocked);
+		sane.removeAll(deadLocked);
+		if (!saneConfigCache.equals(sane)) {
+			saneConfigCache.clear();
+			saneConfigCache.addAll(sane);
+			repaint();
+		}
+	}
+
+	/**
+	 * Checks if the given {@link PipePart} is sane. Sane means that the
+	 * {@link PipePart} can be reached from an {@link Input}, has a path to an
+	 * {@link Output}, doesn't contain a dead-lock in it's path and is correctly
+	 * configured.
+	 * 
+	 * @param pp
+	 *            the {@link PipePart} to check
+	 * @param sane
+	 *            a set of sane PipeParts
+	 * @param visited
+	 *            a set of already visited {@link PipePart}s during the current
+	 *            recursion (handled like a kind of stack) to detect dead-locks.
+	 * @param deadLocked
+	 *            a set of already detected dead-locks.
+	 * @return true if an {@link Output} can be reached from the
+	 *         {@link PipePart}.
+	 */
+	private boolean topDownCheck(final PipePart pp, final Set<PipePart> sane,
+			final Set<PipePart> visited, final Set<PipePart> deadLocked) {
+		if (visited.contains(pp)) {
+			deadLocked.add(pp);
+			return false;
+		}
+		boolean outputReached = pp instanceof Output;
+		visited.add(pp);
+		for (final PipePart ppSub : pp.getConnectedPipeParts())
+			outputReached |= topDownCheck(ppSub, sane, visited, deadLocked);
+		visited.remove(pp);
+		if (outputReached && pp.isConfigurationSane()) sane.add(pp);
+		return outputReached;
+	}
+
 	@Override
 	public void paintComponent(final Graphics g) {
 		final Graphics2D g2 = (Graphics2D) g;
@@ -305,7 +361,10 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set) {
-			g2.setColor(pp == currentPart ? Color.BLUE : Color.BLACK);
+			if (saneConfigCache.contains(pp))
+				g2.setColor(pp == currentPart ? Color.BLUE : Color.BLACK);
+			else
+				g2.setColor(pp == currentPart ? Color.MAGENTA : Color.RED);
 			drawPipePart(g2, pp, pp == underCursor);
 		}
 
@@ -449,6 +508,7 @@ public final class PipeConfigBoard extends JPanel {
 				public void run() {
 					check(pp.getGuiPosition(), pp);
 					getSet().add(pp);
+					updateSaneConfigCache();
 					repaint();
 				}
 			});
@@ -472,9 +532,11 @@ public final class PipeConfigBoard extends JPanel {
 		if (currentPart == null) return;
 		if (currentConnection != null) {
 			// move connector instead of pipe-part
-			if (currentConnectionsTarget != null)
+			if (currentConnectionsTarget != null) {
 				currentPart.disconnectFromPipePart(currentConnectionsTarget);
-			currentConnectionsTarget = null;
+				updateSaneConfigCache();
+				currentConnectionsTarget = null;
+			}
 
 			Rectangle r = new Rectangle(currentPart.getGuiPosition());
 			r = r.union(currentConnection);
@@ -619,6 +681,7 @@ public final class PipeConfigBoard extends JPanel {
 				if (pp.getGuiPosition().contains(p)
 						&& isConnectionAllowed(currentPart, pp)) {
 					currentPart.connectToPipePart(pp);
+					updateSaneConfigCache();
 					break;
 				}
 		}
@@ -755,9 +818,10 @@ public final class PipeConfigBoard extends JPanel {
 				lb.addButton(Button.Ok, new Runnable() {
 					@Override
 					public void run() {
-						saveConfigChanges(pp);
-						dlg.dispose();
-						if (runIfOK != null) runIfOK.run();
+						if (saveConfigChanges(pp)) {
+							dlg.dispose();
+							if (runIfOK != null) runIfOK.run();
+						}
 					}
 				}));
 		lb.addButton(Button.Apply, new Runnable() {
@@ -781,15 +845,21 @@ public final class PipeConfigBoard extends JPanel {
 		HelpDialog.closeHelpIfOpen();
 	}
 
-	protected void saveConfigChanges(final PipePart pp) {
-		// TODO pp.getGroup().assertContextSensitiveCorrectness();
+	protected boolean saveConfigChanges(final PipePart pp) {
+		for (final ConfigValue v : pp.getGuiConfigs())
+			v.setFromGUIComponents();
+		updateSaneConfigCache();
+		if (!pp.isConfigurationSane()) {
+			Log.error("Configuration is invalid.");
+			return false;
+		}
 		try {
-			for (final ConfigValue v : pp.getGuiConfigs())
-				v.setFromGUIComponents();
 			pp.configure();
 		} catch (final PipeException e) {
 			Log.error(e);
+			return false;
 		}
+		return true;
 	}
 
 	@Override

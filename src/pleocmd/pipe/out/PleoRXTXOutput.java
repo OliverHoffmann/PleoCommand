@@ -99,4 +99,14 @@ public final class PleoRXTXOutput extends Output {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		try {
+			PleoCommunication.getPort(cfgDevice.getContent());
+		} catch (final IOException e) {
+			return false;
+		}
+		return true;
+	}
+
 }

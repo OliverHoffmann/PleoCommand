@@ -78,4 +78,9 @@ public final class ConsoleInput extends Input {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		return true;
+	}
+
 }

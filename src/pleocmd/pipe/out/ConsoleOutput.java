@@ -97,4 +97,9 @@ public final class ConsoleOutput extends Output {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		return true;
+	}
+
 }

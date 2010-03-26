@@ -71,4 +71,9 @@ public final class StaticInput extends Input {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		return true;
+	}
+
 }

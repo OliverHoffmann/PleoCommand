@@ -123,4 +123,13 @@ public final class BCICodomainAdaption extends Converter {
 			return "???";
 		}
 	}
+
+	@Override
+	public boolean isConfigurationSane() {
+		if (cfgSourceMin.getContent() >= cfgSourceMax.getContent())
+			return false;
+		if (cfgTargetMin.getContent() >= cfgTargetMax.getContent())
+			return false;
+		return true;
+	}
 }

@@ -119,4 +119,11 @@ public final class FileOutput extends Output {
 		}
 	}
 
+	@Override
+	public boolean isConfigurationSane() {
+		final File file = cfgFile.getContent();
+		if (file.exists()) return file.canWrite();
+		return file.getParentFile() != null && file.getParentFile().canWrite();
+	}
+
 }
