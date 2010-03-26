@@ -421,6 +421,7 @@ public final class PipeConfigBoard extends JPanel {
 			createConfigureDialog("Add", pp, new Runnable() {
 				@Override
 				public void run() {
+					check(pp.getGuiPosition(), pp);
 					getSet().add(pp);
 					repaint();
 				}
@@ -483,7 +484,7 @@ public final class PipeConfigBoard extends JPanel {
 		}
 	}
 
-	private void check(final Rectangle r, final PipePart pp) {
+	protected void check(final Rectangle r, final PipePart pp) {
 		final int xMin;
 		final int xMax;
 		final int yMin = 1;
