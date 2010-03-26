@@ -69,6 +69,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private final JPopupMenu menuOutput;
 
+	private int idxMenuAdd;
+
 	private final Set<PipePart> set;
 
 	private final Dimension bounds = new Dimension();
@@ -88,6 +90,14 @@ public final class PipeConfigBoard extends JPanel {
 	private PipePart underCursor;
 
 	private int grayVal = 128;
+
+	private int idxMenuConfPart;
+
+	private int idxMenuDelPart;
+
+	private int idxMenuDelPartConn;
+
+	private int idxMenuDelConn;
 
 	public PipeConfigBoard() {
 		menuInput = createMenu("Input", Input.class);
@@ -110,13 +120,7 @@ public final class PipeConfigBoard extends JPanel {
 				else {
 					updateCurrent(e.getPoint());
 					if (e.getModifiers() == InputEvent.BUTTON1_MASK
-							&& e.getClickCount() == 2) {
-						final PipePart pp = getCurrentPart();
-						if (pp != null) {
-							createConfigureDialog("Configure", pp, null);
-							repaint();
-						}
-					}
+							&& e.getClickCount() == 2) configureCurrentPart();
 				}
 			}
 
@@ -157,6 +161,8 @@ public final class PipeConfigBoard extends JPanel {
 	private JPopupMenu createMenu(final String name,
 			final Class<? extends PipePart> clazz) {
 		final JPopupMenu menu = new JPopupMenu();
+
+		idxMenuAdd = menu.getSubElements().length;
 		final JMenu menuAdd = new JMenu("Add " + name);
 		menu.add(menuAdd);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
@@ -172,6 +178,17 @@ public final class PipeConfigBoard extends JPanel {
 			}
 		menu.addSeparator();
 
+		idxMenuConfPart = menu.getSubElements().length;
+		final JMenuItem itemConfPart = new JMenuItem("Configure This PipePart");
+		itemConfPart.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				configureCurrentPart();
+			}
+		});
+		menu.add(itemConfPart);
+
+		idxMenuDelPart = menu.getSubElements().length;
 		final JMenuItem itemDelPart = new JMenuItem("Delete This PipePart");
 		itemDelPart.addActionListener(new ActionListener() {
 			@Override
@@ -181,6 +198,7 @@ public final class PipeConfigBoard extends JPanel {
 		});
 		menu.add(itemDelPart);
 
+		idxMenuDelPartConn = menu.getSubElements().length;
 		final JMenuItem itemDelPartConn = new JMenuItem(
 				"Delete Connections Of This PipePart");
 		itemDelPartConn.addActionListener(new ActionListener() {
@@ -191,6 +209,7 @@ public final class PipeConfigBoard extends JPanel {
 		});
 		menu.add(itemDelPartConn);
 
+		idxMenuDelConn = menu.getSubElements().length;
 		final JMenuItem itemDelConn = new JMenuItem("Delete This Connection");
 		itemDelConn.addActionListener(new ActionListener() {
 			@Override
@@ -236,6 +255,13 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
+			repaint();
+		}
+	}
+
+	protected void configureCurrentPart() {
+		if (currentPart != null && !currentPart.getGuiConfigs().isEmpty()) {
+			createConfigureDialog("Configure", currentPart, null);
 			repaint();
 		}
 	}
@@ -675,19 +701,17 @@ public final class PipeConfigBoard extends JPanel {
 	protected void showMenu(final JPopupMenu menu, final Component invoker,
 			final int x, final int y) {
 		final MenuElement[] items = menu.getSubElements();
-		if (items.length >= 4) {
-			if (items[0] instanceof JMenuItem)
-				((JMenuItem) items[0]).setEnabled(currentPart == null);
-			if (items[1] instanceof JMenuItem)
-				((JMenuItem) items[1]).setEnabled(currentPart != null
-						&& currentConnection == null);
-			if (items[2] instanceof JMenuItem)
-				((JMenuItem) items[2]).setEnabled(currentPart != null
-						&& currentConnection == null
-						&& !currentPart.getConnectedPipeParts().isEmpty());
-			if (items[3] instanceof JMenuItem)
-				((JMenuItem) items[3]).setEnabled(currentConnection != null);
-		}
+		((JMenuItem) items[idxMenuAdd]).setEnabled(currentPart == null);
+		((JMenuItem) items[idxMenuConfPart]).setEnabled(currentPart != null
+				&& currentConnection == null
+				&& !currentPart.getGuiConfigs().isEmpty());
+		((JMenuItem) items[idxMenuDelPart]).setEnabled(currentPart != null
+				&& currentConnection == null);
+		((JMenuItem) items[idxMenuDelPartConn]).setEnabled(currentPart != null
+				&& currentConnection == null
+				&& !currentPart.getConnectedPipeParts().isEmpty());
+		((JMenuItem) items[idxMenuDelConn])
+				.setEnabled(currentConnection != null);
 		menu.show(invoker, x, y);
 	}
 
