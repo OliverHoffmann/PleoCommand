@@ -128,6 +128,7 @@ public final class PipeConfigDialog extends JDialog implements
 			Log.error(e);
 		}
 		dispose();
+		MainFrame.the().getMainPipePanel().configDialogDisposed();
 		HelpDialog.closeHelpIfOpen();
 	}
 

@@ -26,6 +26,8 @@ public final class MainPipePanel extends JPanel {
 
 	private final JButton btnLoad;
 
+	private PipeConfigDialog cfgDialog;
+
 	public MainPipePanel() {
 		final Layouter lay = new Layouter(this);
 		pipeLabel = new JLabel();
@@ -70,8 +72,7 @@ public final class MainPipePanel extends JPanel {
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		new PipeConfigDialog();
-		Log.detail("GUI-Frame is done with configuration");
+		cfgDialog = new PipeConfigDialog();
 	}
 
 	public void writePipeConfigToFile() {
@@ -126,6 +127,11 @@ public final class MainPipePanel extends JPanel {
 				|| !Pipe.the().getConverterList().isEmpty()
 				|| !Pipe.the().getOutputList().isEmpty());
 		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
+		if (cfgDialog != null) cfgDialog.updateState();
+	}
+
+	void configDialogDisposed() {
+		cfgDialog = null;
 	}
 
 }
