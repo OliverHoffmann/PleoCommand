@@ -21,6 +21,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -427,23 +429,44 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static void drawConnectorLabel(final Graphics2D g2, final int sx,
 			final int sy, final int tx, final int ty, final String str) {
-		final double d = Math.atan2(sx - tx, sy - ty);
-		final AffineTransform at = g2.getTransform();
+		if (str.isEmpty()) return;
+
+		// draw in image
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(str, g2);
-		final int w = (int) (sb.getWidth() + 14);
-		int h = (int) (sb.getHeight() + 0);
-		double theta = Math.PI / 2 - d;
-		if (theta > Math.PI / 2) {
-			// text should never be bottom-up
-			theta += Math.PI;
-			h = -h;
-		}
-		g2.transform(AffineTransform.getTranslateInstance(sx - xCor(w / 2, d)
-				- xCor(h, d - Math.PI / 2), sy - yCor(w / 2, d)
-				- yCor(h, d - Math.PI / 2)));
-		g2.transform(AffineTransform.getRotateInstance(theta));
-		g2.drawString(str, -(int) sb.getWidth() / 2, (int) sb.getHeight() / 2);
+		final BufferedImage img = new BufferedImage((int) sb.getWidth(),
+				(int) sb.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		final Graphics2D imgG2D = img.createGraphics();
+		imgG2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+		imgG2D.setColor(g2.getColor());
+		imgG2D.setFont(g2.getFont());
+		imgG2D.drawString(str, 0, img.getHeight());
+
+		// make sure text is never bottom-up and correctly positioned
+		double d = Math.atan2(sy - ty, sx - tx);
+		int xoffs = 16;
+		if (d > Math.PI / 2)
+			d -= Math.PI;
+		else if (d < -Math.PI / 2.0)
+			d += Math.PI;
+		else
+			xoffs = -img.getWidth() - xoffs;
+
+		// draw rotated image
+		final Shape clip = g2.getClip();
+		final AffineTransform at = g2.getTransform();
+		g2.translate(sx, sy);
+		g2.rotate(d);
+		final int len = (int) Math.sqrt((sx - tx) * (sx - tx) + (sy - ty)
+				* (sy - ty));
+		if (xoffs < 0)
+			g2.clipRect(-len / 2, 0, len / 2, img.getHeight());
+		else
+			g2.clipRect(0, 0, len / 2, img.getHeight());
+		g2.drawImage(img, new AffineTransformOp(new AffineTransform(),
+				AffineTransformOp.TYPE_BILINEAR), xoffs, 0);
 		g2.setTransform(at);
+		g2.setClip(clip);
 	}
 
 	private static void calcConnectorPositions(final Rectangle srcRect,
