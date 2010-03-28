@@ -192,7 +192,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 		fc.addChoosableFileFilter(new FileFilter() {
 			@Override
 			public boolean accept(final File f) {
-				return !f.getName().endsWith(".cfg"); // TODO extension?
+				final String name = f.getName();
+				return !name.endsWith(".pbd") && !name.endsWith(".pca");
 			}
 
 			@Override
