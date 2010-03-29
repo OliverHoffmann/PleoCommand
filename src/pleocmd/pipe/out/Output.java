@@ -22,12 +22,12 @@ public abstract class Output extends PipePart {
 	protected abstract void close0() throws OutputException, IOException;
 
 	@Override
-	public String getOutputDescription() {
+	public final String getOutputDescription() {
 		return "";
 	}
 
 	@Override
-	public boolean isConnectionAllowed0(final PipePart trg) {
+	public final boolean isConnectionAllowed0(final PipePart trg) {
 		return false;
 	}
 

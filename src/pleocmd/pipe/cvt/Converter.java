@@ -23,7 +23,7 @@ public abstract class Converter extends PipePart {
 	protected abstract void close0() throws ConverterException, IOException;
 
 	@Override
-	public boolean isConnectionAllowed0(final PipePart trg) {
+	public final boolean isConnectionAllowed0(final PipePart trg) {
 		return true;
 	}
 

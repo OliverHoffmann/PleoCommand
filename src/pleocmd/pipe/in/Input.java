@@ -22,12 +22,12 @@ public abstract class Input extends PipePart {
 	protected abstract void close0() throws InputException, IOException;
 
 	@Override
-	public String getInputDescription() {
+	public final String getInputDescription() {
 		return "";
 	}
 
 	@Override
-	public boolean isConnectionAllowed0(final PipePart trg) {
+	public final boolean isConnectionAllowed0(final PipePart trg) {
 		return true;
 	}
 

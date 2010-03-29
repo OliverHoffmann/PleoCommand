@@ -75,7 +75,7 @@ public abstract class PipePart extends StateHandling {
 		cfgGuiPosition.getContent().setBounds(0, 0, 150, 20);
 	}
 
-	long getUID() {
+	final long getUID() {
 		return cfgUID.getContent();
 	}
 
@@ -103,11 +103,11 @@ public abstract class PipePart extends StateHandling {
 		if (visibleInGUI) guiConfigs.add(value);
 	}
 
-	public List<ConfigValue> getGuiConfigs() {
+	public final List<ConfigValue> getGuiConfigs() {
 		return Collections.unmodifiableList(guiConfigs);
 	}
 
-	public void addConfigToGUI(final ConfigValue value) {
+	public final void addConfigToGUI(final ConfigValue value) {
 		if (group.get(value.getLabel()) != value)
 			throw new IllegalArgumentException("ConfigValue is not registered");
 		if (guiConfigs.contains(value))
@@ -224,11 +224,11 @@ public abstract class PipePart extends StateHandling {
 		Log.detail("Disconnected '%s' from '%s'", this, curPipe);
 	}
 
-	public Set<PipePart> getConnectedPipeParts() {
+	public final Set<PipePart> getConnectedPipeParts() {
 		return Collections.unmodifiableSet(connected);
 	}
 
-	public void connectToPipePart(final PipePart target) {
+	public final void connectToPipePart(final PipePart target) {
 		connected.add(target);
 		try {
 			cfgConnectedUIDs.addContent(target.getUID());
@@ -237,7 +237,7 @@ public abstract class PipePart extends StateHandling {
 		}
 	}
 
-	public void disconnectFromPipePart(final PipePart target) {
+	public final void disconnectFromPipePart(final PipePart target) {
 		connected.remove(target);
 		cfgConnectedUIDs.removeContent(target.getUID());
 	}
@@ -255,7 +255,7 @@ public abstract class PipePart extends StateHandling {
 				&& !s1.equals(s2);
 	}
 
-	public boolean isConnectionAllowed(final PipePart trg) {
+	public final boolean isConnectionAllowed(final PipePart trg) {
 		return this != trg
 				&& !(trg instanceof Input)
 				&& isConnectionAllowed0(trg)
@@ -264,7 +264,7 @@ public abstract class PipePart extends StateHandling {
 
 	protected abstract boolean isConnectionAllowed0(final PipePart trg);
 
-	public void assertAllConnectionUIDsResolved() throws PipeException {
+	public final void assertAllConnectionUIDsResolved() throws PipeException {
 		if (cfgConnectedUIDs.getContent().size() != connected.size()) {
 			final Set<Long> goodUIDs = new HashSet<Long>();
 			final Set<Long> badUIDs = new HashSet<Long>();
@@ -290,13 +290,13 @@ public abstract class PipePart extends StateHandling {
 		}
 	}
 
-	public void resolveConnectionUIDs(final Map<Long, PipePart> map) {
+	public final void resolveConnectionUIDs(final Map<Long, PipePart> map) {
 		connected.clear();
 		for (final Long trgUID : cfgConnectedUIDs.getContent())
 			if (map.containsKey(trgUID)) connected.add(map.get(trgUID));
 	}
 
-	public Rectangle getGuiPosition() {
+	public final Rectangle getGuiPosition() {
 		return cfgGuiPosition.getContent();
 	}
 

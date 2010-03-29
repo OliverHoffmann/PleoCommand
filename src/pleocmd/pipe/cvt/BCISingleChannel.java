@@ -7,7 +7,7 @@ import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.pipe.data.Data;
 
-public class BCISingleChannel extends Converter {
+public final class BCISingleChannel extends Converter {
 
 	private final ConfigInt cfgChannelNr;
 
