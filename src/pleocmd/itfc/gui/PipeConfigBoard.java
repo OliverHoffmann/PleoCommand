@@ -42,7 +42,9 @@ import javax.swing.ToolTipManager;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigValue;
+import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
+import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
@@ -61,9 +63,11 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final int INNER_HEIGHT = 4;
 
-	private static final Color INNER_COLOR = new Color(220, 220, 220);
-
 	private static final Color RECT_COLOR = new Color(255, 255, 255);
+
+	private static final Color INNER_COLOR_MOD = new Color(200, 200, 255);
+
+	private static final Color INNER_COLOR_RO = new Color(220, 220, 220);
 
 	private final JPopupMenu menuInput;
 
@@ -103,6 +107,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private final Set<PipePart> saneConfigCache;
 
+	private boolean modifyable;
+
 	public PipeConfigBoard() {
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
@@ -118,6 +124,8 @@ public final class PipeConfigBoard extends JPanel {
 
 		saneConfigCache = new HashSet<PipePart>();
 		updateSaneConfigCache();
+
+		updateState();
 
 		addMouseListener(new MouseAdapter() {
 			@Override
@@ -230,8 +238,13 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void removeCurrentConnection() {
-		if (currentPart != null && currentConnectionsTarget != null) {
-			currentPart.disconnectFromPipePart(currentConnectionsTarget);
+		if (currentPart != null && currentConnectionsTarget != null
+				&& ensureModifyable()) {
+			try {
+				currentPart.disconnectFromPipePart(currentConnectionsTarget);
+			} catch (final StateException e) {
+				Log.error(e, "Cannot delete connection");
+			}
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
@@ -241,11 +254,15 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void removeCurrentPartsConnections() {
-		if (currentPart != null) {
+		if (currentPart != null && ensureModifyable()) {
 			final Set<PipePart> copy = new HashSet<PipePart>(currentPart
 					.getConnectedPipeParts());
-			for (final PipePart pp : copy)
-				currentPart.disconnectFromPipePart(pp);
+			try {
+				for (final PipePart pp : copy)
+					currentPart.disconnectFromPipePart(pp);
+			} catch (final StateException e) {
+				Log.error(e, "Cannot delete connections");
+			}
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
@@ -255,11 +272,28 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void removeCurrentPart() {
-		if (currentPart != null) {
-			for (final PipePart srcPP : set)
-				if (srcPP.getConnectedPipeParts().contains(currentPart))
-					srcPP.disconnectFromPipePart(currentPart);
+		if (currentPart != null && ensureModifyable()) {
+			try {
+				for (final PipePart srcPP : set)
+					if (srcPP.getConnectedPipeParts().contains(currentPart))
+						srcPP.disconnectFromPipePart(currentPart);
+			} catch (final StateException e) {
+				Log.error(e, "Cannot delete connections");
+			}
 			set.remove(currentPart);
+			try {
+				if (currentPart instanceof Input)
+					Pipe.the().removeInput((Input) currentPart);
+				else if (currentPart instanceof Converter)
+					Pipe.the().removeConverter((Converter) currentPart);
+				else if (currentPart instanceof Output)
+					Pipe.the().removeOutput((Output) currentPart);
+				else
+					throw new InternalException(
+							"Invalid sub-class of PipePart '%s'", currentPart);
+			} catch (final StateException e) {
+				Log.error(e, "Cannot remove PipePart '%s'", currentPart);
+			}
 			currentPart = null;
 			currentConnection = null;
 			currentConnectionsTarget = null;
@@ -270,7 +304,8 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void configureCurrentPart() {
-		if (currentPart != null && !currentPart.getGuiConfigs().isEmpty()) {
+		if (currentPart != null && !currentPart.getGuiConfigs().isEmpty()
+				&& ensureModifyable()) {
 			createConfigureDialog("Configure", currentPart, null);
 			repaint();
 		}
@@ -382,7 +417,7 @@ public final class PipeConfigBoard extends JPanel {
 		}
 	}
 
-	private static void drawPipePart(final Graphics2D g2, final PipePart part,
+	private void drawPipePart(final Graphics2D g2, final PipePart part,
 			final boolean visibleInner) {
 		final Rectangle rect = part.getGuiPosition();
 		if (!rect.intersects(g2.getClipBounds())) return;
@@ -398,7 +433,7 @@ public final class PipeConfigBoard extends JPanel {
 		if (visibleInner) {
 			final Rectangle inner = new Rectangle(rect);
 			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-			g2.setColor(INNER_COLOR);
+			g2.setColor(modifyable ? INNER_COLOR_MOD : INNER_COLOR_RO);
 			g2.fillRect(inner.x, inner.y, inner.width, inner.height);
 			g2.setColor(clr);
 		}
@@ -524,13 +559,27 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void addPipePart(final Class<? extends PipePart> part) {
+		if (!ensureModifyable()) return;
 		try {
 			final PipePart pp = part.newInstance();
 			createConfigureDialog("Add", pp, new Runnable() {
 				@Override
 				public void run() {
 					check(pp.getGuiPosition(), pp);
-					getSet().add(pp);
+					try {
+						if (pp instanceof Input)
+							Pipe.the().addInput((Input) pp);
+						else if (pp instanceof Converter)
+							Pipe.the().addConverter((Converter) pp);
+						else if (pp instanceof Output)
+							Pipe.the().addOutput((Output) pp);
+						else
+							throw new InternalException(
+									"Invalid sub-class of PipePart '%s'", pp);
+						getSet().add(pp);
+					} catch (final StateException e) {
+						Log.error(e, "Cannot add new PipePart");
+					}
 					updateSaneConfigCache();
 					repaint();
 				}
@@ -555,8 +604,14 @@ public final class PipeConfigBoard extends JPanel {
 		if (currentPart == null) return;
 		if (currentConnection != null) {
 			// move connector instead of pipe-part
+			if (!ensureModifyable()) return;
 			if (currentConnectionsTarget != null) {
-				currentPart.disconnectFromPipePart(currentConnectionsTarget);
+				try {
+					currentPart
+							.disconnectFromPipePart(currentConnectionsTarget);
+				} catch (final StateException e) {
+					Log.error(e, "Cannot delete connection");
+				}
 				updateSaneConfigCache();
 				currentConnectionsTarget = null;
 			}
@@ -698,12 +753,17 @@ public final class PipeConfigBoard extends JPanel {
 	 */
 	protected void releaseCurrent() {
 		// invoked on click or when a drag&drop operation is finished
-		if (currentConnection != null && currentConnectionsTarget == null) {
+		if (currentConnection != null && currentConnectionsTarget == null
+				&& ensureModifyable()) {
 			final Point p = new Point(currentConnection.getLocation());
 			for (final PipePart pp : set)
 				if (pp.getGuiPosition().contains(p)
 						&& currentPart.isConnectionAllowed(pp)) {
-					currentPart.connectToPipePart(pp);
+					try {
+						currentPart.connectToPipePart(pp);
+					} catch (final StateException e) {
+						Log.error(e, "Cannot create connection");
+					}
 					updateSaneConfigCache();
 					break;
 				}
@@ -764,17 +824,18 @@ public final class PipeConfigBoard extends JPanel {
 	protected void showMenu(final JPopupMenu menu, final Component invoker,
 			final int x, final int y) {
 		final MenuElement[] items = menu.getSubElements();
-		((JMenuItem) items[idxMenuAdd]).setEnabled(currentPart == null);
-		((JMenuItem) items[idxMenuConfPart]).setEnabled(currentPart != null
-				&& currentConnection == null
+		((JMenuItem) items[idxMenuAdd]).setEnabled(modifyable
+				&& currentPart == null);
+		((JMenuItem) items[idxMenuConfPart]).setEnabled(modifyable
+				&& currentPart != null && currentConnection == null
 				&& !currentPart.getGuiConfigs().isEmpty());
-		((JMenuItem) items[idxMenuDelPart]).setEnabled(currentPart != null
-				&& currentConnection == null);
-		((JMenuItem) items[idxMenuDelPartConn]).setEnabled(currentPart != null
-				&& currentConnection == null
+		((JMenuItem) items[idxMenuDelPart]).setEnabled(modifyable
+				&& currentPart != null && currentConnection == null);
+		((JMenuItem) items[idxMenuDelPartConn]).setEnabled(modifyable
+				&& currentPart != null && currentConnection == null
 				&& !currentPart.getConnectedPipeParts().isEmpty());
-		((JMenuItem) items[idxMenuDelConn])
-				.setEnabled(currentConnection != null);
+		((JMenuItem) items[idxMenuDelConn]).setEnabled(modifyable
+				&& currentConnection != null);
 		menu.show(invoker, x, y);
 	}
 
@@ -846,6 +907,7 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected boolean saveConfigChanges(final PipePart pp) {
+		if (!ensureModifyable()) return false;
 		for (final ConfigValue v : pp.getGuiConfigs())
 			v.setFromGUIComponents();
 		updateSaneConfigCache();
@@ -877,6 +939,19 @@ public final class PipeConfigBoard extends JPanel {
 		}
 		sb.append("</table></html>");
 		return sb.toString();
+	}
+
+	public void updateState() {
+		final boolean changed = modifyable ^ !MainFrame.the().isPipeRunning();
+		modifyable = !MainFrame.the().isPipeRunning();
+		if (changed) repaint();
+	}
+
+	private boolean ensureModifyable() {
+		if (!modifyable)
+			Log.error("Configuration board is read-only as "
+					+ "the Pipe is currently running.");
+		return modifyable;
 	}
 
 }

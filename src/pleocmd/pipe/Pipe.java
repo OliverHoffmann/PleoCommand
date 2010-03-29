@@ -221,7 +221,29 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		((PipePart) converter).connectedToPipe(this);
 	}
 
-	private void resolveConnectionUIDs() {
+	public void removeInput(final Input input) throws StateException {
+		ensureConstructed();
+		Log.detail("Disconnecting pipe from input '%s'", input);
+		if (inputList.remove(input))
+			((PipePart) input).disconnectedFromPipe(this);
+	}
+
+	public void removeOutput(final Output output) throws StateException {
+		ensureConstructed();
+		Log.detail("Disconnecting pipe from output '%s'", output);
+		if (outputList.remove(output))
+			((PipePart) output).disconnectedFromPipe(this);
+	}
+
+	public void removeConverter(final Converter converter)
+			throws StateException {
+		ensureConstructed();
+		Log.detail("Disconnecting pipe from converter '%s'", converter);
+		if (converterList.remove(converter))
+			((PipePart) converter).disconnectedFromPipe(this);
+	}
+
+	private void resolveConnectionUIDs() throws StateException {
 		// create a map from UID to PipePart
 		final Map<Long, PipePart> map = new HashMap<Long, PipePart>();
 		for (final PipePart pp : inputList)
@@ -863,9 +885,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			else
 				throw new InternalException(
 						"Superclass of PipePart '%s' unknown", pp);
-			pp.connectedToPipe(this);
-			resolveConnectionUIDs(); // TODO correct here?
 			try {
+				pp.connectedToPipe(this);
+				resolveConnectionUIDs(); // TODO correct here?
 				pp.configure();
 			} catch (final PipeException e) {
 				throw new ConfigurationException(e,

@@ -228,16 +228,20 @@ public abstract class PipePart extends StateHandling {
 		return Collections.unmodifiableSet(connected);
 	}
 
-	public final void connectToPipePart(final PipePart target) {
-		connected.add(target);
+	public final void connectToPipePart(final PipePart target)
+			throws StateException {
+		ensureConstructed();
 		try {
 			cfgConnectedUIDs.addContent(target.getUID());
 		} catch (final ConfigurationException e) {
 			throw new InternalException(e);
 		}
+		connected.add(target);
 	}
 
-	public final void disconnectFromPipePart(final PipePart target) {
+	public final void disconnectFromPipePart(final PipePart target)
+			throws StateException {
+		ensureConstructed();
 		connected.remove(target);
 		cfgConnectedUIDs.removeContent(target.getUID());
 	}
@@ -264,6 +268,13 @@ public abstract class PipePart extends StateHandling {
 
 	protected abstract boolean isConnectionAllowed0(final PipePart trg);
 
+	/**
+	 * Throws an exception when there are any unresolved connections.<br>
+	 * The unresolved UIDs will be removed from the internal UID-list.
+	 * 
+	 * @throws PipeException
+	 *             an exception containing the list of unresolved connections.
+	 */
 	public final void assertAllConnectionUIDsResolved() throws PipeException {
 		if (cfgConnectedUIDs.getContent().size() != connected.size()) {
 			final Set<Long> goodUIDs = new HashSet<Long>();
@@ -290,7 +301,21 @@ public abstract class PipePart extends StateHandling {
 		}
 	}
 
-	public final void resolveConnectionUIDs(final Map<Long, PipePart> map) {
+	/**
+	 * Resolves all UIDs from connected {@link PipePart}s, while missing ones
+	 * are ignored. The internal connection-list only contains those that could
+	 * be resolved afterwards.
+	 * 
+	 * @param map
+	 *            a mapping between UIDs and {@link PipePart}s currently known
+	 *            to the {@link Pipe}
+	 * @throws StateException
+	 *             if the {@link PipePart} is being constructed or already
+	 *             initialized
+	 */
+	public final void resolveConnectionUIDs(final Map<Long, PipePart> map)
+			throws StateException {
+		ensureConstructed();
 		connected.clear();
 		for (final Long trgUID : cfgConnectedUIDs.getContent())
 			if (map.containsKey(trgUID)) connected.add(map.get(trgUID));

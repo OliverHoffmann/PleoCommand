@@ -18,12 +18,8 @@ import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
-import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
-import pleocmd.pipe.cvt.Converter;
-import pleocmd.pipe.in.Input;
-import pleocmd.pipe.out.Output;
 
 public final class PipeConfigDialog extends JDialog implements
 		ConfigurationInterface {
@@ -116,9 +112,9 @@ public final class PipeConfigDialog extends JDialog implements
 				Configuration.the().readFromReader(new BufferedReader(in),
 						Pipe.the());
 			} catch (final ConfigurationException e) {
-				Log.error(e, "Cannot restore old pipe");
+				Log.error(e, "Cannot restore previous pipe");
 			} catch (final IOException e) {
-				Log.error(e, "Cannot restore old pipe");
+				Log.error(e, "Cannot restore previous pipe");
 			}
 			in.close();
 		}
@@ -134,20 +130,11 @@ public final class PipeConfigDialog extends JDialog implements
 
 	public void applyChanges() {
 		try {
-			Pipe.the().reset();
-			for (final Input pp : board.getSortedParts(Input.class))
-				Pipe.the().addInput(pp);
-			for (final Converter pp : board.getSortedParts(Converter.class))
-				Pipe.the().addConverter(pp);
-			for (final Output pp : board.getSortedParts(Output.class))
-				Pipe.the().addOutput(pp);
 			saveCurrentPipe();
 			Configuration.the().writeToDefaultFile();
 			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();
 			Log.detail("Applied Config-Frame");
-		} catch (final PipeException e) {
-			Log.error(e);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -177,6 +164,7 @@ public final class PipeConfigDialog extends JDialog implements
 	public void updateState() {
 		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
 		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
+		board.updateState();
 	}
 
 }
