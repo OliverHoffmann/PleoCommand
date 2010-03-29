@@ -38,7 +38,8 @@
 		<javac srcdir="${src}"
 		       destdir="${bin}"
 		       verbose="${verb}"
-		       classpath="${classpath}" />
+		       classpath="${classpath}"
+		       includeantruntime="false" />
 
 		<checkstyle config="checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
