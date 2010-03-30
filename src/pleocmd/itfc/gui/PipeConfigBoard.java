@@ -120,6 +120,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final double ORDER_HINT_ARROW_HEIGHT = 0.3;
 
+	private static final int GROW_LABEL_REDRAW = 14;
+
 	private final JPopupMenu menuInput;
 
 	private final JPopupMenu menuConverter;
@@ -602,20 +604,24 @@ public final class PipeConfigBoard extends JPanel {
 		final int dcy = cty - csy;
 		if (dcx > Math.abs(dcy)) {
 			// target is right of source
-			srcPos.setLocation(srcRect.x + srcRect.width, csy);
-			trgPos.setLocation(trgRect.x, cty);
+			if (srcPos != null)
+				srcPos.setLocation(srcRect.x + srcRect.width, csy);
+			if (trgPos != null) trgPos.setLocation(trgRect.x, cty);
 		} else if (dcy >= Math.abs(dcx)) {
 			// target is below source
-			srcPos.setLocation(csx, srcRect.y + srcRect.height);
-			trgPos.setLocation(ctx, trgRect.y);
+			if (srcPos != null)
+				srcPos.setLocation(csx, srcRect.y + srcRect.height);
+			if (trgPos != null) trgPos.setLocation(ctx, trgRect.y);
 		} else if (dcx < 0 && Math.abs(dcx) > Math.abs(dcy)) {
 			// target is left of source
-			srcPos.setLocation(srcRect.x, csy);
-			trgPos.setLocation(trgRect.x + trgRect.width, cty);
+			if (srcPos != null) srcPos.setLocation(srcRect.x, csy);
+			if (trgPos != null)
+				trgPos.setLocation(trgRect.x + trgRect.width, cty);
 		} else {
 			// target is above source
-			srcPos.setLocation(csx, srcRect.y);
-			trgPos.setLocation(ctx, trgRect.y + trgRect.height);
+			if (srcPos != null) srcPos.setLocation(csx, srcRect.y);
+			if (trgPos != null)
+				trgPos.setLocation(ctx, trgRect.y + trgRect.height);
 		}
 	}
 
@@ -721,24 +727,43 @@ public final class PipeConfigBoard extends JPanel {
 				}
 			mouseMoved(p);
 
-			r = r.union(currentConnection);
-			r.grow(8, 8);
+			Rectangle2D.union(r, currentConnection, r);
+			// need to take care of labels
+			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
 			repaint(r);
 		} else {
 			// move pipe-part
 			Rectangle r = new Rectangle(currentPart.getGuiPosition());
+			unionConnectionTargets(r);
+			unionConnectionSources(r);
 			currentPart.getGuiPosition().setLocation(p.x - handlePoint.x,
 					p.y - handlePoint.y);
 			check(currentPart.getGuiPosition(), currentPart);
 			r = r.union(currentPart.getGuiPosition());
-			for (final PipePart trgPP : currentPart.getConnectedPipeParts())
-				r = r.union(trgPP.getGuiPosition());
-			for (final PipePart srcPP : set)
-				if (srcPP.getConnectedPipeParts().contains(currentPart))
-					r = r.union(srcPP.getGuiPosition());
-			r.grow(4, 4);
+			unionConnectionTargets(r);
+			unionConnectionSources(r);
+			// need to take care of labels
+			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
 			repaint(r);
 		}
+	}
+
+	private void unionConnectionSources(final Rectangle r) {
+		for (final PipePart srcPP : set)
+			if (srcPP.getConnectedPipeParts().contains(currentPart))
+				unionConnection(r, srcPP);
+	}
+
+	private void unionConnectionTargets(final Rectangle r) {
+		for (final PipePart trgPP : currentPart.getConnectedPipeParts())
+			unionConnection(r, trgPP);
+	}
+
+	private void unionConnection(final Rectangle r, final PipePart pp) {
+		final Point pt = new Point();
+		calcConnectorPositions(currentPart.getGuiPosition(), pp
+				.getGuiPosition(), null, pt);
+		Rectangle2D.union(r, new Rectangle(pt.x, pt.y, 0, 0), r);
 	}
 
 	protected void check(final Rectangle r, final PipePart pp) {
