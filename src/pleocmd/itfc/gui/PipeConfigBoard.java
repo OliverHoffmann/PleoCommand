@@ -54,16 +54,21 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-// TODO make visible, that ordering of Inputs is important
 // TODO auto ordering of PipeParts via A* algorithm
 // TODO speed up drawing
 public final class PipeConfigBoard extends JPanel {
+
+	public static final int DEF_RECT_WIDTH = 150;
+
+	public static final int DEF_RECT_HEIGHT = 20;
 
 	private static final boolean PAINT_DEBUG = false;
 
 	private static final long serialVersionUID = -4525676341777864359L;
 
 	private static final Color BACKGROUND = Color.LIGHT_GRAY;
+
+	private static final Color ORDER_HINT_BACK = new Color(255, 255, 128);
 
 	private static final Color SECT_BORDER = Color.BLACK;
 
@@ -89,6 +94,10 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final Color CONNECTION_SEL_BAD = Color.MAGENTA;
 
+	private static final Color SHADOW_COLOR = Color.GRAY;
+
+	private static final int SHADOW_DEPTH = 4;
+
 	private static final int ARROW_TIP = 14;
 
 	private static final int ARROW_WING = 8;
@@ -103,9 +112,13 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final int SECTION_SPACE = 20;
 
-	public static final int DEF_RECT_WIDTH = 150;
+	private static final double ORDER_HINT_TRUNK_WIDTH = 0.3;
 
-	public static final int DEF_RECT_HEIGHT = 20;
+	private static final double ORDER_HINT_TRUNK_HEIGHT = 0.65;
+
+	private static final double ORDER_HINT_ARROW_WIDTH = 0.3;
+
+	private static final double ORDER_HINT_ARROW_HEIGHT = 0.3;
 
 	private final JPopupMenu menuInput;
 
@@ -418,6 +431,38 @@ public final class PipeConfigBoard extends JPanel {
 			g2.setColor(BACKGROUND);
 		final Rectangle clip = g2.getClipBounds();
 		g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+
+		// draw ordering hint for Input section
+		if (clip.x < border1) {
+			final int tw = (int) (border1 * ORDER_HINT_TRUNK_WIDTH);
+			final int th = (int) (bounds.height * ORDER_HINT_TRUNK_HEIGHT);
+			final int aw = (int) (border1 * ORDER_HINT_ARROW_WIDTH);
+			final int ah = (int) (bounds.height * ORDER_HINT_ARROW_HEIGHT);
+			final int cw = tw + 2 * aw;
+			final int ch = th + ah;
+			final int ow = (border1 - cw) / 2;
+			final int oh = (bounds.height - ch) / 2;
+			final Polygon p = new Polygon();
+			p.addPoint(ow + aw, oh);
+			p.addPoint(ow + aw + tw, oh);
+			p.addPoint(ow + aw + tw, oh + th);
+			p.addPoint(ow + aw + tw + aw, oh + th);
+			p.addPoint(ow + aw + tw / 2, oh + th + ah);
+			p.addPoint(ow, oh + th);
+			p.addPoint(ow + aw, oh + th);
+			p.addPoint(ow + aw, oh);
+
+			if (SHADOW_DEPTH > 0) {
+				final AffineTransform at = g2.getTransform();
+				g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
+				g2.setColor(SHADOW_COLOR);
+				g2.fillPolygon(p);
+				g2.setTransform(at);
+			}
+
+			g2.setColor(ORDER_HINT_BACK);
+			g2.fillPolygon(p);
+		}
 
 		// draw section borders
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
