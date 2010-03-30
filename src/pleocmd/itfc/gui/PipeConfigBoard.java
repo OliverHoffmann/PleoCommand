@@ -54,9 +54,9 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-// TODO Inputs should not allowed to be side-by-side
 // TODO make visible, that ordering of Inputs is important
 // TODO auto ordering of PipeParts via A* algorithm
+// TODO speed up drawing
 public final class PipeConfigBoard extends JPanel {
 
 	private static final boolean PAINT_DEBUG = false;
@@ -98,6 +98,14 @@ public final class PipeConfigBoard extends JPanel {
 	private static final int INNER_HEIGHT = 4;
 
 	private static final double LINE_CLICK_DIST = 10;
+
+	private static final int SECTION_FRAC = 5;
+
+	private static final int SECTION_SPACE = 20;
+
+	public static final int DEF_RECT_WIDTH = 150;
+
+	public static final int DEF_RECT_HEIGHT = 20;
 
 	private final JPopupMenu menuInput;
 
@@ -888,8 +896,9 @@ public final class PipeConfigBoard extends JPanel {
 
 	protected void updateBounds(final int width, final int height) {
 		bounds.setSize(width, height);
-		border1 = width / 5;
-		border2 = width * 4 / 5;
+		final int maxWidth = DEF_RECT_WIDTH + SECTION_SPACE;
+		border1 = Math.min(width / SECTION_FRAC, maxWidth);
+		border2 = width - Math.min(width / SECTION_FRAC, maxWidth);
 		for (final PipePart pp : set)
 			check(pp.getGuiPosition(), pp);
 		repaint();
