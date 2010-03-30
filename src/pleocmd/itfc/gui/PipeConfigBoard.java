@@ -53,6 +53,10 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
+// TODO click-point should be remembered and moving relative to clip-point
+// TODO Inputs should not allowed to be side-by-side
+// TODO make visible, that ordering of Inputs is important
+// TODO auto ordering of PipeParts via A* algorithm
 public final class PipeConfigBoard extends JPanel {
 
 	private static final boolean PAINT_DEBUG = false;
@@ -672,6 +676,40 @@ public final class PipeConfigBoard extends JPanel {
 		if (r.y < yMin) r.y = yMin;
 		if (r.x + r.width > xMax) r.x = xMax - r.width;
 		if (r.y + r.height > yMax) r.y = yMax - r.height;
+		for (final PipePart other : set)
+			if (other != pp && other.getGuiPosition().intersects(r)) {
+				// move r, so it doesn't intersect anymore
+				final Rectangle rO = other.getGuiPosition();
+				final Rectangle i = r.intersection(rO);
+				final int x0 = r.x + r.width / 2;
+				final int y0 = r.y + r.height / 2;
+				final int x1 = rO.x + rO.width / 2;
+				final int y1 = rO.y + rO.height / 2;
+				if (i.width < i.height && r.x - i.width >= xMin
+						&& r.x + r.width + i.width <= xMax) {
+					if (x0 > x1) // move right
+						r.translate(i.width, 0);
+					else
+						// move left
+						r.translate(-i.width, 0);
+				} else if (y0 > y1) {
+					if (r.y + r.height + i.height > yMax)
+						// move up instead of down
+						r.translate(0, i.height - r.height - rO.height);
+					else
+						r.translate(0, i.height); // move down
+				} else if (r.y - i.height < yMin)
+					// move down instead of up
+					r.translate(0, r.height + rO.height - i.height);
+				else
+					r.translate(0, -i.height); // move up
+				// check bounds again
+				// (overlapping is better than being out of bounds)
+				if (r.x < xMin) r.x = xMin;
+				if (r.y < yMin) r.y = yMin;
+				if (r.x + r.width > xMax) r.x = xMax - r.width;
+				if (r.y + r.height > yMax) r.y = yMax - r.height;
+			}
 	}
 
 	/**
