@@ -373,6 +373,10 @@ public final class PipeConfigBoard extends JPanel {
 	@Override
 	public void paintComponent(final Graphics g) {
 		final Graphics2D g2 = (Graphics2D) g;
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
+
+		// fill background
 		if (PAINT_DEBUG) {
 			grayVal = (grayVal - 118) % 64 + 128;
 			g2.setColor(new Color(grayVal, grayVal, grayVal));
@@ -381,15 +385,14 @@ public final class PipeConfigBoard extends JPanel {
 		final Rectangle clip = g2.getClipBounds();
 		g2.fillRect(clip.x, clip.y, clip.width, clip.height);
 
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-
+		// draw section borders
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, new float[] { 2, 2 }, 0));
 		g2.setColor(Color.BLACK);
 		g2.drawLine(border1, 0, border1, bounds.height);
 		g2.drawLine(border2, 0, border2, bounds.height);
 
+		// draw PipeParts
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set) {
@@ -400,11 +403,15 @@ public final class PipeConfigBoard extends JPanel {
 			drawPipePart(g2, pp, pp == underCursor);
 		}
 
-		g2.setColor(Color.BLACK);
+		// draw connections
 		for (final PipePart src : set)
-			for (final PipePart trg : src.getConnectedPipeParts())
+			for (final PipePart trg : src.getConnectedPipeParts()) {
+				g2.setColor(currentPart == src
+						&& currentConnectionsTarget == trg ? Color.BLUE
+						: Color.BLACK);
 				drawConnection(g2, src.getGuiPosition(), trg.getGuiPosition(),
 						src, trg);
+			}
 		if (currentConnection != null && currentConnectionsTarget == null) {
 			g2.setColor(currentConnectionValid ? Color.BLUE : Color.RED);
 			drawConnection(g2, currentPart.getGuiPosition(), currentConnection,
