@@ -98,6 +98,12 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final int SHADOW_DEPTH = 4;
 
+	private static final boolean SHADOW_ORDERHINT = true;
+
+	private static final boolean SHADOW_RECTS = true;
+
+	private static final boolean SHADOW_CONNECTIONS = false;
+
 	private static final int ARROW_TIP = 14;
 
 	private static final int ARROW_WING = 8;
@@ -492,7 +498,7 @@ public final class PipeConfigBoard extends JPanel {
 		p.addPoint(ow + aw, oh + th);
 		p.addPoint(ow + aw, oh);
 
-		if (SHADOW_DEPTH > 0) {
+		if (SHADOW_ORDERHINT && SHADOW_DEPTH > 0) {
 			final AffineTransform at = g2.getTransform();
 			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
 			g2.setColor(SHADOW_COLOR);
@@ -520,13 +526,8 @@ public final class PipeConfigBoard extends JPanel {
 				-(int) g2.getTransform().getTranslateY(), //
 				(int) g2.getClipBounds().getWidth(), //
 				(int) g2.getClipBounds().getHeight());
-		for (final PipePart pp : set) {
-			if (saneConfigCache.contains(pp))
-				g2.setColor(pp == currentPart ? OUTER_SEL_OK : OUTER_OK);
-			else
-				g2.setColor(pp == currentPart ? OUTER_SEL_BAD : OUTER_BAD);
+		for (final PipePart pp : set)
 			drawPipePart(g2, pp, pp == underCursor, clip);
-		}
 	}
 
 	private void drawConnections(final Graphics2D g2) {
@@ -558,10 +559,25 @@ public final class PipeConfigBoard extends JPanel {
 			final boolean visibleInner, final Rectangle clip) {
 		final Rectangle rect = part.getGuiPosition();
 		if (!rect.intersects(clip)) return;
-		final Color clr = g2.getColor();
+
+		final Color outerClr;
+		if (saneConfigCache.contains(part))
+			outerClr = part == currentPart ? OUTER_SEL_OK : OUTER_OK;
+		else
+			outerClr = part == currentPart ? OUTER_SEL_BAD : OUTER_BAD;
+
+		if (SHADOW_RECTS && SHADOW_DEPTH > 0) {
+			final AffineTransform at = g2.getTransform();
+			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
+			g2.setColor(SHADOW_COLOR);
+			g2.fillRect(rect.x, rect.y, rect.width, rect.height);
+			g2.setTransform(at);
+		}
+
 		g2.setColor(RECT_BACKGROUND);
 		g2.fillRect(rect.x, rect.y, rect.width, rect.height);
-		g2.setColor(clr);
+
+		g2.setColor(outerClr);
 		g2.drawRect(rect.x, rect.y, rect.width, rect.height);
 
 		final String s = part.getClass().getSimpleName();
@@ -572,11 +588,11 @@ public final class PipeConfigBoard extends JPanel {
 			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
 			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
 			g2.fillRect(inner.x, inner.y, inner.width, inner.height);
-			g2.setColor(clr);
 		}
 
 		final Shape shape = g2.getClip();
 		g2.clipRect(rect.x, rect.y, rect.width, rect.height);
+		g2.setColor(outerClr);
 		g2.drawString(s, (float) (rect.x + (rect.width - sb.getWidth()) / 2),
 				(float) (rect.y + sb.getHeight() + (rect.height - sb
 						.getHeight()) / 2));
@@ -587,12 +603,31 @@ public final class PipeConfigBoard extends JPanel {
 			final Rectangle srcRect, final Rectangle trgRect,
 			final PipePart src, final PipePart trg, final Rectangle clip) {
 		if (!srcRect.union(trgRect).intersects(clip)) return;
+
 		final Point srcPoint = new Point();
 		final Point trgPoint = new Point();
 		calcConnectorPositions(srcRect, trgRect, srcPoint, trgPoint);
+		final Polygon arrow = getArrowPolygon(srcPoint.x, srcPoint.y,
+				trgPoint.x, trgPoint.y);
+
+		if (SHADOW_CONNECTIONS && SHADOW_DEPTH > 0) {
+			final Color clr = g2.getColor();
+			final AffineTransform at = g2.getTransform();
+			g2.translate(SHADOW_DEPTH / 2, SHADOW_DEPTH / 2);
+			g2.setColor(SHADOW_COLOR);
+			g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
+			g2.fillPolygon(arrow);
+			drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x,
+					trgPoint.y, src.getOutputDescription());
+			drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x,
+					srcPoint.y, trg == null ? "" : trg.getInputDescription());
+			g2.setTransform(at);
+			g2.setColor(clr);
+		}
+
 		g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
-		g2.fillPolygon(getArrowPolygon(srcPoint.x, srcPoint.y, trgPoint.x,
-				trgPoint.y));
+		g2.fillPolygon(arrow);
+
 		drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y,
 				src.getOutputDescription());
 		drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x, srcPoint.y,
