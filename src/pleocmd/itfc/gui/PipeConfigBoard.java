@@ -598,9 +598,9 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setClip(shape);
 	}
 
-	private static void drawConnection(final Graphics2D g2,
-			final Rectangle srcRect, final Rectangle trgRect,
-			final PipePart src, final PipePart trg, final Rectangle clip) {
+	private void drawConnection(final Graphics2D g2, final Rectangle srcRect,
+			final Rectangle trgRect, final PipePart src, final PipePart trg,
+			final Rectangle clip) {
 		if (!srcRect.union(trgRect).intersects(clip)) return;
 
 		final Point srcPoint = new Point();
@@ -633,20 +633,26 @@ public final class PipeConfigBoard extends JPanel {
 				trg == null ? "" : trg.getInputDescription());
 	}
 
-	private static void drawConnectorLabel(final Graphics2D g2, final int sx,
+	private void drawConnectorLabel(final Graphics2D g2, final int sx,
 			final int sy, final int tx, final int ty, final String str) {
 		if (str.isEmpty()) return;
 
 		// draw in image
-		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(str, g2);
-		final BufferedImage img = new BufferedImage((int) sb.getWidth(),
-				(int) sb.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		final Rectangle sb = g2.getFontMetrics().getStringBounds(str, g2)
+				.getBounds();
+		final BufferedImage img = new BufferedImage((int) (sb.width * scale),
+				(int) (sb.height * scale), BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D imgG2D = img.createGraphics();
+		imgG2D.scale(scale, scale);
 		imgG2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
+		if (PAINT_DEBUG) {
+			imgG2D.setColor(Color.YELLOW);
+			imgG2D.fillRect(0, 0, sb.width, sb.height);
+		}
 		imgG2D.setColor(g2.getColor());
 		imgG2D.setFont(g2.getFont());
-		imgG2D.drawString(str, 0, img.getHeight());
+		imgG2D.drawString(str, 0, sb.height);
 
 		// make sure text is never bottom-up and correctly positioned
 		double d = Math.atan2(sy - ty, sx - tx);
@@ -656,15 +662,20 @@ public final class PipeConfigBoard extends JPanel {
 		else if (d < -Math.PI / 2.0)
 			d += Math.PI;
 		else
-			xoffs = -img.getWidth() - xoffs;
+			xoffs = (int) (-sb.width * scale - xoffs);
 
 		// draw rotated image
 		final Shape shape = g2.getClip();
 		final AffineTransform at = g2.getTransform();
-		g2.translate(sx, sy);
+
+		// only use translation from original transformation
+		// scaling is already done in imgG2D
+		g2.setTransform(new AffineTransform());
+		g2.translate(at.getTranslateX() + sx * scale, at.getTranslateY() + sy
+				* scale);
 		g2.rotate(d);
-		final int len = (int) Math.sqrt((sx - tx) * (sx - tx) + (sy - ty)
-				* (sy - ty));
+		final int len = (int) (Math.sqrt((sx - tx) * (sx - tx) + (sy - ty)
+				* (sy - ty)) * scale);
 		if (xoffs < 0)
 			g2.clipRect(-len / 2, 0, len / 2, img.getHeight());
 		else
