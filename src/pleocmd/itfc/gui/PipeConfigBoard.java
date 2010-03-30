@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -55,7 +56,6 @@ import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
 // TODO auto ordering of PipeParts via A* algorithm
-// TODO speed up drawing
 public final class PipeConfigBoard extends JPanel {
 
 	public static final int DEF_RECT_WIDTH = 150;
@@ -421,70 +421,120 @@ public final class PipeConfigBoard extends JPanel {
 
 	@Override
 	public void paintComponent(final Graphics g) {
-		final Graphics2D g2 = (Graphics2D) g;
+		final Rectangle clip = g.getClipBounds();
+		final BufferedImage img = new BufferedImage(clip.width, clip.height,
+				BufferedImage.TYPE_INT_RGB);
+		final Graphics2D g2 = img.createGraphics();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setClip(0, 0, clip.width, clip.height);
+		g2.translate(-clip.x, -clip.y);
 
-		// fill background
 		if (PAINT_DEBUG) {
+			final long start = System.currentTimeMillis();
+
 			grayVal = (grayVal - 118) % 64 + 128;
 			g2.setColor(new Color(grayVal, grayVal, grayVal));
-		} else
+			g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+			final long time1 = System.currentTimeMillis();
+
+			if (clip.x < border1) drawOrderingHint(g2);
+			final long time2 = System.currentTimeMillis();
+			drawSectionBorders(g2);
+			final long time3 = System.currentTimeMillis();
+			drawPipeParts(g2);
+			final long time4 = System.currentTimeMillis();
+			drawConnections(g2);
+			final long time5 = System.currentTimeMillis();
+
+			g2.translate(clip.x, clip.y);
+			drawDebugTime(g2, time1 - start, 1);
+			drawDebugTime(g2, time2 - time1, 2);
+			drawDebugTime(g2, time3 - time2, 3);
+			drawDebugTime(g2, time4 - time3, 4);
+			drawDebugTime(g2, time5 - time4, 5);
+		} else {
 			g2.setColor(BACKGROUND);
-		final Rectangle clip = g2.getClipBounds();
-		g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+			g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+			if (clip.x < border1) drawOrderingHint(g2);
+			drawSectionBorders(g2);
+			drawPipeParts(g2);
+			drawConnections(g2);
+		}
+		g.drawImage(img, clip.x, clip.y, null);
+	}
 
-		// draw ordering hint for Input section
-		if (clip.x < border1) {
-			final int tw = (int) (border1 * ORDER_HINT_TRUNK_WIDTH);
-			final int th = (int) (bounds.height * ORDER_HINT_TRUNK_HEIGHT);
-			final int aw = (int) (border1 * ORDER_HINT_ARROW_WIDTH);
-			final int ah = (int) (bounds.height * ORDER_HINT_ARROW_HEIGHT);
-			final int cw = tw + 2 * aw;
-			final int ch = th + ah;
-			final int ow = (border1 - cw) / 2;
-			final int oh = (bounds.height - ch) / 2;
-			final Polygon p = new Polygon();
-			p.addPoint(ow + aw, oh);
-			p.addPoint(ow + aw + tw, oh);
-			p.addPoint(ow + aw + tw, oh + th);
-			p.addPoint(ow + aw + tw + aw, oh + th);
-			p.addPoint(ow + aw + tw / 2, oh + th + ah);
-			p.addPoint(ow, oh + th);
-			p.addPoint(ow + aw, oh + th);
-			p.addPoint(ow + aw, oh);
+	private void drawDebugTime(final Graphics2D g2, final long elapsed,
+			final int pos) {
+		final Font f = g2.getFont();
+		g2.setFont(f.deriveFont(10f));
+		g2.setColor(Color.GREEN);
+		g2.drawString(String.valueOf(elapsed), 0, 10 * pos);
+		g2.setFont(f);
+	}
 
-			if (SHADOW_DEPTH > 0) {
-				final AffineTransform at = g2.getTransform();
-				g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
-				g2.setColor(SHADOW_COLOR);
-				g2.fillPolygon(p);
-				g2.setTransform(at);
-			}
+	private void drawOrderingHint(final Graphics2D g2) {
+		final int tw = (int) (border1 * ORDER_HINT_TRUNK_WIDTH);
+		final int th = (int) (bounds.height * ORDER_HINT_TRUNK_HEIGHT);
+		final int aw = (int) (border1 * ORDER_HINT_ARROW_WIDTH);
+		final int ah = (int) (bounds.height * ORDER_HINT_ARROW_HEIGHT);
+		final int cw = tw + 2 * aw;
+		final int ch = th + ah;
+		final int ow = (border1 - cw) / 2;
+		final int oh = (bounds.height - ch) / 2;
+		final Polygon p = new Polygon();
+		p.addPoint(ow + aw, oh);
+		p.addPoint(ow + aw + tw, oh);
+		p.addPoint(ow + aw + tw, oh + th);
+		p.addPoint(ow + aw + tw + aw, oh + th);
+		p.addPoint(ow + aw + tw / 2, oh + th + ah);
+		p.addPoint(ow, oh + th);
+		p.addPoint(ow + aw, oh + th);
+		p.addPoint(ow + aw, oh);
 
-			g2.setColor(ORDER_HINT_BACK);
+		if (SHADOW_DEPTH > 0) {
+			final AffineTransform at = g2.getTransform();
+			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
+			g2.setColor(SHADOW_COLOR);
 			g2.fillPolygon(p);
+			g2.setTransform(at);
 		}
 
-		// draw section borders
+		g2.setColor(ORDER_HINT_BACK);
+		g2.fillPolygon(p);
+	}
+
+	private void drawSectionBorders(final Graphics2D g2) {
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, new float[] { 2, 2 }, 0));
 		g2.setColor(SECT_BORDER);
 		g2.drawLine(border1, 0, border1, bounds.height);
 		g2.drawLine(border2, 0, border2, bounds.height);
+	}
 
-		// draw PipeParts
+	private void drawPipeParts(final Graphics2D g2) {
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
+		final Rectangle clip = new Rectangle( //
+				-(int) g2.getTransform().getTranslateX(), //
+				-(int) g2.getTransform().getTranslateY(), //
+				(int) g2.getClipBounds().getWidth(), //
+				(int) g2.getClipBounds().getHeight());
 		for (final PipePart pp : set) {
 			if (saneConfigCache.contains(pp))
 				g2.setColor(pp == currentPart ? OUTER_SEL_OK : OUTER_OK);
 			else
 				g2.setColor(pp == currentPart ? OUTER_SEL_BAD : OUTER_BAD);
-			drawPipePart(g2, pp, pp == underCursor);
+			drawPipePart(g2, pp, pp == underCursor, clip);
 		}
+	}
 
-		// draw connections
+	private void drawConnections(final Graphics2D g2) {
+		final Rectangle clip = new Rectangle( //
+				-(int) g2.getTransform().getTranslateX(), //
+				-(int) g2.getTransform().getTranslateY(), //
+				(int) g2.getClipBounds().getWidth(), //
+				(int) g2.getClipBounds().getHeight());
 		for (final PipePart src : set)
 			for (final PipePart trg : src.getConnectedPipeParts()) {
 				final boolean sel = currentPart == src
@@ -494,20 +544,20 @@ public final class PipeConfigBoard extends JPanel {
 				else
 					g2.setColor(sel ? CONNECTION_SEL_BAD : CONNECTION_BAD);
 				drawConnection(g2, src.getGuiPosition(), trg.getGuiPosition(),
-						src, trg);
+						src, trg, clip);
 			}
 		if (currentConnection != null && currentConnectionsTarget == null) {
 			g2.setColor(currentConnectionValid ? CONNECTION_SEL_OK
 					: CONNECTION_SEL_BAD);
 			drawConnection(g2, currentPart.getGuiPosition(), currentConnection,
-					currentPart, underCursor);
+					currentPart, underCursor, clip);
 		}
 	}
 
 	private void drawPipePart(final Graphics2D g2, final PipePart part,
-			final boolean visibleInner) {
+			final boolean visibleInner, final Rectangle clip) {
 		final Rectangle rect = part.getGuiPosition();
-		if (!rect.intersects(g2.getClipBounds())) return;
+		if (!rect.intersects(clip)) return;
 		final Color clr = g2.getColor();
 		g2.setColor(RECT_BACKGROUND);
 		g2.fillRect(rect.x, rect.y, rect.width, rect.height);
@@ -525,18 +575,18 @@ public final class PipeConfigBoard extends JPanel {
 			g2.setColor(clr);
 		}
 
-		final Shape clip = g2.getClip();
+		final Shape shape = g2.getClip();
 		g2.clipRect(rect.x, rect.y, rect.width, rect.height);
 		g2.drawString(s, (float) (rect.x + (rect.width - sb.getWidth()) / 2),
 				(float) (rect.y + sb.getHeight() + (rect.height - sb
 						.getHeight()) / 2));
-		g2.setClip(clip);
+		g2.setClip(shape);
 	}
 
 	private static void drawConnection(final Graphics2D g2,
 			final Rectangle srcRect, final Rectangle trgRect,
-			final PipePart src, final PipePart trg) {
-		if (!srcRect.union(trgRect).intersects(g2.getClipBounds())) return;
+			final PipePart src, final PipePart trg, final Rectangle clip) {
+		if (!srcRect.union(trgRect).intersects(clip)) return;
 		final Point srcPoint = new Point();
 		final Point trgPoint = new Point();
 		calcConnectorPositions(srcRect, trgRect, srcPoint, trgPoint);
@@ -575,7 +625,7 @@ public final class PipeConfigBoard extends JPanel {
 			xoffs = -img.getWidth() - xoffs;
 
 		// draw rotated image
-		final Shape clip = g2.getClip();
+		final Shape shape = g2.getClip();
 		final AffineTransform at = g2.getTransform();
 		g2.translate(sx, sy);
 		g2.rotate(d);
@@ -588,7 +638,7 @@ public final class PipeConfigBoard extends JPanel {
 		g2.drawImage(img, new AffineTransformOp(new AffineTransform(),
 				AffineTransformOp.TYPE_BILINEAR), xoffs, 0);
 		g2.setTransform(at);
-		g2.setClip(clip);
+		g2.setClip(shape);
 	}
 
 	private static void calcConnectorPositions(final Rectangle srcRect,
