@@ -20,6 +20,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
+import pleocmd.itfc.gui.PipeConfigBoard;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -72,7 +73,9 @@ public abstract class PipePart extends StateHandling {
 			}
 		});
 		group.add(cfgGuiPosition = new ConfigBounds("GUI-Position"));
-		cfgGuiPosition.getContent().setBounds(0, 0, 150, 20);
+		cfgGuiPosition.getContent()
+				.setBounds(0, 0, PipeConfigBoard.DEF_RECT_WIDTH,
+						PipeConfigBoard.DEF_RECT_HEIGHT);
 	}
 
 	final long getUID() {
