@@ -63,15 +63,41 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final long serialVersionUID = -4525676341777864359L;
 
+	private static final Color BACKGROUND = Color.LIGHT_GRAY;
+
+	private static final Color SECT_BORDER = Color.BLACK;
+
+	private static final Color RECT_BACKGROUND = new Color(255, 255, 255);
+
+	private static final Color INNER_MODIFYABLE = new Color(200, 200, 255);
+
+	private static final Color INNER_READONLY = Color.LIGHT_GRAY;
+
+	private static final Color OUTER_OK = Color.BLACK;
+
+	private static final Color OUTER_BAD = Color.RED;
+
+	private static final Color OUTER_SEL_OK = Color.BLUE;
+
+	private static final Color OUTER_SEL_BAD = Color.MAGENTA;
+
+	private static final Color CONNECTION_OK = Color.BLACK;
+
+	private static final Color CONNECTION_BAD = Color.RED;
+
+	private static final Color CONNECTION_SEL_OK = Color.BLUE;
+
+	private static final Color CONNECTION_SEL_BAD = Color.MAGENTA;
+
+	private static final int ARROW_TIP = 14;
+
+	private static final int ARROW_WING = 8;
+
 	private static final int INNER_WIDTH = 8;
 
 	private static final int INNER_HEIGHT = 4;
 
-	private static final Color RECT_COLOR = new Color(255, 255, 255);
-
-	private static final Color INNER_COLOR_MOD = new Color(200, 200, 255);
-
-	private static final Color INNER_COLOR_RO = new Color(220, 220, 220);
+	private static final double LINE_CLICK_DIST = 10;
 
 	private final JPopupMenu menuInput;
 
@@ -381,14 +407,14 @@ public final class PipeConfigBoard extends JPanel {
 			grayVal = (grayVal - 118) % 64 + 128;
 			g2.setColor(new Color(grayVal, grayVal, grayVal));
 		} else
-			g2.setColor(Color.LIGHT_GRAY);
+			g2.setColor(BACKGROUND);
 		final Rectangle clip = g2.getClipBounds();
 		g2.fillRect(clip.x, clip.y, clip.width, clip.height);
 
 		// draw section borders
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, new float[] { 2, 2 }, 0));
-		g2.setColor(Color.BLACK);
+		g2.setColor(SECT_BORDER);
 		g2.drawLine(border1, 0, border1, bounds.height);
 		g2.drawLine(border2, 0, border2, bounds.height);
 
@@ -397,23 +423,27 @@ public final class PipeConfigBoard extends JPanel {
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set) {
 			if (saneConfigCache.contains(pp))
-				g2.setColor(pp == currentPart ? Color.BLUE : Color.BLACK);
+				g2.setColor(pp == currentPart ? OUTER_SEL_OK : OUTER_OK);
 			else
-				g2.setColor(pp == currentPart ? Color.MAGENTA : Color.RED);
+				g2.setColor(pp == currentPart ? OUTER_SEL_BAD : OUTER_BAD);
 			drawPipePart(g2, pp, pp == underCursor);
 		}
 
 		// draw connections
 		for (final PipePart src : set)
 			for (final PipePart trg : src.getConnectedPipeParts()) {
-				g2.setColor(currentPart == src
-						&& currentConnectionsTarget == trg ? Color.BLUE
-						: Color.BLACK);
+				final boolean sel = currentPart == src
+						&& currentConnectionsTarget == trg;
+				if (saneConfigCache.contains(src))
+					g2.setColor(sel ? CONNECTION_SEL_OK : CONNECTION_OK);
+				else
+					g2.setColor(sel ? CONNECTION_SEL_BAD : CONNECTION_BAD);
 				drawConnection(g2, src.getGuiPosition(), trg.getGuiPosition(),
 						src, trg);
 			}
 		if (currentConnection != null && currentConnectionsTarget == null) {
-			g2.setColor(currentConnectionValid ? Color.BLUE : Color.RED);
+			g2.setColor(currentConnectionValid ? CONNECTION_SEL_OK
+					: CONNECTION_SEL_BAD);
 			drawConnection(g2, currentPart.getGuiPosition(), currentConnection,
 					currentPart, underCursor);
 		}
@@ -424,7 +454,7 @@ public final class PipeConfigBoard extends JPanel {
 		final Rectangle rect = part.getGuiPosition();
 		if (!rect.intersects(g2.getClipBounds())) return;
 		final Color clr = g2.getColor();
-		g2.setColor(RECT_COLOR);
+		g2.setColor(RECT_BACKGROUND);
 		g2.fillRect(rect.x, rect.y, rect.width, rect.height);
 		g2.setColor(clr);
 		g2.drawRect(rect.x, rect.y, rect.width, rect.height);
@@ -435,7 +465,7 @@ public final class PipeConfigBoard extends JPanel {
 		if (visibleInner) {
 			final Rectangle inner = new Rectangle(rect);
 			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-			g2.setColor(modifyable ? INNER_COLOR_MOD : INNER_COLOR_RO);
+			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
 			g2.fillRect(inner.x, inner.y, inner.width, inner.height);
 			g2.setColor(clr);
 		}
@@ -540,15 +570,18 @@ public final class PipeConfigBoard extends JPanel {
 	// 5842-how-draw-arrow-mark-using-java-swing.html
 	private static Polygon getArrowPolygon(final int sx, final int sy,
 			final int tx, final int ty) {
-		final int i1 = 14; // how sharp the arrow's tip should look
-		final int i2 = 8; // how sharp the arrow's wings should look
 		final Polygon p = new Polygon();
 		final double d = Math.atan2(sx - tx, sy - ty);
-		p.addPoint(tx, ty); // tip
-		p.addPoint(tx + xCor(i1, d + .5), ty + yCor(i1, d + .5)); // wing 1
-		p.addPoint(tx + xCor(i2, d), ty + yCor(i2, d)); // on line
-		p.addPoint(tx + xCor(i1, d - .5), ty + yCor(i1, d - .5)); // wing 2
-		p.addPoint(tx, ty); // back to tip, close polygon
+		// tip
+		p.addPoint(tx, ty);
+		// wing 1
+		p.addPoint(tx + xCor(ARROW_TIP, d + .5), ty + yCor(ARROW_TIP, d + .5));
+		// on line
+		p.addPoint(tx + xCor(ARROW_WING, d), ty + yCor(ARROW_WING, d));
+		// wing 2
+		p.addPoint(tx + xCor(ARROW_TIP, d - .5), ty + yCor(ARROW_TIP, d - .5));
+		// back to tip, close polygon
+		p.addPoint(tx, ty);
 		return p;
 	}
 
@@ -775,8 +808,8 @@ public final class PipeConfigBoard extends JPanel {
 				final Point pt = new Point();
 				calcConnectorPositions(srcPP.getGuiPosition(), trgPP
 						.getGuiPosition(), ps, pt);
-				if (getArrowPolygon(ps.x, ps.y, pt.x, pt.y).contains(p)
-						|| Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, p.x, p.y) < 3) {
+				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, p.x, p.y) < LINE_CLICK_DIST
+						|| getArrowPolygon(ps.x, ps.y, pt.x, pt.y).contains(p)) {
 					currentPart = srcPP;
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					currentConnectionsTarget = trgPP;
