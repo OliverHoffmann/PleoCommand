@@ -20,6 +20,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -53,7 +54,6 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-// TODO click-point should be remembered and moving relative to clip-point
 // TODO Inputs should not allowed to be side-by-side
 // TODO make visible, that ordering of Inputs is important
 // TODO auto ordering of PipeParts via A* algorithm
@@ -88,6 +88,8 @@ public final class PipeConfigBoard extends JPanel {
 	private int border1;
 
 	private int border2;
+
+	private Point handlePoint;
 
 	private PipePart currentPart;
 
@@ -302,6 +304,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentConnection = null;
 			currentConnectionsTarget = null;
 			currentConnectionValid = false;
+			handlePoint = null;
 			updateSaneConfigCache();
 			repaint();
 		}
@@ -317,18 +320,6 @@ public final class PipeConfigBoard extends JPanel {
 
 	protected Set<PipePart> getSet() {
 		return set;
-	}
-
-	protected PipePart getCurrentPart() {
-		return currentPart;
-	}
-
-	/**
-	 * @return the {@link PipePart} which is under the cursor or <b>null</b> if
-	 *         none.
-	 */
-	protected PipePart getUnderCursor() {
-		return underCursor;
 	}
 
 	protected void updateSaneConfigCache() {
@@ -623,12 +614,14 @@ public final class PipeConfigBoard extends JPanel {
 			Rectangle r = new Rectangle(currentPart.getGuiPosition());
 			r = r.union(currentConnection);
 
-			currentConnection.setLocation(p.x, p.y);
+			currentConnection.setLocation(p.x - handlePoint.x, p.y
+					- handlePoint.y);
 			currentConnection.setSize(0, 0);
 			check(currentConnection, null);
 			currentConnectionValid = false;
 			for (final PipePart pp : set)
-				if (pp.getGuiPosition().contains(p)) {
+				if (pp.getGuiPosition().contains(
+						currentConnection.getLocation())) {
 					currentConnectionValid = currentPart
 							.isConnectionAllowed(pp);
 					break;
@@ -641,7 +634,8 @@ public final class PipeConfigBoard extends JPanel {
 		} else {
 			// move pipe-part
 			Rectangle r = new Rectangle(currentPart.getGuiPosition());
-			currentPart.getGuiPosition().setLocation(p.x, p.y);
+			currentPart.getGuiPosition().setLocation(p.x - handlePoint.x,
+					p.y - handlePoint.y);
 			check(currentPart.getGuiPosition(), currentPart);
 			r = r.union(currentPart.getGuiPosition());
 			for (final PipePart trgPP : currentPart.getConnectedPipeParts())
@@ -753,8 +747,15 @@ public final class PipeConfigBoard extends JPanel {
 				currentPart = pp;
 				final Rectangle inner = new Rectangle(pp.getGuiPosition());
 				inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-				currentConnection = inner.contains(p) ? null : new Rectangle(
-						p.x, p.y, 0, 0);
+				if (inner.contains(p)) {
+					currentConnection = null;
+					handlePoint = new Point(p.x - pp.getGuiPosition().x, p.y
+							- pp.getGuiPosition().y);
+				} else {
+					currentConnection = new Rectangle(p.x, p.y, 0, 0);
+					handlePoint = new Point(0, 0);
+				}
+
 				currentConnectionsTarget = null;
 				currentConnectionValid = false;
 				return;
@@ -767,11 +768,13 @@ public final class PipeConfigBoard extends JPanel {
 				final Point pt = new Point();
 				calcConnectorPositions(srcPP.getGuiPosition(), trgPP
 						.getGuiPosition(), ps, pt);
-				if (getArrowPolygon(ps.x, ps.y, pt.x, pt.y).contains(p)) {
+				if (getArrowPolygon(ps.x, ps.y, pt.x, pt.y).contains(p)
+						|| Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, p.x, p.y) < 3) {
 					currentPart = srcPP;
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					currentConnectionsTarget = trgPP;
 					currentConnectionValid = false;
+					handlePoint = new Point(p.x - pt.x, p.y - pt.y);
 					return;
 				}
 			}
@@ -780,6 +783,7 @@ public final class PipeConfigBoard extends JPanel {
 		currentConnection = null;
 		currentConnectionsTarget = null;
 		currentConnectionValid = false;
+		handlePoint = null;
 	}
 
 	/**
@@ -810,6 +814,7 @@ public final class PipeConfigBoard extends JPanel {
 		currentConnection = null;
 		currentConnectionValid = false;
 		// currentConnectionsTarget = null;
+		handlePoint = null;
 		repaint();
 	}
 
