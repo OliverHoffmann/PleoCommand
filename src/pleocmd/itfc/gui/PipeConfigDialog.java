@@ -10,6 +10,9 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBounds;
@@ -27,6 +30,8 @@ public final class PipeConfigDialog extends JDialog implements
 	private static final long serialVersionUID = 145574241927303337L;
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
+
+	private final JSlider sldZoom;
 
 	private final JButton btnOk;
 
@@ -50,6 +55,15 @@ public final class PipeConfigDialog extends JDialog implements
 		// Save current pipe's configuration
 		saveCurrentPipe();
 
+		sldZoom = new JSlider(-100, 100, 0);
+		sldZoom.setToolTipText("Zoom the Pipe Configuration Board");
+		sldZoom.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(final ChangeEvent e) {
+				setCurrentZoom();
+			}
+		});
+
 		// Add components
 		final Layouter lay = new Layouter(this);
 		board = new PipeConfigBoard();
@@ -57,6 +71,7 @@ public final class PipeConfigDialog extends JDialog implements
 
 		lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
+		lay.add(sldZoom, false);
 		lay.addSpacer();
 		btnOk = lay.addButton(Button.Ok, new Runnable() {
 			@Override
@@ -93,6 +108,10 @@ public final class PipeConfigDialog extends JDialog implements
 		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+	}
+
+	protected void setCurrentZoom() {
+		board.setZoom(sldZoom.getValue() / 100.0);
 	}
 
 	private void saveCurrentPipe() {
@@ -162,6 +181,7 @@ public final class PipeConfigDialog extends JDialog implements
 	}
 
 	public void updateState() {
+		sldZoom.setEnabled(true);
 		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
 		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
 		board.updateState();

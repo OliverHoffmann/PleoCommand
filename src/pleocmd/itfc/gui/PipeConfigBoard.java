@@ -170,6 +170,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private boolean modifyable;
 
+	private double scale = 1.0;
+
 	public PipeConfigBoard() {
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
@@ -434,26 +436,31 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		g2.setClip(0, 0, clip.width, clip.height);
-		g2.translate(-clip.x, -clip.y);
+
+		final Rectangle clipOrg = new Rectangle((int) (clip.x / scale),
+				(int) (clip.y / scale), (int) (clip.width / scale),
+				(int) (clip.height / scale));
 
 		if (PAINT_DEBUG) {
 			final long start = System.currentTimeMillis();
 
 			grayVal = (grayVal - 118) % 64 + 128;
 			g2.setColor(new Color(grayVal, grayVal, grayVal));
-			g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+			g2.fillRect(0, 0, clip.width, clip.height);
+			g2.translate(-clip.x, -clip.y);
+			g2.scale(scale, scale);
 			final long time1 = System.currentTimeMillis();
 
 			if (clip.x < border1) drawOrderingHint(g2);
 			final long time2 = System.currentTimeMillis();
 			drawSectionBorders(g2);
 			final long time3 = System.currentTimeMillis();
-			drawPipeParts(g2);
+			drawPipeParts(g2, clipOrg);
 			final long time4 = System.currentTimeMillis();
-			drawConnections(g2);
+			drawConnections(g2, clipOrg);
 			final long time5 = System.currentTimeMillis();
 
-			g2.translate(clip.x, clip.y);
+			g2.translate(clip.x / scale, clip.y / scale);
 			drawDebugTime(g2, time1 - start, 1);
 			drawDebugTime(g2, time2 - time1, 2);
 			drawDebugTime(g2, time3 - time2, 3);
@@ -461,11 +468,13 @@ public final class PipeConfigBoard extends JPanel {
 			drawDebugTime(g2, time5 - time4, 5);
 		} else {
 			g2.setColor(BACKGROUND);
-			g2.fillRect(clip.x, clip.y, clip.width, clip.height);
+			g2.fillRect(0, 0, clip.width, clip.height);
+			g2.translate(-clip.x, -clip.y);
+			g2.scale(scale, scale);
 			if (clip.x < border1) drawOrderingHint(g2);
 			drawSectionBorders(g2);
-			drawPipeParts(g2);
-			drawConnections(g2);
+			drawPipeParts(g2, clipOrg);
+			drawConnections(g2, clipOrg);
 		}
 		g.drawImage(img, clip.x, clip.y, null);
 	}
@@ -518,24 +527,14 @@ public final class PipeConfigBoard extends JPanel {
 		g2.drawLine(border2, 0, border2, bounds.height);
 	}
 
-	private void drawPipeParts(final Graphics2D g2) {
+	private void drawPipeParts(final Graphics2D g2, final Rectangle clip) {
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
-		final Rectangle clip = new Rectangle( //
-				-(int) g2.getTransform().getTranslateX(), //
-				-(int) g2.getTransform().getTranslateY(), //
-				(int) g2.getClipBounds().getWidth(), //
-				(int) g2.getClipBounds().getHeight());
 		for (final PipePart pp : set)
 			drawPipePart(g2, pp, pp == underCursor, clip);
 	}
 
-	private void drawConnections(final Graphics2D g2) {
-		final Rectangle clip = new Rectangle( //
-				-(int) g2.getTransform().getTranslateX(), //
-				-(int) g2.getTransform().getTranslateY(), //
-				(int) g2.getClipBounds().getWidth(), //
-				(int) g2.getClipBounds().getHeight());
+	private void drawConnections(final Graphics2D g2, final Rectangle clip) {
 		for (final PipePart src : set)
 			for (final PipePart trg : src.getConnectedPipeParts()) {
 				final boolean sel = currentPart == src
@@ -776,11 +775,12 @@ public final class PipeConfigBoard extends JPanel {
 	 * if any, or otherwise tries to move the current remembered
 	 * {@link PipePart} to the given position.
 	 * 
-	 * @param p
-	 *            current cursor position
+	 * @param ps
+	 *            current cursor position (scaled to screen)
 	 */
-	protected void mouseDragged(final Point p) {
+	protected void mouseDragged(final Point ps) {
 		if (currentPart == null) return;
+		final Point p = getOriginal(ps);
 		if (currentConnection != null) {
 			// move connector instead of pipe-part
 			if (!ensureModifyable()) return;
@@ -810,11 +810,12 @@ public final class PipeConfigBoard extends JPanel {
 							.isConnectionAllowed(pp);
 					break;
 				}
-			mouseMoved(p);
+			mouseMoved(ps);
 
 			Rectangle2D.union(r, currentConnection, r);
 			// need to take care of labels
 			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
+			scaleRect(r);
 			repaint(r);
 		} else {
 			// move pipe-part
@@ -829,6 +830,7 @@ public final class PipeConfigBoard extends JPanel {
 			unionConnectionSources(r);
 			// need to take care of labels
 			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
+			scaleRect(r);
 			repaint(r);
 		}
 	}
@@ -912,10 +914,11 @@ public final class PipeConfigBoard extends JPanel {
 	/**
 	 * Should be called whenever the mouse is moved over this section.
 	 * 
-	 * @param p
-	 *            current cursor position
+	 * @param ps
+	 *            current cursor position (scaled to screen)
 	 */
-	protected void mouseMoved(final Point p) {
+	protected void mouseMoved(final Point ps) {
+		final Point p = getOriginal(ps);
 		PipePart found = null;
 		for (final PipePart pp : set)
 			if (pp.getGuiPosition().contains(p)) {
@@ -923,9 +926,11 @@ public final class PipeConfigBoard extends JPanel {
 				break;
 			}
 		if (underCursor != found) {
-			if (underCursor != null) repaint(underCursor.getGuiPosition());
+			if (underCursor != null)
+				repaint(scaleRect(new Rectangle(underCursor.getGuiPosition())));
 			underCursor = found;
-			if (underCursor != null) repaint(underCursor.getGuiPosition());
+			if (underCursor != null)
+				repaint(scaleRect(new Rectangle(underCursor.getGuiPosition())));
 		}
 	}
 
@@ -934,17 +939,18 @@ public final class PipeConfigBoard extends JPanel {
 	 * cursor position for later use in {@link #mouseDragged(Point)} and during
 	 * {@link #paintComponent(Graphics)}.
 	 * 
-	 * @param p
-	 *            current cursor position
+	 * @param ps
+	 *            current cursor position (scaled to screen)
 	 */
-	protected void updateCurrent(final Point p) {
+	protected void updateCurrent(final Point ps) {
 		// invoked on click or when a drag&drop operation starts
-		updateCurrent0(p);
+		updateCurrent0(ps);
 		repaint();
 	}
 
-	private void updateCurrent0(final Point p) {
+	private void updateCurrent0(final Point pscr) {
 		// check all pipe-parts
+		final Point p = getOriginal(pscr);
 		for (final PipePart pp : set)
 			if (pp.getGuiPosition().contains(p)) {
 				currentPart = pp;
@@ -1199,6 +1205,28 @@ public final class PipeConfigBoard extends JPanel {
 			Log.error("Configuration board is read-only as "
 					+ "the Pipe is currently running.");
 		return modifyable;
+	}
+
+	public void setZoom(final double zoom) {
+		if (zoom > 0)
+			scale = 1 + zoom * 9;
+		else if (zoom < 0)
+			scale = 1 / (1 + -zoom * 9);
+		else
+			scale = 1;
+		repaint();
+	}
+
+	private Point getOriginal(final Point scaled) {
+		return new Point((int) (scaled.x / scale), (int) (scaled.y / scale));
+	}
+
+	private Rectangle scaleRect(final Rectangle r) {
+		r.x *= scale;
+		r.y *= scale;
+		r.width *= scale;
+		r.height *= scale;
+		return r;
 	}
 
 }
