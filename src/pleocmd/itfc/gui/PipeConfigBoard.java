@@ -68,6 +68,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final Color BACKGROUND = Color.LIGHT_GRAY;
 
+	private static final Color MOVEMENT_HINT = new Color(192, 208, 192);
+
 	private static final Color ORDER_HINT_BACK = new Color(255, 255, 128);
 
 	private static final Color SECT_BORDER = Color.BLACK;
@@ -171,6 +173,8 @@ public final class PipeConfigBoard extends JPanel {
 	private boolean modifyable;
 
 	private double scale = 1.0;
+
+	private boolean delayedReordering;
 
 	public PipeConfigBoard() {
 		menuInput = createMenu("Input", Input.class);
@@ -449,6 +453,7 @@ public final class PipeConfigBoard extends JPanel {
 			g2.fillRect(0, 0, clip.width, clip.height);
 			g2.translate(-clip.x, -clip.y);
 			g2.scale(scale, scale);
+			drawMovementHint(g2);
 			final long time1 = System.currentTimeMillis();
 
 			if (clip.x < border1) drawOrderingHint(g2);
@@ -471,6 +476,7 @@ public final class PipeConfigBoard extends JPanel {
 			g2.fillRect(0, 0, clip.width, clip.height);
 			g2.translate(-clip.x, -clip.y);
 			g2.scale(scale, scale);
+			drawMovementHint(g2);
 			if (clip.x < border1) drawOrderingHint(g2);
 			drawSectionBorders(g2);
 			drawPipeParts(g2, clipOrg);
@@ -486,6 +492,37 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setColor(Color.GREEN);
 		g2.drawString(String.valueOf(elapsed), 0, 10 * pos);
 		g2.setFont(f);
+	}
+
+	private void drawMovementHint(final Graphics2D g2) {
+		final List<? extends PipePart> list;
+		final int x0;
+		final int x1;
+		if (currentPart instanceof Input) {
+			list = Pipe.the().getInputList();
+			x0 = 0;
+			x1 = border1;
+		} else if (currentPart instanceof Converter) {
+			list = Pipe.the().getConverterList();
+			x0 = border1;
+			x1 = border2;
+		} else if (currentPart instanceof Output) {
+			list = Pipe.the().getOutputList();
+			x0 = border2;
+			x1 = bounds.width;
+		} else
+			return;
+		final int idx = list.indexOf(currentPart);
+		final PipePart before = idx > 0 ? list.get(idx - 1) : null;
+		final PipePart after = idx < list.size() - 1 ? list.get(idx + 1) : null;
+
+		final int y0 = before == null ? 0 : before.getGuiPosition().y
+				+ before.getGuiPosition().height + 1;
+		final int y1 = after == null ? bounds.height
+				: after.getGuiPosition().y - 1;
+		final Rectangle r = new Rectangle(x0, y0, x1 - x0, y1 - y0);
+		g2.setColor(MOVEMENT_HINT);
+		g2.fill(r);
 	}
 
 	private void drawOrderingHint(final Graphics2D g2) {
@@ -569,15 +606,15 @@ public final class PipeConfigBoard extends JPanel {
 			final AffineTransform at = g2.getTransform();
 			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
 			g2.setColor(SHADOW_COLOR);
-			g2.fillRect(rect.x, rect.y, rect.width, rect.height);
+			g2.fill(rect);
 			g2.setTransform(at);
 		}
 
 		g2.setColor(RECT_BACKGROUND);
-		g2.fillRect(rect.x, rect.y, rect.width, rect.height);
+		g2.fill(rect);
 
 		g2.setColor(outerClr);
-		g2.drawRect(rect.x, rect.y, rect.width, rect.height);
+		g2.draw(rect);
 
 		final String s = part.getClass().getSimpleName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
@@ -586,7 +623,7 @@ public final class PipeConfigBoard extends JPanel {
 			final Rectangle inner = new Rectangle(rect);
 			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
 			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
-			g2.fillRect(inner.x, inner.y, inner.width, inner.height);
+			g2.fill(inner);
 		}
 
 		final Shape shape = g2.getClip();
@@ -766,6 +803,7 @@ public final class PipeConfigBoard extends JPanel {
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
 						getSet().add(pp);
+						checkPipeOrdering();
 					} catch (final StateException e) {
 						Log.error(e, "Cannot add new PipePart");
 					}
@@ -830,12 +868,15 @@ public final class PipeConfigBoard extends JPanel {
 			repaint(r);
 		} else {
 			// move pipe-part
-			Rectangle r = new Rectangle(currentPart.getGuiPosition());
+			final Rectangle orgPos = new Rectangle(currentPart.getGuiPosition());
+			Rectangle r = new Rectangle(orgPos);
 			unionConnectionTargets(r);
 			unionConnectionSources(r);
 			currentPart.getGuiPosition().setLocation(p.x - handlePoint.x,
 					p.y - handlePoint.y);
 			check(currentPart.getGuiPosition(), currentPart);
+			if (!checkPipeOrdering())
+				currentPart.getGuiPosition().setLocation(orgPos.getLocation());
 			r = r.union(currentPart.getGuiPosition());
 			unionConnectionTargets(r);
 			unionConnectionSources(r);
@@ -1049,7 +1090,7 @@ public final class PipeConfigBoard extends JPanel {
 	 * @return sorted list of {@link PipePart}s
 	 */
 	@SuppressWarnings("unchecked")
-	public <T extends PipePart> List<T> getSortedParts(final Class<T> clazz) {
+	private <T extends PipePart> List<T> getSortedParts(final Class<T> clazz) {
 		final List<T> res = new ArrayList<T>();
 		for (final PipePart pp : set)
 			if (clazz.isInstance(pp)) res.add((T) pp);
@@ -1066,6 +1107,47 @@ public final class PipeConfigBoard extends JPanel {
 		return res;
 	}
 
+	/**
+	 * Checks whether {@link PipePart}s in the {@link Pipe} need to be reordered
+	 * to reflect their GUI positions. If reordering is needed but the board is
+	 * in read-only state (as the Pipe is running), this method will return
+	 * false and delay the reordering until the Pipe has finished running.
+	 * 
+	 * @return true if reordering was not needed or succeeded, false if
+	 *         reordering was needed and failed.
+	 * @see #updateState()
+	 */
+	protected boolean checkPipeOrdering() {
+		// is reordering needed?
+		final List<Input> orderInput = getSortedParts(Input.class);
+		final List<Converter> orderConverter = getSortedParts(Converter.class);
+		final List<Output> orderOutput = getSortedParts(Output.class);
+		if (Pipe.the().getInputList().equals(orderInput)
+				&& Pipe.the().getConverterList().equals(orderConverter)
+				&& Pipe.the().getOutputList().equals(orderOutput)) return true;
+
+		if (!ensureModifyable()) {
+			// delay until pipe has finished ...
+			delayedReordering = true;
+			// ... and stop drag&drop operation (if any)
+			return false;
+		}
+
+		// reorder
+		try {
+			Pipe.the().reorderInputs(orderInput);
+			Pipe.the().reorderConverter(orderConverter);
+			Pipe.the().reorderOutputs(orderOutput);
+		} catch (final StateException e) {
+			Log.error(e, "Cannot reorder PipeParts");
+		} catch (final IllegalArgumentException e) {
+			Log.error(e, "Cannot reorder PipeParts");
+		}
+		delayedReordering = false;
+		repaint();
+		return true;
+	}
+
 	protected void updateBounds(final int width, final int height) {
 		bounds.setSize(width, height);
 		final int maxWidth = DEF_RECT_WIDTH + SECTION_SPACE;
@@ -1073,6 +1155,7 @@ public final class PipeConfigBoard extends JPanel {
 		border2 = width - Math.min(width / SECTION_FRAC, maxWidth);
 		for (final PipePart pp : set)
 			check(pp.getGuiPosition(), pp);
+		checkPipeOrdering();
 		repaint();
 	}
 
@@ -1208,7 +1291,10 @@ public final class PipeConfigBoard extends JPanel {
 	public void updateState() {
 		final boolean changed = modifyable ^ !MainFrame.the().isPipeRunning();
 		modifyable = !MainFrame.the().isPipeRunning();
-		if (changed) repaint();
+		if (changed) {
+			if (delayedReordering) checkPipeOrdering();
+			repaint();
+		}
 	}
 
 	private boolean ensureModifyable() {

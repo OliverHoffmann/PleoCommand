@@ -243,6 +243,83 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			((PipePart) converter).disconnectedFromPipe(this);
 	}
 
+	/**
+	 * Rearranges all {@link Input}s according to the given list.
+	 * 
+	 * @param ordered
+	 *            list of all {@link Input}s of the {@link Pipe} in the new
+	 *            order
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 * @throws IllegalArgumentException
+	 *             if the given list doesn't contain the same {@link Input}s as
+	 *             the {@link Pipe}.
+	 */
+	public void reorderInputs(final List<Input> ordered) throws StateException {
+		ensureConstructed();
+		if (inputList.size() != ordered.size())
+			throw new IllegalArgumentException("Size of lists differ");
+		for (final Input pp : inputList)
+			if (!ordered.contains(pp))
+				throw new IllegalArgumentException(String.format(
+						"Missed in ordered list: '%s'", pp));
+		inputList.clear();
+		inputList.addAll(ordered);
+	}
+
+	/**
+	 * Rearranges all {@link Converter} according to the given list.
+	 * 
+	 * @param ordered
+	 *            list of all {@link Converter} of the {@link Pipe} in the new
+	 *            order
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 * @throws IllegalArgumentException
+	 *             if the given list doesn't contain the same {@link Converter}
+	 *             as the {@link Pipe}.
+	 */
+	public void reorderConverter(final List<Converter> ordered)
+			throws StateException {
+		ensureConstructed();
+		if (converterList.size() != ordered.size())
+			throw new IllegalArgumentException("Size of lists differ");
+		for (final Converter pp : converterList)
+			if (!ordered.contains(pp))
+				throw new IllegalArgumentException(String.format(
+						"Missed in ordered list: '%s'", pp));
+		converterList.clear();
+		converterList.addAll(ordered);
+	}
+
+	/**
+	 * Rearranges all {@link Output}s according to the given list.
+	 * 
+	 * @param ordered
+	 *            list of all {@link Output}s of the {@link Pipe} in the new
+	 *            order
+	 * @throws StateException
+	 *             if the {@link Pipe} is being constructed or already
+	 *             initialized
+	 * @throws IllegalArgumentException
+	 *             if the given list doesn't contain the same {@link Output}s as
+	 *             the {@link Pipe}.
+	 */
+	public void reorderOutputs(final List<Output> ordered)
+			throws StateException {
+		ensureConstructed();
+		if (outputList.size() != ordered.size())
+			throw new IllegalArgumentException("Size of lists differ");
+		for (final Output pp : outputList)
+			if (!ordered.contains(pp))
+				throw new IllegalArgumentException(String.format(
+						"Missed in ordered list: '%s'", pp));
+		outputList.clear();
+		outputList.addAll(ordered);
+	}
+
 	private void resolveConnectionUIDs() throws StateException {
 		// create a map from UID to PipePart
 		final Map<Long, PipePart> map = new HashMap<Long, PipePart>();
