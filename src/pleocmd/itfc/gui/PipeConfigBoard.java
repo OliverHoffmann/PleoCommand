@@ -807,7 +807,7 @@ public final class PipeConfigBoard extends JPanel {
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
 						getSet().add(pp);
-						checkPipeOrdering();
+						checkPipeOrdering(null);
 					} catch (final StateException e) {
 						Log.error(e, "Cannot add new PipePart");
 					}
@@ -879,7 +879,7 @@ public final class PipeConfigBoard extends JPanel {
 			currentPart.getGuiPosition().setLocation(p.x - handlePoint.x,
 					p.y - handlePoint.y);
 			check(currentPart.getGuiPosition(), currentPart);
-			if (!checkPipeOrdering())
+			if (!checkPipeOrdering(null))
 				currentPart.getGuiPosition().setLocation(orgPos.getLocation());
 			r = r.union(currentPart.getGuiPosition());
 			unionConnectionTargets(r);
@@ -1117,11 +1117,14 @@ public final class PipeConfigBoard extends JPanel {
 	 * in read-only state (as the Pipe is running), this method will return
 	 * false and delay the reordering until the Pipe has finished running.
 	 * 
+	 * @param warnIfNeeded
+	 *            if not empty, a message will be printed if reordering is
+	 *            needed
 	 * @return true if reordering was not needed or succeeded, false if
 	 *         reordering was needed and failed.
 	 * @see #updateState()
 	 */
-	protected boolean checkPipeOrdering() {
+	protected boolean checkPipeOrdering(final String warnIfNeeded) {
 		// is reordering needed?
 		final List<Input> orderInput = getSortedParts(Input.class);
 		final List<Converter> orderConverter = getSortedParts(Converter.class);
@@ -1129,6 +1132,9 @@ public final class PipeConfigBoard extends JPanel {
 		if (Pipe.the().getInputList().equals(orderInput)
 				&& Pipe.the().getConverterList().equals(orderConverter)
 				&& Pipe.the().getOutputList().equals(orderOutput)) return true;
+
+		if (warnIfNeeded != null && !warnIfNeeded.isEmpty())
+			Log.warn(warnIfNeeded);
 
 		if (!ensureModifyable()) {
 			// delay until pipe has finished ...
@@ -1159,7 +1165,8 @@ public final class PipeConfigBoard extends JPanel {
 		border2 = width - Math.min(width / SECTION_FRAC, maxWidth);
 		for (final PipePart pp : set)
 			check(pp.getGuiPosition(), pp);
-		checkPipeOrdering();
+		checkPipeOrdering("Resizing the board changed the ordering of the Pipe !!! "
+				+ "Please check ordering of all PipeParts.");
 		repaint();
 	}
 
@@ -1296,7 +1303,7 @@ public final class PipeConfigBoard extends JPanel {
 		final boolean changed = modifyable ^ !MainFrame.the().isPipeRunning();
 		modifyable = !MainFrame.the().isPipeRunning();
 		if (changed) {
-			if (delayedReordering) checkPipeOrdering();
+			if (delayedReordering) checkPipeOrdering(null);
 			repaint();
 		}
 	}
