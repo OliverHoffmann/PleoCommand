@@ -445,52 +445,47 @@ public final class PipeConfigBoard extends JPanel {
 				(int) (clip.y / scale), (int) (clip.width / scale),
 				(int) (clip.height / scale));
 
+		final long start = System.currentTimeMillis();
 		if (PAINT_DEBUG) {
-			final long start = System.currentTimeMillis();
-
 			grayVal = (grayVal - 118) % 64 + 128;
 			g2.setColor(new Color(grayVal, grayVal, grayVal));
-			g2.fillRect(0, 0, clip.width, clip.height);
-			g2.translate(-clip.x, -clip.y);
-			g2.scale(scale, scale);
-			drawMovementHint(g2);
-			final long time1 = System.currentTimeMillis();
-
-			if (clip.x < border1) drawOrderingHint(g2);
-			final long time2 = System.currentTimeMillis();
-			drawSectionBorders(g2);
-			final long time3 = System.currentTimeMillis();
-			drawPipeParts(g2, clipOrg);
-			final long time4 = System.currentTimeMillis();
-			drawConnections(g2, clipOrg);
-			final long time5 = System.currentTimeMillis();
-
-			g2.translate(clip.x / scale, clip.y / scale);
-			drawDebugTime(g2, time1 - start, 1);
-			drawDebugTime(g2, time2 - time1, 2);
-			drawDebugTime(g2, time3 - time2, 3);
-			drawDebugTime(g2, time4 - time3, 4);
-			drawDebugTime(g2, time5 - time4, 5);
-		} else {
+		} else
 			g2.setColor(BACKGROUND);
-			g2.fillRect(0, 0, clip.width, clip.height);
-			g2.translate(-clip.x, -clip.y);
-			g2.scale(scale, scale);
-			drawMovementHint(g2);
-			if (clip.x < border1) drawOrderingHint(g2);
-			drawSectionBorders(g2);
-			drawPipeParts(g2, clipOrg);
-			drawConnections(g2, clipOrg);
+		g2.fillRect(0, 0, clip.width, clip.height);
+		g2.translate(-clip.x, -clip.y);
+		g2.scale(scale, scale);
+		drawMovementHint(g2);
+		final long time1 = System.currentTimeMillis();
+
+		if (clip.x < border1) drawOrderingHint(g2);
+		final long time2 = System.currentTimeMillis();
+		drawSectionBorders(g2);
+		final long time3 = System.currentTimeMillis();
+		final int cnt4 = drawPipeParts(g2, clipOrg);
+		final long time4 = System.currentTimeMillis();
+		final int cnt5 = drawConnections(g2, clipOrg);
+		final long time5 = System.currentTimeMillis();
+
+		if (PAINT_DEBUG) {
+			g2.translate(clip.x / scale, clip.y / scale);
+			drawDebugTime(g2, time1 - start, -1, "Background", 1);
+			drawDebugTime(g2, time2 - time1, -1, "Hint", 2);
+			drawDebugTime(g2, time3 - time2, -1, "Border", 3);
+			drawDebugTime(g2, time4 - time3, cnt4, "Parts", 4);
+			drawDebugTime(g2, time5 - time4, cnt5, "Conn's", 5);
 		}
+
 		g.drawImage(img, clip.x, clip.y, null);
 	}
 
 	private void drawDebugTime(final Graphics2D g2, final long elapsed,
-			final int pos) {
+			final int count, final String name, final int pos) {
 		final Font f = g2.getFont();
 		g2.setFont(f.deriveFont(10f));
 		g2.setColor(Color.GREEN);
-		g2.drawString(String.valueOf(elapsed), 0, 10 * pos);
+		final String str = count == -1 ? name : String.format("%d %s", count,
+				name);
+		g2.drawString(String.format("%d ms for %s", elapsed, str), 0, 10 * pos);
 		g2.setFont(f);
 	}
 
@@ -521,7 +516,10 @@ public final class PipeConfigBoard extends JPanel {
 		final int y1 = after == null ? bounds.height
 				: after.getGuiPosition().y - 1;
 		final Rectangle r = new Rectangle(x0, y0, x1 - x0, y1 - y0);
-		g2.setColor(MOVEMENT_HINT);
+		if (PAINT_DEBUG)
+			g2.setColor(new Color(grayVal, grayVal + 16, grayVal));
+		else
+			g2.setColor(MOVEMENT_HINT);
 		g2.fill(r);
 	}
 
@@ -564,14 +562,17 @@ public final class PipeConfigBoard extends JPanel {
 		g2.drawLine(border2, 0, border2, bounds.height);
 	}
 
-	private void drawPipeParts(final Graphics2D g2, final Rectangle clip) {
+	private int drawPipeParts(final Graphics2D g2, final Rectangle clip) {
+		int cnt = 0;
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set)
-			drawPipePart(g2, pp, pp == underCursor, clip);
+			cnt += drawPipePart(g2, pp, pp == underCursor, clip);
+		return cnt;
 	}
 
-	private void drawConnections(final Graphics2D g2, final Rectangle clip) {
+	private int drawConnections(final Graphics2D g2, final Rectangle clip) {
+		int cnt = 0;
 		for (final PipePart src : set)
 			for (final PipePart trg : src.getConnectedPipeParts()) {
 				final boolean sel = currentPart == src
@@ -580,21 +581,22 @@ public final class PipeConfigBoard extends JPanel {
 					g2.setColor(sel ? CONNECTION_SEL_OK : CONNECTION_OK);
 				else
 					g2.setColor(sel ? CONNECTION_SEL_BAD : CONNECTION_BAD);
-				drawConnection(g2, src.getGuiPosition(), trg.getGuiPosition(),
-						src, trg, clip);
+				cnt += drawConnection(g2, src.getGuiPosition(), trg
+						.getGuiPosition(), src, trg, clip);
 			}
 		if (currentConnection != null && currentConnectionsTarget == null) {
 			g2.setColor(currentConnectionValid ? CONNECTION_SEL_OK
 					: CONNECTION_SEL_BAD);
-			drawConnection(g2, currentPart.getGuiPosition(), currentConnection,
-					currentPart, underCursor, clip);
+			cnt += drawConnection(g2, currentPart.getGuiPosition(),
+					currentConnection, currentPart, underCursor, clip);
 		}
+		return cnt;
 	}
 
-	private void drawPipePart(final Graphics2D g2, final PipePart part,
+	private int drawPipePart(final Graphics2D g2, final PipePart part,
 			final boolean visibleInner, final Rectangle clip) {
 		final Rectangle rect = part.getGuiPosition();
-		if (!rect.intersects(clip)) return;
+		if (!rect.intersects(clip)) return 0;
 
 		final Color outerClr;
 		if (saneConfigCache.contains(part))
@@ -633,12 +635,13 @@ public final class PipeConfigBoard extends JPanel {
 				(float) (rect.y + sb.getHeight() + (rect.height - sb
 						.getHeight()) / 2));
 		g2.setClip(shape);
+		return 1;
 	}
 
-	private void drawConnection(final Graphics2D g2, final Rectangle srcRect,
+	private int drawConnection(final Graphics2D g2, final Rectangle srcRect,
 			final Rectangle trgRect, final PipePart src, final PipePart trg,
 			final Rectangle clip) {
-		if (!srcRect.union(trgRect).intersects(clip)) return;
+		if (!srcRect.union(trgRect).intersects(clip)) return 0;
 
 		final Point srcPoint = new Point();
 		final Point trgPoint = new Point();
@@ -668,6 +671,7 @@ public final class PipeConfigBoard extends JPanel {
 				src.getOutputDescription());
 		drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x, srcPoint.y,
 				trg == null ? "" : trg.getInputDescription());
+		return 1;
 	}
 
 	private void drawConnectorLabel(final Graphics2D g2, final int sx,
