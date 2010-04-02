@@ -987,12 +987,18 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		}
 		final List<Group> res = new ArrayList<Group>();
 		res.add(getSkeleton(getClass().getSimpleName()));
-		for (final PipePart pp : inputList)
+		for (final PipePart pp : inputList) {
+			pp.groupWriteback();
 			res.add(pp.getGroup());
-		for (final PipePart pp : converterList)
+		}
+		for (final PipePart pp : converterList) {
+			pp.groupWriteback();
 			res.add(pp.getGroup());
-		for (final PipePart pp : outputList)
+		}
+		for (final PipePart pp : outputList) {
+			pp.groupWriteback();
 			res.add(pp.getGroup());
+		}
 		return res;
 	}
 

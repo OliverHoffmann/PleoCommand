@@ -340,6 +340,15 @@ public abstract class PipePart extends StateHandling {
 		return cfgGuiPosition.getContent();
 	}
 
+	public final void groupWriteback() throws ConfigurationException {
+		if (visualizationDialog != null)
+			cfgVisPosition.setContent(visualizationDialog.getBounds());
+		groupWriteback0();
+	}
+
+	protected void groupWriteback0() throws ConfigurationException {
+	}
+
 	public final boolean isVisualize() {
 		return cfgVisualize.getContent();
 	}
@@ -365,6 +374,7 @@ public abstract class PipePart extends StateHandling {
 
 	private final void closeVisualization() {
 		if (visualizationDialog == null) return;
+		cfgVisPosition.setContent(visualizationDialog.getBounds());
 		visualizationDialog.dispose();
 		visualizationDialog = null;
 	}
