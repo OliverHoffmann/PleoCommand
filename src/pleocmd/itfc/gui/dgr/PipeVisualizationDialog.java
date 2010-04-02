@@ -9,10 +9,13 @@ import java.util.List;
 import javax.swing.JDialog;
 
 import pleocmd.Log;
+import pleocmd.itfc.gui.AutoDisposableWindow;
 import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.PipePart;
 
-public class PipeVisualizationDialog extends JDialog {
+public class PipeVisualizationDialog extends JDialog implements
+		AutoDisposableWindow {
 
 	private static final long serialVersionUID = 2818789810493796194L;
 
@@ -48,12 +51,21 @@ public class PipeVisualizationDialog extends JDialog {
 
 		setSize(400, 300);
 		setLocationRelativeTo(null);
+		setAlwaysOnTop(true);
 		Log.detail("Pipe-Visualization-Dialog created");
+		MainFrame.the().addKnownWindow(this);
 	}
 
 	protected void close() {
+		MainFrame.the().removeKnownWindow(this);
 		dispose();
 		part.setVisualize(false);
+	}
+
+	@Override
+	public void autoDispose() {
+		MainFrame.the().removeKnownWindow(this);
+		dispose();
 	}
 
 	public DiagramDataSet getDataSet(final int index) {
@@ -69,4 +81,5 @@ public class PipeVisualizationDialog extends JDialog {
 		dataSets.get(index).addPoint(new Point2D.Double(x, y));
 		repaint();
 	}
+
 }

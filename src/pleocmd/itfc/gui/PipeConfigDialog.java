@@ -25,7 +25,7 @@ import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
 public final class PipeConfigDialog extends JDialog implements
-		ConfigurationInterface {
+		ConfigurationInterface, AutoDisposableWindow {
 
 	private static final long serialVersionUID = 145574241927303337L;
 
@@ -105,6 +105,7 @@ public final class PipeConfigDialog extends JDialog implements
 		}
 
 		Log.detail("Config-Frame created");
+		MainFrame.the().addKnownWindow(this);
 		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
@@ -142,9 +143,15 @@ public final class PipeConfigDialog extends JDialog implements
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
+		MainFrame.the().removeKnownWindow(this);
 		dispose();
 		MainFrame.the().getMainPipePanel().configDialogDisposed();
 		HelpDialog.closeHelpIfOpen();
+	}
+
+	@Override
+	public void autoDispose() {
+		close(true);
 	}
 
 	public void applyChanges() {

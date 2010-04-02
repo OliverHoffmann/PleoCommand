@@ -3,6 +3,7 @@ package pleocmd.itfc.gui;
 import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -55,11 +56,14 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private final JButton btnExit;
 
+	private final List<AutoDisposableWindow> knownWindows;
+
 	private Thread pipeThread;
 
 	private MainFrame() {
 		// don't change the order of the following lines !!!
 		// we need this order to avoid race conditions
+		knownWindows = new ArrayList<AutoDisposableWindow>();
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
 		hasGUI = true;
@@ -162,6 +166,15 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			Log.error(e);
 		}
 		dispose();
+
+		// dispose all other dialogs and frames, so that the
+		// Java AWT thread can exit cleanly
+		// special case: ErrorDialog will still be shown if it has unread
+		// messages (need copy because of concurrent modifications)
+		final List<AutoDisposableWindow> copy = new ArrayList<AutoDisposableWindow>(
+				knownWindows);
+		for (final AutoDisposableWindow wnd : copy)
+			wnd.autoDispose();
 		ErrorDialog.canDisposeIfHidden();
 		HelpDialog.closeHelpIfOpen();
 		Log.detail("GUI-Frame has been closed");
@@ -247,6 +260,14 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		cfgBounds.setContent(getBounds());
 		cfgSplitterPos.setContent(splitPane.getDividerLocation());
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
+	}
+
+	public void addKnownWindow(final AutoDisposableWindow wnd) {
+		knownWindows.add(wnd);
+	}
+
+	public void removeKnownWindow(final AutoDisposableWindow wnd) {
+		knownWindows.remove(wnd);
 	}
 
 }
