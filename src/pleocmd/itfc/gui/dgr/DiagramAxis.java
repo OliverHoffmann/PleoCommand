@@ -6,6 +6,8 @@ public class DiagramAxis {
 		LinearScale, LogarithmicScale
 	}
 
+	private final Diagram diagram;
+
 	private String axisName;
 
 	private String unitName = "";
@@ -22,7 +24,8 @@ public class DiagramAxis {
 
 	private double offset;
 
-	public DiagramAxis(final String axisName) {
+	public DiagramAxis(final Diagram diagram, final String axisName) {
+		this.diagram = diagram;
 		this.axisName = axisName;
 	}
 
@@ -31,7 +34,9 @@ public class DiagramAxis {
 	}
 
 	public void setAxisName(final String axisName) {
-		this.axisName = axisName;
+		synchronized (diagram) {
+			this.axisName = axisName;
+		}
 	}
 
 	public String getUnitName() {
@@ -39,7 +44,9 @@ public class DiagramAxis {
 	}
 
 	public void setUnitName(final String unitName) {
-		this.unitName = unitName;
+		synchronized (diagram) {
+			this.unitName = unitName;
+		}
 	}
 
 	public AxisScale getScale() {
@@ -47,7 +54,9 @@ public class DiagramAxis {
 	}
 
 	public void setScale(final AxisScale scale) {
-		this.scale = scale;
+		synchronized (diagram) {
+			this.scale = scale;
+		}
 	}
 
 	public double getMin() {
@@ -55,7 +64,9 @@ public class DiagramAxis {
 	}
 
 	public void setMin(final double min) {
-		this.min = min;
+		synchronized (diagram) {
+			this.min = min;
+		}
 	}
 
 	public double getMax() {
@@ -63,7 +74,9 @@ public class DiagramAxis {
 	}
 
 	public void setMax(final double max) {
-		this.max = max;
+		synchronized (diagram) {
+			this.max = max;
+		}
 	}
 
 	public boolean isReversed() {
@@ -71,7 +84,9 @@ public class DiagramAxis {
 	}
 
 	public void setReversed(final boolean reversed) {
-		this.reversed = reversed;
+		synchronized (diagram) {
+			this.reversed = reversed;
+		}
 	}
 
 	public int getSubsPerUnit() {
@@ -79,7 +94,9 @@ public class DiagramAxis {
 	}
 
 	public void setSubsPerUnit(final int subsPerUnit) {
-		this.subsPerUnit = subsPerUnit;
+		synchronized (diagram) {
+			this.subsPerUnit = subsPerUnit;
+		}
 	}
 
 	public double getOffset() {
@@ -87,7 +104,9 @@ public class DiagramAxis {
 	}
 
 	public void setOffset(final double offset) {
-		this.offset = offset;
+		synchronized (diagram) {
+			this.offset = offset;
+		}
 	}
 
 }

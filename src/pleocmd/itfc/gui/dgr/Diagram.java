@@ -65,9 +65,9 @@ public class Diagram extends JPanel {
 
 	private Pen subUnitPen = new Pen(Color.LIGHT_GRAY);
 
-	private final DiagramAxis xAxis = new DiagramAxis("x");
+	private final DiagramAxis xAxis = new DiagramAxis(this, "x");
 
-	private final DiagramAxis yAxis = new DiagramAxis("y");
+	private final DiagramAxis yAxis = new DiagramAxis(this, "y");
 
 	private double zoom = 1.0;
 
@@ -121,7 +121,7 @@ public class Diagram extends JPanel {
 		});
 	}
 
-	void addDataSet(final DiagramDataSet dataSet) {
+	synchronized void addDataSet(final DiagramDataSet dataSet) {
 		dataSets.add(dataSet);
 	}
 
@@ -133,7 +133,7 @@ public class Diagram extends JPanel {
 		return backgroundColor;
 	}
 
-	public void setBackgroundColor(final Color backgroundColor) {
+	public synchronized void setBackgroundColor(final Color backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
 
@@ -141,7 +141,7 @@ public class Diagram extends JPanel {
 		return axisPen;
 	}
 
-	public void setAxisPen(final Pen axisPen) {
+	public synchronized void setAxisPen(final Pen axisPen) {
 		this.axisPen = axisPen;
 	}
 
@@ -149,7 +149,7 @@ public class Diagram extends JPanel {
 		return unitPen;
 	}
 
-	public void setUnitPen(final Pen unitPen) {
+	public synchronized void setUnitPen(final Pen unitPen) {
 		this.unitPen = unitPen;
 	}
 
@@ -157,7 +157,7 @@ public class Diagram extends JPanel {
 		return subUnitPen;
 	}
 
-	public void setSubUnitPen(final Pen subUnitPen) {
+	public synchronized void setSubUnitPen(final Pen subUnitPen) {
 		this.subUnitPen = subUnitPen;
 	}
 
@@ -173,12 +173,12 @@ public class Diagram extends JPanel {
 		return zoom;
 	}
 
-	public void setZoom(final double zoom) {
+	public synchronized void setZoom(final double zoom) {
 		this.zoom = zoom;
 	}
 
 	@Override
-	protected void paintComponent(final Graphics g) {
+	protected synchronized void paintComponent(final Graphics g) {
 		final Rectangle clip = g.getClipBounds();
 		final BufferedImage img = new BufferedImage(clip.width, clip.height,
 				BufferedImage.TYPE_INT_RGB);

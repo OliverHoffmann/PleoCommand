@@ -48,9 +48,11 @@ public class DiagramDataSet {
 	}
 
 	public void setPoints(final List<Double> points) {
-		this.points.clear();
-		this.points.addAll(points);
-		prepared = false;
+		synchronized (diagram) {
+			this.points.clear();
+			this.points.addAll(points);
+			prepared = false;
+		}
 	}
 
 	public String getLabel() {
@@ -58,7 +60,9 @@ public class DiagramDataSet {
 	}
 
 	public void setLabel(final String label) {
-		this.label = label;
+		synchronized (diagram) {
+			this.label = label;
+		}
 	}
 
 	public Pen getPen() {
@@ -66,8 +70,10 @@ public class DiagramDataSet {
 	}
 
 	public void setPen(final Pen pen) {
-		this.pen = pen;
-		penAutomatic = false;
+		synchronized (diagram) {
+			this.pen = pen;
+			penAutomatic = false;
+		}
 	}
 
 	public boolean isPenAutomatic() {
@@ -79,7 +85,9 @@ public class DiagramDataSet {
 	}
 
 	public void setType(final DiagramType type) {
-		this.type = type;
+		synchronized (diagram) {
+			this.type = type;
+		}
 	}
 
 	public double getValuePerUnitX() {
@@ -87,7 +95,9 @@ public class DiagramDataSet {
 	}
 
 	public void setValuePerUnitX(final double valuePerUnitX) {
-		this.valuePerUnitX = valuePerUnitX;
+		synchronized (diagram) {
+			this.valuePerUnitX = valuePerUnitX;
+		}
 	}
 
 	public double getValuePerUnitY() {
@@ -95,12 +105,16 @@ public class DiagramDataSet {
 	}
 
 	public void setValuePerUnitY(final double valuePerUnitY) {
-		this.valuePerUnitY = valuePerUnitY;
+		synchronized (diagram) {
+			this.valuePerUnitY = valuePerUnitY;
+		}
 	}
 
 	public void addPoint(final Double point) {
-		points.add(point);
-		prepared = false;
+		synchronized (diagram) {
+			points.add(point);
+			prepared = false;
+		}
 	}
 
 	public void addSequence(final int[] values) {
@@ -113,12 +127,14 @@ public class DiagramDataSet {
 
 	public void addSequence(final int[] values, final int xStart,
 			final int xIncr) {
-		int x = xStart;
-		for (final int value : values) {
-			points.add(new Double(x, value));
-			x += xIncr;
+		synchronized (diagram) {
+			int x = xStart;
+			for (final int value : values) {
+				points.add(new Double(x, value));
+				x += xIncr;
+			}
+			prepared = false;
 		}
-		prepared = false;
 	}
 
 	public void addSequence(final double[] values) {
