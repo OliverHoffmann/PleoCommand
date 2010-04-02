@@ -10,6 +10,7 @@ import java.util.Random;
 import java.util.Set;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigCollection;
 import pleocmd.cfg.ConfigLong;
@@ -57,7 +58,7 @@ public abstract class PipePart extends StateHandling {
 
 	private final ConfigBounds cfgVisPosition;
 
-	private boolean visualize;
+	private final ConfigBoolean cfgVisualize;
 
 	private PipeVisualizationDialog visualizationDialog;
 
@@ -85,6 +86,7 @@ public abstract class PipePart extends StateHandling {
 				.setBounds(0, 0, PipeConfigBoard.DEF_RECT_WIDTH,
 						PipeConfigBoard.DEF_RECT_HEIGHT);
 		group.add(cfgVisPosition = new ConfigBounds("Visualization-Position"));
+		group.add(cfgVisualize = new ConfigBoolean("Visualization", false));
 	}
 
 	final long getUID() {
@@ -155,7 +157,7 @@ public abstract class PipePart extends StateHandling {
 	public final boolean tryInit() {
 		try {
 			init();
-			if (visualize) createVisualization();
+			if (cfgVisualize.getContent()) createVisualization();
 			return true;
 		} catch (final PipeException e) {
 			pipe.getFeedback().addError(e, e.isPermanent());
@@ -339,14 +341,14 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	public final boolean isVisualize() {
-		return visualize;
+		return cfgVisualize.getContent();
 	}
 
 	public final void setVisualize(final boolean visualize) {
 		if (visualize && !supportsVisualization())
 			throw new IllegalStateException(
 					"This PipePart doesn't support visualization");
-		this.visualize = visualize;
+		cfgVisualize.setContent(visualize);
 		if (getState() == State.Initialized) if (visualize)
 			createVisualization();
 		else
