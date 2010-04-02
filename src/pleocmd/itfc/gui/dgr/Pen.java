@@ -4,7 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-public class Pen {
+public final class Pen {
 
 	private final Color color;
 

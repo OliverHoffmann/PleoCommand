@@ -22,13 +22,13 @@ import javax.swing.JPanel;
 
 import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 
-public class Diagram extends JPanel {
-
-	private static final long serialVersionUID = -8245547025738665255L;
+public final class Diagram extends JPanel {
 
 	protected static final double SCALE_SPEED_MOUSE = 0.01;
 
 	protected static final double MOVE_SPEED_MOUSE = 0.05;
+
+	private static final long serialVersionUID = -8245547025738665255L;
 
 	private static final int BORDER = 4;
 
@@ -247,7 +247,6 @@ public class Diagram extends JPanel {
 				final double xc = xAxis.isReversed() ? w - x : x;
 				final double yc = yAxis.isReversed() ? h - y : y;
 				switch (ds.getType()) {
-				default:
 				case LineDiagram:
 					if (!first)
 						g2.drawLine((int) xold, (int) yold, (int) xc, (int) yc);

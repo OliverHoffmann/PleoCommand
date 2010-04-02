@@ -14,7 +14,7 @@ import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.PipePart;
 
-public class PipeVisualizationDialog extends JDialog implements
+public final class PipeVisualizationDialog extends JDialog implements
 		AutoDisposableWindow {
 
 	private static final long serialVersionUID = 2818789810493796194L;

@@ -364,7 +364,7 @@ public abstract class PipePart extends StateHandling {
 			closeVisualization();
 	}
 
-	private final void createVisualization() {
+	private void createVisualization() {
 		if (visualizationDialog != null) return;
 		visualizationDialog = new PipeVisualizationDialog(this,
 				getVisualizeDataSetCount());
@@ -372,7 +372,7 @@ public abstract class PipePart extends StateHandling {
 		visualizationDialog.setVisible(true);
 	}
 
-	private final void closeVisualization() {
+	private void closeVisualization() {
 		if (visualizationDialog == null) return;
 		cfgVisPosition.setContent(visualizationDialog.getBounds());
 		visualizationDialog.dispose();

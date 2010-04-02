@@ -1,6 +1,6 @@
 package pleocmd.itfc.gui.dgr;
 
-public class DiagramAxis {
+public final class DiagramAxis {
 
 	public enum AxisScale {
 		LinearScale, LogarithmicScale

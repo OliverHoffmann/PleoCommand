@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class DiagramDataSet {
+public final class DiagramDataSet {
 
 	public enum DiagramType {
 		LineDiagram, BarDiagram, ScatterPlotDiagram, IntersectionDiagram
