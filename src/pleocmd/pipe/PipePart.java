@@ -357,7 +357,7 @@ public abstract class PipePart extends StateHandling {
 		if (visualizationDialog != null) return;
 		visualizationDialog = new PipeVisualizationDialog(this,
 				getVisualizeDataSetCount());
-		visualizationDialog.setBounds(cfgVisPosition.getContent());
+		cfgVisPosition.assignContent(visualizationDialog);
 		visualizationDialog.setVisible(true);
 	}
 

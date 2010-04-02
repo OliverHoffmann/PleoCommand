@@ -115,7 +115,7 @@ public final class DataFileEditFrame extends JDialog implements
 
 	@Override
 	public void configurationChanged(final Group group) {
-		setBounds(cfgBounds.getContent());
+		cfgBounds.assignContent(this);
 	}
 
 	@Override

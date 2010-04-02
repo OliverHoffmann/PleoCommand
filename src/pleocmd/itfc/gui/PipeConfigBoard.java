@@ -204,6 +204,8 @@ public final class PipeConfigBoard extends JPanel {
 	private boolean delayedReordering;
 
 	public PipeConfigBoard() {
+		setPreferredSize(new Dimension(400, 300));
+
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
 		menuOutput = createMenu("Output", Output.class);
