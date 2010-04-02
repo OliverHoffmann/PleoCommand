@@ -8,6 +8,7 @@ import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Value;
 
@@ -55,7 +56,8 @@ public final class BCICodomainAdaption extends Converter {
 
 	@Override
 	protected void init0() {
-		// nothing to do
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null) ds.setLabel("Codomain adapted");
 	}
 
 	@Override
@@ -101,6 +103,7 @@ public final class BCICodomainAdaption extends Converter {
 			throw new InternalException(e);
 		}
 		res.add(new Data(vals, data));
+		if (isVisualize()) plot(0, vals.get(2).asDouble());
 		return res;
 	}
 
@@ -131,5 +134,10 @@ public final class BCICodomainAdaption extends Converter {
 		if (cfgTargetMin.getContent() >= cfgTargetMax.getContent())
 			return false;
 		return true;
+	}
+
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 1;
 	}
 }

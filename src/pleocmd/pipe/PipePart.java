@@ -21,6 +21,8 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.PipeConfigBoard;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
+import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -53,6 +55,12 @@ public abstract class PipePart extends StateHandling {
 
 	private final ConfigBounds cfgGuiPosition;
 
+	private final ConfigBounds cfgVisPosition;
+
+	private boolean visualize;
+
+	private PipeVisualizationDialog visualizationDialog;
+
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
@@ -76,6 +84,7 @@ public abstract class PipePart extends StateHandling {
 		cfgGuiPosition.getContent()
 				.setBounds(0, 0, PipeConfigBoard.DEF_RECT_WIDTH,
 						PipeConfigBoard.DEF_RECT_HEIGHT);
+		group.add(cfgVisPosition = new ConfigBounds("Visualization-Position"));
 	}
 
 	final long getUID() {
@@ -146,6 +155,7 @@ public abstract class PipePart extends StateHandling {
 	public final boolean tryInit() {
 		try {
 			init();
+			if (visualize) createVisualization();
 			return true;
 		} catch (final PipeException e) {
 			pipe.getFeedback().addError(e, e.isPermanent());
@@ -326,6 +336,56 @@ public abstract class PipePart extends StateHandling {
 
 	public final Rectangle getGuiPosition() {
 		return cfgGuiPosition.getContent();
+	}
+
+	public final boolean isVisualize() {
+		return visualize;
+	}
+
+	public final void setVisualize(final boolean visualize) {
+		if (visualize && !supportsVisualization())
+			throw new IllegalStateException(
+					"This PipePart doesn't support visualization");
+		this.visualize = visualize;
+		if (getState() == State.Initialized) if (visualize)
+			createVisualization();
+		else
+			closeVisualization();
+	}
+
+	private final void createVisualization() {
+		if (visualizationDialog != null) return;
+		visualizationDialog = new PipeVisualizationDialog(this,
+				getVisualizeDataSetCount());
+		visualizationDialog.setBounds(cfgVisPosition.getContent());
+		visualizationDialog.setVisible(true);
+	}
+
+	private final void closeVisualization() {
+		if (visualizationDialog == null) return;
+		visualizationDialog.dispose();
+		visualizationDialog = null;
+	}
+
+	public final boolean supportsVisualization() {
+		return getVisualizeDataSetCount() > 0;
+	}
+
+	protected abstract int getVisualizeDataSetCount();
+
+	protected final DiagramDataSet getVisualizeDataSet(final int index) {
+		return visualizationDialog == null ? null : visualizationDialog
+				.getDataSet(index);
+	}
+
+	protected final void plot(final int index, final double x, final double y) {
+		if (visualizationDialog != null) visualizationDialog.plot(index, x, y);
+	}
+
+	protected final void plot(final int index, final double y) {
+		if (visualizationDialog != null)
+			visualizationDialog.plot(index, Pipe.the().getFeedback()
+					.getElapsed(), y);
 	}
 
 }

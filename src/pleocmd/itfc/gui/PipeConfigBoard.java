@@ -32,6 +32,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.swing.AbstractButton;
+import javax.swing.Icon;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -41,6 +44,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigValue;
@@ -48,6 +52,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
@@ -56,6 +61,8 @@ import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
 // TODO auto ordering of PipeParts via A* algorithm
+// TODO raster
+// TODO width of parts according to label
 public final class PipeConfigBoard extends JPanel {
 
 	public static final int DEF_RECT_WIDTH = 150;
@@ -110,9 +117,25 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final int ARROW_WING = 8;
 
-	private static final int INNER_WIDTH = 8;
+	private static final int ICON_WIDTH = 18;
 
-	private static final int INNER_HEIGHT = 4;
+	private static final Color ICON_OUTLINE = Color.GRAY;
+
+	private static final Color ICON_HOVER = Color.BLUE;
+
+	private static final Color ICON_SELECTED = new Color(128, 128, 0);
+
+	private static final Icon ICON_CONF = IconLoader.getIcon("configure");
+
+	private static final int ICON_CONF_POS = 1;
+
+	private static final Icon ICON_DGR = IconLoader.getIcon("games-difficult");
+
+	private static final int ICON_DGR_POS = 0;
+
+	private static final int INNER_WIDTH = ICON_WIDTH + 2;
+
+	private static final int INNER_HEIGHT = 6;
 
 	private static final double LINE_CLICK_DIST = 10;
 
@@ -150,6 +173,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private PipePart currentPart;
 
+	private Icon currentIcon;
+
 	private Rectangle currentConnection;
 
 	private PipePart currentConnectionsTarget;
@@ -167,6 +192,8 @@ public final class PipeConfigBoard extends JPanel {
 	private int idxMenuDelPartConn;
 
 	private int idxMenuDelConn;
+
+	private int idxMenuToggleDgr;
 
 	private final Set<PipePart> saneConfigCache;
 
@@ -199,11 +226,22 @@ public final class PipeConfigBoard extends JPanel {
 			public void mousePressed(final MouseEvent e) {
 				if (e.isPopupTrigger())
 					showPopup(e);
-				else {
+				else
 					updateCurrent(e.getPoint());
-					if (e.getModifiers() == InputEvent.BUTTON1_MASK
-							&& e.getClickCount() == 2) configureCurrentPart();
-				}
+			}
+
+			@Override
+			public void mouseClicked(final MouseEvent e) {
+				updateCurrent(e.getPoint());
+				if (e.getModifiers() == InputEvent.BUTTON1_MASK)
+					switch (e.getClickCount()) {
+					case 1:
+						checkIconClicked();
+						break;
+					case 2:
+						configureCurrentPart(true);
+						break;
+					}
 			}
 
 			@Override
@@ -261,11 +299,12 @@ public final class PipeConfigBoard extends JPanel {
 		menu.addSeparator();
 
 		idxMenuConfPart = menu.getSubElements().length;
-		final JMenuItem itemConfPart = new JMenuItem("Configure This PipePart");
+		final JMenuItem itemConfPart = new JMenuItem("Configure This PipePart",
+				ICON_CONF);
 		itemConfPart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				configureCurrentPart();
+				configureCurrentPart(false);
 			}
 		});
 		menu.add(itemConfPart);
@@ -300,6 +339,17 @@ public final class PipeConfigBoard extends JPanel {
 			}
 		});
 		menu.add(itemDelConn);
+
+		idxMenuToggleDgr = menu.getSubElements().length;
+		final JCheckBoxMenuItem itemToggleDgr = new JCheckBoxMenuItem(
+				"Visualize PipePart's Output", ICON_DGR);
+		itemToggleDgr.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				toggleDiagram();
+			}
+		});
+		menu.add(itemToggleDgr);
 
 		return menu;
 	}
@@ -371,12 +421,22 @@ public final class PipeConfigBoard extends JPanel {
 		}
 	}
 
-	protected void configureCurrentPart() {
+	protected void configureCurrentPart(final boolean onlyIfNoIcon) {
 		if (currentPart != null && !currentPart.getGuiConfigs().isEmpty()
-				&& ensureModifyable()) {
+				&& (!onlyIfNoIcon || currentIcon == null) && ensureModifyable()) {
 			createConfigureDialog("Configure", currentPart, null);
 			repaint();
 		}
+	}
+
+	protected void checkIconClicked() {
+		if (currentIcon == ICON_CONF) configureCurrentPart(false);
+		if (currentIcon == ICON_DGR) toggleDiagram();
+	}
+
+	protected void toggleDiagram() {
+		if (currentPart != null)
+			currentPart.setVisualize(!currentPart.isVisualize());
 	}
 
 	protected Set<PipePart> getSet() {
@@ -594,7 +654,7 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	private int drawPipePart(final Graphics2D g2, final PipePart part,
-			final boolean visibleInner, final Rectangle clip) {
+			final boolean hover, final Rectangle clip) {
 		final Rectangle rect = part.getGuiPosition();
 		if (!rect.intersects(clip)) return 0;
 
@@ -621,7 +681,7 @@ public final class PipeConfigBoard extends JPanel {
 		final String s = part.getClass().getSimpleName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
-		if (visibleInner) {
+		if (hover) {
 			final Rectangle inner = new Rectangle(rect);
 			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
 			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
@@ -634,8 +694,75 @@ public final class PipeConfigBoard extends JPanel {
 		g2.drawString(s, (float) (rect.x + (rect.width - sb.getWidth()) / 2),
 				(float) (rect.y + sb.getHeight() + (rect.height - sb
 						.getHeight()) / 2));
+		drawIcon(g2, hover, rect, ICON_CONF, ICON_CONF_POS, !modifyable
+				|| part.getGuiConfigs().isEmpty(), false);
+		drawIcon(g2, hover, rect, ICON_DGR, ICON_DGR_POS, false, part
+				.isVisualize());
 		g2.setClip(shape);
 		return 1;
+	}
+
+	/**
+	 * Draws an icon to the image
+	 * 
+	 * @param g2
+	 *            {@link Graphics2D} of the image
+	 * @param hover
+	 *            if true, an outline will be drawn
+	 * @param rect
+	 *            position of the image in which to align the icon
+	 * @param icon
+	 *            {@link Icon} to draw
+	 * @param pos
+	 *            the position inside the rectangle as follow<br>
+	 *            [ 1 2 3 ..... -2 -1 0 ]
+	 * @param disabled
+	 *            if true, icon is drawn in disabled state
+	 * @param selected
+	 *            if true, icon is drawn in selected state
+	 */
+	private void drawIcon(final Graphics2D g2, final boolean hover,
+			final Rectangle rect, final Icon icon, final int pos,
+			final boolean disabled, final boolean selected) {
+		final Rectangle b = getIconBounds(rect, icon, pos);
+		if (hover) {
+			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
+			g2.fill(b);
+		}
+		Icon ico = disabled ? (selected ? UIManager.getLookAndFeel()
+				.getDisabledSelectedIcon(null, icon) : UIManager
+				.getLookAndFeel().getDisabledIcon(null, icon)) : icon;
+		if (ico == null) ico = icon;
+		ico.paintIcon(null, g2, b.x, b.y);
+		g2.setColor(selected ? ICON_SELECTED : hover ? ICON_HOVER
+				: ICON_OUTLINE);
+		g2.draw3DRect(b.x, b.y, b.width, b.height, !selected);
+	}
+
+	/**
+	 * Gets the bounding rectangle around an icon.
+	 * 
+	 * @param rect
+	 *            position of the image in which to align the icon
+	 * @param icon
+	 *            {@link Icon} which would be drawn
+	 * @param pos
+	 *            the position inside the rectangle as follow<br>
+	 *            [ 1 2 3 ..... -2 -1 0 ]
+	 * @return the bounding rectangle
+	 */
+	private Rectangle getIconBounds(final Rectangle rect, final Icon icon,
+			final int pos) {
+		final boolean alignRight = pos <= 0;
+		final Rectangle b = new Rectangle();
+		b.width = icon.getIconWidth();
+		b.height = icon.getIconHeight();
+		if (alignRight)
+			b.x = rect.x + rect.width - (1 - pos) * ICON_WIDTH;
+		else
+			b.x = rect.x + pos * ICON_WIDTH - b.width;
+		b.y = rect.y + (rect.height - b.width) / 2;
+		return b;
 	}
 
 	private int drawConnection(final Graphics2D g2, final Rectangle srcRect,
@@ -832,7 +959,7 @@ public final class PipeConfigBoard extends JPanel {
 	 *            current cursor position (scaled to screen)
 	 */
 	protected void mouseDragged(final Point ps) {
-		if (currentPart == null) return;
+		if (currentPart == null || handlePoint == null) return;
 		final Point p = getOriginal(ps);
 		if (currentConnection != null) {
 			// move connector instead of pipe-part
@@ -1005,24 +1132,39 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	private void updateCurrent0(final Point pscr) {
+		currentPart = null;
+		currentIcon = null;
+		currentConnection = null;
+		currentConnectionsTarget = null;
+		currentConnectionValid = false;
+		handlePoint = null;
+
 		// check all pipe-parts
 		final Point p = getOriginal(pscr);
 		for (final PipePart pp : set)
 			if (pp.getGuiPosition().contains(p)) {
 				currentPart = pp;
+
 				final Rectangle inner = new Rectangle(pp.getGuiPosition());
 				inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-				if (inner.contains(p)) {
-					currentConnection = null;
+				if (inner.contains(p))
 					handlePoint = new Point(p.x - pp.getGuiPosition().x, p.y
 							- pp.getGuiPosition().y);
-				} else {
-					currentConnection = new Rectangle(p.x, p.y, 0, 0);
-					handlePoint = new Point(0, 0);
+				else {
+					final Rectangle ibC = getIconBounds(pp.getGuiPosition(),
+							ICON_CONF, ICON_CONF_POS);
+					final Rectangle ibD = getIconBounds(pp.getGuiPosition(),
+							ICON_DGR, ICON_DGR_POS);
+					if (ibC.contains(p))
+						currentIcon = ICON_CONF;
+					else if (ibD.contains(p))
+						currentIcon = ICON_DGR;
+					else {
+						currentConnection = new Rectangle(p.x, p.y, 0, 0);
+						handlePoint = new Point(0, 0);
+					}
 				}
 
-				currentConnectionsTarget = null;
-				currentConnectionValid = false;
 				return;
 			}
 
@@ -1038,17 +1180,10 @@ public final class PipeConfigBoard extends JPanel {
 					currentPart = srcPP;
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					currentConnectionsTarget = trgPP;
-					currentConnectionValid = false;
 					handlePoint = new Point(p.x - pt.x, p.y - pt.y);
 					return;
 				}
 			}
-
-		currentPart = null;
-		currentConnection = null;
-		currentConnectionsTarget = null;
-		currentConnectionValid = false;
-		handlePoint = null;
 	}
 
 	/**
@@ -1076,9 +1211,10 @@ public final class PipeConfigBoard extends JPanel {
 				}
 		}
 		// currentPart = null;
+		currentIcon = null;
 		currentConnection = null;
-		currentConnectionValid = false;
 		// currentConnectionsTarget = null;
+		currentConnectionValid = false;
 		handlePoint = null;
 		repaint();
 	}
@@ -1182,18 +1318,22 @@ public final class PipeConfigBoard extends JPanel {
 	protected void showMenu(final JPopupMenu menu, final Component invoker,
 			final int x, final int y) {
 		final MenuElement[] items = menu.getSubElements();
-		((JMenuItem) items[idxMenuAdd]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuAdd]).setEnabled(modifyable
 				&& currentPart == null);
-		((JMenuItem) items[idxMenuConfPart]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuConfPart]).setEnabled(modifyable
 				&& currentPart != null && currentConnection == null
 				&& !currentPart.getGuiConfigs().isEmpty());
-		((JMenuItem) items[idxMenuDelPart]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuDelPart]).setEnabled(modifyable
 				&& currentPart != null && currentConnection == null);
-		((JMenuItem) items[idxMenuDelPartConn]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuDelPartConn]).setEnabled(modifyable
 				&& currentPart != null && currentConnection == null
 				&& !currentPart.getConnectedPipeParts().isEmpty());
-		((JMenuItem) items[idxMenuDelConn]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuDelConn]).setEnabled(modifyable
 				&& currentConnection != null);
+		((AbstractButton) items[idxMenuToggleDgr])
+				.setEnabled(currentPart != null);
+		((AbstractButton) items[idxMenuToggleDgr])
+				.setSelected(currentPart != null && currentPart.isVisualize());
 		menu.show(invoker, x, y);
 	}
 

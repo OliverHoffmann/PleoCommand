@@ -109,4 +109,9 @@ public final class PleoRXTXOutput extends Output {
 		return true;
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

@@ -119,4 +119,9 @@ public final class TcpIpInput extends Input {
 		return true;
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

@@ -7,6 +7,8 @@ import java.util.List;
 import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.FormatException;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
+import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 import pleocmd.pipe.data.Data;
 
 public final class StatedIntervalConverter extends Converter {
@@ -34,6 +36,11 @@ public final class StatedIntervalConverter extends Converter {
 	protected void init0() {
 		sum = .0;
 		nextCommand = 2;
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null) {
+			ds.setLabel("Command sent");
+			ds.setType(DiagramType.IntersectionDiagram);
+		}
 	}
 
 	@Override
@@ -67,6 +74,7 @@ public final class StatedIntervalConverter extends Converter {
 					cfgCommand2.getContent().isEmpty() ? cfgCommand1
 							: cfgCommand2, data));
 		}
+		if (isVisualize()) plot(0, nextCommand);
 		nextCommand = 3 - nextCommand;
 		return res;
 	}
@@ -105,6 +113,11 @@ public final class StatedIntervalConverter extends Converter {
 	@Override
 	public boolean isConfigurationSane() {
 		return true;
+	}
+
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 1;
 	}
 
 }

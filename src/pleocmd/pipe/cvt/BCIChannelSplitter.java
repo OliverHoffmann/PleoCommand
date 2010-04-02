@@ -6,11 +6,14 @@ import java.util.List;
 
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
 public final class BCIChannelSplitter extends Converter {
+
+	private static final int MAX_VIS = 8;
 
 	public BCIChannelSplitter() {
 		constructed();
@@ -23,7 +26,11 @@ public final class BCIChannelSplitter extends Converter {
 
 	@Override
 	protected void init0() {
-		// nothing to do
+		for (int i = 0; i < MAX_VIS; ++i) {
+			final DiagramDataSet ds = getVisualizeDataSet(i);
+			if (ds != null)
+				ds.setLabel(String.format("BCI Channel %d", i + 1));
+		}
 	}
 
 	@Override
@@ -58,6 +65,8 @@ public final class BCIChannelSplitter extends Converter {
 				throw new InternalException(e);
 			}
 			res.add(new Data(vals, data));
+			if (isVisualize() && i <= MAX_VIS)
+				plot(i - 1, data.get(i).asDouble());
 		}
 		return res;
 	}
@@ -80,6 +89,11 @@ public final class BCIChannelSplitter extends Converter {
 	@Override
 	public boolean isConfigurationSane() {
 		return true;
+	}
+
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return MAX_VIS;
 	}
 
 }

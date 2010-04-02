@@ -116,4 +116,9 @@ public final class FileInput extends Input {
 		return cfgFile.getContent().canRead();
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

@@ -71,4 +71,9 @@ public final class SimpleConverter extends Converter {
 		return true;
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

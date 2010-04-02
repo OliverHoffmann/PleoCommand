@@ -126,4 +126,9 @@ public final class FileOutput extends Output {
 		return file.getParentFile() != null && file.getParentFile().canWrite();
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

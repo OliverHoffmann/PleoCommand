@@ -83,4 +83,9 @@ public final class ConsoleInput extends Input {
 		return true;
 	}
 
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 0;
+	}
+
 }

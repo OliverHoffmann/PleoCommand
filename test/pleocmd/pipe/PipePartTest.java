@@ -63,6 +63,11 @@ public final class PipePartTest extends Testcases {
 				return true;
 			}
 
+			@Override
+			protected int getVisualizeDataSetCount() {
+				return 0;
+			}
+
 		};
 	}
 

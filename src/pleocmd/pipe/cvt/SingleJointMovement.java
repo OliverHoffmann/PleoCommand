@@ -7,6 +7,7 @@ import java.util.List;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
@@ -43,6 +44,10 @@ public final class SingleJointMovement extends Converter {
 	@Override
 	protected void init0() {
 		currentAngle = ANGLE_UNDEFINED;
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null)
+			ds.setLabel(String.format("Angle for Joint %d", cfgJointNumber
+					.getContent()));
 	}
 
 	@Override
@@ -74,6 +79,7 @@ public final class SingleJointMovement extends Converter {
 			vals.add(Value.createForType(ValueType.NullTermString).set(
 					String.format("JOINT MOVE %d %d", cfgJointNumber
 							.getContent(), val)));
+			if (isVisualize()) plot(0, data.get(2).asDouble());
 		} catch (final IOException e) {
 			throw new InternalException(e);
 		}
@@ -99,6 +105,11 @@ public final class SingleJointMovement extends Converter {
 	@Override
 	public boolean isConfigurationSane() {
 		return true;
+	}
+
+	@Override
+	protected int getVisualizeDataSetCount() {
+		return 1;
 	}
 
 }
