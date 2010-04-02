@@ -72,7 +72,10 @@ public final class MainPipePanel extends JPanel {
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		cfgDialog = new PipeConfigDialog();
+		if (cfgDialog == null)
+			cfgDialog = new PipeConfigDialog();
+		else
+			cfgDialog.toFront();
 	}
 
 	public void writePipeConfigToFile() {
