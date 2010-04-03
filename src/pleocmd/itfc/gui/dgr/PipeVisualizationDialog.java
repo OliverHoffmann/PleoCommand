@@ -82,4 +82,10 @@ public final class PipeVisualizationDialog extends JDialog implements
 		repaint();
 	}
 
+	public void reset() {
+		for (final DiagramDataSet ds : dataSets)
+			ds.setPoints(new ArrayList<Point2D.Double>());
+		repaint();
+	}
+
 }

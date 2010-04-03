@@ -365,7 +365,10 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	private void createVisualization() {
-		if (visualizationDialog != null) return;
+		if (visualizationDialog != null) {
+			visualizationDialog.reset();
+			return;
+		}
 		visualizationDialog = new PipeVisualizationDialog(this,
 				getVisualizeDataSetCount());
 		cfgVisPosition.assignContent(visualizationDialog);
