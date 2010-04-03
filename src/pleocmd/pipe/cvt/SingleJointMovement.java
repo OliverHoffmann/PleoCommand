@@ -44,15 +44,19 @@ public final class SingleJointMovement extends Converter {
 	@Override
 	protected void init0() {
 		currentAngle = ANGLE_UNDEFINED;
-		final DiagramDataSet ds = getVisualizeDataSet(0);
-		if (ds != null)
-			ds.setLabel(String.format("Angle for Joint %d", cfgJointNumber
-					.getContent()));
 	}
 
 	@Override
 	protected void close0() {
 		// nothing to do
+	}
+
+	@Override
+	protected void initVisualize0() {
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null)
+			ds.setLabel(String.format("Angle for Joint %d", cfgJointNumber
+					.getContent()));
 	}
 
 	@Override

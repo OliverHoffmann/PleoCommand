@@ -347,6 +347,7 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	protected void groupWriteback0() throws ConfigurationException {
+		// do nothing by default
 	}
 
 	public final boolean isVisualize() {
@@ -367,12 +368,18 @@ public abstract class PipePart extends StateHandling {
 	private void createVisualization() {
 		if (visualizationDialog != null) {
 			visualizationDialog.reset();
+			initVisualize0();
 			return;
 		}
 		visualizationDialog = new PipeVisualizationDialog(this,
 				getVisualizeDataSetCount());
 		cfgVisPosition.assignContent(visualizationDialog);
+		initVisualize0();
 		visualizationDialog.setVisible(true);
+	}
+
+	protected void initVisualize0() {
+		// do nothing by default
 	}
 
 	private void closeVisualization() {

@@ -56,13 +56,18 @@ public final class BCICodomainAdaption extends Converter {
 
 	@Override
 	protected void init0() {
-		final DiagramDataSet ds = getVisualizeDataSet(0);
-		if (ds != null) ds.setLabel("Codomain adapted");
+		// nothing to do
 	}
 
 	@Override
 	protected void close0() {
 		// nothing to do
+	}
+
+	@Override
+	protected void initVisualize0() {
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null) ds.setLabel("Codomain adapted");
 	}
 
 	@Override

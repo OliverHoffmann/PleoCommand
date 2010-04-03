@@ -36,16 +36,20 @@ public final class StatedIntervalConverter extends Converter {
 	protected void init0() {
 		sum = .0;
 		nextCommand = 2;
-		final DiagramDataSet ds = getVisualizeDataSet(0);
-		if (ds != null) {
-			ds.setLabel("Command sent");
-			ds.setType(DiagramType.IntersectionDiagram);
-		}
 	}
 
 	@Override
 	protected void close0() {
 		// nothing to do
+	}
+
+	@Override
+	protected void initVisualize0() {
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null) {
+			ds.setLabel("Command sent");
+			ds.setType(DiagramType.IntersectionDiagram);
+		}
 	}
 
 	@Override

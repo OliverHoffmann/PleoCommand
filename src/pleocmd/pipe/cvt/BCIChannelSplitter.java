@@ -26,16 +26,21 @@ public final class BCIChannelSplitter extends Converter {
 
 	@Override
 	protected void init0() {
-		for (int i = 0; i < MAX_VIS; ++i) {
-			final DiagramDataSet ds = getVisualizeDataSet(i);
-			if (ds != null)
-				ds.setLabel(String.format("BCI Channel %d", i + 1));
-		}
+		// nothing to do
 	}
 
 	@Override
 	protected void close0() {
 		// nothing to do
+	}
+
+	@Override
+	protected void initVisualize0() {
+		for (int i = 0; i < MAX_VIS; ++i) {
+			final DiagramDataSet ds = getVisualizeDataSet(i);
+			if (ds != null)
+				ds.setLabel(String.format("BCI Channel %d", i + 1));
+		}
 	}
 
 	@Override
