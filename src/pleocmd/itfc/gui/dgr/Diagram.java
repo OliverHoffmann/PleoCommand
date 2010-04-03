@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 
 import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 
@@ -119,6 +120,7 @@ public final class Diagram extends JPanel {
 				repaint();
 			}
 		});
+		ToolTipManager.sharedInstance().registerComponent(this);
 	}
 
 	synchronized void addDataSet(final DiagramDataSet dataSet) {
@@ -378,6 +380,8 @@ public final class Diagram extends JPanel {
 					high = Math.max(high, val);
 				}
 			}
+			if (low == Double.MAX_VALUE) low = 0;
+			if (high == Double.MIN_VALUE) high = 1;
 			if (minMax[0] <= Double.MIN_VALUE) minMax[0] = low;
 			if (minMax[1] >= Double.MAX_VALUE) minMax[1] = high;
 		}
@@ -413,19 +417,26 @@ public final class Diagram extends JPanel {
 			final boolean vertical, final double pixelPerUnit,
 			final double pixelPerSub, final int axisLen,
 			final int axisThickness, final int unitSpace) {
-		if (pixelPerUnit <= MIN_GRID_DELTA) return;
-		for (double i = 0; i <= axisLen + BORDER; i += pixelPerUnit) {
+		int ppuSteps = 1;
+		double ppu = pixelPerUnit;
+		double pps = pixelPerSub;
+		if (ppu < MIN_GRID_DELTA * axis.getSubsPerUnit()) {
+			ppuSteps = (int) (MIN_GRID_DELTA * axis.getSubsPerUnit() / ppu);
+			ppu *= ppuSteps;
+			pps *= ppuSteps;
+		}
+		for (double i = 0; i <= axisLen + BORDER; i += ppu) {
 			unitPen.assignTo(g2);
 			final double ic = axis.isReversed() ? axisLen - i : i;
 			drawAxisLine(g2, vertical, ic, axisThickness);
-			drawAxisText(g2, vertical, ic, unitSpace, pixelPerUnit, i
-					/ pixelPerUnit - axis.getOffset(), axis.getUnitName());
-			if (pixelPerSub > MIN_GRID_DELTA && i <= axisLen
+			drawAxisText(g2, vertical, ic, unitSpace, ppu, i * ppuSteps / ppu
+					- axis.getOffset(), axis.getUnitName());
+			if (pps > MIN_GRID_DELTA && i <= axisLen
 					&& axis.getSubsPerUnit() > 1) {
 				subUnitPen.assignTo(g2);
 				for (int s = 1; s < axis.getSubsPerUnit(); ++s)
-					drawAxisLine(g2, vertical, axis.isReversed() ? ic - s
-							* pixelPerSub : ic + s * pixelPerSub, axisThickness);
+					drawAxisLine(g2, vertical, axis.isReversed() ? ic - s * pps
+							: ic + s * pps, axisThickness);
 			}
 		}
 	}
@@ -445,4 +456,17 @@ public final class Diagram extends JPanel {
 							.getBlue() / MAKE_DARKER));
 		return new Pen(color, 2.0f);
 	}
+
+	@Override
+	public String getToolTipText(final MouseEvent event) {
+		final double[] minMax = new double[2];
+		calculateAxis1(xAxis, true, minMax);
+		final double minX = minMax[0];
+		final double maxX = minMax[1];
+		calculateAxis1(yAxis, false, minMax);
+		final double minY = minMax[0];
+		final double maxY = minMax[1];
+		return String.format("%f - %f", minX, maxX);
+	}
+
 }
