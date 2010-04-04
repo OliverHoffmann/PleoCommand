@@ -395,6 +395,10 @@ public abstract class PipePart extends StateHandling {
 
 	protected abstract int getVisualizeDataSetCount();
 
+	public PipeVisualizationDialog getVisualizationDialog() {
+		return visualizationDialog;
+	}
+
 	protected final DiagramDataSet getVisualizeDataSet(final int index) {
 		return visualizationDialog == null ? null : visualizationDialog
 				.getDataSet(index);

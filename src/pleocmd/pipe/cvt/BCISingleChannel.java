@@ -35,8 +35,12 @@ public final class BCISingleChannel extends Converter {
 	@Override
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
-		if (ds != null)
-			ds.setLabel(String.format("Channel %d", cfgChannelNr.getContent()));
+		if (ds != null) {
+			ds.setLabel(String.format("Channel %d",
+					cfgChannelNr.getContent() + 1));
+			ds.setPen(getVisualizationDialog().getDiagram().detectPen(
+					cfgChannelNr.getContent()));
+		}
 	}
 
 	@Override
