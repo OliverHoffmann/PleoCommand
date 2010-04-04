@@ -1,6 +1,13 @@
 package pleocmd.itfc.gui.dgr;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 
 import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 
@@ -56,6 +63,7 @@ public final class DiagramAxis {
 	public void setAxisName(final String axisName) {
 		synchronized (diagram) {
 			this.axisName = axisName;
+			diagram.repaint();
 		}
 	}
 
@@ -66,6 +74,7 @@ public final class DiagramAxis {
 	public void setUnitName(final String unitName) {
 		synchronized (diagram) {
 			this.unitName = unitName;
+			diagram.repaint();
 		}
 	}
 
@@ -76,6 +85,7 @@ public final class DiagramAxis {
 	public void setScale(final AxisScale scale) {
 		synchronized (diagram) {
 			this.scale = scale;
+			diagram.repaint();
 		}
 	}
 
@@ -86,6 +96,7 @@ public final class DiagramAxis {
 	public void setMin(final double min) {
 		synchronized (diagram) {
 			this.min = min;
+			diagram.repaint();
 		}
 	}
 
@@ -96,6 +107,7 @@ public final class DiagramAxis {
 	public void setMax(final double max) {
 		synchronized (diagram) {
 			this.max = max;
+			diagram.repaint();
 		}
 	}
 
@@ -106,6 +118,7 @@ public final class DiagramAxis {
 	public void setReversed(final boolean reversed) {
 		synchronized (diagram) {
 			this.reversed = reversed;
+			diagram.repaint();
 		}
 	}
 
@@ -116,6 +129,7 @@ public final class DiagramAxis {
 	public void setSubsPerUnit(final int subsPerUnit) {
 		synchronized (diagram) {
 			this.subsPerUnit = subsPerUnit;
+			diagram.repaint();
 		}
 	}
 
@@ -126,6 +140,7 @@ public final class DiagramAxis {
 	public void setOffset(final double offset) {
 		synchronized (diagram) {
 			this.offset = offset;
+			diagram.repaint();
 		}
 	}
 
@@ -214,4 +229,63 @@ public final class DiagramAxis {
 		return cachedPixelPerSubGrid;
 	}
 
+	public void createMenu(final JPopupMenu parent) {
+		final JMenu menu = new JMenu(getAxisName() + "-Axis");
+		parent.add(menu);
+		JMenuItem item = new JMenuItem("Set Minimum");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				final String newMin = JOptionPane.showInputDialog(String
+						.format("New Minimum Of %s-Axis", getAxisName()),
+						getCachedMinUnit());
+				if (newMin != null) setMin(Double.valueOf(newMin));
+			}
+		});
+		item = new JMenuItem("Set Minimum To Automatic");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setMin(Double.MIN_VALUE);
+			}
+		});
+		item = new JMenuItem("Set Maximum");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				final String newMax = JOptionPane.showInputDialog(String
+						.format("New Maximum Of %s-Axis", getAxisName()),
+						getCachedMaxUnit());
+				if (newMax != null) setMax(Double.valueOf(newMax));
+			}
+		});
+		item = new JMenuItem("Set Maximum To Automatic");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setMax(Double.MIN_VALUE);
+			}
+		});
+		item = new JMenuItem("Set Linear Scale");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setScale(AxisScale.LinearScale);
+			}
+		});
+		item = new JMenuItem("Set Logarithmic Scale");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setScale(AxisScale.LogarithmicScale);
+			}
+		});
+
+	}
 }

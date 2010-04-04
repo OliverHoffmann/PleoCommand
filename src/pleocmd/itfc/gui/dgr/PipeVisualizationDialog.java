@@ -1,5 +1,7 @@
 package pleocmd.itfc.gui.dgr;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Point2D;
@@ -64,6 +66,16 @@ public final class PipeVisualizationDialog extends JDialog implements
 		setAlwaysOnTop(true);
 		Log.detail("Pipe-Visualization-Dialog created");
 		MainFrame.the().addKnownWindow(this);
+
+		diagram.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(final MouseEvent e) {
+				if (e.isPopupTrigger())
+					getDiagram().getMenu().show(PipeVisualizationDialog.this,
+							e.getX(), e.getY());
+			}
+		});
+
 	}
 
 	protected void close() {
@@ -96,7 +108,6 @@ public final class PipeVisualizationDialog extends JDialog implements
 		final long elapsed = Pipe.the().getFeedback().getElapsed();
 		diagram.getXAxis().setMin(Math.max(0, elapsed - TIME_SPAN) / 1000.0);
 		diagram.getXAxis().setMax(Math.max(TIME_SPAN, elapsed) / 1000.0);
-		repaint();
 	}
 
 	public void reset() {

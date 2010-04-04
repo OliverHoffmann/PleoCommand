@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
@@ -18,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 
 public final class Diagram extends JPanel {
@@ -33,26 +37,23 @@ public final class Diagram extends JPanel {
 
 	private static final int BORDER = 4;
 
-	private static final Color[] DEFAULT_COLORS = new Color[] {
-			new Color(0xFF, 0x45, 0x00), // orange red
-			new Color(0x7F, 0xFF, 0x00), // chartreuse
-			new Color(0x63, 0xB8, 0xFF), // steel blue
-			new Color(0xFF, 0xD7, 0x00), // gold
-			new Color(0xFF, 0x6A, 0x6A), // indian red
-			new Color(0x00, 0xFF, 0xFF), // cyan
-			new Color(0xFF, 0xF6, 0x8F), // khaki
-			new Color(0x7F, 0xFF, 0xD4), // aqua marine
-			new Color(0xFF, 0x69, 0xB4), // hot pink
-			new Color(0xC1, 0xFF, 0xC1), // dark sea green
-			new Color(0xFF, 0xFF, 0xF0), // ivory
-			new Color(0x83, 0x6F, 0xFF), // slate blue
-			new Color(0xC0, 0xFF, 0x3E), // olive drab
-			new Color(0xFF, 0x83, 0xFA), // orchid
-			new Color(0xFF, 0xE7, 0xBA), // wheat
-			new Color(0xFF, 0xC1, 0xC1), // rosy brown
-	};
-
-	private static final double MAKE_DARKER = 1.834;
+	private static final DefaultColor[] DEFAULT_COLORS = new DefaultColor[] {
+			new DefaultColor(0xFF, 0x45, 0x00, "orange red"),
+			new DefaultColor(0x7F, 0xFF, 0x00, "chartreuse"),
+			new DefaultColor(0x63, 0xB8, 0xFF, "steel blue"),
+			new DefaultColor(0xFF, 0xD7, 0x00, "gold"),
+			new DefaultColor(0xFF, 0x6A, 0x6A, "indian red"),
+			new DefaultColor(0x00, 0xFF, 0xFF, "cyan"),
+			new DefaultColor(0xFF, 0xF6, 0x8F, "khaki"),
+			new DefaultColor(0x7F, 0xFF, 0xD4, "aqua marine"),
+			new DefaultColor(0xFF, 0x69, 0xB4, "hot pink"),
+			new DefaultColor(0xC1, 0xFF, 0xC1, "dark sea green"),
+			new DefaultColor(0xFF, 0xFF, 0xF0, "ivory"),
+			new DefaultColor(0x83, 0x6F, 0xFF, "slate blue"),
+			new DefaultColor(0xC0, 0xFF, 0x3E, "olive drab"),
+			new DefaultColor(0xFF, 0x83, 0xFA, "orchid"),
+			new DefaultColor(0xFF, 0xE7, 0xBA, "wheat"),
+			new DefaultColor(0xFF, 0xC1, 0xC1, "rosy brown") };
 
 	private final List<DiagramDataSet> dataSets = new ArrayList<DiagramDataSet>();
 
@@ -104,7 +105,6 @@ public final class Diagram extends JPanel {
 								* MOVE_SPEED_MOUSE / getZoom());
 				oldx = newx;
 				oldy = newy;
-				repaint();
 			}
 		});
 		addMouseWheelListener(new MouseWheelListener() {
@@ -115,7 +115,6 @@ public final class Diagram extends JPanel {
 					setZoom(getZoom() * (1 + SCALE_SPEED_MOUSE * clicks));
 				if (clicks < 0)
 					setZoom(getZoom() / (1 - SCALE_SPEED_MOUSE * clicks));
-				repaint();
 			}
 		});
 		ToolTipManager.sharedInstance().registerComponent(this);
@@ -175,6 +174,7 @@ public final class Diagram extends JPanel {
 
 	public synchronized void setZoom(final double zoom) {
 		this.zoom = zoom;
+		repaint();
 	}
 
 	@Override
@@ -211,8 +211,8 @@ public final class Diagram extends JPanel {
 		g2.scale(1, -1);
 
 		// draw x and y axis
-		drawAxis(g2, yAxis, true, h, w, unitWidth);
-		drawAxis(g2, xAxis, false, w, h, unitHeight);
+		drawAxis(g2, yAxis, true, w, unitWidth);
+		drawAxis(g2, xAxis, false, h, unitHeight);
 		axisPen.assignTo(g2);
 		g2.drawLine(0, 0, w, 0);
 		g2.drawLine(0, 0, 0, h);
@@ -368,8 +368,7 @@ public final class Diagram extends JPanel {
 	}
 
 	private void drawAxis(final Graphics2D g2, final DiagramAxis axis,
-			final boolean vertical, final int axisLen, final int axisThickness,
-			final int unitSpace) {
+			final boolean vertical, final int axisThickness, final int unitSpace) {
 		final int spu = axis.getSubsPerUnit();
 		final int upg = axis.getCachedUnitsPerGrid();
 		final double ppg = axis.getCachedPixelPerGrid();
@@ -392,23 +391,53 @@ public final class Diagram extends JPanel {
 	}
 
 	public Pen detectPen(final int idx) {
-		Color color = backgroundColor;
-		int v = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
+		final Color bc = backgroundColor;
+		int v = (bc.getRed() + bc.getGreen() + bc.getBlue()) / 3;
 		if (idx >= DEFAULT_COLORS.length) {
 			v = v < 64 || v > 192 ? 255 - v : v < 128 ? 255 : 0;
 			return new Pen(new Color(v, v, v), 2.0f);
 		}
-		color = DEFAULT_COLORS[idx];
-		if (v > 128) // use darker colors
-			color = new Color((int) (color.getRed() / MAKE_DARKER),
-					(int) (color.getGreen() / MAKE_DARKER), (int) (color
-							.getBlue() / MAKE_DARKER));
-		return new Pen(color, 2.0f);
+		return new Pen(v > 128 ? DEFAULT_COLORS[idx].makeDarker()
+				: DEFAULT_COLORS[idx], 2.0f);
+	}
+
+	static int getDefaultColorCount() {
+		return DEFAULT_COLORS.length;
+	}
+
+	static DefaultColor getDefaultColor(final int index) {
+		return DEFAULT_COLORS[index];
 	}
 
 	@Override
 	public String getToolTipText(final MouseEvent event) {
 		return null;
+	}
+
+	public JPopupMenu getMenu() {
+		final JPopupMenu menu = new JPopupMenu();
+		JMenuItem item = new JMenuItem("Reset Zoom");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setZoom(1.0);
+			}
+		});
+		item = new JMenuItem("Reset Scrolling");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				getXAxis().setOffset(0);
+				getYAxis().setOffset(0);
+			}
+		});
+		xAxis.createMenu(menu);
+		yAxis.createMenu(menu);
+		for (final DiagramDataSet ds : dataSets)
+			ds.createMenu(menu);
+		return menu;
 	}
 
 }

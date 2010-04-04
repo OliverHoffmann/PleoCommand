@@ -1,11 +1,18 @@
 package pleocmd.itfc.gui.dgr;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 public final class DiagramDataSet {
 
@@ -23,9 +30,7 @@ public final class DiagramDataSet {
 
 	private String label;
 
-	private Pen pen = new Pen(Color.BLACK, 2.0f);
-
-	private boolean penAutomatic = true;
+	private Pen pen;
 
 	private DiagramType type = DiagramType.LineDiagram;
 
@@ -60,6 +65,7 @@ public final class DiagramDataSet {
 			this.points.clear();
 			this.points.addAll(points);
 			prepared = false;
+			diagram.repaint();
 		}
 	}
 
@@ -70,6 +76,7 @@ public final class DiagramDataSet {
 	public void setLabel(final String label) {
 		synchronized (diagram) {
 			this.label = label;
+			diagram.repaint();
 		}
 	}
 
@@ -80,12 +87,12 @@ public final class DiagramDataSet {
 	public void setPen(final Pen pen) {
 		synchronized (diagram) {
 			this.pen = pen;
-			penAutomatic = false;
+			diagram.repaint();
 		}
 	}
 
 	public boolean isPenAutomatic() {
-		return penAutomatic;
+		return pen == null;
 	}
 
 	public DiagramType getType() {
@@ -95,6 +102,7 @@ public final class DiagramDataSet {
 	public void setType(final DiagramType type) {
 		synchronized (diagram) {
 			this.type = type;
+			diagram.repaint();
 		}
 	}
 
@@ -105,6 +113,7 @@ public final class DiagramDataSet {
 	public void setValuePerUnitX(final double valuePerUnitX) {
 		synchronized (diagram) {
 			this.valuePerUnitX = valuePerUnitX;
+			diagram.repaint();
 		}
 	}
 
@@ -115,6 +124,7 @@ public final class DiagramDataSet {
 	public void setValuePerUnitY(final double valuePerUnitY) {
 		synchronized (diagram) {
 			this.valuePerUnitY = valuePerUnitY;
+			diagram.repaint();
 		}
 	}
 
@@ -122,6 +132,7 @@ public final class DiagramDataSet {
 		synchronized (diagram) {
 			points.add(point);
 			prepared = false;
+			diagram.repaint();
 		}
 	}
 
@@ -142,6 +153,7 @@ public final class DiagramDataSet {
 				x += xIncr;
 			}
 			prepared = false;
+			diagram.repaint();
 		}
 	}
 
@@ -161,6 +173,7 @@ public final class DiagramDataSet {
 			x += xIncr;
 		}
 		prepared = false;
+		diagram.repaint();
 	}
 
 	void prepare() {
@@ -215,4 +228,114 @@ public final class DiagramDataSet {
 		return cachedValueToPixYFactor;
 	}
 
+	public void createMenu(final JPopupMenu parent) {
+		final JMenu menu = new JMenu("DataSet " + getLabel());
+		parent.add(menu);
+		JMenuItem item = new JMenuItem("Set Default Pen");
+		menu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				setPen(null);
+			}
+		});
+		final JMenu colorMenu = new JMenu("Set Color");
+		menu.add(colorMenu);
+		for (int i = 0; i < Diagram.getDefaultColorCount(); ++i) {
+			final int index = i;
+			item = new JMenuItem(Diagram.getDefaultColor(i).getName());
+			item.setForeground(Diagram.getDefaultColor(i));
+			colorMenu.add(item);
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					changePen(Diagram.getDefaultColor(index));
+				}
+			});
+			item = new JMenuItem("dark " + Diagram.getDefaultColor(i).getName());
+			item.setForeground(Diagram.getDefaultColor(i).makeDarker());
+			colorMenu.add(item);
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					changePen(Diagram.getDefaultColor(index).makeDarker());
+				}
+			});
+		}
+
+		final JMenu swMenu = new JMenu("Set Stroke Width");
+		menu.add(swMenu);
+		for (float i = 0.25f; i <= 4.0f; i += 0.25f) {
+			final float index = i;
+			item = new JMenuItem(String.format("%.2f", i));
+			swMenu.add(item);
+			item.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					changePen(index);
+				}
+			});
+		}
+
+		final JMenu stMenu = new JMenu("Set Stroke Type");
+		menu.add(stMenu);
+		item = new JMenuItem("solid");
+		stMenu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				changePen(new float[] { 1 });
+			}
+		});
+		item = new JMenuItem("dotted");
+		stMenu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				changePen(new float[] { 2, 5 });
+			}
+		});
+		item = new JMenuItem("dashed");
+		stMenu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				changePen(new float[] { 10, 10 });
+			}
+		});
+		item = new JMenuItem("dash-dotted");
+		stMenu.add(item);
+		item.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				changePen(new float[] { 10, 6, 2, 6 });
+			}
+		});
+	}
+
+	public void changePen(final Color color) {
+		final BasicStroke stroke = pen == null ? new BasicStroke(2.0f) : pen
+				.getStroke();
+		setPen(new Pen(color, stroke));
+	}
+
+	public void changePen(final float strokeWidth) {
+		final Color color = pen == null ? diagram.detectPen(
+				diagram.getDataSets().indexOf(this)).getColor() : pen
+				.getColor();
+		final BasicStroke stroke = new BasicStroke(strokeWidth,
+				BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER, 10.0f,
+				pen == null ? null : pen.getStroke().getDashArray(), 0.0f);
+		setPen(new Pen(color, stroke));
+	}
+
+	public void changePen(final float dash[]) {
+		final Color color = pen == null ? diagram.detectPen(
+				diagram.getDataSets().indexOf(this)).getColor() : pen
+				.getColor();
+		final BasicStroke stroke = new BasicStroke(pen == null ? 2.0f : pen
+				.getStroke().getLineWidth(), BasicStroke.CAP_SQUARE,
+				BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f);
+		setPen(new Pen(color, stroke));
+	}
 }
