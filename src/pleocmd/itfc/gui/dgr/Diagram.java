@@ -21,19 +21,17 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.ToolTipManager;
 
-import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
-
 public final class Diagram extends JPanel {
 
-	protected static final double SCALE_SPEED_MOUSE = 0.01;
+	static final double SCALE_SPEED_MOUSE = 0.01;
 
-	protected static final double MOVE_SPEED_MOUSE = 0.05;
+	static final double MOVE_SPEED_MOUSE = 0.05;
+
+	static final double MIN_GRID_DELTA = 2.0;
 
 	private static final long serialVersionUID = -8245547025738665255L;
 
 	private static final int BORDER = 4;
-
-	private static final double MIN_GRID_DELTA = 2.0;
 
 	private static final Color[] DEFAULT_COLORS = new Color[] {
 			new Color(0xFF, 0x45, 0x00), // orange red
@@ -193,35 +191,28 @@ public final class Diagram extends JPanel {
 		g2.fillRect(0, 0, clip.width, clip.height);
 		g2.setFont(getFont().deriveFont(10f));
 
-		final double[] minMax = new double[2];
-		calculateAxis1(xAxis, true, minMax);
-		final double minX = minMax[0];
-		final double maxX = minMax[1];
-		calculateAxis1(yAxis, false, minMax);
-		final double minY = minMax[0];
-		final double maxY = minMax[1];
-		final int unitWidth1 = g2.getFontMetrics().stringWidth(
-				String.format("%.2f %s", maxY, xAxis.getUnitName()));
-		final int unitWidth2 = g2.getFontMetrics().stringWidth(
-				String.format("%.2f %s", minY, xAxis.getUnitName()));
-		final int unitWidth = Math.max(unitWidth1, unitWidth2);
+		// cache y-axis dimension
 		final int unitHeight = g2.getFontMetrics().getHeight();
+		final int h = getHeight() - 1 - unitHeight - BORDER;
+		yAxis.updateCache(h);
+
+		// cache x-axis dimension
+		final int unitWidth1 = g2.getFontMetrics().stringWidth(
+				String.format("%.2f %s", yAxis.getCachedMinVisUnit(), yAxis
+						.getUnitName()));
+		final int unitWidth2 = g2.getFontMetrics().stringWidth(
+				String.format("%.2f %s", yAxis.getCachedMaxVisUnit(), yAxis
+						.getUnitName()));
+		final int unitWidth = Math.max(unitWidth1, unitWidth2);
+		final int w = getWidth() - 1 - unitWidth - BORDER;
+		xAxis.updateCache(w);
 
 		g2.translate(unitWidth, getHeight() - unitHeight);
 		g2.scale(1, -1);
-		final int w = getWidth() - 1 - unitWidth - BORDER;
-		final int h = getHeight() - 1 - unitHeight - BORDER;
 
-		final double[] pixels = new double[2];
-		calculateAxis2(yAxis, h, minX, maxX, pixels);
-		final double pixelPerUnitX = pixels[0];
-		final double pixelPerSubX = pixels[1];
-		calculateAxis2(xAxis, w, minY, maxY, pixels);
-		final double pixelPerUnitY = pixels[0];
-		final double pixelPerSubY = pixels[1];
-		drawAxis(g2, yAxis, true, pixelPerUnitX, pixelPerSubX, h, w, unitWidth);
-		drawAxis(g2, xAxis, false, pixelPerUnitY, pixelPerSubY, w, h,
-				unitHeight);
+		// draw x and y axis
+		drawAxis(g2, yAxis, true, h, w, unitWidth);
+		drawAxis(g2, xAxis, false, w, h, unitHeight);
 		axisPen.assignTo(g2);
 		g2.drawLine(0, 0, w, 0);
 		g2.drawLine(0, 0, 0, h);
@@ -229,39 +220,36 @@ public final class Diagram extends JPanel {
 		// draw data-sets
 		g2.clipRect(0, 0, w + BORDER, h + BORDER);
 		int idx = 0;
-		final double y0c = yAxis.isReversed() ? h - yAxis.getOffset()
-				* pixelPerUnitX : yAxis.getOffset() * pixelPerUnitX;
 		for (final DiagramDataSet ds : dataSets) {
 			if (!ds.isValid()) continue;
 			ds.prepare();
+			ds.updateCache();
 			double xold = 0;
 			double yold = 0;
 			boolean first = true;
-			final Pen pen = detectPen(ds, idx);
+			final Pen pen = ds.isPenAutomatic() ? detectPen(idx) : ds.getPen();
 			pen.assignTo(g2);
+			final int y0pos = (int) ds.valueToPixelY(0);
 			for (final Point2D.Double pt : ds.getPoints()) {
-				final double xu = pt.x / ds.getValuePerUnitX()
-						+ xAxis.getOffset();
-				final double yu = pt.y / ds.getValuePerUnitY()
-						+ yAxis.getOffset();
-				final double x = xu * pixelPerUnitY;
-				final double y = yu * pixelPerUnitX;
-				final double xc = xAxis.isReversed() ? w - x : x;
-				final double yc = yAxis.isReversed() ? h - y : y;
+				final double xpix = ds.valueToPixelX(pt.x);
+				final double ypix = ds.valueToPixelY(pt.y);
+				final double xpos = xAxis.isReversed() ? w - xpix : xpix;
+				final double ypos = yAxis.isReversed() ? h - ypix : ypix;
 				switch (ds.getType()) {
 				case LineDiagram:
 					if (!first)
-						g2.drawLine((int) xold, (int) yold, (int) xc, (int) yc);
+						g2.drawLine((int) xold, (int) yold, (int) xpos,
+								(int) ypos);
 					break;
 				case BarDiagram:
-					g2.fillRect((int) xc - 1, (int) y0c, 3, (int) (yc - y0c));
+					g2.fillRect((int) xpos - 1, y0pos, 3, (int) (ypos - y0pos));
 					break;
 				case ScatterPlotDiagram:
-					g2.drawOval((int) xc - 1, (int) yc - 1, 2, 2);
+					g2.drawOval((int) xpos - 1, (int) ypos - 1, 2, 2);
 					break;
 				case IntersectionDiagram:
-					g2.fillRect((int) xc - 1, 0, 3, h);
-					final int xp = (int) (xc + pen.getStroke().getLineWidth() + 3);
+					g2.fillRect((int) xpos - 1, 0, 3, h);
+					final int xp = (int) (xpos + pen.getStroke().getLineWidth() + 3);
 					final String str = String.format("%f", pt.y);
 					final Rectangle bounds = new Rectangle(xp, 2, w - xp, h - 4);
 					drawText(g2, bounds, AlignH.Left, AlignV.Center, str);
@@ -271,8 +259,8 @@ public final class Diagram extends JPanel {
 					}
 					break;
 				}
-				xold = xc;
-				yold = yc;
+				xold = xpos;
+				yold = ypos;
 				first = false;
 			}
 			++idx;
@@ -301,7 +289,7 @@ public final class Diagram extends JPanel {
 		idx = 0;
 		legendRect.width -= 2;
 		for (final DiagramDataSet ds : dataSets) {
-			detectPen(ds, idx).assignTo(g2);
+			(ds.isPenAutomatic() ? detectPen(idx) : ds.getPen()).assignTo(g2);
 			legendRect.y += fh;
 			legendRect.height -= fh;
 			drawText(g2, legendRect, AlignH.Right, AlignV.Bottom, ds.getLabel());
@@ -360,40 +348,6 @@ public final class Diagram extends JPanel {
 		g2.setTransform(at);
 	}
 
-	private void calculateAxis1(final DiagramAxis axis, final boolean isXAxis,
-			final double[] minMax) {
-		minMax[0] = axis.getMin();
-		minMax[1] = axis.getMax();
-		if (minMax[1] >= Double.MAX_VALUE || minMax[0] <= Double.MIN_VALUE) {
-			double low = Double.MAX_VALUE, high = Double.MIN_VALUE;
-			for (final DiagramDataSet ds : dataSets) {
-				if (isXAxis && ds.getType() == DiagramType.IntersectionDiagram)
-					continue;
-				if (!ds.isValid()) continue;
-				for (final Point2D.Double pt : ds.getPoints()) {
-					double val;
-					if (isXAxis)
-						val = pt.y / ds.getValuePerUnitY() + axis.getOffset();
-					else
-						val = pt.x / ds.getValuePerUnitX() - axis.getOffset();
-					low = Math.min(low, val);
-					high = Math.max(high, val);
-				}
-			}
-			if (low == Double.MAX_VALUE) low = 0;
-			if (high == Double.MIN_VALUE) high = 1;
-			if (minMax[0] <= Double.MIN_VALUE) minMax[0] = low;
-			if (minMax[1] >= Double.MAX_VALUE) minMax[1] = high;
-		}
-	}
-
-	private void calculateAxis2(final DiagramAxis axis, final int availPixels,
-			final double min, final double max, final double[] pixels) {
-		pixels[0] = availPixels / (max - min) * zoom;
-		pixels[1] = axis.getSubsPerUnit() > 0 ? pixels[0]
-				/ axis.getSubsPerUnit() : 0;
-	}
-
 	private void drawAxisLine(final Graphics2D g2, final boolean vertical,
 			final double pos, final int len) {
 		if (vertical)
@@ -414,35 +368,30 @@ public final class Diagram extends JPanel {
 	}
 
 	private void drawAxis(final Graphics2D g2, final DiagramAxis axis,
-			final boolean vertical, final double pixelPerUnit,
-			final double pixelPerSub, final int axisLen,
-			final int axisThickness, final int unitSpace) {
-		int ppuSteps = 1;
-		double ppu = pixelPerUnit;
-		double pps = pixelPerSub;
-		if (ppu < MIN_GRID_DELTA * axis.getSubsPerUnit()) {
-			ppuSteps = (int) (MIN_GRID_DELTA * axis.getSubsPerUnit() / ppu);
-			ppu *= ppuSteps;
-			pps *= ppuSteps;
-		}
-		for (double i = 0; i <= axisLen + BORDER; i += ppu) {
+			final boolean vertical, final int axisLen, final int axisThickness,
+			final int unitSpace) {
+		final int spu = axis.getSubsPerUnit();
+		final int upg = axis.getCachedUnitsPerGrid();
+		final double ppg = axis.getCachedPixelPerGrid();
+		final double ppsg = axis.getCachedPixelPerSubGrid();
+		final boolean rev = axis.isReversed();
+		for (double u = axis.getCachedMinVisUnit(); u <= axis
+				.getCachedMaxVisUnit(); u += upg) {
 			unitPen.assignTo(g2);
-			final double ic = axis.isReversed() ? axisLen - i : i;
-			drawAxisLine(g2, vertical, ic, axisThickness);
-			drawAxisText(g2, vertical, ic, unitSpace, ppu, i * ppuSteps / ppu
-					- axis.getOffset(), axis.getUnitName());
-			if (pps > MIN_GRID_DELTA && i <= axisLen
-					&& axis.getSubsPerUnit() > 1) {
+			final double pos = axis.unitToPixel(u);
+			drawAxisLine(g2, vertical, pos, axisThickness);
+			drawAxisText(g2, vertical, pos, unitSpace, ppg, u, axis
+					.getUnitName());
+			if (ppsg >= MIN_GRID_DELTA) {
 				subUnitPen.assignTo(g2);
-				for (int s = 1; s < axis.getSubsPerUnit(); ++s)
-					drawAxisLine(g2, vertical, axis.isReversed() ? ic - s * pps
-							: ic + s * pps, axisThickness);
+				for (int s = 1; s < spu; ++s)
+					drawAxisLine(g2, vertical, rev ? pos - s * ppsg : pos + s
+							* ppsg, axisThickness);
 			}
 		}
 	}
 
-	private Pen detectPen(final DiagramDataSet dds, final int idx) {
-		if (!dds.isPenAutomatic()) return dds.getPen();
+	public Pen detectPen(final int idx) {
 		Color color = backgroundColor;
 		int v = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
 		if (idx >= DEFAULT_COLORS.length) {
@@ -459,14 +408,7 @@ public final class Diagram extends JPanel {
 
 	@Override
 	public String getToolTipText(final MouseEvent event) {
-		final double[] minMax = new double[2];
-		calculateAxis1(xAxis, true, minMax);
-		final double minX = minMax[0];
-		final double maxX = minMax[1];
-		calculateAxis1(yAxis, false, minMax);
-		final double minY = minMax[0];
-		final double maxY = minMax[1];
-		return String.format("%f - %f", minX, maxX);
+		return null;
 	}
 
 }

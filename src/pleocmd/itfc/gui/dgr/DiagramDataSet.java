@@ -33,6 +33,14 @@ public final class DiagramDataSet {
 
 	private double valuePerUnitY = 1.0;
 
+	private double cachedValueToPixXIncr;
+
+	private double cachedValueToPixYIncr;
+
+	private double cachedValueToPixXFactor;
+
+	private double cachedValueToPixYFactor;
+
 	public DiagramDataSet(final Diagram diagram, final String label) {
 		this.diagram = diagram;
 		this.label = label;
@@ -172,6 +180,39 @@ public final class DiagramDataSet {
 	public boolean isValid() {
 		return !points.isEmpty() && valuePerUnitX >= MIN_VAL_PER_UNIT
 				&& valuePerUnitY >= MIN_VAL_PER_UNIT;
+	}
+
+	void updateCache() {
+		cachedValueToPixXIncr = -diagram.getXAxis().getCachedMinVisUnit();
+		cachedValueToPixXFactor = diagram.getXAxis().getCachedPixelPerUnit();
+		cachedValueToPixYIncr = -diagram.getYAxis().getCachedMinVisUnit();
+		cachedValueToPixYFactor = diagram.getYAxis().getCachedPixelPerUnit();
+	}
+
+	double valueToPixelX(final double value) {
+		return (value / valuePerUnitX + cachedValueToPixXIncr)
+				* cachedValueToPixXFactor;
+	}
+
+	double valueToPixelY(final double value) {
+		return (value / valuePerUnitY + cachedValueToPixYIncr)
+				* cachedValueToPixYFactor;
+	}
+
+	double getCachedValueToPixXIncr() {
+		return cachedValueToPixXIncr;
+	}
+
+	double getCachedValueToPixYIncr() {
+		return cachedValueToPixYIncr;
+	}
+
+	double getCachedValueToPixXFactor() {
+		return cachedValueToPixXFactor;
+	}
+
+	double getCachedValueToPixYFactor() {
+		return cachedValueToPixYFactor;
 	}
 
 }
