@@ -414,4 +414,39 @@ public abstract class PipePart extends StateHandling {
 					.getElapsed(), y);
 	}
 
+	/**
+	 * Checks if this {@link PipePart} is sane. Sane means that the
+	 * {@link PipePart} can be reached from an {@link Input}, has a path to an
+	 * {@link Output}, doesn't contain a dead-lock in it's path and is correctly
+	 * configured.
+	 * 
+	 * @param sane
+	 *            {@link PipePart} is added to this set if it's sane
+	 * @param visited
+	 *            a set of already visited {@link PipePart}s during the current
+	 *            recursion (handled like a kind of stack) to detect dead-locks
+	 * @param deadLocked
+	 *            a set of already detected dead-locks
+	 * @return true if an {@link Output} can be reached from the
+	 *         {@link PipePart}.
+	 */
+	boolean topDownCheck(final Set<PipePart> sane, final Set<PipePart> visited,
+			final Set<PipePart> deadLocked) {
+		if (visited.contains(this)) {
+			deadLocked.add(this);
+			return false;
+		}
+		boolean outputReached = topDownCheck_outputReached();
+		visited.add(this);
+		for (final PipePart ppSub : getConnectedPipeParts())
+			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
+		visited.remove(this);
+		if (outputReached && isConfigurationSane()) sane.add(this);
+		return outputReached;
+	}
+
+	protected boolean topDownCheck_outputReached() {
+		return false;
+	}
+
 }

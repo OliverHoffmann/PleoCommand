@@ -446,51 +446,12 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void updateSaneConfigCache() {
-		final Set<PipePart> sane = new HashSet<PipePart>();
-		final Set<PipePart> visited = new HashSet<PipePart>();
-		final Set<PipePart> deadLocked = new HashSet<PipePart>();
-		for (final PipePart pp : set)
-			if (pp instanceof Input)
-				topDownCheck(pp, sane, visited, deadLocked);
-		sane.removeAll(deadLocked);
+		final Set<PipePart> sane = Pipe.the().getSanePipeParts();
 		if (!saneConfigCache.equals(sane)) {
 			saneConfigCache.clear();
 			saneConfigCache.addAll(sane);
 			repaint();
 		}
-	}
-
-	/**
-	 * Checks if the given {@link PipePart} is sane. Sane means that the
-	 * {@link PipePart} can be reached from an {@link Input}, has a path to an
-	 * {@link Output}, doesn't contain a dead-lock in it's path and is correctly
-	 * configured.
-	 * 
-	 * @param pp
-	 *            the {@link PipePart} to check
-	 * @param sane
-	 *            a set of sane PipeParts
-	 * @param visited
-	 *            a set of already visited {@link PipePart}s during the current
-	 *            recursion (handled like a kind of stack) to detect dead-locks.
-	 * @param deadLocked
-	 *            a set of already detected dead-locks.
-	 * @return true if an {@link Output} can be reached from the
-	 *         {@link PipePart}.
-	 */
-	private boolean topDownCheck(final PipePart pp, final Set<PipePart> sane,
-			final Set<PipePart> visited, final Set<PipePart> deadLocked) {
-		if (visited.contains(pp)) {
-			deadLocked.add(pp);
-			return false;
-		}
-		boolean outputReached = pp instanceof Output;
-		visited.add(pp);
-		for (final PipePart ppSub : pp.getConnectedPipeParts())
-			outputReached |= topDownCheck(ppSub, sane, visited, deadLocked);
-		visited.remove(pp);
-		if (outputReached && pp.isConfigurationSane()) sane.add(pp);
-		return outputReached;
 	}
 
 	@Override

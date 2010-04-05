@@ -47,4 +47,9 @@ public abstract class Output extends PipePart {
 	protected abstract boolean write0(Data data) throws OutputException,
 			IOException;
 
+	@Override
+	protected boolean topDownCheck_outputReached() {
+		return true;
+	}
+
 }

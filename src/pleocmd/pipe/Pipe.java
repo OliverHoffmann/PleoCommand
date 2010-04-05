@@ -114,8 +114,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private final Set<PipePart> ignoredOutputs = new HashSet<PipePart>();
 
-	private final Set<Long> deadlockDetection = new HashSet<Long>();
-
 	private final DataQueue dataQueue = new DataQueue();
 
 	private int inputPosition;
@@ -347,6 +345,39 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			pp.resolveConnectionUIDs(map);
 	}
 
+	/**
+	 * @return all {@link PipePart}s which are sane according to
+	 *         {@link PipePart#topDownCheck(Set, Set, Set)}
+	 */
+	public final Set<PipePart> getSanePipeParts() {
+		final Set<PipePart> sane = new HashSet<PipePart>();
+		final Set<PipePart> visited = new HashSet<PipePart>();
+		final Set<PipePart> deadLocked = new HashSet<PipePart>();
+		for (final PipePart pp : inputList)
+			pp.topDownCheck(sane, visited, deadLocked);
+		sane.removeAll(deadLocked);
+		return sane;
+	}
+
+	private void checkSanity() throws PipeException {
+		final Set<PipePart> sane = getSanePipeParts();
+		final Set<PipePart> bad = new HashSet<PipePart>();
+		for (final PipePart pp : getInputList())
+			if (!sane.contains(pp)) bad.add(pp);
+		for (final PipePart pp : getConverterList())
+			if (!sane.contains(pp)) bad.add(pp);
+		for (final PipePart pp : getOutputList())
+			if (!sane.contains(pp)) bad.add(pp);
+		if (bad.isEmpty()) return;
+		final StringBuilder sb = new StringBuilder("The following PipeParts "
+				+ "are not correctly configured or connected:");
+		for (final PipePart pp : bad) {
+			sb.append("\n");
+			sb.append(pp);
+		}
+		throw new PipeException(this, true, sb.toString());
+	}
+
 	@Override
 	protected void configure0() throws PipeException {
 		Log.detail("Configuring all input");
@@ -370,6 +401,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	@Override
 	protected void init0() throws PipeException {
+		checkSanity();
+
 		Log.detail("Initializing all input");
 		for (final PipePart pp : inputList)
 			if (!pp.tryInit()) ignoredInputs.add(pp);
@@ -518,7 +551,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				if (data == null) break; // marks end of all inputs
 
 				// ... convert it ...
-				deadlockDetection.clear();
 				final List<Data> dataList = convertDataToDataList(data);
 
 				// ... and put it into the queue for Output classes
@@ -751,11 +783,12 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private List<Data> convertDataToDataList(final Data data) {
 		Log.detail("Converting data block to list of data blocks");
 		List<Data> res = null;
+		final List<Data> sum = new ArrayList<Data>();
 		for (final PipePart pp : data.getOrigin().getConnectedPipeParts())
 			if (pp instanceof Converter && !ignoredConverter.contains(pp)
 					&& (res = convertOneData(data, (Converter) pp)) != null)
-				return res; // TODO implement "AND" in pipe-structure, not "OR"
-		// i.e. continue calling convertOneData() for all converter
+				sum.addAll(res);
+		if (!sum.isEmpty()) return sum;
 
 		// no fitting (and not ignored and working) converter found
 		Log.info("No Converter found, returning data as is: '%s'", data);
@@ -784,9 +817,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private List<Data> convertOneData(final Data data, final Converter cvt) {
 		try {
 			Log.detail("Converting '%s' with '%s'", data, cvt);
-			final long id = (long) cvt.hashCode() << 32 | data.hashCode();
-			if (!deadlockDetection.add(id))
-				throw new ConverterException(cvt, true, "Detected dead-lock");
 			feedback.incDataConvertedCount();
 			final List<Data> newDatas = cvt.convert(data);
 			if (newDatas != null) {
