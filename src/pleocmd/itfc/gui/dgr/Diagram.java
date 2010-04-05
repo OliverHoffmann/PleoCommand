@@ -65,9 +65,9 @@ public final class Diagram extends JPanel {
 
 	private Pen subUnitPen = new Pen(Color.LIGHT_GRAY);
 
-	private final DiagramAxis xAxis = new DiagramAxis(this, "x");
+	private final DiagramAxis xAxis = new DiagramAxis(this, "X");
 
-	private final DiagramAxis yAxis = new DiagramAxis(this, "y");
+	private final DiagramAxis yAxis = new DiagramAxis(this, "Y");
 
 	private double zoom = 1.0;
 
