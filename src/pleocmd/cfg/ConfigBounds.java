@@ -6,6 +6,8 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.util.List;
 
+import javax.swing.JLabel;
+
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
 
@@ -99,12 +101,12 @@ public final class ConfigBounds extends ConfigValue {
 
 	@Override
 	public void insertGUIComponents(final Layouter lay) {
-		// TODO GUI support
+		lay.add(new JLabel(asString()), true);
 	}
 
 	@Override
 	public void setFromGUIComponents() {
-		// TODO GUI support
+		// GUI support is read-only
 	}
 
 }
