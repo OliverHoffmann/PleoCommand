@@ -67,8 +67,8 @@ public final class SimpleConverter extends Converter {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
-		return true;
+	public String isConfigurationSane() {
+		return null;
 	}
 
 	@Override

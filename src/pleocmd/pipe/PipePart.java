@@ -129,7 +129,13 @@ public abstract class PipePart extends StateHandling {
 		guiConfigs.add(value);
 	}
 
-	public abstract boolean isConfigurationSane();
+	/**
+	 * @return <b>null</b> if everything is all-right or a {@link String}
+	 *         describing why this {@link PipePart} will probably fail to
+	 *         initialize if it would be initialized with it's current
+	 *         configuration.
+	 */
+	public abstract String isConfigurationSane();
 
 	/**
 	 * Tries to call {@link #configure()} and writes an error message to the
@@ -441,7 +447,13 @@ public abstract class PipePart extends StateHandling {
 		for (final PipePart ppSub : getConnectedPipeParts())
 			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
 		visited.remove(this);
-		if (outputReached && isConfigurationSane()) sane.add(this);
+		if (outputReached) {
+			final String cfgRes = isConfigurationSane();
+			if (cfgRes == null)
+				sane.add(this);
+			else
+				Log.error("Configuration for '%s' is bad: %s", this, cfgRes);
+		}
 		return outputReached;
 	}
 

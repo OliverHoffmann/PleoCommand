@@ -100,13 +100,14 @@ public final class PleoRXTXOutput extends Output {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
+	public String isConfigurationSane() {
 		try {
 			PleoCommunication.getPort(cfgDevice.getContent());
 		} catch (final IOException e) {
-			return false;
+			return String.format("Device %s does not exist", cfgDevice
+					.getContent());
 		}
-		return true;
+		return null;
 	}
 
 	@Override

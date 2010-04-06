@@ -59,8 +59,8 @@ public final class PipePartTest extends Testcases {
 			}
 
 			@Override
-			public boolean isConfigurationSane() {
-				return true;
+			public String isConfigurationSane() {
+				return null;
 			}
 
 			@Override

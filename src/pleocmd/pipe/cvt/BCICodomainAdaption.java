@@ -133,12 +133,14 @@ public final class BCICodomainAdaption extends Converter {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
+	public String isConfigurationSane() {
 		if (cfgSourceMin.getContent() >= cfgSourceMax.getContent())
-			return false;
+			return String.format("%d must be less than %d in source range",
+					cfgSourceMin.getContent(), cfgSourceMax.getContent());
 		if (cfgTargetMin.getContent() >= cfgTargetMax.getContent())
-			return false;
-		return true;
+			return String.format("%d must be less than %d in target range",
+					cfgTargetMin.getContent(), cfgTargetMax.getContent());
+		return null;
 	}
 
 	@Override

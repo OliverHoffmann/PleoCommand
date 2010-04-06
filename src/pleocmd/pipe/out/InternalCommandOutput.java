@@ -105,8 +105,8 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
-		return true;
+	public String isConfigurationSane() {
+		return null;
 	}
 
 	@Override

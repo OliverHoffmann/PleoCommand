@@ -112,8 +112,9 @@ public final class FileInput extends Input {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
-		return cfgFile.getContent().canRead();
+	public String isConfigurationSane() {
+		return cfgFile.getContent().canRead() ? null : String.format(
+				"Cannot read from '%s'", cfgFile.getContent());
 	}
 
 	@Override

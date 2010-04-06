@@ -120,10 +120,14 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
-	public boolean isConfigurationSane() {
+	public String isConfigurationSane() {
 		final File file = cfgFile.getContent();
-		if (file.exists()) return file.canWrite();
-		return file.getParentFile() != null && file.getParentFile().canWrite();
+		if (file.exists())
+			return file.canWrite() ? null : String.format(
+					"Cannot write to '%s'", file);
+		return file.getParentFile() != null && file.getParentFile().canWrite() ? null
+				: String.format("Cannot create a file in '%s'", file
+						.getParentFile());
 	}
 
 	@Override
