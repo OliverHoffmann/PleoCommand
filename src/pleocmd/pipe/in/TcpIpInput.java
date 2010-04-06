@@ -26,8 +26,6 @@ public final class TcpIpInput extends Input {
 
 	private DataInputStream in;
 
-	private boolean delayedInit;
-
 	public TcpIpInput() {
 		addConfig(cfgPort = new ConfigInt("Port", 19876, 1, 65535));
 		addConfig(cfgTimeoutConn = new ConfigInt("Connection-Timeout (sec)",
@@ -53,16 +51,29 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	protected void init0() throws IOException {
+		serverSocket = new ServerSocket();
+		serverSocket.setPerformancePreferences(0, 2, 1);
+		serverSocket.setReuseAddress(true);
+		serverSocket.setSoTimeout(3000);
+		serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
+		final int cnt = Math.max(1, cfgTimeoutConn.getContent() / 3);
+		for (int i = 1;; ++i)
+			try {
+				socket = serverSocket.accept();
+				break;
+			} catch (final IOException e) {
+				if (getPipe().isInitPhaseInterrupted()) return;
+				if (i == cnt) throw e;
+			}
+		socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
+		in = new DataInputStream(socket.getInputStream());
 	}
 
 	@Override
 	protected void close0() throws IOException {
-		if (delayedInit) {
-			delayedInit = false;
-			in.close();
-			socket.close();
-			serverSocket.close();
-		}
+		if (in != null) in.close();
+		if (socket != null) socket.close();
+		serverSocket.close();
 	}
 
 	@Override
@@ -72,17 +83,6 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	protected Data readData0() throws IOException {
-		if (!delayedInit) {
-			delayedInit = true;
-			serverSocket = new ServerSocket();
-			serverSocket.setPerformancePreferences(0, 2, 1);
-			serverSocket.setReuseAddress(true);
-			serverSocket.setSoTimeout(cfgTimeoutConn.getContent() * 1000);
-			serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
-			socket = serverSocket.accept();
-			socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
-			in = new DataInputStream(socket.getInputStream());
-		}
 		if (!socket.isConnected() || socket.isInputShutdown()) return null;
 		final Data res = Data.createFromBinary(in);
 		res
@@ -109,7 +109,7 @@ public final class TcpIpInput extends Input {
 	@Override
 	public boolean isConfigurationSane() {
 		try {
-			final ServerSocket ss = new ServerSocket(0);
+			final ServerSocket ss = new ServerSocket();
 			ss.setReuseAddress(true);
 			ss.bind(new InetSocketAddress(cfgPort.getContent()));
 			ss.close();
