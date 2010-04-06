@@ -126,6 +126,10 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private PipeFeedback feedback;
 
+	private boolean pipeInitializing;
+
+	private boolean initPhaseInterrupted;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 */
@@ -404,16 +408,22 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		checkSanity();
 
 		Log.detail("Initializing all input");
-		for (final PipePart pp : inputList)
+		for (final PipePart pp : inputList) {
 			if (!pp.tryInit()) ignoredInputs.add(pp);
+			if (initPhaseInterrupted) return;
+		}
 
 		Log.detail("Initializing all converter");
-		for (final PipePart pp : converterList)
+		for (final PipePart pp : converterList) {
 			if (!pp.tryInit()) ignoredConverter.add(pp);
+			if (initPhaseInterrupted) return;
+		}
 
 		Log.detail("Initializing all output");
-		for (final PipePart pp : outputList)
+		for (final PipePart pp : outputList) {
 			if (!pp.tryInit()) ignoredOutputs.add(pp);
+			if (initPhaseInterrupted) return;
+		}
 	}
 
 	@Override
@@ -425,14 +435,17 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		}
 		Log.detail("Closing all input");
 		for (int i = inputPosition; i < inputList.size(); ++i)
-			if (!ignoredInputs.contains(inputList.get(i)))
+			if (!ignoredInputs.contains(inputList.get(i))
+					&& inputList.get(i).getState() == State.Initialized)
 				inputList.get(i).tryClose();
 		Log.detail("Closing all converter");
 		for (final PipePart pp : converterList)
-			if (!ignoredConverter.contains(pp)) pp.tryClose();
+			if (!ignoredConverter.contains(pp)
+					&& pp.getState() == State.Initialized) pp.tryClose();
 		Log.detail("Closing all output");
 		for (final PipePart pp : outputList)
-			if (!ignoredOutputs.contains(pp)) pp.tryClose();
+			if (!ignoredOutputs.contains(pp)
+					&& pp.getState() == State.Initialized) pp.tryClose();
 		inputPosition = 0;
 		ignoredInputs.clear();
 		ignoredConverter.clear();
@@ -453,8 +466,19 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 *             waiting for the two pipe threads
 	 */
 	public void pipeAllData() throws PipeException, InterruptedException {
+		ensureConfigured();
+		initPhaseInterrupted = false;
 		feedback = new PipeFeedback();
-		init();
+		try {
+			pipeInitializing = true;
+			init();
+		} finally {
+			pipeInitializing = false;
+		}
+		if (initPhaseInterrupted) {
+			close();
+			return;
+		}
 		dataQueue.resetCache();
 		thrInput = new Thread() {
 			@Override
@@ -514,14 +538,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 *             if waiting has been interrupted
 	 */
 	public void abortPipe() throws StateException, InterruptedException {
-		ensureInitialized();
 		Log.info("Aborting pipe");
 		inputThreadInterruped = true;
-		thrInput.interrupt();
+		initPhaseInterrupted = true;
+		if (thrInput != null) thrInput.interrupt();
 		dataQueue.close();
-		thrOutput.interrupt();
+		if (thrOutput != null) thrOutput.interrupt();
 		Log.detail("Waiting for accepted abort in threads");
-		while (thrInput != null || thrOutput != null)
+		while (pipeInitializing || thrInput != null || thrOutput != null)
 			Thread.sleep(100);
 		Log.info("Pipe successfully aborted");
 	}
@@ -1049,6 +1073,10 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		return String.format("%s: %s - %s - %s <%s> %s", getClass()
 				.getSimpleName(), inputList, converterList, outputList,
 				getState(), getFeedback());
+	}
+
+	public boolean isInitPhaseInterrupted() {
+		return initPhaseInterrupted;
 	}
 
 }
