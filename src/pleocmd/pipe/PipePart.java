@@ -402,7 +402,7 @@ public abstract class PipePart extends StateHandling {
 
 	protected abstract int getVisualizeDataSetCount();
 
-	public PipeVisualizationDialog getVisualizationDialog() {
+	public final PipeVisualizationDialog getVisualizationDialog() {
 		return visualizationDialog;
 	}
 
@@ -437,8 +437,8 @@ public abstract class PipePart extends StateHandling {
 	 * @return true if an {@link Output} can be reached from the
 	 *         {@link PipePart}.
 	 */
-	boolean topDownCheck(final Set<PipePart> sane, final Set<PipePart> visited,
-			final Set<PipePart> deadLocked) {
+	final boolean topDownCheck(final Set<PipePart> sane,
+			final Set<PipePart> visited, final Set<PipePart> deadLocked) {
 		if (visited.contains(this)) {
 			deadLocked.add(this);
 			return false;
@@ -458,7 +458,8 @@ public abstract class PipePart extends StateHandling {
 		return outputReached;
 	}
 
-	protected boolean topDownCheck_outputReached() {
+	protected boolean topDownCheck_outputReached() { // CS_IGNORE
+		// design for extension: *is* empty
 		return false;
 	}
 

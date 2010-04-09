@@ -353,7 +353,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * @return all {@link PipePart}s which are sane according to
 	 *         {@link PipePart#topDownCheck(Set, Set, Set)}
 	 */
-	public final Set<PipePart> getSanePipeParts() {
+	public Set<PipePart> getSanePipeParts() {
 		final Set<PipePart> sane = new HashSet<PipePart>();
 		final Set<PipePart> visited = new HashSet<PipePart>();
 		final Set<PipePart> deadLocked = new HashSet<PipePart>();
