@@ -52,7 +52,7 @@ public final class ConsoleOutput extends Output {
 		Data root;
 		switch (cfgType.getEnum()) {
 		case DataAscii:
-			Log.consoleOut(data.toString());
+			Log.consoleOut(data.asString());
 			break;
 		case DataBinary:
 			if (lastRoot != (root = data.getRoot())) {
@@ -65,7 +65,7 @@ public final class ConsoleOutput extends Output {
 		case DataAsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
-				Log.consoleOut(data.getRoot().toString());
+				Log.consoleOut(data.getRoot().asString());
 			}
 			break;
 		case DataBinaryOriginal:

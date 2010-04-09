@@ -359,7 +359,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		if (dataList != null)
 			try {
 				for (final Data data : dataList)
-					doc.insertString(doc.getLength(), data.toString() + "\n",
+					doc.insertString(doc.getLength(), data.asString() + "\n",
 							null);
 			} catch (final BadLocationException e) {
 				throw new InternalException(e);

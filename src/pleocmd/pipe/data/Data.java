@@ -340,8 +340,7 @@ public class Data extends AbstractList<Value> {
 		new DataAsciiConverter(this).writeToAscii(out, writeLF);
 	}
 
-	@Override
-	public final String toString() {
+	public final String asString() {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
 		try {
 			writeToAscii(new DataOutputStream(out), false);
@@ -350,6 +349,11 @@ public class Data extends AbstractList<Value> {
 			Log.error(e);
 			return String.format("S:%1", e.getMessage());
 		}
+	}
+
+	@Override
+	public final String toString() {
+		return String.format("%s from %s", asString(), origin);
 	}
 
 	/**
