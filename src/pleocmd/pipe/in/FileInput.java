@@ -43,6 +43,7 @@ public final class FileInput extends Input {
 						.freeResources();
 				return null;
 			}
+
 		});
 		constructed();
 	}

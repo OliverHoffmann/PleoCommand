@@ -72,7 +72,7 @@ public final class Configuration {
 	private static File defaultConfigFile;
 	static {
 		defaultConfigFile = new File(System.getProperty("user.home")
-				+ "/.pleocommand.cfg");
+				+ File.separator + ".pleocommand.cfg");
 	}
 
 	private static Configuration config;

@@ -186,6 +186,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 				break;
 			default:
 				putByteIntoBuffer(b);
+				break;
 			}
 		}
 	}

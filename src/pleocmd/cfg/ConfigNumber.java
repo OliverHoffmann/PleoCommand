@@ -14,7 +14,9 @@ public abstract class ConfigNumber<E extends Number> extends ConfigValue {
 
 	private E content;
 
-	private final E min, max;
+	private final E min;
+
+	private final E max;
 
 	private final E step;
 

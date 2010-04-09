@@ -126,6 +126,7 @@ public final class ThresholdConverter extends Converter {
 			break;
 		default:
 			val = .0;
+			break;
 		}
 
 		if (isVisualize()) {

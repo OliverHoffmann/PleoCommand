@@ -146,7 +146,9 @@ public final class ErrorDialog extends JDialog implements
 			return;
 		}
 
-		final JLabel lblT, lblC, lblS;
+		final JLabel lblT;
+		final JLabel lblC;
+		final JLabel lblS;
 		final JTextArea lblM;
 		final JCheckBox cbS;
 		if (errorCount > 0)

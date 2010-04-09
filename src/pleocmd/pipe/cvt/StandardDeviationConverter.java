@@ -79,10 +79,7 @@ public final class StandardDeviationConverter extends Converter {
 		values2[valPos] = val - avg;
 		valPos = (valPos + 1) % values.length;
 		if (valPos == 0) feeded = true; // at least one loop now
-		if (feeded)
-			val = sum2 / values.length;
-		else
-			val = 0;
+		val = feeded ? sum2 / values.length : 0;
 		if (isVisualize()) plot(0, val);
 		return asList(SingleValueData.create(val, data));
 	}

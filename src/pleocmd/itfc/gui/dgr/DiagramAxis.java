@@ -150,7 +150,8 @@ public final class DiagramAxis {
 		final DiagramAxis xAxis = diagram.getXAxis();
 		final boolean isXAxis = xAxis == this;
 		if (max >= Double.MAX_VALUE || min <= Double.MIN_VALUE) {
-			double low = Double.MAX_VALUE, high = Double.MIN_VALUE;
+			double low = Double.MAX_VALUE;
+			double high = Double.MIN_VALUE;
 			for (final DiagramDataSet ds : diagram.getDataSets()) {
 				if (!isXAxis && ds.getType() == DiagramType.IntersectionDiagram)
 					continue;

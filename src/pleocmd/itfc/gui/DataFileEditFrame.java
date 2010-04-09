@@ -90,14 +90,13 @@ public final class DataFileEditFrame extends JDialog implements
 	private void updateTextPaneFromFile() {
 		Log.detail("Updating TextPane from file '%s'", file);
 		try {
-			if (!file.exists())
-				dsePanel.updateTextPaneFromReader(null);
-			else {
+			if (file.exists()) {
 				final BufferedReader in = new BufferedReader(new FileReader(
 						file));
 				dsePanel.updateTextPaneFromReader(in);
 				in.close();
-			}
+			} else
+				dsePanel.updateTextPaneFromReader(null);
 		} catch (final IOException e) {
 			Log.error(e);
 		}

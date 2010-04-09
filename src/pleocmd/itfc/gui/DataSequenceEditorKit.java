@@ -31,4 +31,9 @@ public final class DataSequenceEditorKit extends StyledEditorKit implements
 		return "text/datasequence";
 	}
 
+	@Override
+	public Object clone() {
+		return super.clone();
+	}
+
 }

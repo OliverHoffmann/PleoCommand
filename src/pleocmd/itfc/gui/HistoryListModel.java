@@ -37,7 +37,7 @@ public final class HistoryListModel extends AbstractListModel implements
 	}
 
 	@Override
-	public Object getElementAt(final int index) {
+	public String getElementAt(final int index) {
 		return history.get(index);
 	}
 

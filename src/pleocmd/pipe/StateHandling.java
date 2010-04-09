@@ -175,9 +175,10 @@ public abstract class StateHandling {
 		case Configured:
 		case Initialized:
 			throwException("Already constructed");
-			//$FALL-THROUGH$ does never occur
+			break;
 		default:
 			throwUnknownState();
+			break;
 		}
 	}
 
@@ -191,15 +192,16 @@ public abstract class StateHandling {
 		switch (state) {
 		case Constructing:
 			throwException("Constructing");
-			//$FALL-THROUGH$ does never occur
+			break;
 		case Constructed:
 		case Configured:
 			break;
 		case Initialized:
 			throwException("Already initialized");
-			//$FALL-THROUGH$ does never occur
+			break;
 		default:
 			throwUnknownState();
+			break;
 		}
 	}
 
@@ -214,17 +216,18 @@ public abstract class StateHandling {
 		switch (state) {
 		case Constructing:
 			throwException("Constructing");
-			//$FALL-THROUGH$ does never occur
+			break;
 		case Constructed:
 			throwException("Not configured");
-			//$FALL-THROUGH$ does never occur
+			break;
 		case Configured:
 			break;
 		case Initialized:
 			throwException("Already initialized");
-			//$FALL-THROUGH$ does never occur
+			break;
 		default:
 			throwUnknownState();
+			break;
 		}
 	}
 
@@ -240,11 +243,12 @@ public abstract class StateHandling {
 		case Constructed:
 		case Configured:
 			throwException("Not initialized");
-			//$FALL-THROUGH$ does never occur
+			break;
 		case Initialized:
 			break;
 		default:
 			throwUnknownState();
+			break;
 		}
 	}
 
@@ -262,9 +266,10 @@ public abstract class StateHandling {
 			break;
 		case Initialized:
 			throwException("Still initialized");
-			//$FALL-THROUGH$ does never occur
+			break;
 		default:
 			throwUnknownState();
+			break;
 		}
 	}
 

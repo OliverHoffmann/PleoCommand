@@ -29,8 +29,11 @@ public final class RandomGeneratorInput extends Input {
 	private long last;
 	private PeakPos peakPos;
 	private double amp;
-	private int peakLen, grad0Len, grad1Len; // in loops
-	private double grad0Inc, grad1Inc;
+	private int peakLen; // in loops
+	private int grad0Len; // in loops
+	private int grad1Len; // in loops
+	private double grad0Inc;
+	private double grad1Inc;
 	private double value;
 	private int step;
 

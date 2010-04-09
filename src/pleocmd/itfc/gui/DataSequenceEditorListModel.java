@@ -18,7 +18,7 @@ public final class DataSequenceEditorListModel extends AbstractListModel {
 	}
 
 	@Override
-	public Object getElementAt(final int index) {
+	public String getElementAt(final int index) {
 		return index == -1 ? null : triggers.get(index);
 	}
 

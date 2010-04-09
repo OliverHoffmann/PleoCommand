@@ -37,11 +37,8 @@ public final class CommandLine {
 					else
 						throw new RuntimeException(String.format(
 								"Cannot recognize filetype of '%s'", file));
-				else if ("-d".equals(arg) || "--detailed".equals(arg))
-					Log.setMinLogType(Type.Detail);
 				else
-					throw new RuntimeException(String.format(
-							"Cannot recognize argument '%s'", file));
+					parseArgument(arg);
 			}
 		} catch (final Throwable throwable) { // CS_IGNORE
 			// we need to print the Exception additionally to
@@ -50,6 +47,18 @@ public final class CommandLine {
 			throwable.printStackTrace(); // CS_IGNORE
 			Log.error(throwable, "Failed to parse command line arguments");
 		}
+	}
+
+	private void parseArgument(final String arg) {
+		if ("-d".equals(arg) || "--detailed".equals(arg))
+			Log.setMinLogType(Type.Detail);
+		if (arg.startsWith("--configure=")) {
+			// final String ppName = arg.substring(12);
+			// final PipePart pp = Pipe.the().find(ppName);
+			// TODO
+		} else
+			throw new RuntimeException(String.format(
+					"Cannot recognize argument '%s'", arg));
 	}
 
 	public void executePipe(final File pcaFile) {

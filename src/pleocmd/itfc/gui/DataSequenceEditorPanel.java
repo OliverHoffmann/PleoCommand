@@ -413,8 +413,12 @@ public final class DataSequenceEditorPanel extends JPanel {
 
 	private class FadeTimerTask extends TimerTask {
 
-		private double cur0, cur1, cur2;
-		private final double inc0, inc1, inc2;
+		private double cur0;
+		private double cur1;
+		private double cur2;
+		private final double inc0;
+		private final double inc1;
+		private final double inc2;
 		private int steps;
 
 		FadeTimerTask(final int src0, final int src1, final int src2,

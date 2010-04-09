@@ -99,6 +99,7 @@ public final class BCICodomainAdaption extends Converter {
 		switch (cfgTransformation.getEnum()) {
 		case Linear:
 			val = (val - dec) * fl + inc;
+			break;
 		}
 		if (isVisualize()) plot(0, val);
 		return asList(SingleValueData.create(val, data));
