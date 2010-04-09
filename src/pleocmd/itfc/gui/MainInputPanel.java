@@ -179,7 +179,7 @@ public final class MainInputPanel extends JPanel {
 	private void searchInHistory() {
 		final String expr = String.format(".*%s.*", consoleInput.getText());
 		for (int idx = historyListModel.getSize() - 1; idx >= 0; --idx)
-			if (historyListModel.getElementAt(idx).toString().matches(expr)) {
+			if (historyListModel.getElementAt(idx).matches(expr)) {
 				setConsoleInput(idx);
 				return;
 			}
@@ -197,7 +197,7 @@ public final class MainInputPanel extends JPanel {
 		Log.detail("Setting console input to index %d (history index: %d)",
 				index, historyIndex);
 		final String hist = index == historyListModel.getSize() ? ""
-				: historyListModel.getElementAt(index).toString();
+				: historyListModel.getElementAt(index);
 		consoleInput.setText(hist);
 		consoleInput.setCaretPosition(hist.length());
 		historyIndex = index;
