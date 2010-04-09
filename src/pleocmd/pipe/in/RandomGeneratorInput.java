@@ -97,7 +97,7 @@ public final class RandomGeneratorInput extends Input {
 		case NoPeak:
 			if (Math.random() < cfgPeakPropbability.getContent()) {
 				peakPos = PeakPos.Grad0;
-				amp = rand_11() * cfgMaxAmplitude.getContent();
+				amp = rand11() * cfgMaxAmplitude.getContent();
 				final double spms = cfgSamplerate.getContent() / 1000.0;
 				peakLen = rand0N(cfgMaxPeakLength.getContent() * spms);
 				grad0Len = rand0N(cfgMaxGrad0Length.getContent() * spms);
@@ -127,11 +127,11 @@ public final class RandomGeneratorInput extends Input {
 			if (++step >= grad1Len) peakPos = PeakPos.NoPeak;
 			break;
 		}
-		return new SingleValueData(d + rand_11() * cfgMaxNoise.getContent(),
+		return new SingleValueData(d + rand11() * cfgMaxNoise.getContent(),
 				cfgUserData.getContent(), null);
 	}
 
-	private static double rand_11() {
+	private static double rand11() {
 		return 1 - 2 * Math.random();
 	}
 
