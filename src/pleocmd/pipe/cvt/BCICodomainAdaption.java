@@ -1,16 +1,14 @@
 package pleocmd.pipe.cvt;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
-import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.val.Value;
+import pleocmd.pipe.data.SingleValueData;
 
 public final class BCICodomainAdaption extends Converter {
 
@@ -72,44 +70,38 @@ public final class BCICodomainAdaption extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
-		final List<Data> res = new ArrayList<Data>(1);
-		final List<Value> vals = new ArrayList<Value>(data);
-		try {
-			double val = data.get(2).asDouble();
-			switch (cfgOutOfRange.getEnum()) {
-			case CutOff:
-				// return empty list, so "data" is just dropped
-				if (val < cfgSourceMin.getContent()
-						|| val > cfgSourceMax.getContent()) return res;
-				break;
-			case FitToRange:
-				if (val < cfgSourceMin.getContent())
-					val = cfgSourceMin.getContent();
-				if (val > cfgSourceMax.getContent())
-					val = cfgSourceMax.getContent();
-				break;
-			}
-			switch (cfgTransformation.getEnum()) {
-			case Linear:
-				vals.get(2).set(String.valueOf((val - dec) * fl + inc));
-			}
-		} catch (final IOException e) {
-			throw new InternalException(e);
+		if (!SingleValueData.isSingleValueData(data)) return null;
+		double val = SingleValueData.getValue(data);
+		switch (cfgOutOfRange.getEnum()) {
+		case CutOff:
+			// return empty list, so "data" is just dropped
+			if (val < cfgSourceMin.getContent()
+					|| val > cfgSourceMax.getContent())
+				return new ArrayList<Data>(0);
+			break;
+		case FitToRange:
+			if (val < cfgSourceMin.getContent())
+				val = cfgSourceMin.getContent();
+			if (val > cfgSourceMax.getContent())
+				val = cfgSourceMax.getContent();
+			break;
 		}
-		res.add(new Data(vals, data));
-		if (isVisualize()) plot(0, vals.get(2).asDouble());
-		return res;
+		switch (cfgTransformation.getEnum()) {
+		case Linear:
+			val = (val - dec) * fl + inc;
+		}
+		if (isVisualize()) plot(0, val);
+		return asList(SingleValueData.create(val, data));
 	}
 
 	public static String help(final HelpKind kind) {

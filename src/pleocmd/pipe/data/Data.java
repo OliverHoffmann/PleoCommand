@@ -32,7 +32,7 @@ import pleocmd.pipe.val.Value;
  * 
  * @author oliver
  */
-public final class Data extends AbstractList<Value> {
+public class Data extends AbstractList<Value> {
 
 	/**
 	 * The priority which will be used if no special one is specified.
@@ -77,8 +77,8 @@ public final class Data extends AbstractList<Value> {
 	 * @param values
 	 *            list of {@link Value} - will be <b>shallow-copied</b>
 	 * @param parent
-	 *            the parent which was the cause while this {@link Data} has
-	 *            been created - may be <b>null</b>
+	 *            the parent which was the cause for this {@link Data} being
+	 *            created - may be <b>null</b>
 	 * @param priority
 	 *            priority of the new {@link Data} (must be between
 	 *            {@link #PRIO_LOWEST} and {@link #PRIO_HIGHEST}) - if
@@ -91,15 +91,7 @@ public final class Data extends AbstractList<Value> {
 	 */
 	public Data(final List<Value> values, final Data parent,
 			final byte priority, final long time) {
-		this.values = new ArrayList<Value>(values.size());
-		this.values.addAll(values);
-		this.parent = parent;
-		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
-				.getPriority() : priority;
-		this.time = time == TIME_NOTIME && parent != null ? parent.getTime()
-				: time;
-		Log.detail("New Data created: %s (parent: '%s' priority: %d time: %d)",
-				this, parent, priority, time);
+		this(new ArrayList<Value>(values.size()), parent, priority, time, true);
 	}
 
 	/**
@@ -109,16 +101,40 @@ public final class Data extends AbstractList<Value> {
 	 * @param values
 	 *            list of {@link Value} - will be <b>shallow-copied</b>
 	 * @param parent
-	 *            the parent which was the cause while this {@link Data} has
-	 *            been created - may be <b>null</b>
+	 *            the parent which was the cause for this {@link Data} being
+	 *            created - may be <b>null</b>
 	 */
 	public Data(final List<Value> values, final Data parent) {
-		this.values = new ArrayList<Value>(values.size());
-		this.values.addAll(values);
+		this(new ArrayList<Value>(values.size()), parent, PRIO_DEFAULT,
+				TIME_NOTIME, true);
+	}
+
+	/**
+	 * Internal constructor which directly uses the values list
+	 * 
+	 * @param values
+	 *            list of {@link Value} - will be directly used
+	 * @param parent
+	 *            the parent which was the cause for this {@link Data} being
+	 *            created - may be <b>null</b>
+	 * @param priority
+	 *            priority of the new {@link Data}
+	 * @param time
+	 *            relative time at which this {@link Data} has been created
+	 * @param dummy
+	 *            just for distinction between other constructors
+	 */
+	protected Data(final List<Value> values, final Data parent,
+			final byte priority, final long time,
+			@SuppressWarnings("unused") final boolean dummy) {
+		this.values = values;
 		this.parent = parent;
-		priority = parent != null ? parent.getPriority() : PRIO_DEFAULT;
-		time = parent != null ? parent.getTime() : TIME_NOTIME;
-		Log.detail("New Data created: %s (parent: '%s')", this, parent);
+		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
+				.getPriority() : priority;
+		this.time = time == TIME_NOTIME && parent != null ? parent.getTime()
+				: time;
+		Log.detail("New Data created: %s (parent: '%s' priority: %d time: %d)",
+				this, parent, priority, time);
 	}
 
 	/**
@@ -132,7 +148,7 @@ public final class Data extends AbstractList<Value> {
 	 */
 	@Override
 	// CS_IGNORE_NEXT unchecked exception thrown intentionally
-	public Value get(final int index) throws IndexOutOfBoundsException {
+	public final Value get(final int index) throws IndexOutOfBoundsException {
 		if (index < 0 || index >= values.size())
 			throw new IndexOutOfBoundsException(String.format(
 					"Argument %d does not exist in data '%s'", index, this));
@@ -148,13 +164,13 @@ public final class Data extends AbstractList<Value> {
 	 *            index of the {@link Value} to return
 	 * @return {@link Value} at this position or {@link DummyValue}
 	 */
-	public Value getSafe(final int index) {
+	public final Value getSafe(final int index) {
 		return index < 0 || index >= values.size() ? new DummyValue() : values
 				.get(index);
 	}
 
 	@Override
-	public int size() {
+	public final int size() {
 		return values.size();
 	}
 
@@ -162,7 +178,7 @@ public final class Data extends AbstractList<Value> {
 	 * @return the {@link PipePart} which has created or most recently "touched"
 	 *         this {@link Data}.
 	 */
-	public PipePart getOrigin() {
+	public final PipePart getOrigin() {
 		return origin;
 	}
 
@@ -173,7 +189,7 @@ public final class Data extends AbstractList<Value> {
 	 * @param origin
 	 *            creator or processor of this {@link Data}.
 	 */
-	public void setOrigin(final PipePart origin) {
+	public final void setOrigin(final PipePart origin) {
 		this.origin = origin;
 	}
 
@@ -185,7 +201,7 @@ public final class Data extends AbstractList<Value> {
 	 *         May be <b>null</b>, if this one is the root (i.e. it has directly
 	 *         been read from an {@link Input}).
 	 */
-	public Data getParent() {
+	public final Data getParent() {
 		return parent;
 	}
 
@@ -196,7 +212,7 @@ public final class Data extends AbstractList<Value> {
 	 *         one with a higher priority arrives. {@link Data}s with a lower
 	 *         priority than other ones already in the queue will be ignored.
 	 */
-	public byte getPriority() {
+	public final byte getPriority() {
 		return priority;
 	}
 
@@ -206,7 +222,7 @@ public final class Data extends AbstractList<Value> {
 	 *         {@link #TIME_NOTIME} it will just be executed when it reaches the
 	 *         top position in the {@link DataQueue}.
 	 */
-	public long getTime() {
+	public final long getTime() {
 		return time;
 	}
 
@@ -303,7 +319,7 @@ public final class Data extends AbstractList<Value> {
 	 *             example more than eight values associated)
 	 * @see DataBinaryConverter
 	 */
-	public void writeToBinary(final DataOutput out) throws IOException {
+	public final void writeToBinary(final DataOutput out) throws IOException {
 		new DataBinaryConverter(this).writeToBinary(out);
 	}
 
@@ -319,13 +335,13 @@ public final class Data extends AbstractList<Value> {
 	 *             if writing to {@link DataOutput} failed
 	 * @see DataAsciiConverter
 	 */
-	public void writeToAscii(final DataOutput out, final boolean writeLF)
+	public final void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
 		new DataAsciiConverter(this).writeToAscii(out, writeLF);
 	}
 
 	@Override
-	public String toString() {
+	public final String toString() {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream(128);
 		try {
 			writeToAscii(new DataOutputStream(out), false);
@@ -343,12 +359,12 @@ public final class Data extends AbstractList<Value> {
 	 *         May be the {@link Data} itself, if this one is the root (i.e. it
 	 *         has directly been read from an {@link Input}).
 	 */
-	public Data getRoot() {
+	public final Data getRoot() {
 		return parent == null ? this : parent.getRoot();
 	}
 
 	@Override
-	public boolean equals(final Object o) {
+	public final boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof Data)) return false;
 		final Data d = (Data) o;
@@ -357,7 +373,7 @@ public final class Data extends AbstractList<Value> {
 	}
 
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		int res = values.hashCode();
 		res = res * 31 + (parent == null ? 0 : parent.hashCode());
 		res = res * 31 + priority;

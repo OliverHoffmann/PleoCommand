@@ -1,7 +1,6 @@
 package pleocmd.pipe.cvt;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.cfg.ConfigString;
@@ -10,6 +9,7 @@ import pleocmd.exc.FormatException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.SingleValueData;
 
 public final class StatedIntervalConverter extends Converter {
 
@@ -45,7 +45,9 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	protected void initVisualize0() {
-		final DiagramDataSet ds = getVisualizeDataSet(0);
+		DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null) ds.setLabel("Sum");
+		ds = getVisualizeDataSet(0);
 		if (ds != null) {
 			ds.setLabel("Command sent");
 			ds.setType(DiagramType.IntersectionDiagram);
@@ -54,7 +56,7 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
@@ -64,22 +66,24 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
-		final List<Data> res = new ArrayList<Data>(1);
-		sum += 1.0 / data.get(2).asDouble();
-		if (sum < 1) return res;
+		if (!SingleValueData.isSingleValueData(data)) return null;
+		sum += 1.0 / SingleValueData.getValue(data);
+		if (isVisualize()) plot(0, sum);
+		if (sum < 1) return emptyList();
 		sum = .0;
+		final List<Data> res;
 		switch (nextCommand) {
 		case 1:
-			res.add(createCommand(cfgCommand1, data));
+			res = asList(createCommand(cfgCommand1, data));
 			break;
 		case 2:
-			res.add(createCommand(
-					cfgCommand2.getContent().isEmpty() ? cfgCommand1
-							: cfgCommand2, data));
+			res = asList(createCommand(cfgCommand2, data));
+			break;
+		default:
+			throw new IllegalStateException("nextCommand is invalid");
 		}
-		if (isVisualize()) plot(0, nextCommand);
-		nextCommand = 3 - nextCommand;
+		if (isVisualize()) plot(1, nextCommand);
+		nextCommand = cfgCommand2.getContent().isEmpty() ? 1 : 3 - nextCommand;
 		return res;
 	}
 
@@ -121,7 +125,7 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	protected int getVisualizeDataSetCount() {
-		return 1;
+		return 2;
 	}
 
 }

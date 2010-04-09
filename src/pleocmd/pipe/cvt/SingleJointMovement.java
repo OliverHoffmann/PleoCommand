@@ -1,16 +1,13 @@
 package pleocmd.pipe.cvt;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
-import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
+import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.val.Value;
-import pleocmd.pipe.val.ValueType;
+import pleocmd.pipe.data.SingleValueData;
 
 public final class SingleJointMovement extends Converter {
 
@@ -27,7 +24,7 @@ public final class SingleJointMovement extends Converter {
 	private final ConfigInt cfgJointNumber;
 	private final ConfigInt cfgMinAngleMovement;
 
-	private int currentAngle;
+	private double currentAngle;
 
 	public SingleJointMovement() {
 		addConfig(cfgJointNumber = new ConfigInt("Joint-Number", 9, 0, 13));
@@ -61,7 +58,7 @@ public final class SingleJointMovement extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
@@ -71,24 +68,14 @@ public final class SingleJointMovement extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
-		final List<Data> res = new ArrayList<Data>(1);
-		final List<Value> vals = new ArrayList<Value>(2);
-		try {
-			final int val = (int) data.get(2).asDouble();
-			if (Math.abs(currentAngle - val) < cfgMinAngleMovement.getContent())
-				return res; // ignore small movements
-			currentAngle = val;
-			vals.add(Value.createForType(ValueType.NullTermString).set("PMC"));
-			vals.add(Value.createForType(ValueType.NullTermString).set(
-					String.format("JOINT MOVE %d %d", cfgJointNumber
-							.getContent(), val)));
-			if (isVisualize()) plot(0, data.get(2).asDouble());
-		} catch (final IOException e) {
-			throw new InternalException(e);
-		}
-		res.add(new Data(vals, data));
-		return res;
+		if (!SingleValueData.isSingleValueData(data)) return null;
+		final double val = SingleValueData.getValue(data);
+		if (Math.abs(currentAngle - val) < cfgMinAngleMovement.getContent())
+			return emptyList(); // ignore small movements
+		currentAngle = val;
+		if (isVisualize()) plot(0, val);
+		return asList(new CommandData("PMC", String.format("JOINT MOVE %d %d",
+				cfgJointNumber.getContent(), val), data));
 	}
 
 	public static String help(final HelpKind kind) {

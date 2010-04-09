@@ -9,8 +9,7 @@ import java.net.Socket;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.val.Value;
-import pleocmd.pipe.val.ValueType;
+import pleocmd.pipe.data.MultiValueData;
 
 public final class TcpIpInput extends Input {
 
@@ -78,17 +77,13 @@ public final class TcpIpInput extends Input {
 
 	@Override
 	public String getOutputDescription() {
-		return "FromBCI";
+		return MultiValueData.IDENT;
 	}
 
 	@Override
 	protected Data readData0() throws IOException {
 		if (!socket.isConnected() || socket.isInputShutdown()) return null;
-		final Data res = Data.createFromBinary(in);
-		res
-				.add(0, Value.createForType(ValueType.NullTermString).set(
-						"FromBCI"));
-		return res;
+		return new MultiValueData(Data.createFromBinary(in));
 	}
 
 	public static String help(final HelpKind kind) {

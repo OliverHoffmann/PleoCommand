@@ -1,15 +1,13 @@
 package pleocmd.pipe.cvt;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.exc.ConverterException;
-import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.val.Value;
-import pleocmd.pipe.val.ValueType;
+import pleocmd.pipe.data.MultiValueData;
+import pleocmd.pipe.data.SingleValueData;
 
 public final class BCIChannelSplitter extends Converter {
 
@@ -45,33 +43,23 @@ public final class BCIChannelSplitter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return "FromBCI";
+		return MultiValueData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"FromBCI".equals(data.getSafe(0).asString())) return null;
-		final List<Data> res = new ArrayList<Data>(data.size() - 1);
-		for (int i = 1; i < data.size(); ++i) {
-			final List<Value> vals = new ArrayList<Value>(4);
-			try {
-				vals.add(Value.createForType(ValueType.NullTermString).set(
-						"BCIChannel"));
-				vals.add(Value.createForType(ValueType.Int8).set(
-						String.valueOf(i - 1)));
-				vals.add(data.get(i));
-				vals.add(Value.createForType(ValueType.Int32).set("0"));
-			} catch (final IOException e) {
-				throw new InternalException(e);
-			}
-			res.add(new Data(vals, data));
-			if (isVisualize() && i <= MAX_VIS)
-				plot(i - 1, data.get(i).asDouble());
+		if (!MultiValueData.isMultiValueData(data)) return null;
+		final int cnt = MultiValueData.getValueCount(data);
+		final List<Data> res = new ArrayList<Data>(cnt);
+		for (int i = 0; i < cnt; ++i) {
+			final double val = MultiValueData.getValue(data, i);
+			res.add(new SingleValueData(val, i + 1, data));
+			if (isVisualize() && i <= MAX_VIS) plot(i, val);
 		}
 		return res;
 	}
@@ -82,8 +70,8 @@ public final class BCIChannelSplitter extends Converter {
 			return "BCI Channel Splitter";
 		case Description:
 			return "Splits a data packet received from BCI into its "
-					+ "single channels, like 'FromBCI|foo|bar' to "
-					+ "'BCIChannel|0|foo' and 'BCIChannel|1|bar'";
+					+ "single channels, like 'Multi|2.5|7|0.01' to "
+					+ "'Single|2.5|1', 'Single|7|2' and 'Single|0.01|3'";
 		case Configuration:
 			return "";
 		default:

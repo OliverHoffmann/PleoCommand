@@ -12,6 +12,7 @@ import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigItem;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.OutputException;
+import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
 public final class PleoRXTXOutput extends Output {
@@ -70,17 +71,15 @@ public final class PleoRXTXOutput extends Output {
 	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
-		if ("PMC".equals(data.getSafe(0).asString())) {
-			pc.send(data.get(1).asString());
-			try {
-				Log.consoleOut(pc.readAnswer());
-			} catch (final TimeoutException e) {
-				throw new OutputException(this, true, e,
-						"Cannot read answer for command '%s'", data);
-			}
-			return true;
+		if (!CommandData.isCommandData(data, "PMC")) return false;
+		pc.send(CommandData.getArgument(data));
+		try {
+			Log.consoleOut(pc.readAnswer());
+		} catch (final TimeoutException e) {
+			throw new OutputException(this, true, e,
+					"Cannot read answer for command '%s'", data);
 		}
-		return false;
+		return true;
 	}
 
 	public static String help(final HelpKind kind) {

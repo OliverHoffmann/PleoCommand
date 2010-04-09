@@ -6,6 +6,7 @@ import pleocmd.Log;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
+import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
 public final class InternalCommandOutput extends Output {
@@ -37,26 +38,24 @@ public final class InternalCommandOutput extends Output {
 	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
-		if ("SC".equals(data.getSafe(0).asString())) {
-			final String v2 = data.get(1).asString();
-			if ("SLEEP".equals(v2))
-				try {
-					Thread.sleep(data.getSafe(2).asLong());
-				} catch (final InterruptedException e) {
-					throw new OutputException(this, false, e,
-							"Executing '%s' failed", data);
-				}
-			else if ("HELP".equals(v2))
-				printHelp();
-			else if ("ECHO".equals(v2))
-				Log.consoleOut(data.getSafe(2).asString().replace("$ELAPSED",
-						String.valueOf(getPipe().getFeedback().getElapsed())));
-			else
-				throw new OutputException(this, false,
-						"Unknown internal command: '%s' in '%s'", v2, data);
-			return true;
-		}
-		return false;
+		if (!CommandData.isCommandData(data, "SC")) return false;
+		final String arg = CommandData.getArgument(data);
+		if ("SLEEP".equals(arg))
+			try {
+				Thread.sleep(data.getSafe(2).asLong());
+			} catch (final InterruptedException e) {
+				throw new OutputException(this, false, e,
+						"Executing '%s' failed", data);
+			}
+		else if ("HELP".equals(arg))
+			printHelp();
+		else if ("ECHO".equals(arg))
+			Log.consoleOut(data.getSafe(2).asString().replace("$ELAPSED",
+					String.valueOf(getPipe().getFeedback().getElapsed())));
+		else
+			throw new OutputException(this, false,
+					"Unknown internal command: '%s' in '%s'", arg, data);
+		return true;
 	}
 
 	private void printHelp() {

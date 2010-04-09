@@ -5,6 +5,7 @@ import java.util.List;
 
 import pleocmd.cfg.ConfigDataMap;
 import pleocmd.exc.ConverterException;
+import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
 public final class SimpleConverter extends Converter {
@@ -43,8 +44,8 @@ public final class SimpleConverter extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"DO".equals(data.getSafe(0).asString())) return null;
-		final String s = data.get(1).asString();
+		if (!CommandData.isCommandData(data, "DO")) return null;
+		final String s = CommandData.getArgument(data);
 		if (!cfgMap.hasContent(s))
 			throw new ConverterException(this, false,
 					"No entry for '%s' found", s);

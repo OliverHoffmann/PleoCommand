@@ -1,12 +1,12 @@
 package pleocmd.pipe.cvt;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.SingleValueData;
 
 public final class BCISingleChannel extends Converter {
 
@@ -45,23 +45,21 @@ public final class BCISingleChannel extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return "BCIChannel";
+		return SingleValueData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!"BCIChannel".equals(data.getSafe(0).asString())) return null;
-		final List<Data> res = new ArrayList<Data>(1);
-		if (data.get(1).asLong() == cfgChannelNr.getContent()) {
-			res.add(data);
-			if (isVisualize()) plot(0, data.get(2).asDouble());
-		}
-		return res;
+		if (!SingleValueData.isSingleValueData(data)) return null;
+		if (SingleValueData.getUser(data) != cfgChannelNr.getContent())
+			return emptyList();
+		if (isVisualize()) plot(0, SingleValueData.getValue(data));
+		return asList(data);
 	}
 
 	public static String help(final HelpKind kind) {

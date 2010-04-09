@@ -97,6 +97,11 @@ public final class IntValue extends Value {
 		return this;
 	}
 
+	public Value set(final long content) {
+		val = content;
+		return this;
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 		if (o == this) return true;
