@@ -4,15 +4,12 @@ import java.io.IOException;
 
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigInt;
-import pleocmd.cfg.ConfigString;
-import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleValueData;
 
 public final class RandomGeneratorInput extends Input {
 
-	private final ConfigString cfgInput;
 	private final ConfigInt cfgUserData;
 	private final ConfigInt cfgSamplerate;
 	private final ConfigDouble cfgPeakPropbability;
@@ -38,7 +35,6 @@ public final class RandomGeneratorInput extends Input {
 	private int step;
 
 	public RandomGeneratorInput() {
-		addConfig(cfgInput = new ConfigString("Input", true));
 		addConfig(cfgUserData = new ConfigInt("User-Data", 0));
 		addConfig(cfgSamplerate = new ConfigInt("Samplerate (in Hz)", 10, 1,
 				10000));
@@ -59,12 +55,6 @@ public final class RandomGeneratorInput extends Input {
 		constructed();
 	}
 
-	public RandomGeneratorInput(final String staticData)
-			throws ConfigurationException {
-		this();
-		cfgInput.setContent(staticData);
-	}
-
 	@Override
 	protected void configure0() {
 		// nothing to do
@@ -78,6 +68,7 @@ public final class RandomGeneratorInput extends Input {
 
 	@Override
 	protected void close0() throws IOException {
+		// nothing to do
 	}
 
 	@Override
