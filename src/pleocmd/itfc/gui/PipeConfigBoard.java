@@ -1321,7 +1321,7 @@ public final class PipeConfigBoard extends JPanel {
 		}
 
 		final JDialog dlg = new JDialog();
-		dlg.setTitle(String.format("%s %s", prefix, pp));
+		dlg.setTitle(String.format("%s %s", prefix, pp.getName()));
 		final Layouter lay = new Layouter(dlg);
 		for (final ConfigValue v : pp.getGuiConfigs()) {
 			// each config-value gets its own JPanel so they don't
