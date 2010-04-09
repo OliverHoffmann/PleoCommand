@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import javax.swing.Icon;
+
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigBounds;
@@ -24,6 +26,7 @@ import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.PipeConfigBoard;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.in.Input;
@@ -40,7 +43,38 @@ public abstract class PipePart extends StateHandling {
 	private static final Random RAND = new Random();
 
 	public enum HelpKind {
-		Name, Description, Configuration
+		/**
+		 * Name of the Pipe-Part (only one line)
+		 */
+		Name,
+		/**
+		 * A short description of this Pipe-Part (a few lines)
+		 */
+		Description,
+		/**
+		 * Name of an HTML file displayed when clicking "Help" in the
+		 * configuration dialog (defaults to the class-name + ".html")
+		 */
+		HelpFile,
+		/**
+		 * Name of an icon for this Pipe-Part (should be 16x16 pixels, defaults
+		 * to the class-name + ".png")
+		 */
+		Icon,
+		/**
+		 * Name of an image displayed on the left side of the configuration
+		 * dialog (should be no larger than 300x500 pixels, defaults to the
+		 * class-name + "-cfg.png")
+		 */
+		ConfigImage,
+		/**
+		 * Short description of a configuration entry (a few lines)
+		 */
+		Config1, Config2, Config3, Config4, Config5, //
+		Config6, Config7, Config8, Config9, Config10, //
+		Config11, Config12, Config13, Config14, Config15, //
+		Config16, Config17, Config18, Config19, Config20, //
+		// Config... must be the last entries
 	}
 
 	private final ConfigLong cfgUID;
@@ -481,8 +515,32 @@ public abstract class PipePart extends StateHandling {
 		return PipePartDetection.callHelp(getClass(), HelpKind.Description);
 	}
 
-	public final String getConfigHelp() {
-		return PipePartDetection.callHelp(getClass(), HelpKind.Configuration);
+	public final String getHelpFile() {
+		final String name = PipePartDetection.callHelp(getClass(),
+				HelpKind.HelpFile);
+		return name == null ? getClass().getSimpleName() + ".html" : name;
+	}
+
+	public String getConfigHelp(final int index) {
+		final int cfgIndex = HelpKind.Config1.ordinal() + index;
+		if (cfgIndex >= HelpKind.values().length) return null;
+		return PipePartDetection.callHelp(getClass(),
+				HelpKind.values()[cfgIndex]);
+	}
+
+	public Icon getConfigImage() {
+		String name = PipePartDetection.callHelp(getClass(),
+				HelpKind.ConfigImage);
+		if (name == null) name = getClass().getSimpleName() + "-cfg.png";
+		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
+				: null;
+	}
+
+	public Icon getIcon() {
+		String name = PipePartDetection.callHelp(getClass(), HelpKind.Icon);
+		if (name == null) name = getClass().getSimpleName() + ".png";
+		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
+				: null;
 	}
 
 }

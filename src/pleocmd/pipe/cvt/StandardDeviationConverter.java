@@ -89,11 +89,12 @@ public final class StandardDeviationConverter extends Converter {
 		case Name:
 			return "Standard-Deviation Converter";
 		case Description:
-			return "Calculates the standard deviation of the Data";
-		case Configuration:
-			return "1: Number of Data blocks to use for deviation calculation";
+			return "Calculates the standard deviation of the Data based "
+					+ "on the most recent data packets";
+		case Config1:
+			return "Number of Data blocks to use for deviation calculation";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

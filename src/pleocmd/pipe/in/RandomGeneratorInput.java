@@ -138,11 +138,9 @@ public final class RandomGeneratorInput extends Input {
 		case Name:
 			return "Random Generator";
 		case Description:
-			return "";
-		case Configuration:
-			return "1: ";
+			return ""; // TODO
 		default:
-			return "???";
+			return null;
 		}
 	}
 

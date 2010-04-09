@@ -82,11 +82,11 @@ public final class NormalizingConverter extends Converter {
 			return "Normalizing Converter";
 		case Description:
 			return "Normalizes the Data to the baseline by reducing it "
-					+ "by the average over the last view Data blocks";
-		case Configuration:
-			return "1: Number of Data blocks to use for average calculation";
+					+ "by the average over the most recent Data blocks";
+		case Config1:
+			return "Number of Data blocks to use for average calculation";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

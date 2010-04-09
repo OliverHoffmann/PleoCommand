@@ -65,14 +65,14 @@ public final class BCISingleChannel extends Converter {
 	public static String help(final HelpKind kind) {
 		switch (kind) {
 		case Name:
-			return "BCI Single Channel";
+			return "Single Channel";
 		case Description:
-			return "Lets only one single channel pass and "
-					+ "blocks all other ones";
-		case Configuration:
-			return "1: Number of channel that is allowed to pass";
+			return "Lets only data from a single channel pass and "
+					+ "blocks all other data packets";
+		case Config1:
+			return "Number of channel that is allowed to pass";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

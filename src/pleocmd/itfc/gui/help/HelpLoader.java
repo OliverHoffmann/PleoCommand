@@ -25,6 +25,21 @@ public final class HelpLoader {
 		return url;
 	}
 
+	/**
+	 * Checks whether a help file is available (so that {@link #getHelp(String)}
+	 * would return an URL other than {@link #getMissingHelp()}).
+	 * 
+	 * @param name
+	 *            name of the help file without any path and optionally without
+	 *            extension it it is an HTML file
+	 * @return true if help file exists
+	 */
+	public static boolean isHelpAvailable(final String name) {
+		if (name == null) return false;
+		return HelpLoader.class.getResource(name.contains(".") ? name : name
+				+ ".html") != null;
+	}
+
 	public static URL getMissingHelp() {
 		final URL url = HelpLoader.class.getResource("help-missing.html");
 		if (url == null)

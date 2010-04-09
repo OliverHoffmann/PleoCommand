@@ -64,10 +64,10 @@ public final class StaticInput extends Input {
 			return "Static Input";
 		case Description:
 			return "Returns Ascii Data blocks directly from configuration";
-		case Configuration:
-			return "1: A new-line delimited list of Data blocks in Ascii form";
+		case Config1:
+			return "A new-line delimited list of Data blocks in Ascii form";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

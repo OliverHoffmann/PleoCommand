@@ -79,9 +79,12 @@ public final class InternalCommandOutput extends Output {
 		// CS_IGNORE_NEXT format is correct in this context
 		Log.consoleOut("%s:", PipePartDetection.callHelp(cpp, HelpKind.Name));
 		Log.consoleOut(PipePartDetection.callHelp(cpp, HelpKind.Description));
-		final String cfg = PipePartDetection.callHelp(cpp,
-				HelpKind.Configuration);
-		if (!cfg.isEmpty()) Log.consoleOut(cfg);
+		for (int i = HelpKind.Config1.ordinal(); i < HelpKind.values().length; ++i) {
+			final HelpKind hk = HelpKind.values()[i];
+			final String cfg = PipePartDetection.callHelp(cpp, hk);
+			if (cfg == null) break;
+			Log.consoleOut(String.format("%s: %s", hk, cfg));
+		}
 		Log.consoleOut("");
 	}
 
@@ -90,16 +93,9 @@ public final class InternalCommandOutput extends Output {
 		case Name:
 			return "Internal Commands Output";
 		case Description:
-			return "Processes special commands, which don't need to be "
-					+ "send to external targets:\n"
-					+ "SC|SLEEP|<duration>\tSleeps the for duration specified "
-					+ "in milliseconds\n"
-					+ "SC|HELP\t\t\tPrint help for all currently known PipeParts "
-					+ "to the standard output";
-		case Configuration:
-			return "";
+			return "Processes special commands like SLEEP or HELP";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

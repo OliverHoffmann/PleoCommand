@@ -59,11 +59,11 @@ public final class EmotionConverter extends Converter {
 		case Description:
 			return "Converts emotions like 'BE|foo' into a sequence of "
 					+ "simpler commands based on a table lookup for 'foo'";
-		case Configuration:
-			return "1: Path to a file which contains a mapping between "
+		case Config1:
+			return "Path to a file which contains a mapping between "
 					+ "triggers and a list of commands for each of them";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

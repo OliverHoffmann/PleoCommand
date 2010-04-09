@@ -108,20 +108,25 @@ public final class BCICodomainAdaption extends Converter {
 	public static String help(final HelpKind kind) {
 		switch (kind) {
 		case Name:
-			return "BCI Codomain Adaption";
+			return "Codomain Adaption";
 		case Description:
 			return "Reduces or enlarges the range of possible values for a "
-					+ "single BCI channel";
-		case Configuration:
-			return "1: Minimum value of source range\n"
-					+ "2: Maximum value of source range\n"
-					+ "3: Minimum value of target range\n"
-					+ "4: Maximum value of target range\n"
-					+ "5: Whether to fit values out of the source range to min/max "
-					+ "or just drop their data packets\n"
-					+ "6: Kind of transformation from source range to target range";
+					+ "single channel";
+		case Config1:
+			return "Minimum value of source range";
+		case Config2:
+			return "Maximum value of source range";
+		case Config3:
+			return "Minimum value of target range";
+		case Config4:
+			return "Maximum value of target range";
+		case Config5:
+			return "Whether to fit values out of the source range to min/max "
+					+ "or just drop the data packet";
+		case Config6:
+			return "Kind of transformation from source range to target range";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

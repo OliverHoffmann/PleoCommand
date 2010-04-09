@@ -92,12 +92,14 @@ public final class TcpIpInput extends Input {
 			return "TCP/IP Input";
 		case Description:
 			return "Reads Data blocks from a TCP/IP connection";
-		case Configuration:
-			return "1: Port number of the Host\n"
-					+ "2: Connection Timeout in seconds (0 means infinite)\n"
-					+ "3: Timeout for reading in seconds (0 means infinite)";
+		case Config1:
+			return "Port number of the client";
+		case Config2:
+			return "Connection Timeout in seconds (0 means infinite)";
+		case Config3:
+			return "Timeout for reading in seconds (0 means infinite)";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

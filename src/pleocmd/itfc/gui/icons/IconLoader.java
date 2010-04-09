@@ -36,6 +36,21 @@ public final class IconLoader {
 	}
 
 	/**
+	 * Loads an icon and returns an instance to it.
+	 * 
+	 * @param name
+	 *            name of the icon without any path and optionally without
+	 *            extension it it is a PNG file
+	 * @return instance to the icon or instance to a special "image-missing"
+	 *         icon if the icon specified by name could not be found or loaded
+	 */
+	public static boolean isIconAvailable(final String name) {
+		if (name == null) return false;
+		return IconLoader.class.getResource(name.contains(".") ? name : name
+				+ ".png") != null;
+	}
+
+	/**
 	 * Loads a special icon and returns an instance to it.
 	 * 
 	 * @return instance to a special "image-missing" icon or an empty icon if

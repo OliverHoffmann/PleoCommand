@@ -109,13 +109,14 @@ public final class FileOutput extends Output {
 			return "File Output";
 		case Description:
 			return "Writes Data blocks to external files";
-		case Configuration:
-			return "1: Path to an external file to which commands should"
-					+ "be written in either Ascii or binary form\n"
-					+ "2: 'Ascii' if Data blocks will be in Ascii format or\n"
+		case Config1:
+			return "Path to an external file to which commands should "
+					+ "be written in either Ascii or binary form";
+		case Config2:
+			return "'Ascii' if Data blocks will be in Ascii format or\n"
 					+ "   'Binary' if Data blocks will be written as binary";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

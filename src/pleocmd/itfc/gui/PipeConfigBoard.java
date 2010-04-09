@@ -1,6 +1,7 @@
 package pleocmd.itfc.gui;
 
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -34,7 +35,9 @@ import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -52,6 +55,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
+import pleocmd.itfc.gui.help.HelpLoader;
 import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
@@ -301,6 +305,8 @@ public final class PipeConfigBoard extends JPanel {
 						addPipePart(pp, getLastMenuLocation());
 					}
 				});
+				item.setToolTipText(PipePartDetection.callHelp(pp,
+						HelpKind.Description));
 			}
 		menu.addSeparator();
 
@@ -649,6 +655,7 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setColor(outerClr);
 		g2.draw(rect);
 
+		final Icon icon = part.getIcon();
 		final String s = part.getName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
@@ -1322,8 +1329,10 @@ public final class PipeConfigBoard extends JPanel {
 
 		final JDialog dlg = new JDialog();
 		dlg.setTitle(String.format("%s %s", prefix, pp.getName()));
-		final Layouter lay = new Layouter(dlg);
+		final JPanel cfgItemPanel = new JPanel();
+		final Layouter lay = new Layouter(cfgItemPanel);
 		boolean hasGreedy = false;
+		int idx = 0;
 		for (final ConfigValue v : pp.getGuiConfigs()) {
 			// each config-value gets its own JPanel so they don't
 			// interfere with each other.
@@ -1332,23 +1341,39 @@ public final class PipeConfigBoard extends JPanel {
 			// LBL3 SUB3
 			// BUTTONS
 			final JPanel sub = new JPanel();
-			final Layouter laySub = new Layouter(sub);
-			final boolean greedy = v.insertGUIComponents(laySub);
+			final int cmpCnt = sub.getComponentCount();
+			final boolean greedy = v.insertGUIComponents(new Layouter(sub));
 			final String compLabel = v.getLabel() + ":";
 			final JLabel lbl = new JLabel(compLabel, SwingConstants.RIGHT);
 			lbl.setVerticalAlignment(SwingConstants.TOP);
 			lay.add(lbl, false);
 			lay.addWholeLine(sub, greedy);
 			hasGreedy |= greedy;
+			for (int i = cmpCnt; i < sub.getComponentCount(); ++i)
+				if (sub.getComponent(i) instanceof JComponent)
+					((JComponent) sub.getComponent(i)).setToolTipText(pp
+							.getConfigHelp(idx));
+			++idx;
 		}
+		if (!hasGreedy) lay.addVerticalSpacer();
 
 		final JPanel buttons = new JPanel();
 		final Layouter lb = new Layouter(buttons);
 
-		if (!hasGreedy) lay.addVerticalSpacer();
-		lay.addWholeLine(buttons, false);
+		dlg.setLayout(new BorderLayout());
+		dlg.add(cfgItemPanel, BorderLayout.CENTER);
+		dlg.add(buttons, BorderLayout.SOUTH);
+		final Icon cfgImage = pp.getConfigImage();
+		if (cfgImage != null) {
+			final JLabel lbl = new JLabel(cfgImage, SwingConstants.RIGHT);
+			lbl.setVerticalAlignment(SwingConstants.TOP);
+			dlg.add(lbl, BorderLayout.WEST);
+		}
 
-		lb.addButton(Button.Help, Layouter.help(dlg, "PartConfigureDialog"));
+		final String helpFile = pp.getHelpFile();
+		final JButton btnHelp = lb.addButton(Button.Help, Layouter.help(dlg,
+				helpFile));
+		btnHelp.setEnabled(HelpLoader.isHelpAvailable(helpFile));
 		lb.addSpacer();
 		dlg.getRootPane().setDefaultButton(
 				lb.addButton(Button.Ok, new Runnable() {
@@ -1375,7 +1400,7 @@ public final class PipeConfigBoard extends JPanel {
 
 		dlg.pack();
 		dlg.setLocationRelativeTo(null);
-		// dlg.setModal(true);
+		dlg.setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		dlg.setVisible(true);
 		HelpDialog.closeHelpIfOpen();
@@ -1405,7 +1430,9 @@ public final class PipeConfigBoard extends JPanel {
 		if (underCursor == null) return null;
 		final StringBuilder sb = new StringBuilder("<html><b>");
 		sb.append(underCursor.getName());
-		sb.append("</b><table>");
+		sb.append("</b><p>");
+		sb.append(underCursor.getDescription());
+		sb.append("<table>");
 		for (final ConfigValue v : underCursor.getGuiConfigs()) {
 			sb.append("<tr><td align=right>");
 			sb.append(v.getLabel().replace("<", "&lt;"));

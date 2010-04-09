@@ -109,12 +109,12 @@ public final class StatedIntervalConverter extends Converter {
 					+ "the source values, i.e. if input is [2, 2, 2, 2, 1, 1]"
 					+ "output would be [-, C, -, C, C, C] where C is command "
 					+ "and - marks a dropped data packet";
-		case Configuration:
-			return "1: First command to send (alternating with the second one)\n"
-					+ "2: Second command to send (if empty, "
-					+ "only first one will be used)";
+		case Config1:
+			return "First command to send (alternating with the second one)";
+		case Config2:
+			return "Second command to send (if empty, only first one will be used)";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

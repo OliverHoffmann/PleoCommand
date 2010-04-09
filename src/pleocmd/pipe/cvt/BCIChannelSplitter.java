@@ -67,15 +67,13 @@ public final class BCIChannelSplitter extends Converter {
 	public static String help(final HelpKind kind) {
 		switch (kind) {
 		case Name:
-			return "BCI Channel Splitter";
+			return "Channel Splitter";
 		case Description:
-			return "Splits a data packet received from BCI into its "
+			return "Splits a multi-channel data packet into its "
 					+ "single channels, like 'Multi|2.5|7|0.01' to "
 					+ "'Single|2.5|1', 'Single|7|2' and 'Single|0.01|3'";
-		case Configuration:
-			return "";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

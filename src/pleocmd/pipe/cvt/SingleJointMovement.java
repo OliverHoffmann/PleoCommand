@@ -83,13 +83,14 @@ public final class SingleJointMovement extends Converter {
 		case Name:
 			return "Single Joint Movement";
 		case Description:
-			return "Produces a JOINT MOVE command for the Pleo for one joint and"
-					+ "a codomain-adapted value of the given BCI channel";
-		case Configuration:
-			return "1: Number of Pleo joint (motor) to move\n"
-					+ "2: Minimal angle - movements below this will be ignored";
+			return "Produces a JOINT MOVE command for the Pleo for one joint "
+					+ "based on the data in a single channel";
+		case Config1:
+			return "Number of Pleo joint (motor) to move";
+		case Config2:
+			return "Minimal angle; all movements below this will be ignored";
 		default:
-			return "???";
+			return null;
 		}
 	}
 

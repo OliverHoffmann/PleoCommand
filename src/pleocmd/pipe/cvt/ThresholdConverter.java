@@ -144,10 +144,8 @@ public final class ThresholdConverter extends Converter {
 			return "Threshold Converter";
 		case Description:
 			return ""; // TODO
-		case Configuration:
-			return ""; // TODO
 		default:
-			return "???";
+			return null;
 		}
 	}
 

@@ -89,11 +89,11 @@ public final class ConsoleOutput extends Output {
 			return "Console Output";
 		case Description:
 			return "Writes Data blocks to the standard output";
-		case Configuration:
-			return "1: 'Ascii' if Data blocks will be in Ascii format or\n"
+		case Config1:
+			return "'Ascii' if Data blocks will be in Ascii format or\n"
 					+ "   'Binary' if Data blocks will be written as binary";
 		default:
-			return "???";
+			return null;
 		}
 	}
 
