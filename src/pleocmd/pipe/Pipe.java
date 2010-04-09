@@ -815,7 +815,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (!sum.isEmpty()) return sum;
 
 		// no fitting (and not ignored and working) converter found
-		Log.info("No Converter found, returning data as is: '%s'", data);
+		Log.detail("No Converter found, returning data as is: '%s'", data);
 		res = new ArrayList<Data>(1);
 		res.add(data);
 		return res;
