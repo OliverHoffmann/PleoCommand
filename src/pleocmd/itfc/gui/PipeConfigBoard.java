@@ -1323,6 +1323,7 @@ public final class PipeConfigBoard extends JPanel {
 		final JDialog dlg = new JDialog();
 		dlg.setTitle(String.format("%s %s", prefix, pp.getName()));
 		final Layouter lay = new Layouter(dlg);
+		boolean hasGreedy = false;
 		for (final ConfigValue v : pp.getGuiConfigs()) {
 			// each config-value gets its own JPanel so they don't
 			// interfere with each other.
@@ -1332,18 +1333,19 @@ public final class PipeConfigBoard extends JPanel {
 			// BUTTONS
 			final JPanel sub = new JPanel();
 			final Layouter laySub = new Layouter(sub);
+			final boolean greedy = v.insertGUIComponents(laySub);
 			final String compLabel = v.getLabel() + ":";
 			final JLabel lbl = new JLabel(compLabel, SwingConstants.RIGHT);
 			lbl.setVerticalAlignment(SwingConstants.TOP);
 			lay.add(lbl, false);
-			lay.addWholeLine(sub, false);
-			v.insertGUIComponents(laySub);
+			lay.addWholeLine(sub, greedy);
+			hasGreedy |= greedy;
 		}
 
 		final JPanel buttons = new JPanel();
 		final Layouter lb = new Layouter(buttons);
 
-		lay.addVerticalSpacer();
+		if (!hasGreedy) lay.addVerticalSpacer();
 		lay.addWholeLine(buttons, false);
 
 		lb.addButton(Button.Help, Layouter.help(dlg, "PartConfigureDialog"));

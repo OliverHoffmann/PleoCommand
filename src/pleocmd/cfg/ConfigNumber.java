@@ -1,5 +1,6 @@
 package pleocmd.cfg;
 
+import java.awt.Dimension;
 import java.util.List;
 
 import javax.swing.JSpinner;
@@ -94,10 +95,12 @@ public abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	@SuppressWarnings("unchecked")
 	// all Number implementations are Comparable to themselves
 	// but we can't express this in Java genericals :(
-	public final void insertGUIComponents(final Layouter lay) {
+	public final boolean insertGUIComponents(final Layouter lay) {
 		sp = new JSpinner(new SpinnerNumberModel(content, (Comparable<E>) min,
 				(Comparable<E>) max, step));
+		sp.setPreferredSize(new Dimension(150, sp.getMinimumSize().height));
 		lay.add(sp, true);
+		return false;
 	}
 
 	@Override

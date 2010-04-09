@@ -133,11 +133,12 @@ public class ConfigItem<E> extends ConfigValue {
 	}
 
 	@Override
-	public final void insertGUIComponents(final Layouter lay) {
+	public final boolean insertGUIComponents(final Layouter lay) {
 		cb = new JComboBox(identifiers.toArray());
 		cb.setEditable(freeAssign);
 		cb.setSelectedItem(content);
 		lay.add(cb, true);
+		return false;
 	}
 
 	@Override

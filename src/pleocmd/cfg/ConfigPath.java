@@ -135,7 +135,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Layouter lay) {
+	public boolean insertGUIComponents(final Layouter lay) {
 		tf = new JTextField(content.getPath(), 50);
 		lay.add(tf, true);
 		lay.addButton(Button.Browse, new Runnable() {
@@ -163,6 +163,7 @@ public final class ConfigPath extends ConfigValue {
 				}
 			});
 		}
+		return false;
 	}
 
 	protected void selectPath(final Container parent) {

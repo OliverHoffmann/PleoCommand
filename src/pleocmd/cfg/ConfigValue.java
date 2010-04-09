@@ -64,7 +64,7 @@ public abstract class ConfigValue {
 
 	abstract boolean isSingleLined();
 
-	public abstract void insertGUIComponents(final Layouter lay);
+	public abstract boolean insertGUIComponents(final Layouter lay);
 
 	public abstract void setFromGUIComponents();
 

@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import pleocmd.Log;
@@ -145,9 +146,10 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	@Override
-	public final void insertGUIComponents(final Layouter lay) {
-		tc = new JTextArea(asString(), 50, 5);
-		lay.add(tc, true);
+	public final boolean insertGUIComponents(final Layouter lay) {
+		tc = new JTextArea(asString(), 5, 20);
+		lay.addWholeLine(new JScrollPane(tc), true);
+		return true;
 	}
 
 	@Override

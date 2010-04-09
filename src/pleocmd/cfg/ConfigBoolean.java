@@ -68,9 +68,10 @@ public final class ConfigBoolean extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Layouter lay) {
+	public boolean insertGUIComponents(final Layouter lay) {
 		checkBox = new JCheckBox("", content);
 		lay.add(checkBox, false);
+		return false;
 	}
 
 	@Override

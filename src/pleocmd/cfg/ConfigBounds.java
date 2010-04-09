@@ -100,8 +100,9 @@ public final class ConfigBounds extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Layouter lay) {
+	public boolean insertGUIComponents(final Layouter lay) {
 		lay.add(new JLabel(asString()), true);
+		return false;
 	}
 
 	@Override

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -123,10 +124,15 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public void insertGUIComponents(final Layouter lay) {
-		tc = multiLine ? new JTextArea(content, 50, 5) : new JTextField(
-				content, 50);
-		lay.add(tc, true);
+	public boolean insertGUIComponents(final Layouter lay) {
+		tc = multiLine ? new JTextArea(content, 5, 20) : new JTextField(
+				content, 20);
+		if (multiLine) {
+			final JScrollPane sp = new JScrollPane(tc);
+			lay.addWholeLine(sp, true);
+		} else
+			lay.add(tc, true);
+		return multiLine;
 	}
 
 	@Override
