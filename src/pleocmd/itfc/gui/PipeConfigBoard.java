@@ -56,6 +56,7 @@ import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
+import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -203,6 +204,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private boolean delayedReordering;
 
+	private Point lastMenuLocation;
+
 	public PipeConfigBoard() {
 		setPreferredSize(new Dimension(400, 300));
 
@@ -289,12 +292,13 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(menuAdd);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
-				final JMenuItem item = new JMenuItem(pp.getName());
+				final JMenuItem item = new JMenuItem(PipePartDetection
+						.callHelp(pp, HelpKind.Name));
 				menuAdd.add(item);
 				item.addActionListener(new ActionListener() {
 					@Override
 					public void actionPerformed(final ActionEvent e) {
-						addPipePart(pp);
+						addPipePart(pp, getLastMenuLocation());
 					}
 				});
 			}
@@ -354,6 +358,10 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(itemToggleDgr);
 
 		return menu;
+	}
+
+	protected Point getLastMenuLocation() {
+		return lastMenuLocation;
 	}
 
 	protected void removeCurrentConnection() {
@@ -878,13 +886,16 @@ public final class PipeConfigBoard extends JPanel {
 		return (int) (len * Math.cos(dir));
 	}
 
-	protected void addPipePart(final Class<? extends PipePart> part) {
+	protected void addPipePart(final Class<? extends PipePart> part,
+			final Point location) {
 		if (!ensureModifyable()) return;
 		try {
 			final PipePart pp = part.newInstance();
 			createConfigureDialog("Add", pp, new Runnable() {
 				@Override
 				public void run() {
+					if (location != null)
+						pp.getGuiPosition().setLocation(location);
 					check(pp.getGuiPosition(), pp);
 					try {
 						if (pp instanceof Input)
@@ -1270,6 +1281,7 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void showMenu(final Component invoker, final int x, final int y) {
+		lastMenuLocation = new Point(x, y);
 		if (x <= border1)
 			showMenu(menuInput, invoker, x, y);
 		else if (x >= border2)
@@ -1422,10 +1434,8 @@ public final class PipeConfigBoard extends JPanel {
 	public void setZoom(final double zoom) {
 		if (zoom > 0)
 			scale = 1 + zoom * 9;
-		else if (zoom < 0)
-			scale = 1 / (1 + -zoom * 9);
 		else
-			scale = 1;
+			scale = zoom < 0 ? 1 / (1 + -zoom * 9) : 1;
 		repaint();
 	}
 
