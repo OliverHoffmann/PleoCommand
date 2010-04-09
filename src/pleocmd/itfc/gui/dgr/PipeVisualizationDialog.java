@@ -34,7 +34,7 @@ public final class PipeVisualizationDialog extends JDialog implements
 		this.part = part;
 
 		Log.detail("Creating Pipe-Visualization-Dialog");
-		setTitle("Visualization for " + part.getClass().getSimpleName());
+		setTitle("Visualization for " + part.getName());
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override

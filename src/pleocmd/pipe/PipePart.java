@@ -25,6 +25,7 @@ import pleocmd.itfc.gui.PipeConfigBoard;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.pipe.cvt.Converter;
+import pleocmd.pipe.data.Data;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
@@ -149,7 +150,7 @@ public abstract class PipePart extends StateHandling {
 			return true;
 		} catch (final PipeException e) {
 			pipe.getFeedback().addError(e, e.isPermanent());
-			Log.error(e, "Cannot configure '%s'", getClass().getSimpleName());
+			Log.error(e, "Cannot configure '%s'", getName());
 			return false;
 		}
 	}
@@ -167,7 +168,7 @@ public abstract class PipePart extends StateHandling {
 			return true;
 		} catch (final PipeException e) {
 			pipe.getFeedback().addError(e, e.isPermanent());
-			Log.error(e, "Cannot initialize '%s'", getClass().getSimpleName());
+			Log.error(e, "Cannot initialize '%s'", getName());
 			return false;
 		}
 	}
@@ -184,7 +185,7 @@ public abstract class PipePart extends StateHandling {
 			return true;
 		} catch (final PipeException e) {
 			pipe.getFeedback().addError(e, e.isPermanent());
-			Log.error(e, "Cannot close '%s'", getClass().getSimpleName());
+			Log.error(e, "Cannot close '%s'", getName());
 			return false;
 		}
 	}
@@ -459,6 +460,28 @@ public abstract class PipePart extends StateHandling {
 
 	protected boolean topDownCheck_outputReached() {
 		return false;
+	}
+
+	protected final List<Data> asList(final Data data) {
+		final List<Data> res = new ArrayList<Data>(1);
+		res.add(data);
+		return res;
+	}
+
+	protected final List<Data> emptyList() {
+		return new ArrayList<Data>(0);
+	}
+
+	public final String getName() {
+		return PipePartDetection.callHelp(getClass(), HelpKind.Name);
+	}
+
+	public final String getDescription() {
+		return PipePartDetection.callHelp(getClass(), HelpKind.Description);
+	}
+
+	public final String getConfigHelp() {
+		return PipePartDetection.callHelp(getClass(), HelpKind.Configuration);
 	}
 
 }

@@ -289,7 +289,7 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(menuAdd);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
-				final JMenuItem item = new JMenuItem(pp.getSimpleName());
+				final JMenuItem item = new JMenuItem(pp.getName());
 				menuAdd.add(item);
 				item.addActionListener(new ActionListener() {
 					@Override
@@ -641,7 +641,7 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setColor(outerClr);
 		g2.draw(rect);
 
-		final String s = part.getClass().getSimpleName();
+		final String s = part.getName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
 		if (hover) {
@@ -1390,7 +1390,7 @@ public final class PipeConfigBoard extends JPanel {
 	public String getToolTipText(final MouseEvent event) {
 		if (underCursor == null) return null;
 		final StringBuilder sb = new StringBuilder("<html><b>");
-		sb.append(underCursor.getClass().getSimpleName());
+		sb.append(underCursor.getName());
 		sb.append("</b><table>");
 		for (final ConfigValue v : underCursor.getGuiConfigs()) {
 			sb.append("<tr><td align=right>");
