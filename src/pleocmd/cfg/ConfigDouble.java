@@ -45,7 +45,7 @@ public final class ConfigDouble extends ConfigNumber<Double> {
 
 	@Override
 	protected boolean lessThan(final Double nr1, final Double nr2) {
-		return nr1 < nr2;
+		return nr1 < nr2 - Double.MIN_NORMAL;
 	}
 
 	@Override
