@@ -6,7 +6,7 @@ import pleocmd.exc.InternalException;
 public final class ConfigDouble extends ConfigNumber<Double> {
 
 	public ConfigDouble(final String label) {
-		this(label, Double.MIN_VALUE, Double.MAX_VALUE);
+		this(label, -Double.MAX_VALUE, Double.MAX_VALUE);
 	}
 
 	public ConfigDouble(final String label, final double content) {

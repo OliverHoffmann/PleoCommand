@@ -25,7 +25,7 @@ public final class DiagramAxis {
 
 	private AxisScale scale = AxisScale.LinearScale;
 
-	private double min = Double.MIN_VALUE;
+	private double min = -Double.MAX_VALUE;
 
 	private double max = Double.MAX_VALUE;
 
@@ -149,9 +149,10 @@ public final class DiagramAxis {
 		cachedMaxUnit = max;
 		final DiagramAxis xAxis = diagram.getXAxis();
 		final boolean isXAxis = xAxis == this;
-		if (max >= Double.MAX_VALUE || min <= Double.MIN_VALUE) {
+		if (max >= Double.MAX_VALUE - Double.MIN_NORMAL
+				|| min <= Double.MIN_NORMAL - Double.MAX_VALUE) {
 			double low = Double.MAX_VALUE;
-			double high = Double.MIN_VALUE;
+			double high = -Double.MAX_VALUE;
 			for (final DiagramDataSet ds : diagram.getDataSets()) {
 				if (!isXAxis && ds.getType() == DiagramType.IntersectionDiagram)
 					continue;
@@ -174,9 +175,11 @@ public final class DiagramAxis {
 				}
 			}
 			if (low == Double.MAX_VALUE) low = 0;
-			if (high == Double.MIN_VALUE) high = 1;
-			if (min <= Double.MIN_VALUE) cachedMinUnit = low;
-			if (max >= Double.MAX_VALUE) cachedMaxUnit = high;
+			if (high == -Double.MAX_VALUE) high = 1;
+			if (min <= Double.MIN_NORMAL - Double.MAX_VALUE)
+				cachedMinUnit = low;
+			if (max >= Double.MAX_VALUE - Double.MIN_NORMAL)
+				cachedMaxUnit = high;
 		}
 		cachedPixelPerUnit = availPixels / (cachedMaxUnit - cachedMinUnit)
 				* diagram.getZoom();
@@ -249,7 +252,7 @@ public final class DiagramAxis {
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				setMin(Double.MIN_VALUE);
+				setMin(-Double.MAX_VALUE);
 			}
 		});
 		item = new JMenuItem("Set Maximum");
@@ -268,7 +271,7 @@ public final class DiagramAxis {
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				setMax(Double.MIN_VALUE);
+				setMax(Double.MAX_VALUE);
 			}
 		});
 		item = new JMenuItem("Set Linear Scale");
