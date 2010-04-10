@@ -324,6 +324,22 @@ public final class PipeConfigBoard extends JPanel {
 				item.setToolTipText(PipePartDetection.callHelp(pp,
 						HelpKind.Description));
 			}
+		final JMenu menuRepl = new JMenu("Replace " + name + " With");
+		menu.add(menuRepl);
+		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
+			if (clazz.isAssignableFrom(pp)) {
+				final JMenuItem item = new JMenuItem(PipePartDetection
+						.callHelp(pp, HelpKind.Name));
+				menuRepl.add(item);
+				item.addActionListener(new ActionListener() {
+					@Override
+					public void actionPerformed(final ActionEvent e) {
+						replacePipePart(pp);
+					}
+				});
+				item.setToolTipText(PipePartDetection.callHelp(pp,
+						HelpKind.Description));
+			}
 		menu.addSeparator();
 
 		idxMenuConfPart = menu.getSubElements().length;
@@ -962,6 +978,47 @@ public final class PipeConfigBoard extends JPanel {
 					}
 					updateSaneConfigCache();
 					repaint();
+				}
+			});
+		} catch (final InstantiationException e) {
+			Log.error(e);
+		} catch (final IllegalAccessException e) {
+			Log.error(e);
+		}
+	}
+
+	protected void replacePipePart(final Class<? extends PipePart> part) {
+		if (!ensureModifyable() || currentPart == null) return;
+		try {
+			final PipePart pp = part.newInstance();
+			createConfigureDialog("Replace With", pp, new Runnable() {
+				@Override
+				public void run() {
+					try {
+						if (pp instanceof Input)
+							Pipe.the().addInput((Input) pp);
+						else if (pp instanceof Converter)
+							Pipe.the().addConverter((Converter) pp);
+						else if (pp instanceof Output)
+							Pipe.the().addOutput((Output) pp);
+						else
+							throw new InternalException(
+									"Invalid sub-class of PipePart '%s'", pp);
+						for (final PipePart srcPP : set)
+							if (srcPP.getConnectedPipeParts().contains(
+									currentPart)) srcPP.connectToPipePart(pp);
+						for (final PipePart trgPP : currentPart
+								.getConnectedPipeParts())
+							pp.connectToPipePart(trgPP);
+					} catch (final StateException e) {
+						Log.error(e, "Cannot replace PipePart");
+					}
+					pp.getGuiPosition().setLocation(
+							currentPart.getGuiPosition().getLocation());
+					addToSet(pp);
+					removeCurrentPart();
+					check(pp.getGuiPosition(), pp);
+					checkPipeOrdering(null);
 				}
 			});
 		} catch (final InstantiationException e) {
