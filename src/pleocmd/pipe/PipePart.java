@@ -90,11 +90,11 @@ public abstract class PipePart extends StateHandling {
 
 	private final ConfigBounds cfgGuiPosition;
 
-	private final ConfigBounds cfgVisPosition;
+	private PipeVisualizationDialog visualizationDialog;
 
 	private final ConfigBoolean cfgVisualize;
 
-	private PipeVisualizationDialog visualizationDialog;
+	private final PipePartVisualizationConfig visualizationConfig;
 
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
@@ -117,7 +117,7 @@ public abstract class PipePart extends StateHandling {
 		});
 		group.add(cfgGuiPosition = new ConfigBounds("GUI-Position"));
 		cfgGuiPosition.getContent().setBounds(0, 0, 0, 0);
-		group.add(cfgVisPosition = new ConfigBounds("Visualization-Position"));
+		visualizationConfig = new PipePartVisualizationConfig(this, group);
 		group.add(cfgVisualize = new ConfigBoolean("Visualization", false));
 	}
 
@@ -379,8 +379,7 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	public final void groupWriteback() throws ConfigurationException {
-		if (visualizationDialog != null)
-			cfgVisPosition.setContent(visualizationDialog.getBounds());
+		visualizationConfig.writeback();
 		groupWriteback0();
 	}
 
@@ -411,7 +410,7 @@ public abstract class PipePart extends StateHandling {
 		}
 		visualizationDialog = new PipeVisualizationDialog(this,
 				getVisualizeDataSetCount());
-		cfgVisPosition.assignContent(visualizationDialog);
+		visualizationConfig.assignConfig();
 		initVisualize0();
 		visualizationDialog.setVisible(true);
 	}
@@ -422,7 +421,11 @@ public abstract class PipePart extends StateHandling {
 
 	private void closeVisualization() {
 		if (visualizationDialog == null) return;
-		cfgVisPosition.setContent(visualizationDialog.getBounds());
+		try {
+			visualizationConfig.writeback();
+		} catch (final ConfigurationException e) {
+			Log.error(e, "Cannot write back visualization configuration");
+		}
 		visualizationDialog.dispose();
 		visualizationDialog = null;
 	}
