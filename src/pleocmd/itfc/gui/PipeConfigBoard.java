@@ -575,14 +575,16 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	private void drawOrderingHint(final Graphics2D g2) {
-		final int tw = (int) (border1 * ORDER_HINT_TRUNK_WIDTH);
-		final int th = (int) (bounds.height * ORDER_HINT_TRUNK_HEIGHT);
-		final int aw = (int) (border1 * ORDER_HINT_ARROW_WIDTH);
-		final int ah = (int) (bounds.height * ORDER_HINT_ARROW_HEIGHT);
+		final double w = border1;
+		final double h = bounds.height / scale;
+		final int tw = (int) (w * ORDER_HINT_TRUNK_WIDTH);
+		final int th = (int) (h * ORDER_HINT_TRUNK_HEIGHT);
+		final int aw = (int) (w * ORDER_HINT_ARROW_WIDTH);
+		final int ah = (int) (h * ORDER_HINT_ARROW_HEIGHT);
 		final int cw = tw + 2 * aw;
 		final int ch = th + ah;
-		final int ow = (border1 - cw) / 2;
-		final int oh = (bounds.height - ch) / 2;
+		final int ow = (int) ((w - cw) / 2);
+		final int oh = (int) ((h - ch) / 2);
 		final Polygon p = new Polygon();
 		p.addPoint(ow + aw, oh);
 		p.addPoint(ow + aw + tw, oh);
@@ -609,8 +611,9 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, new float[] { 2, 2 }, 0));
 		g2.setColor(SECT_BORDER);
-		g2.drawLine(border1, 0, border1, bounds.height);
-		g2.drawLine(border2, 0, border2, bounds.height);
+		final int h = (int) (bounds.height / scale);
+		g2.drawLine(border1, 0, border1, h);
+		g2.drawLine(border2, 0, border2, h);
 	}
 
 	private int drawPipeParts(final Graphics2D g2, final Rectangle clip) {
