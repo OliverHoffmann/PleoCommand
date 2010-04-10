@@ -23,7 +23,6 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
-import pleocmd.itfc.gui.PipeConfigBoard;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.itfc.gui.icons.IconLoader;
@@ -117,9 +116,7 @@ public abstract class PipePart extends StateHandling {
 			}
 		});
 		group.add(cfgGuiPosition = new ConfigBounds("GUI-Position"));
-		cfgGuiPosition.getContent()
-				.setBounds(0, 0, PipeConfigBoard.DEF_RECT_WIDTH,
-						PipeConfigBoard.DEF_RECT_HEIGHT);
+		cfgGuiPosition.getContent().setBounds(0, 0, 0, 0);
 		group.add(cfgVisPosition = new ConfigBounds("Visualization-Position"));
 		group.add(cfgVisualize = new ConfigBoolean("Visualization", false));
 	}

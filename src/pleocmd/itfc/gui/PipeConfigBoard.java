@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -35,6 +36,7 @@ import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -67,12 +69,7 @@ import pleocmd.pipe.out.Output;
 
 // TODO auto ordering of PipeParts via A* algorithm
 // TODO raster
-// TODO width of parts according to label
 public final class PipeConfigBoard extends JPanel {
-
-	public static final int DEF_RECT_WIDTH = 150;
-
-	public static final int DEF_RECT_HEIGHT = 20;
 
 	private static final boolean PAINT_DEBUG = false;
 
@@ -132,7 +129,7 @@ public final class PipeConfigBoard extends JPanel {
 
 	private static final Icon ICON_CONF = IconLoader.getIcon("configure");
 
-	private static final int ICON_CONF_POS = 1;
+	private static final int ICON_CONF_POS = -1;
 
 	private static final Icon ICON_DGR = IconLoader.getIcon("games-difficult");
 
@@ -147,6 +144,8 @@ public final class PipeConfigBoard extends JPanel {
 	private static final int SECTION_FRAC = 5;
 
 	private static final int SECTION_SPACE = 20;
+
+	private static final int MAX_RECT_WIDTH = 200;
 
 	private static final double ORDER_HINT_TRUNK_WIDTH = 0.3;
 
@@ -218,12 +217,18 @@ public final class PipeConfigBoard extends JPanel {
 		menuOutput = createMenu("Output", Output.class);
 
 		set = new HashSet<PipePart>();
-		for (final PipePart pp : Pipe.the().getInputList())
-			set.add(pp);
-		for (final PipePart pp : Pipe.the().getConverterList())
-			set.add(pp);
-		for (final PipePart pp : Pipe.the().getOutputList())
-			set.add(pp);
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				for (final PipePart pp : Pipe.the().getInputList())
+					addToSet(pp);
+				for (final PipePart pp : Pipe.the().getConverterList())
+					addToSet(pp);
+				for (final PipePart pp : Pipe.the().getOutputList())
+					addToSet(pp);
+				repaint();
+			}
+		});
 
 		saneConfigCache = new HashSet<PipePart>();
 		updateSaneConfigCache();
@@ -285,6 +290,17 @@ public final class PipeConfigBoard extends JPanel {
 			}
 		});
 		ToolTipManager.sharedInstance().registerComponent(this);
+	}
+
+	protected void addToSet(final PipePart pp) {
+		set.add(pp);
+		final Graphics g = getGraphics();
+		pp.getGuiPosition().height = g.getFontMetrics().getHeight()
+				+ ICON_WIDTH + 2;
+		pp.getGuiPosition().width = Math.min(MAX_RECT_WIDTH, Math.max(
+				ICON_WIDTH * 4, (int) g.getFontMetrics().getStringBounds(
+						pp.getName(), g).getWidth()
+						+ pp.getGuiPosition().height * 2));
 	}
 
 	private JPopupMenu createMenu(final String name,
@@ -455,10 +471,6 @@ public final class PipeConfigBoard extends JPanel {
 			currentPart.setVisualize(!currentPart.isVisualize());
 	}
 
-	protected Set<PipePart> getSet() {
-		return set;
-	}
-
 	protected void updateSaneConfigCache() {
 		final Set<PipePart> sane = Pipe.the().getSanePipeParts();
 		if (!saneConfigCache.equals(sane)) {
@@ -476,6 +488,8 @@ public final class PipeConfigBoard extends JPanel {
 		final Graphics2D g2 = img.createGraphics();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 		g2.setClip(0, 0, clip.width, clip.height);
 
 		final Rectangle clipOrg = new Rectangle((int) (clip.x / scale),
@@ -655,7 +669,6 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setColor(outerClr);
 		g2.draw(rect);
 
-		final Icon icon = part.getIcon();
 		final String s = part.getName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
@@ -666,16 +679,41 @@ public final class PipeConfigBoard extends JPanel {
 			g2.fill(inner);
 		}
 
+		// restrict drawing to inside the rectangle
 		final Shape shape = g2.getClip();
 		g2.clipRect(rect.x, rect.y, rect.width, rect.height);
+
+		// draw main icon
+		Icon mainIcon = part.getIcon();
+		if (mainIcon == null) {
+			final BufferedImage img = new BufferedImage(rect.height,
+					rect.height, BufferedImage.TYPE_INT_ARGB);
+			final Icon cfgImage = part.getConfigImage();
+			if (cfgImage instanceof ImageIcon) {
+				final Graphics2D g = img.createGraphics();
+				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+						RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+				g.drawImage(((ImageIcon) cfgImage).getImage(), 0, 0,
+						rect.height, rect.height, null);
+				mainIcon = new ImageIcon(img);
+			} else
+				mainIcon = IconLoader.getMissingIcon();
+		}
+		mainIcon.paintIcon(null, g2, rect.x, rect.y
+				+ (rect.height - mainIcon.getIconHeight()) / 2);
+
+		// draw name of PipePart
 		g2.setColor(outerClr);
 		g2.drawString(s, (float) (rect.x + (rect.width - sb.getWidth()) / 2),
-				(float) (rect.y + sb.getHeight() + (rect.height - sb
-						.getHeight()) / 2));
+				(float) (rect.y + sb.getHeight()));
+
+		// draw clickable icons
 		drawIcon(g2, hover, rect, ICON_CONF, ICON_CONF_POS, !modifyable
 				|| part.getGuiConfigs().isEmpty(), false);
 		drawIcon(g2, hover, rect, ICON_DGR, ICON_DGR_POS, false, part
 				.isVisualize());
+
+		// restore old clip
 		g2.setClip(shape);
 		return 1;
 	}
@@ -739,7 +777,7 @@ public final class PipeConfigBoard extends JPanel {
 			b.x = rect.x + rect.width - (1 - pos) * ICON_WIDTH;
 		else
 			b.x = rect.x + pos * ICON_WIDTH - b.width;
-		b.y = rect.y + (rect.height - b.width) / 2;
+		b.y = rect.y + rect.height - ICON_WIDTH;
 		return b;
 	}
 
@@ -914,7 +952,7 @@ public final class PipeConfigBoard extends JPanel {
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
-						getSet().add(pp);
+						addToSet(pp);
 						checkPipeOrdering(null);
 					} catch (final StateException e) {
 						Log.error(e, "Cannot add new PipePart");
@@ -1128,22 +1166,20 @@ public final class PipeConfigBoard extends JPanel {
 
 				final Rectangle inner = new Rectangle(pp.getGuiPosition());
 				inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-				if (inner.contains(p))
+				final Rectangle ibC = getIconBounds(pp.getGuiPosition(),
+						ICON_CONF, ICON_CONF_POS);
+				final Rectangle ibD = getIconBounds(pp.getGuiPosition(),
+						ICON_DGR, ICON_DGR_POS);
+				if (ibC.contains(p))
+					currentIcon = ICON_CONF;
+				else if (ibD.contains(p))
+					currentIcon = ICON_DGR;
+				else if (inner.contains(p))
 					handlePoint = new Point(p.x - pp.getGuiPosition().x, p.y
 							- pp.getGuiPosition().y);
 				else {
-					final Rectangle ibC = getIconBounds(pp.getGuiPosition(),
-							ICON_CONF, ICON_CONF_POS);
-					final Rectangle ibD = getIconBounds(pp.getGuiPosition(),
-							ICON_DGR, ICON_DGR_POS);
-					if (ibC.contains(p))
-						currentIcon = ICON_CONF;
-					else if (ibD.contains(p))
-						currentIcon = ICON_DGR;
-					else {
-						currentConnection = new Rectangle(p.x, p.y, 0, 0);
-						handlePoint = new Point(0, 0);
-					}
+					currentConnection = new Rectangle(p.x, p.y, 0, 0);
+					handlePoint = new Point(0, 0);
 				}
 
 				return;
@@ -1277,7 +1313,7 @@ public final class PipeConfigBoard extends JPanel {
 
 	protected void updateBounds(final int width, final int height) {
 		bounds.setSize(width, height);
-		final int maxWidth = DEF_RECT_WIDTH + SECTION_SPACE;
+		final int maxWidth = MAX_RECT_WIDTH + SECTION_SPACE;
 		border1 = Math.min(width / SECTION_FRAC, maxWidth);
 		border2 = width - Math.min(width / SECTION_FRAC, maxWidth);
 		for (final PipePart pp : set)
