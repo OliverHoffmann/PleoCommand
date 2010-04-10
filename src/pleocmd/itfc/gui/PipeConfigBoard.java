@@ -226,7 +226,7 @@ public final class PipeConfigBoard extends JPanel {
 					addToSet(pp);
 				for (final PipePart pp : Pipe.the().getOutputList())
 					addToSet(pp);
-				repaint();
+				updatePrefBounds();
 			}
 		});
 
@@ -555,7 +555,7 @@ public final class PipeConfigBoard extends JPanel {
 		} else if (currentPart instanceof Output) {
 			list = Pipe.the().getOutputList();
 			x0 = border2;
-			x1 = bounds.width;
+			x1 = (int) (bounds.width / scale);
 		} else
 			return;
 		final int idx = list.indexOf(currentPart);
@@ -564,8 +564,8 @@ public final class PipeConfigBoard extends JPanel {
 
 		final int y0 = before == null ? 0 : before.getGuiPosition().y
 				+ before.getGuiPosition().height + 1;
-		final int y1 = after == null ? bounds.height
-				: after.getGuiPosition().y - 1;
+		final int y1 = after == null ? (int) (bounds.height / scale) : after
+				.getGuiPosition().y - 1;
 		final Rectangle r = new Rectangle(x0, y0, x1 - x0, y1 - y0);
 		if (PAINT_DEBUG)
 			g2.setColor(new Color(grayVal, grayVal + 16, grayVal));
@@ -1037,6 +1037,7 @@ public final class PipeConfigBoard extends JPanel {
 			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
 			scaleRect(r);
 			repaint(r);
+			updatePrefBounds();
 		}
 	}
 
@@ -1062,7 +1063,7 @@ public final class PipeConfigBoard extends JPanel {
 		final int xMin;
 		final int xMax;
 		final int yMin = 1;
-		final int yMax = bounds.height - 1;
+		final int yMax = (int) (bounds.height / scale) - 1;
 		if (Input.class.isInstance(pp)) {
 			xMin = 1;
 			xMax = border1 - 1;
@@ -1071,10 +1072,10 @@ public final class PipeConfigBoard extends JPanel {
 			xMax = border2 - 1;
 		} else if (Output.class.isInstance(pp)) {
 			xMin = border2 + 1;
-			xMax = bounds.width - 1;
+			xMax = (int) (bounds.width / scale) - 1;
 		} else {
 			xMin = 1;
-			xMax = bounds.width - 1;
+			xMax = (int) (bounds.width / scale) - 1;
 		}
 		if (r.x < xMin) r.x = xMin;
 		if (r.y < yMin) r.y = yMin;
@@ -1314,6 +1315,22 @@ public final class PipeConfigBoard extends JPanel {
 		return true;
 	}
 
+	protected void updatePrefBounds() {
+		// get lower right corner
+		int x = 0;
+		int y = 0;
+		for (final PipePart pp : set) {
+			final Rectangle r = pp.getGuiPosition();
+			x = Math.max(x, r.x + r.width);
+			y = Math.max(y, r.y + r.height);
+		}
+
+		// add some free space and consider scaling
+		setPreferredSize(new Dimension((int) (x * scale + 4),
+				(int) (y * scale + 4)));
+		revalidate();
+	}
+
 	protected void updateBounds(final int width, final int height) {
 		bounds.setSize(width, height);
 		final int maxWidth = MAX_RECT_WIDTH + SECTION_SPACE;
@@ -1327,10 +1344,10 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void showMenu(final Component invoker, final int x, final int y) {
-		lastMenuLocation = new Point(x, y);
-		if (x <= border1)
+		lastMenuLocation = new Point((int) (x / scale), (int) (y / scale));
+		if (x <= border1 * scale)
 			showMenu(menuInput, invoker, x, y);
-		else if (x >= border2)
+		else if (x >= border2 * scale)
 			showMenu(menuOutput, invoker, x, y);
 		else
 			showMenu(menuConverter, invoker, x, y);
@@ -1504,6 +1521,7 @@ public final class PipeConfigBoard extends JPanel {
 			scale = 1 + zoom * 9;
 		else
 			scale = zoom < 0 ? 1 / (1 + -zoom * 9) : 1;
+		updatePrefBounds();
 		repaint();
 	}
 

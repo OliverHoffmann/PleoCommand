@@ -1,5 +1,6 @@
 package pleocmd.itfc.gui;
 
+import java.awt.Dimension;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
@@ -10,7 +11,9 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -56,6 +59,7 @@ public final class PipeConfigDialog extends JDialog implements
 		saveCurrentPipe();
 
 		sldZoom = new JSlider(-100, 100, 0);
+		sldZoom.setMinimumSize(new Dimension(150, sldZoom.getHeight()));
 		sldZoom.setToolTipText("Zoom the Pipe Configuration Board");
 		sldZoom.addChangeListener(new ChangeListener() {
 			@Override
@@ -67,7 +71,9 @@ public final class PipeConfigDialog extends JDialog implements
 		// Add components
 		final Layouter lay = new Layouter(this);
 		board = new PipeConfigBoard();
-		lay.addWholeLine(board, true);
+		lay.addWholeLine(new JScrollPane(board,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS), true);
 
 		lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
