@@ -608,10 +608,10 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	private void drawSectionBorders(final Graphics2D g2) {
-		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
-				BasicStroke.JOIN_BEVEL, 0, new float[] { 2, 2 }, 0));
+		g2.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE,
+				BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 3 }, 0));
 		g2.setColor(SECT_BORDER);
-		final int h = (int) (bounds.height / scale);
+		final int h = (int) (bounds.height / scale + 0.5);
 		g2.drawLine(border1, 0, border1, h);
 		g2.drawLine(border2, 0, border2, h);
 	}
@@ -1333,9 +1333,9 @@ public final class PipeConfigBoard extends JPanel {
 
 	protected void updateBounds(final int width, final int height) {
 		bounds.setSize(width, height);
-		final int maxWidth = MAX_RECT_WIDTH + SECTION_SPACE;
-		border1 = Math.min(width / SECTION_FRAC, maxWidth);
-		border2 = width - Math.min(width / SECTION_FRAC, maxWidth);
+		border1 = Math
+				.min(width / SECTION_FRAC, MAX_RECT_WIDTH + SECTION_SPACE);
+		border2 = width - border1;
 		for (final PipePart pp : set)
 			check(pp.getGuiPosition(), pp);
 		checkPipeOrdering("Resizing the board changed the ordering of the Pipe !!! "
