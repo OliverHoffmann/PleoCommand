@@ -478,11 +478,14 @@ public abstract class PipePart extends StateHandling {
 			return false;
 		}
 		boolean outputReached = topDownCheck_outputReached();
+		boolean validConns = true;
 		visited.add(this);
-		for (final PipePart ppSub : getConnectedPipeParts())
+		for (final PipePart ppSub : getConnectedPipeParts()) {
 			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
+			validConns &= isConnectionAllowed(ppSub);
+		}
 		visited.remove(this);
-		if (outputReached) {
+		if (outputReached && validConns) {
 			final String cfgRes = isConfigurationSane();
 			if (cfgRes == null)
 				sane.add(this);
