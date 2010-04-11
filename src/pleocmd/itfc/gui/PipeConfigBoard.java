@@ -67,7 +67,6 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-// TODO auto ordering of PipeParts via A* algorithm
 // TODO raster
 public final class PipeConfigBoard extends JPanel {
 
@@ -165,6 +164,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private int idxMenuAdd;
 
+	private int idxMenuRepl;
+
 	private final Set<PipePart> set;
 
 	private final Dimension bounds = new Dimension();
@@ -199,6 +200,10 @@ public final class PipeConfigBoard extends JPanel {
 
 	private int idxMenuToggleDgr;
 
+	private int idxMenuClearBoard;
+
+	private int idxMenuLayoutBoard;
+
 	private final Set<PipePart> saneConfigCache;
 
 	private boolean modifyable;
@@ -208,6 +213,12 @@ public final class PipeConfigBoard extends JPanel {
 	private boolean delayedReordering;
 
 	private Point lastMenuLocation;
+
+	private Thread layoutThread;
+
+	private BoardAutoLayouter layouter;
+
+	private boolean closed;
 
 	public PipeConfigBoard() {
 		setPreferredSize(new Dimension(400, 300));
@@ -292,6 +303,26 @@ public final class PipeConfigBoard extends JPanel {
 		ToolTipManager.sharedInstance().registerComponent(this);
 	}
 
+	public PipePart getCurrentPart() {
+		return currentPart;
+	}
+
+	public Set<PipePart> getSet() {
+		return set;
+	}
+
+	public double getScale() {
+		return scale;
+	}
+
+	public int getBorder1() {
+		return border1;
+	}
+
+	public int getBorder2() {
+		return border2;
+	}
+
 	protected void addToSet(final PipePart pp) {
 		set.add(pp);
 		final Graphics g = getGraphics();
@@ -324,6 +355,7 @@ public final class PipeConfigBoard extends JPanel {
 				item.setToolTipText(PipePartDetection.callHelp(pp,
 						HelpKind.Description));
 			}
+		idxMenuRepl = menu.getSubElements().length;
 		final JMenu menuRepl = new JMenu("Replace " + name + " With");
 		menu.add(menuRepl);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
@@ -394,6 +426,27 @@ public final class PipeConfigBoard extends JPanel {
 			}
 		});
 		menu.add(itemToggleDgr);
+		menu.addSeparator();
+
+		idxMenuClearBoard = menu.getSubElements().length;
+		final JMenuItem itemClearBoard = new JMenuItem("Clear The Board");
+		itemClearBoard.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				clearBoard();
+			}
+		});
+		menu.add(itemClearBoard);
+
+		idxMenuLayoutBoard = menu.getSubElements().length;
+		final JMenuItem itemLayoutBoard = new JMenuItem("Auto-Layout The Board");
+		itemLayoutBoard.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				layoutBoard();
+			}
+		});
+		menu.add(itemLayoutBoard);
 
 		return menu;
 	}
@@ -487,6 +540,53 @@ public final class PipeConfigBoard extends JPanel {
 			currentPart.setVisualize(!currentPart.isVisualize());
 	}
 
+	protected void clearBoard() {
+		if (ensureModifyable()) {
+			try {
+				Pipe.the().reset();
+			} catch (final PipeException e) {
+				Log.error(e, "Cannot clear the board");
+			}
+			set.clear();
+			currentPart = null;
+			currentConnection = null;
+			currentConnectionsTarget = null;
+			currentConnectionValid = false;
+			handlePoint = null;
+			delayedReordering = false;
+			updateSaneConfigCache();
+			repaint();
+		}
+	}
+
+	protected void layoutBoard() {
+		if (layoutThread != null) return;
+		layouter = new BoardAutoLayouter(this);
+		layoutThread = new Thread() {
+			@Override
+			public void run() {
+				layoutThreadRun();
+			}
+		};
+		updateState();
+		layoutThread.start();
+	}
+
+	protected void layoutThreadRun() {
+		try {
+			layouter.start();
+		} finally {
+			layouter = null;
+			layoutThread = null;
+			if (!closed) {
+				updateState();
+				checkPipeOrdering(null);
+				updateSaneConfigCache();
+				repaint();
+			}
+		}
+	}
+
 	protected void updateSaneConfigCache() {
 		final Set<PipePart> sane = Pipe.the().getSanePipeParts();
 		if (!saneConfigCache.equals(sane)) {
@@ -532,6 +632,7 @@ public final class PipeConfigBoard extends JPanel {
 		final long time4 = System.currentTimeMillis();
 		final int cnt5 = drawConnections(g2, clipOrg);
 		final long time5 = System.currentTimeMillis();
+		drawAutoLayoutInfo(g2);
 
 		if (PAINT_DEBUG) {
 			g2.translate(clip.x / scale, clip.y / scale);
@@ -889,7 +990,25 @@ public final class PipeConfigBoard extends JPanel {
 		g2.setClip(shape);
 	}
 
-	private static void calcConnectorPositions(final Rectangle srcRect,
+	private void drawAutoLayoutInfo(final Graphics2D g2) {
+		if (layoutThread == null || layouter == null) return;
+		final int w = bounds.width * 2 / 3;
+		final int h = 20;
+		final int x = (bounds.width - w) / 2;
+		final int y = (bounds.height - h) / 2;
+		g2.setColor(Color.LIGHT_GRAY);
+		g2.fill3DRect(x, y, w, h, false);
+		g2.setColor(new Color(128, 128, 255));
+		g2.fill3DRect(x + 1, y + 1, (int) (w * layouter.getProgress()) - 1,
+				h - 2, true);
+		g2.setColor(Color.BLACK);
+		final String s = layouter.getProgressText();
+		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
+		g2.drawString(s, (int) ((bounds.width - sb.getWidth()) / 2), (int) (y
+				+ h - (h - sb.getHeight()) / 2));
+	}
+
+	static void calcConnectorPositions(final Rectangle srcRect,
 			final Rectangle trgRect, final Point srcPos, final Point trgPos) {
 		// calculate center of source and target
 		final int csx = srcRect.x + srcRect.width / 2;
@@ -1004,17 +1123,18 @@ public final class PipeConfigBoard extends JPanel {
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
-						for (final PipePart srcPP : set)
+						for (final PipePart srcPP : getSet())
 							if (srcPP.getConnectedPipeParts().contains(
-									currentPart)) srcPP.connectToPipePart(pp);
-						for (final PipePart trgPP : currentPart
+									getCurrentPart()))
+								srcPP.connectToPipePart(pp);
+						for (final PipePart trgPP : getCurrentPart()
 								.getConnectedPipeParts())
 							pp.connectToPipePart(trgPP);
 					} catch (final StateException e) {
 						Log.error(e, "Cannot replace PipePart");
 					}
 					pp.getGuiPosition().setLocation(
-							currentPart.getGuiPosition().getLocation());
+							getCurrentPart().getGuiPosition().getLocation());
 					addToSet(pp);
 					removeCurrentPart();
 					check(pp.getGuiPosition(), pp);
@@ -1415,6 +1535,8 @@ public final class PipeConfigBoard extends JPanel {
 		final MenuElement[] items = menu.getSubElements();
 		((AbstractButton) items[idxMenuAdd]).setEnabled(modifyable
 				&& currentPart == null);
+		((AbstractButton) items[idxMenuRepl]).setEnabled(modifyable
+				&& currentPart != null);
 		((AbstractButton) items[idxMenuConfPart]).setEnabled(modifyable
 				&& currentPart != null && currentConnection == null
 				&& !currentPart.getGuiConfigs().isEmpty());
@@ -1429,6 +1551,10 @@ public final class PipeConfigBoard extends JPanel {
 				.setEnabled(currentPart != null);
 		((AbstractButton) items[idxMenuToggleDgr])
 				.setSelected(currentPart != null && currentPart.isVisualize());
+		((AbstractButton) items[idxMenuClearBoard]).setEnabled(modifyable
+				&& currentPart == null);
+		((AbstractButton) items[idxMenuLayoutBoard])
+				.setEnabled(currentPart == null && layoutThread == null);
 		menu.show(invoker, x, y);
 	}
 
@@ -1558,9 +1684,10 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	public void updateState() {
-		final boolean changed = modifyable ^ !MainFrame.the().isPipeRunning();
-		modifyable = !MainFrame.the().isPipeRunning();
-		if (changed) {
+		final boolean modifNow = !MainFrame.the().isPipeRunning()
+				&& layoutThread == null && !closed;
+		if (modifyable ^ modifNow) {
+			modifyable = modifNow;
 			if (delayedReordering) checkPipeOrdering(null);
 			repaint();
 		}
@@ -1569,7 +1696,8 @@ public final class PipeConfigBoard extends JPanel {
 	private boolean ensureModifyable() {
 		if (!modifyable)
 			Log.error("Configuration board is read-only as "
-					+ "the Pipe is currently running.");
+					+ "the Pipe or the Auto-Layouter is currently "
+					+ "running.");
 		return modifyable;
 	}
 
@@ -1592,6 +1720,15 @@ public final class PipeConfigBoard extends JPanel {
 		r.width *= scale;
 		r.height *= scale;
 		return r;
+	}
+
+	public void closed() {
+		closed = true;
+		updateState();
+		if (layoutThread != null && layouter != null) {
+			layouter.interrupt();
+			layoutThread.interrupt();
+		}
 	}
 
 }

@@ -132,6 +132,7 @@ public final class PipeConfigDialog extends JDialog implements
 	}
 
 	protected void close(final boolean resetChanges) {
+		board.closed();
 		if (resetChanges) {
 			final CharArrayReader in = new CharArrayReader(originalPipe);
 			try {
