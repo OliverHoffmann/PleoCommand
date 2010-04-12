@@ -36,6 +36,10 @@ public final class PipeConfigDialog extends JDialog implements
 
 	private final JSlider sldZoom;
 
+	private final JButton btnSave;
+
+	private final JButton btnLoad;
+
 	private final JButton btnOk;
 
 	private final JButton btnApply;
@@ -46,7 +50,7 @@ public final class PipeConfigDialog extends JDialog implements
 
 	public PipeConfigDialog() {
 		Log.detail("Creating Config-Frame");
-		setTitle("Configure Pipe");
+		setTitle("Pending ....");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -54,6 +58,7 @@ public final class PipeConfigDialog extends JDialog implements
 				close(true);
 			}
 		});
+		updatePipeLabel();
 
 		// Save current pipe's configuration
 		saveCurrentPipe();
@@ -79,6 +84,22 @@ public final class PipeConfigDialog extends JDialog implements
 				.getSimpleName()));
 		lay.add(sldZoom, false);
 		lay.addSpacer();
+		btnSave = lay.addButton(Button.SaveTo,
+				"Save the current pipe to a file", new Runnable() {
+					@Override
+					public void run() {
+						MainFrame.the().getMainPipePanel()
+								.writePipeConfigToFile();
+					}
+				});
+		btnLoad = lay.addButton(Button.LoadFrom,
+				"Load a previously saved pipe from a file", new Runnable() {
+					@Override
+					public void run() {
+						MainFrame.the().getMainPipePanel()
+								.readPipeConfigFromFile();
+					}
+				});
 		btnOk = lay.addButton(Button.Ok, new Runnable() {
 			@Override
 			public void run() {
@@ -115,6 +136,10 @@ public final class PipeConfigDialog extends JDialog implements
 		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+	}
+
+	public PipeConfigBoard getBoard() {
+		return board;
 	}
 
 	protected void setCurrentZoom() {
@@ -196,9 +221,20 @@ public final class PipeConfigDialog extends JDialog implements
 
 	public void updateState() {
 		sldZoom.setEnabled(true);
+		btnSave.setEnabled(Pipe.the().getInputList().isEmpty()
+				|| !Pipe.the().getConverterList().isEmpty()
+				|| !Pipe.the().getOutputList().isEmpty());
+		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
 		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
 		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
 		board.updateState();
+	}
+
+	public void updatePipeLabel() {
+		String fn = Pipe.the().getLastSaveFile().getName();
+		if (fn.contains("."))
+			fn = " \"" + fn.substring(0, fn.lastIndexOf('.')) + "\"";
+		setTitle("Configure Pipe" + fn);
 	}
 
 }

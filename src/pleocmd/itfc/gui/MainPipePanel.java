@@ -68,6 +68,7 @@ public final class MainPipePanel extends JPanel {
 						.size() == 1 ? "" : "s", Pipe.the().getConverterList()
 						.size(), Pipe.the().getOutputList().size(), Pipe.the()
 						.getOutputList().size() == 1 ? "" : "s", fn));
+		if (cfgDialog != null) cfgDialog.updatePipeLabel();
 	}
 
 	public void changeConfig() {
@@ -119,6 +120,7 @@ public final class MainPipePanel extends JPanel {
 			Pipe.the().setLastSaveFile(file);
 			updateState();
 			updatePipeLabel();
+			if (cfgDialog != null) cfgDialog.getBoard().assignFromPipe();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
