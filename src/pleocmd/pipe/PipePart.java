@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.swing.Icon;
 
+import pleocmd.ImmutableRectangle;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigBounds;
@@ -96,6 +97,8 @@ public abstract class PipePart extends StateHandling {
 
 	private final PipePartVisualizationConfig visualizationConfig;
 
+	private final ImmutableRectangle immutableGUIPosition;
+
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
@@ -119,6 +122,9 @@ public abstract class PipePart extends StateHandling {
 		cfgGuiPosition.getContent().setBounds(0, 0, 0, 0);
 		visualizationConfig = new PipePartVisualizationConfig(this, group);
 		group.add(cfgVisualize = new ConfigBoolean("Visualization", false));
+
+		immutableGUIPosition = new ImmutableRectangle(cfgGuiPosition
+				.getContent());
 	}
 
 	final long getUID() {
@@ -257,6 +263,7 @@ public abstract class PipePart extends StateHandling {
 
 		pipe = newPipe;
 		Log.detail("Connected '%s' to '%s'", this, pipe);
+		pipe.modified();
 	}
 
 	final void disconnectedFromPipe(final Pipe curPipe) {
@@ -275,6 +282,7 @@ public abstract class PipePart extends StateHandling {
 
 		pipe = null;
 		Log.detail("Disconnected '%s' from '%s'", this, curPipe);
+		curPipe.modified();
 	}
 
 	public final Set<PipePart> getConnectedPipeParts() {
@@ -290,6 +298,7 @@ public abstract class PipePart extends StateHandling {
 			throw new InternalException(e);
 		}
 		connected.add(target);
+		pipe.modified();
 	}
 
 	public final void disconnectFromPipePart(final PipePart target)
@@ -297,6 +306,7 @@ public abstract class PipePart extends StateHandling {
 		ensureConstructed();
 		connected.remove(target);
 		cfgConnectedUIDs.removeContent(target.getUID());
+		pipe.modified();
 	}
 
 	/**
@@ -374,8 +384,13 @@ public abstract class PipePart extends StateHandling {
 			if (map.containsKey(trgUID)) connected.add(map.get(trgUID));
 	}
 
-	public final Rectangle getGuiPosition() {
-		return cfgGuiPosition.getContent();
+	public final void setGuiPosition(final Rectangle guiPosition) {
+		cfgGuiPosition.setContent(guiPosition);
+		pipe.modified();
+	}
+
+	public final ImmutableRectangle getGuiPosition() {
+		return immutableGUIPosition;
 	}
 
 	public final void groupWriteback() throws ConfigurationException {
@@ -400,6 +415,7 @@ public abstract class PipePart extends StateHandling {
 			createVisualization();
 		else
 			closeVisualization();
+		pipe.modified();
 	}
 
 	private void createVisualization() {

@@ -1,7 +1,15 @@
 package pleocmd.itfc.gui;
 
+import java.awt.Dimension;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -18,7 +26,11 @@ public final class MainPipePanel extends JPanel {
 
 	private static final long serialVersionUID = 5361715509143723415L;
 
+	private static final int THUMBNAIL_HEIGHT = 100;
+
 	private final JLabel pipeLabel;
+
+	private final JLabel thumbnailLabel;
 
 	private final JButton btnModify;
 
@@ -26,13 +38,30 @@ public final class MainPipePanel extends JPanel {
 
 	private final JButton btnLoad;
 
+	private final Timer updateTimer;
+
+	private TimerTask updateTimerTask;
+
 	private PipeConfigDialog cfgDialog;
 
 	public MainPipePanel() {
 		final Layouter lay = new Layouter(this);
+		updateTimer = new Timer();
+
 		pipeLabel = new JLabel();
-		updatePipeLabel();
 		lay.addWholeLine(pipeLabel, false);
+
+		thumbnailLabel = new JLabel();
+		thumbnailLabel.setBorder(BorderFactory.createBevelBorder(1));
+		lay.addWholeLine(thumbnailLabel, false);
+
+		updatePipeLabel();
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(final ComponentEvent e) {
+				updatePipeLabel();
+			}
+		});
 
 		btnModify = lay.addButton(Button.Modify,
 				"Modify the currently active pipe", new Runnable() {
@@ -68,6 +97,24 @@ public final class MainPipePanel extends JPanel {
 						.size() == 1 ? "" : "s", Pipe.the().getConverterList()
 						.size(), Pipe.the().getOutputList().size(), Pipe.the()
 						.getOutputList().size() == 1 ? "" : "s", fn));
+
+		final int width = getWidth();
+		if (width == 0)
+			thumbnailLabel.setIcon(null);
+		else {
+			final BoardPainter painter = new BoardPainter();
+			final BufferedImage img = new BufferedImage(width,
+					THUMBNAIL_HEIGHT, BufferedImage.TYPE_INT_RGB);
+			painter.assignFromPipe(img.getGraphics(), false);
+			final Dimension pref = painter.getPreferredSize();
+			painter.setScale(Math.min((double) width / pref.width,
+					(double) THUMBNAIL_HEIGHT / pref.height));
+			painter.setBounds(pref.width, pref.height, false);
+			painter.paint(img.getGraphics(), null, null, null, null, false,
+					null, true);
+			thumbnailLabel.setIcon(new ImageIcon(img));
+		}
+
 		if (cfgDialog != null) cfgDialog.updatePipeLabel();
 	}
 
@@ -137,6 +184,19 @@ public final class MainPipePanel extends JPanel {
 
 	void configDialogDisposed() {
 		cfgDialog = null;
+	}
+
+	public void timeUpdatePipeLabel() {
+		if (updateTimerTask != null) return;
+		updateTimerTask = new TimerTask() {
+			@Override
+			@SuppressWarnings("synthetic-access")
+			public void run() {
+				updateTimerTask = null;
+				updatePipeLabel();
+			}
+		};
+		updateTimer.schedule(updateTimerTask, 1000);
 	}
 
 }

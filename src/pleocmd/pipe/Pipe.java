@@ -26,6 +26,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataQueue;
@@ -1079,4 +1080,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		return initPhaseInterrupted;
 	}
 
+	public void modified() {
+		if (MainFrame.hasGUI() && MainFrame.the().getMainPipePanel() != null)
+			MainFrame.the().getMainPipePanel().timeUpdatePipeLabel();
+	}
 }

@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import pleocmd.ImmutableRectangle;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
@@ -50,17 +51,18 @@ public final class BoardAutoLayouter {
 		fringe = new TreeMap<Double, List<Layout>>();
 		found = new HashSet<Layout>();
 		this.board = board;
-		Layout.border1 = board.getBorder1();
-		Layout.border2 = board.getBorder2();
+		Layout.border1 = board.getPainter().getBorder1(false);
+		Layout.border2 = board.getPainter().getBorder2(false);
 		Layout.bounds = new Dimension();
-		Layout.bounds.width = (int) (board.getWidth() * board.getScale()) - 1;
-		Layout.bounds.height = (int) (board.getHeight() * board.getScale()) - 1;
+		final double s = board.getPainter().getScale();
+		Layout.bounds.width = (int) (board.getWidth() / s) - 1;
+		Layout.bounds.height = (int) (board.getHeight() / s) - 1;
 	}
 
 	public void start() {
 		considerSpreading = false;
-		final Map<PipePart, Rectangle> parts = new HashMap<PipePart, Rectangle>();
-		for (final PipePart pp : board.getSet())
+		final Map<PipePart, ImmutableRectangle> parts = new HashMap<PipePart, ImmutableRectangle>();
+		for (final PipePart pp : board.getPainter().getSet())
 			parts.put(pp, pp.getGuiPosition());
 		Layout res = treeSearch(new Layout(null, parts));
 
@@ -182,7 +184,7 @@ public final class BoardAutoLayouter {
 
 		private static Dimension bounds;
 
-		private final Map<PipePart, Rectangle> parts;
+		private final Map<PipePart, ImmutableRectangle> parts;
 
 		private final Map<PipePart, Double> candidateValues;
 
@@ -192,15 +194,15 @@ public final class BoardAutoLayouter {
 
 		private int spreading = -1;
 
-		Layout(final Layout org, final Map<PipePart, Rectangle> parts) {
+		Layout(final Layout org, final Map<PipePart, ImmutableRectangle> parts) {
 			this.parts = parts;
 			candidateValues = new HashMap<PipePart, Double>();
 			depth = org == null ? 0 : org.depth + 1;
 		}
 
 		public void accept() {
-			for (final Entry<PipePart, Rectangle> e : parts.entrySet())
-				e.getKey().getGuiPosition().setBounds(e.getValue());
+			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet())
+				e.getKey().setGuiPosition(e.getValue().createCopy());
 		}
 
 		/**
@@ -221,9 +223,9 @@ public final class BoardAutoLayouter {
 		 *            between >0 and 1
 		 */
 		private void expandPart(final BoardAutoLayouter bal, final PipePart pp,
-				final Rectangle rect, final double xd, final double yd,
-				final double c) {
-			final Rectangle r = new Rectangle(rect);
+				final ImmutableRectangle rect, final double xd,
+				final double yd, final double c) {
+			final Rectangle r = rect.createCopy();
 			r.x += MIN_STEP * (int) (1 + MAX_STEP / MIN_STEP * xd);
 			r.y += (int) (yd * MAX_STEP);
 			check(r, pp);
@@ -232,16 +234,16 @@ public final class BoardAutoLayouter {
 			if (r.equals(rect)) return;
 
 			// clone list but modify pp's value
-			final Map<PipePart, Rectangle> copy = new HashMap<PipePart, Rectangle>(
-					parts);
-			copy.put(pp, r);
+			final Map<PipePart, ImmutableRectangle> copy;
+			copy = new HashMap<PipePart, ImmutableRectangle>(parts);
+			copy.put(pp, new ImmutableRectangle(r));
 
 			// found a (new) candidate
 			bal.insertInFringe(new Layout(this, copy), c * Math.random());
 		}
 
 		public void expand(final BoardAutoLayouter bal) {
-			for (final Entry<PipePart, Rectangle> e : parts.entrySet()) {
+			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet()) {
 				// Parts which are involved in many intersections will
 				// get a slightly higher priority
 				final Double v0 = candidateValues.get(e.getKey());
@@ -293,11 +295,11 @@ public final class BoardAutoLayouter {
 			// intersection of connections with PipeParts and other ones is bad
 			int its = 0;
 			final List<ConnLine> conns = new ArrayList<ConnLine>();
-			for (final Entry<PipePart, Rectangle> e : parts.entrySet())
+			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet())
 				for (final PipePart ppTrg : e.getKey().getConnectedPipeParts()) {
 					final Point ps = new Point();
 					final Point pt = new Point();
-					PipeConfigBoard.calcConnectorPositions(e.getValue(), parts
+					BoardPainter.calcConnectorPositions(e.getValue(), parts
 							.get(ppTrg), ps, pt);
 					final Line2D line = new Line2D.Float(ps, pt);
 					for (final ConnLine conn : conns) {
@@ -316,14 +318,16 @@ public final class BoardAutoLayouter {
 							incCandidateValue(conn.getPP2());
 						}
 					}
-					for (final Entry<PipePart, Rectangle> e2 : parts.entrySet()) {
-						final Rectangle r;
+					for (final Entry<PipePart, ImmutableRectangle> e2 : parts
+							.entrySet()) {
+						boolean intersects;
 						if (e2.getKey() == e.getKey() || e2.getKey() == ppTrg) {
-							r = new Rectangle(e2.getValue());
+							final Rectangle r = e2.getValue().createCopy();
 							r.grow(-2, -2);
+							intersects = r.intersectsLine(line);
 						} else
-							r = e2.getValue();
-						if (r.intersectsLine(line)) {
+							intersects = e2.getValue().intersectsLine(line);
+						if (intersects) {
 							++its;
 							// bad for the PipePart and both ends of the
 							// connection which intersects
@@ -342,8 +346,10 @@ public final class BoardAutoLayouter {
 			if (spreading != -1) return spreading;
 			double spread = .0;
 			// the more spread, the better
-			for (final Entry<PipePart, Rectangle> e1 : parts.entrySet()) {
-				for (final Entry<PipePart, Rectangle> e2 : parts.entrySet())
+			for (final Entry<PipePart, ImmutableRectangle> e1 : parts
+					.entrySet()) {
+				for (final Entry<PipePart, ImmutableRectangle> e2 : parts
+						.entrySet())
 					if (e1 != e2)
 						spread += getDistance(e1.getValue(), e2.getValue());
 				spread += getDistance(e1.getValue(), new Line2D.Float(0, 0,
@@ -359,19 +365,21 @@ public final class BoardAutoLayouter {
 			return spreading;
 		}
 
-		private double getDistance(final Rectangle r1, final Rectangle r2) {
-			final int cx1 = r1.x + r1.width / 2;
-			final int cy1 = r1.y + r1.height / 2;
-			final int cx2 = r2.x + r2.width / 2;
-			final int cy2 = r2.y + r2.height / 2;
+		private double getDistance(final ImmutableRectangle r1,
+				final ImmutableRectangle r2) {
+			final int cx1 = r1.getX() + r1.getWidth() / 2;
+			final int cy1 = r1.getY() + r1.getHeight() / 2;
+			final int cx2 = r2.getX() + r2.getWidth() / 2;
+			final int cy2 = r2.getY() + r2.getHeight() / 2;
 			final int dx = cx1 - cx2;
 			final int dy = cy1 - cy2;
 			return Math.log(Math.sqrt(dx * dx + dy * dy));
 		}
 
-		private double getDistance(final Rectangle r1, final Line2D l2) {
-			return Math.log(l2.ptLineDist(r1.x + r1.width / 2, r1.y + r1.height
-					/ 2));
+		private double getDistance(final ImmutableRectangle r1, final Line2D l2) {
+			return Math.log(l2.ptLineDist(r1.getX() + r1.getWidth() / 2, r1
+					.getY()
+					+ r1.getHeight() / 2));
 		}
 
 		private void check(final Rectangle r, final PipePart pp) {
@@ -396,15 +404,15 @@ public final class BoardAutoLayouter {
 			if (r.y < yMin) r.y = yMin;
 			if (r.x + r.width > xMax) r.x = xMax - r.width;
 			if (r.y + r.height > yMax) r.y = yMax - r.height;
-			for (final Entry<PipePart, Rectangle> e : parts.entrySet())
+			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet())
 				if (e.getKey() != pp && e.getValue().intersects(r)) {
 					// move r, so it doesn't intersect anymore
-					final Rectangle rO = e.getValue();
-					final Rectangle i = r.intersection(rO);
+					final ImmutableRectangle rO = e.getValue();
+					final Rectangle i = rO.intersection(r);
 					final int x0 = r.x + r.width / 2;
 					final int y0 = r.y + r.height / 2;
-					final int x1 = rO.x + rO.width / 2;
-					final int y1 = rO.y + rO.height / 2;
+					final int x1 = rO.getX() + rO.getWidth() / 2;
+					final int y1 = rO.getY() + rO.getHeight() / 2;
 					if (i.width < i.height && r.x - i.width >= xMin
 							&& r.x + r.width + i.width <= xMax) {
 						if (x0 > x1) // move right
@@ -415,12 +423,14 @@ public final class BoardAutoLayouter {
 					} else if (y0 > y1) {
 						if (r.y + r.height + i.height > yMax)
 							// move up instead of down
-							r.translate(0, i.height - r.height - rO.height);
+							r
+									.translate(0, i.height - r.height
+											- rO.getHeight());
 						else
 							r.translate(0, i.height); // move down
 					} else if (r.y - i.height < yMin)
 						// move down instead of up
-						r.translate(0, r.height + rO.height - i.height);
+						r.translate(0, r.height + rO.getHeight() - i.height);
 					else
 						r.translate(0, -i.height); // move up
 					// check bounds again

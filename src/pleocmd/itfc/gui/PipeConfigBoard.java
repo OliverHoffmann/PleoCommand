@@ -1,19 +1,12 @@
 package pleocmd.itfc.gui;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Polygon;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -22,11 +15,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.image.AffineTransformOp;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,7 +26,6 @@ import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -49,8 +38,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
-import javax.swing.UIManager;
 
+import pleocmd.ImmutableRectangle;
 import pleocmd.Log;
 import pleocmd.cfg.ConfigValue;
 import pleocmd.exc.InternalException;
@@ -58,7 +47,6 @@ import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.itfc.gui.help.HelpLoader;
-import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
@@ -67,94 +55,21 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-// TODO raster
 public final class PipeConfigBoard extends JPanel {
-
-	private static final boolean PAINT_DEBUG = false;
 
 	private static final long serialVersionUID = -4525676341777864359L;
 
-	private static final Color BACKGROUND = Color.LIGHT_GRAY;
-
-	private static final Color MOVEMENT_HINT = new Color(192, 208, 192);
-
-	private static final Color ORDER_HINT_BACK = new Color(255, 255, 128);
-
-	private static final Color SECT_BORDER = Color.BLACK;
-
-	private static final Color RECT_BACKGROUND = new Color(255, 255, 255);
-
-	private static final Color INNER_MODIFYABLE = new Color(200, 200, 255);
-
-	private static final Color INNER_READONLY = Color.LIGHT_GRAY;
-
-	private static final Color OUTER_OK = Color.BLACK;
-
-	private static final Color OUTER_BAD = Color.RED;
-
-	private static final Color OUTER_SEL_OK = Color.BLUE;
-
-	private static final Color OUTER_SEL_BAD = Color.MAGENTA;
-
-	private static final Color CONNECTION_OK = Color.BLACK;
-
-	private static final Color CONNECTION_BAD = Color.RED;
-
-	private static final Color CONNECTION_SEL_OK = Color.BLUE;
-
-	private static final Color CONNECTION_SEL_BAD = Color.MAGENTA;
-
-	private static final Color SHADOW_COLOR = Color.GRAY;
-
-	private static final int SHADOW_DEPTH = 4;
-
-	private static final boolean SHADOW_ORDERHINT = true;
-
-	private static final boolean SHADOW_RECTS = true;
-
-	private static final boolean SHADOW_CONNECTIONS = false;
-
-	private static final int ARROW_TIP = 14;
-
-	private static final int ARROW_WING = 8;
-
-	private static final int ICON_WIDTH = 18;
-
-	private static final Color ICON_OUTLINE = Color.GRAY;
-
-	private static final Color ICON_HOVER = Color.BLUE;
-
-	private static final Color ICON_SELECTED = new Color(128, 128, 0);
-
-	private static final Icon ICON_CONF = IconLoader.getIcon("configure");
-
-	private static final int ICON_CONF_POS = -1;
-
-	private static final Icon ICON_DGR = IconLoader.getIcon("games-difficult");
-
-	private static final int ICON_DGR_POS = 0;
-
-	private static final int INNER_WIDTH = ICON_WIDTH + 2;
-
-	private static final int INNER_HEIGHT = 6;
-
+	/**
+	 * Square of distance in pixel to a line to consider it clicked.
+	 */
 	private static final double LINE_CLICK_DIST = 10;
 
-	private static final int SECTION_FRAC = 5;
-
-	private static final int SECTION_SPACE = 20;
-
-	private static final int MAX_RECT_WIDTH = 200;
-
-	private static final double ORDER_HINT_TRUNK_WIDTH = 0.3;
-
-	private static final double ORDER_HINT_TRUNK_HEIGHT = 0.65;
-
-	private static final double ORDER_HINT_ARROW_WIDTH = 0.3;
-
-	private static final double ORDER_HINT_ARROW_HEIGHT = 0.3;
-
+	/**
+	 * Grow repaint clips by this amount to consider labels of connections.
+	 */
 	private static final int GROW_LABEL_REDRAW = 14;
+
+	private final BoardPainter painter;
 
 	private final JPopupMenu menuInput;
 
@@ -165,30 +80,6 @@ public final class PipeConfigBoard extends JPanel {
 	private int idxMenuAdd;
 
 	private int idxMenuRepl;
-
-	private final Set<PipePart> set;
-
-	private final Dimension bounds = new Dimension();
-
-	private int border1;
-
-	private int border2;
-
-	private Point handlePoint;
-
-	private PipePart currentPart;
-
-	private Icon currentIcon;
-
-	private Rectangle currentConnection;
-
-	private PipePart currentConnectionsTarget;
-
-	private boolean currentConnectionValid;
-
-	private PipePart underCursor;
-
-	private int grayVal = 128;
 
 	private int idxMenuConfPart;
 
@@ -204,33 +95,41 @@ public final class PipeConfigBoard extends JPanel {
 
 	private int idxMenuLayoutBoard;
 
-	private final Set<PipePart> saneConfigCache;
+	private Point lastMenuLocation;
 
-	private boolean modifyable;
+	private PipePart currentPart;
 
-	private double scale = 1.0;
+	private Rectangle currentConnection;
+
+	private PipePart currentConnectionsTarget;
+
+	private boolean currentConnectionValid;
+
+	private PipePart underCursor;
+
+	private Point handlePoint;
+
+	private Icon currentIcon;
 
 	private boolean delayedReordering;
 
-	private Point lastMenuLocation;
+	private BoardAutoLayouter layouter;
 
 	private Thread layoutThread;
 
-	private BoardAutoLayouter layouter;
+	private boolean modifyable;
 
 	private boolean closed;
 
 	public PipeConfigBoard() {
+		painter = new BoardPainter();
+
 		setPreferredSize(new Dimension(400, 300));
 		ToolTipManager.sharedInstance().registerComponent(this);
 
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
 		menuOutput = createMenu("Output", Output.class);
-
-		set = new HashSet<PipePart>();
-
-		saneConfigCache = new HashSet<PipePart>();
 
 		updateState();
 
@@ -294,51 +193,23 @@ public final class PipeConfigBoard extends JPanel {
 			public void run() {
 				assignFromPipe();
 			}
+
 		});
 	}
 
-	public void assignFromPipe() {
-		set.clear();
-		for (final PipePart pp : Pipe.the().getInputList())
-			addToSet(pp);
-		for (final PipePart pp : Pipe.the().getConverterList())
-			addToSet(pp);
-		for (final PipePart pp : Pipe.the().getOutputList())
-			addToSet(pp);
+	protected void assignFromPipe() {
+		painter.setBounds(getWidth(), getHeight(), false);
+		painter.assignFromPipe(getGraphics(), true);
 		updatePrefBounds();
-		updateSaneConfigCache();
+		repaint();
 	}
 
-	public PipePart getCurrentPart() {
-		return currentPart;
-	}
-
-	public Set<PipePart> getSet() {
-		return set;
-	}
-
-	public double getScale() {
-		return scale;
-	}
-
-	public int getBorder1() {
-		return border1;
-	}
-
-	public int getBorder2() {
-		return border2;
-	}
-
-	protected void addToSet(final PipePart pp) {
-		set.add(pp);
-		final Graphics g = getGraphics();
-		pp.getGuiPosition().height = g.getFontMetrics().getHeight()
-				+ ICON_WIDTH + 2;
-		pp.getGuiPosition().width = Math.min(MAX_RECT_WIDTH, Math.max(
-				ICON_WIDTH * 4, (int) g.getFontMetrics().getStringBounds(
-						pp.getName(), g).getWidth()
-						+ pp.getGuiPosition().height * 2));
-		check(pp.getGuiPosition(), pp);
+	@Override
+	protected void paintComponent(final Graphics g) {
+		painter.paint(g, currentPart, underCursor,
+				currentConnection == null ? null : new ImmutableRectangle(
+						currentConnection), currentConnectionsTarget,
+				currentConnectionValid, layouter, modifyable);
 	}
 
 	private JPopupMenu createMenu(final String name,
@@ -383,7 +254,7 @@ public final class PipeConfigBoard extends JPanel {
 
 		idxMenuConfPart = menu.getSubElements().length;
 		final JMenuItem itemConfPart = new JMenuItem("Configure This PipePart",
-				ICON_CONF);
+				BoardPainter.ICON_CONF);
 		itemConfPart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -425,7 +296,7 @@ public final class PipeConfigBoard extends JPanel {
 
 		idxMenuToggleDgr = menu.getSubElements().length;
 		final JCheckBoxMenuItem itemToggleDgr = new JCheckBoxMenuItem(
-				"Visualize PipePart's Output", ICON_DGR);
+				"Visualize PipePart's Output", BoardPainter.ICON_DGR);
 		itemToggleDgr.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -463,23 +334,21 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void removeCurrentConnection() {
-		if (currentPart != null && currentConnectionsTarget != null
+		if (hasCurrentPart() && currentConnectionsTarget != null
 				&& ensureModifyable()) {
 			try {
 				currentPart.disconnectFromPipePart(currentConnectionsTarget);
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connection");
 			}
-			currentConnection = null;
-			currentConnectionsTarget = null;
-			currentConnectionValid = false;
-			updateSaneConfigCache();
+			resetCurrentConnection();
+			painter.updateSaneConfigCache();
 			repaint();
 		}
 	}
 
 	protected void removeCurrentPartsConnections() {
-		if (currentPart != null && ensureModifyable()) {
+		if (hasCurrentPart() && ensureModifyable()) {
 			final Set<PipePart> copy = new HashSet<PipePart>(currentPart
 					.getConnectedPipeParts());
 			try {
@@ -488,24 +357,22 @@ public final class PipeConfigBoard extends JPanel {
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connections");
 			}
-			currentConnection = null;
-			currentConnectionsTarget = null;
-			currentConnectionValid = false;
-			updateSaneConfigCache();
+			resetCurrentConnection();
+			painter.updateSaneConfigCache();
 			repaint();
 		}
 	}
 
 	protected void removeCurrentPart() {
-		if (currentPart != null && ensureModifyable()) {
+		if (hasCurrentPart() && ensureModifyable()) {
 			try {
-				for (final PipePart srcPP : set)
+				for (final PipePart srcPP : painter.getSet())
 					if (srcPP.getConnectedPipeParts().contains(currentPart))
 						srcPP.disconnectFromPipePart(currentPart);
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connections");
 			}
-			set.remove(currentPart);
+			painter.getSet().remove(currentPart);
 			try {
 				if (currentPart instanceof Input)
 					Pipe.the().removeInput((Input) currentPart);
@@ -519,18 +386,14 @@ public final class PipeConfigBoard extends JPanel {
 			} catch (final StateException e) {
 				Log.error(e, "Cannot remove PipePart '%s'", currentPart);
 			}
-			currentPart = null;
-			currentConnection = null;
-			currentConnectionsTarget = null;
-			currentConnectionValid = false;
-			handlePoint = null;
-			updateSaneConfigCache();
+			resetCurrentPart();
+			painter.updateSaneConfigCache();
 			repaint();
 		}
 	}
 
 	protected void configureCurrentPart(final boolean onlyIfNoIcon) {
-		if (currentPart != null && !currentPart.getGuiConfigs().isEmpty()
+		if (hasCurrentPart() && !currentPart.getGuiConfigs().isEmpty()
 				&& (!onlyIfNoIcon || currentIcon == null) && ensureModifyable()) {
 			createConfigureDialog("Configure", currentPart, null);
 			repaint();
@@ -538,12 +401,12 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void checkIconClicked() {
-		if (currentIcon == ICON_CONF) configureCurrentPart(false);
-		if (currentIcon == ICON_DGR) toggleDiagram();
+		if (currentIcon == BoardPainter.ICON_CONF) configureCurrentPart(false);
+		if (currentIcon == BoardPainter.ICON_DGR) toggleDiagram();
 	}
 
 	protected void toggleDiagram() {
-		if (currentPart != null)
+		if (hasCurrentPart())
 			currentPart.setVisualize(!currentPart.isVisualize());
 	}
 
@@ -554,14 +417,10 @@ public final class PipeConfigBoard extends JPanel {
 			} catch (final PipeException e) {
 				Log.error(e, "Cannot clear the board");
 			}
-			set.clear();
-			currentPart = null;
-			currentConnection = null;
-			currentConnectionsTarget = null;
-			currentConnectionValid = false;
-			handlePoint = null;
+			painter.getSet().clear();
+			resetCurrentPart();
 			delayedReordering = false;
-			updateSaneConfigCache();
+			painter.updateSaneConfigCache();
 			repaint();
 		}
 	}
@@ -588,492 +447,10 @@ public final class PipeConfigBoard extends JPanel {
 			if (!closed) {
 				updateState();
 				checkPipeOrdering(null);
-				updateSaneConfigCache();
+				painter.updateSaneConfigCache();
 				repaint();
 			}
 		}
-	}
-
-	protected void updateSaneConfigCache() {
-		final Set<PipePart> sane = Pipe.the().getSanePipeParts();
-		if (!saneConfigCache.equals(sane)) {
-			saneConfigCache.clear();
-			saneConfigCache.addAll(sane);
-			repaint();
-		}
-	}
-
-	@Override
-	public void paintComponent(final Graphics g) {
-		final Rectangle clip = g.getClipBounds();
-		final BufferedImage img = new BufferedImage(clip.width, clip.height,
-				BufferedImage.TYPE_INT_RGB);
-		final Graphics2D g2 = img.createGraphics();
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-		g2.setClip(0, 0, clip.width, clip.height);
-
-		final Rectangle clipOrg = new Rectangle((int) (clip.x / scale),
-				(int) (clip.y / scale), (int) (clip.width / scale),
-				(int) (clip.height / scale));
-
-		final long start = System.currentTimeMillis();
-		if (PAINT_DEBUG) {
-			grayVal = (grayVal - 118) % 64 + 128;
-			g2.setColor(new Color(grayVal, grayVal, grayVal));
-		} else
-			g2.setColor(BACKGROUND);
-		g2.fillRect(0, 0, clip.width, clip.height);
-		g2.translate(-clip.x, -clip.y);
-		g2.scale(scale, scale);
-		drawMovementHint(g2);
-		final long time1 = System.currentTimeMillis();
-
-		if (clip.x < border1) drawOrderingHint(g2);
-		final long time2 = System.currentTimeMillis();
-		drawSectionBorders(g2);
-		final long time3 = System.currentTimeMillis();
-		final int cnt4 = drawPipeParts(g2, clipOrg);
-		final long time4 = System.currentTimeMillis();
-		final int cnt5 = drawConnections(g2, clipOrg);
-		final long time5 = System.currentTimeMillis();
-		drawAutoLayoutInfo(g2);
-
-		if (PAINT_DEBUG) {
-			g2.translate(clip.x / scale, clip.y / scale);
-			drawDebugTime(g2, time1 - start, -1, "Background", 1);
-			drawDebugTime(g2, time2 - time1, -1, "Hint", 2);
-			drawDebugTime(g2, time3 - time2, -1, "Border", 3);
-			drawDebugTime(g2, time4 - time3, cnt4, "Parts", 4);
-			drawDebugTime(g2, time5 - time4, cnt5, "Conn's", 5);
-		}
-
-		g.drawImage(img, clip.x, clip.y, null);
-	}
-
-	private void drawDebugTime(final Graphics2D g2, final long elapsed,
-			final int count, final String name, final int pos) {
-		final Font f = g2.getFont();
-		g2.setFont(f.deriveFont(10f));
-		g2.setColor(Color.GREEN);
-		final String str = count == -1 ? name : String.format("%d %s", count,
-				name);
-		g2.drawString(String.format("%d ms for %s", elapsed, str), 0, 10 * pos);
-		g2.setFont(f);
-	}
-
-	private void drawMovementHint(final Graphics2D g2) {
-		final List<? extends PipePart> list;
-		final int x0;
-		final int x1;
-		if (currentPart instanceof Input) {
-			list = Pipe.the().getInputList();
-			x0 = 0;
-			x1 = border1;
-		} else if (currentPart instanceof Converter) {
-			list = Pipe.the().getConverterList();
-			x0 = border1;
-			x1 = border2;
-		} else if (currentPart instanceof Output) {
-			list = Pipe.the().getOutputList();
-			x0 = border2;
-			x1 = (int) (bounds.width / scale);
-		} else
-			return;
-		final int idx = list.indexOf(currentPart);
-		final PipePart before = idx > 0 ? list.get(idx - 1) : null;
-		final PipePart after = idx < list.size() - 1 ? list.get(idx + 1) : null;
-
-		final int y0 = before == null ? 0 : before.getGuiPosition().y
-				+ before.getGuiPosition().height + 1;
-		final int y1 = after == null ? (int) (bounds.height / scale) : after
-				.getGuiPosition().y - 1;
-		final Rectangle r = new Rectangle(x0, y0, x1 - x0, y1 - y0);
-		if (PAINT_DEBUG)
-			g2.setColor(new Color(grayVal, grayVal + 16, grayVal));
-		else
-			g2.setColor(MOVEMENT_HINT);
-		g2.fill(r);
-	}
-
-	private void drawOrderingHint(final Graphics2D g2) {
-		final double w = border1;
-		final double h = bounds.height / scale;
-		final int tw = (int) (w * ORDER_HINT_TRUNK_WIDTH);
-		final int th = (int) (h * ORDER_HINT_TRUNK_HEIGHT);
-		final int aw = (int) (w * ORDER_HINT_ARROW_WIDTH);
-		final int ah = (int) (h * ORDER_HINT_ARROW_HEIGHT);
-		final int cw = tw + 2 * aw;
-		final int ch = th + ah;
-		final int ow = (int) ((w - cw) / 2);
-		final int oh = (int) ((h - ch) / 2);
-		final Polygon p = new Polygon();
-		p.addPoint(ow + aw, oh);
-		p.addPoint(ow + aw + tw, oh);
-		p.addPoint(ow + aw + tw, oh + th);
-		p.addPoint(ow + aw + tw + aw, oh + th);
-		p.addPoint(ow + aw + tw / 2, oh + th + ah);
-		p.addPoint(ow, oh + th);
-		p.addPoint(ow + aw, oh + th);
-		p.addPoint(ow + aw, oh);
-
-		if (SHADOW_ORDERHINT && SHADOW_DEPTH > 0) {
-			final AffineTransform at = g2.getTransform();
-			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
-			g2.setColor(SHADOW_COLOR);
-			g2.fillPolygon(p);
-			g2.setTransform(at);
-		}
-
-		g2.setColor(ORDER_HINT_BACK);
-		g2.fillPolygon(p);
-	}
-
-	private void drawSectionBorders(final Graphics2D g2) {
-		g2.setStroke(new BasicStroke(2, BasicStroke.CAP_SQUARE,
-				BasicStroke.JOIN_BEVEL, 0, new float[] { 3, 3 }, 0));
-		g2.setColor(SECT_BORDER);
-		final int h = (int) (bounds.height / scale + 0.5);
-		g2.drawLine(border1, 0, border1, h);
-		g2.drawLine(border2, 0, border2, h);
-	}
-
-	private int drawPipeParts(final Graphics2D g2, final Rectangle clip) {
-		int cnt = 0;
-		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
-				BasicStroke.JOIN_BEVEL, 0, null, 0));
-		for (final PipePart pp : set)
-			cnt += drawPipePart(g2, pp, pp == underCursor, clip);
-		return cnt;
-	}
-
-	private int drawConnections(final Graphics2D g2, final Rectangle clip) {
-		int cnt = 0;
-		for (final PipePart src : set)
-			for (final PipePart trg : src.getConnectedPipeParts()) {
-				final boolean sel = currentPart == src
-						&& currentConnectionsTarget == trg;
-				if (saneConfigCache.contains(src))
-					g2.setColor(sel ? CONNECTION_SEL_OK : CONNECTION_OK);
-				else
-					g2.setColor(sel ? CONNECTION_SEL_BAD : CONNECTION_BAD);
-				cnt += drawConnection(g2, src.getGuiPosition(), trg
-						.getGuiPosition(), src, trg, clip);
-			}
-		if (currentConnection != null && currentConnectionsTarget == null) {
-			g2.setColor(currentConnectionValid ? CONNECTION_SEL_OK
-					: CONNECTION_SEL_BAD);
-			cnt += drawConnection(g2, currentPart.getGuiPosition(),
-					currentConnection, currentPart, underCursor, clip);
-		}
-		return cnt;
-	}
-
-	private int drawPipePart(final Graphics2D g2, final PipePart part,
-			final boolean hover, final Rectangle clip) {
-		final Rectangle rect = part.getGuiPosition();
-		if (!rect.intersects(clip)) return 0;
-
-		final Color outerClr;
-		if (saneConfigCache.contains(part))
-			outerClr = part == currentPart ? OUTER_SEL_OK : OUTER_OK;
-		else
-			outerClr = part == currentPart ? OUTER_SEL_BAD : OUTER_BAD;
-
-		if (SHADOW_RECTS && SHADOW_DEPTH > 0) {
-			final AffineTransform at = g2.getTransform();
-			g2.translate(SHADOW_DEPTH, SHADOW_DEPTH);
-			g2.setColor(SHADOW_COLOR);
-			g2.fill(rect);
-			g2.setTransform(at);
-		}
-
-		g2.setColor(RECT_BACKGROUND);
-		g2.fill(rect);
-
-		g2.setColor(outerClr);
-		g2.draw(rect);
-
-		final String s = part.getName();
-		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
-
-		if (hover) {
-			final Rectangle inner = new Rectangle(rect);
-			inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
-			g2.fill(inner);
-		}
-
-		// restrict drawing to inside the rectangle
-		final Shape shape = g2.getClip();
-		g2.clipRect(rect.x, rect.y, rect.width, rect.height);
-
-		// draw main icon
-		Icon mainIcon = part.getIcon();
-		if (mainIcon == null) {
-			final BufferedImage img = new BufferedImage(rect.height,
-					rect.height, BufferedImage.TYPE_INT_ARGB);
-			final Icon cfgImage = part.getConfigImage();
-			if (cfgImage instanceof ImageIcon) {
-				final Graphics2D g = img.createGraphics();
-				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-						RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-				g.drawImage(((ImageIcon) cfgImage).getImage(), 0, 0,
-						rect.height, rect.height, null);
-				mainIcon = new ImageIcon(img);
-			} else
-				mainIcon = IconLoader.getMissingIcon();
-		}
-		mainIcon.paintIcon(null, g2, rect.x, rect.y
-				+ (rect.height - mainIcon.getIconHeight()) / 2);
-
-		// draw name of PipePart
-		g2.setColor(outerClr);
-		g2.drawString(s, (float) (rect.x + (rect.width - sb.getWidth()) / 2),
-				(float) (rect.y + sb.getHeight()));
-
-		// draw clickable icons
-		drawIcon(g2, hover, rect, ICON_CONF, ICON_CONF_POS, !modifyable
-				|| part.getGuiConfigs().isEmpty(), false);
-		drawIcon(g2, hover, rect, ICON_DGR, ICON_DGR_POS, false, part
-				.isVisualize());
-
-		// restore old clip
-		g2.setClip(shape);
-		return 1;
-	}
-
-	/**
-	 * Draws an icon to the image
-	 * 
-	 * @param g2
-	 *            {@link Graphics2D} of the image
-	 * @param hover
-	 *            if true, an outline will be drawn
-	 * @param rect
-	 *            position of the image in which to align the icon
-	 * @param icon
-	 *            {@link Icon} to draw
-	 * @param pos
-	 *            the position inside the rectangle as follow<br>
-	 *            [ 1 2 3 ..... -2 -1 0 ]
-	 * @param disabled
-	 *            if true, icon is drawn in disabled state
-	 * @param selected
-	 *            if true, icon is drawn in selected state
-	 */
-	private void drawIcon(final Graphics2D g2, final boolean hover,
-			final Rectangle rect, final Icon icon, final int pos,
-			final boolean disabled, final boolean selected) {
-		final Rectangle b = getIconBounds(rect, icon, pos);
-		if (hover) {
-			g2.setColor(modifyable ? INNER_MODIFYABLE : INNER_READONLY);
-			g2.fill(b);
-		}
-		Icon ico = disabled ? (selected ? UIManager.getLookAndFeel()
-				.getDisabledSelectedIcon(null, icon) : UIManager
-				.getLookAndFeel().getDisabledIcon(null, icon)) : icon;
-		if (ico == null) ico = icon;
-		ico.paintIcon(null, g2, b.x, b.y);
-		g2.setColor(selected ? ICON_SELECTED : hover ? ICON_HOVER
-				: ICON_OUTLINE);
-		g2.draw3DRect(b.x, b.y, b.width, b.height, !selected);
-	}
-
-	/**
-	 * Gets the bounding rectangle around an icon.
-	 * 
-	 * @param rect
-	 *            position of the image in which to align the icon
-	 * @param icon
-	 *            {@link Icon} which would be drawn
-	 * @param pos
-	 *            the position inside the rectangle as follow<br>
-	 *            [ 1 2 3 ..... -2 -1 0 ]
-	 * @return the bounding rectangle
-	 */
-	private Rectangle getIconBounds(final Rectangle rect, final Icon icon,
-			final int pos) {
-		final boolean alignRight = pos <= 0;
-		final Rectangle b = new Rectangle();
-		b.width = icon.getIconWidth();
-		b.height = icon.getIconHeight();
-		if (alignRight)
-			b.x = rect.x + rect.width - (1 - pos) * ICON_WIDTH;
-		else
-			b.x = rect.x + pos * ICON_WIDTH - b.width;
-		b.y = rect.y + rect.height - ICON_WIDTH;
-		return b;
-	}
-
-	private int drawConnection(final Graphics2D g2, final Rectangle srcRect,
-			final Rectangle trgRect, final PipePart src, final PipePart trg,
-			final Rectangle clip) {
-		if (!srcRect.union(trgRect).intersects(clip)) return 0;
-
-		final Point srcPoint = new Point();
-		final Point trgPoint = new Point();
-		calcConnectorPositions(srcRect, trgRect, srcPoint, trgPoint);
-		final Polygon arrow = getArrowPolygon(srcPoint.x, srcPoint.y,
-				trgPoint.x, trgPoint.y);
-
-		if (SHADOW_CONNECTIONS && SHADOW_DEPTH > 0) {
-			final Color clr = g2.getColor();
-			final AffineTransform at = g2.getTransform();
-			g2.translate(SHADOW_DEPTH / 2, SHADOW_DEPTH / 2);
-			g2.setColor(SHADOW_COLOR);
-			g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
-			g2.fillPolygon(arrow);
-			drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x,
-					trgPoint.y, src.getOutputDescription());
-			drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x,
-					srcPoint.y, trg == null ? "" : trg.getInputDescription());
-			g2.setTransform(at);
-			g2.setColor(clr);
-		}
-
-		g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
-		g2.fillPolygon(arrow);
-
-		drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y,
-				src.getOutputDescription());
-		drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x, srcPoint.y,
-				trg == null ? "" : trg.getInputDescription());
-		return 1;
-	}
-
-	private void drawConnectorLabel(final Graphics2D g2, final int sx,
-			final int sy, final int tx, final int ty, final String str) {
-		if (str.isEmpty()) return;
-
-		// draw in image
-		final Rectangle sb = g2.getFontMetrics().getStringBounds(str, g2)
-				.getBounds();
-		final BufferedImage img = new BufferedImage((int) (sb.width * scale),
-				(int) (sb.height * scale), BufferedImage.TYPE_INT_ARGB);
-		final Graphics2D imgG2D = img.createGraphics();
-		imgG2D.scale(scale, scale);
-		imgG2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		if (PAINT_DEBUG) {
-			imgG2D.setColor(Color.YELLOW);
-			imgG2D.fillRect(0, 0, sb.width, sb.height);
-		}
-		imgG2D.setColor(g2.getColor());
-		imgG2D.setFont(g2.getFont());
-		imgG2D.drawString(str, 0, sb.height);
-
-		// make sure text is never bottom-up and correctly positioned
-		double d = Math.atan2(sy - ty, sx - tx);
-		int xoffs = 16;
-		if (d > Math.PI / 2)
-			d -= Math.PI;
-		else if (d < -Math.PI / 2.0)
-			d += Math.PI;
-		else
-			xoffs = (int) (-sb.width * scale - xoffs);
-
-		// draw rotated image
-		final Shape shape = g2.getClip();
-		final AffineTransform at = g2.getTransform();
-
-		// only use translation from original transformation
-		// scaling is already done in imgG2D
-		g2.setTransform(new AffineTransform());
-		g2.translate(at.getTranslateX() + sx * scale, at.getTranslateY() + sy
-				* scale);
-		g2.rotate(d);
-		final int len = (int) (Math.sqrt((sx - tx) * (sx - tx) + (sy - ty)
-				* (sy - ty)) * scale);
-		if (xoffs < 0)
-			g2.clipRect(-len / 2, 0, len / 2, img.getHeight());
-		else
-			g2.clipRect(0, 0, len / 2, img.getHeight());
-		g2.drawImage(img, new AffineTransformOp(new AffineTransform(),
-				AffineTransformOp.TYPE_BILINEAR), xoffs, 0);
-		g2.setTransform(at);
-		g2.setClip(shape);
-	}
-
-	private void drawAutoLayoutInfo(final Graphics2D g2) {
-		if (layoutThread == null || layouter == null) return;
-		final int w = bounds.width * 2 / 3;
-		final int h = 20;
-		final int x = (bounds.width - w) / 2;
-		final int y = (bounds.height - h) / 2;
-		g2.setColor(Color.LIGHT_GRAY);
-		g2.fill3DRect(x, y, w, h, false);
-		g2.setColor(new Color(128, 128, 255));
-		g2.fill3DRect(x + 1, y + 1, (int) (w * layouter.getProgress()) - 1,
-				h - 2, true);
-		g2.setColor(Color.BLACK);
-		final String s = layouter.getProgressText();
-		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
-		g2.drawString(s, (int) ((bounds.width - sb.getWidth()) / 2), (int) (y
-				+ h - (h - sb.getHeight()) / 2));
-	}
-
-	static void calcConnectorPositions(final Rectangle srcRect,
-			final Rectangle trgRect, final Point srcPos, final Point trgPos) {
-		// calculate center of source and target
-		final int csx = srcRect.x + srcRect.width / 2;
-		final int csy = srcRect.y + srcRect.height / 2;
-		final int ctx = trgRect.x + trgRect.width / 2;
-		final int cty = trgRect.y + trgRect.height / 2;
-
-		// determine side of rectangle for the connection
-		final int dcx = ctx - csx;
-		final int dcy = cty - csy;
-		if (dcx > Math.abs(dcy)) {
-			// target is right of source
-			if (srcPos != null)
-				srcPos.setLocation(srcRect.x + srcRect.width, csy);
-			if (trgPos != null) trgPos.setLocation(trgRect.x, cty);
-		} else if (dcy >= Math.abs(dcx)) {
-			// target is below source
-			if (srcPos != null)
-				srcPos.setLocation(csx, srcRect.y + srcRect.height);
-			if (trgPos != null) trgPos.setLocation(ctx, trgRect.y);
-		} else if (dcx < 0 && Math.abs(dcx) > Math.abs(dcy)) {
-			// target is left of source
-			if (srcPos != null) srcPos.setLocation(srcRect.x, csy);
-			if (trgPos != null)
-				trgPos.setLocation(trgRect.x + trgRect.width, cty);
-		} else {
-			// target is above source
-			if (srcPos != null) srcPos.setLocation(csx, srcRect.y);
-			if (trgPos != null)
-				trgPos.setLocation(ctx, trgRect.y + trgRect.height);
-		}
-	}
-
-	// from http://www.java-forums.org/awt-swing/
-	// 5842-how-draw-arrow-mark-using-java-swing.html
-	private static Polygon getArrowPolygon(final int sx, final int sy,
-			final int tx, final int ty) {
-		final Polygon p = new Polygon();
-		final double d = Math.atan2(sx - tx, sy - ty);
-		// tip
-		p.addPoint(tx, ty);
-		// wing 1
-		p.addPoint(tx + xCor(ARROW_TIP, d + .5), ty + yCor(ARROW_TIP, d + .5));
-		// on line
-		p.addPoint(tx + xCor(ARROW_WING, d), ty + yCor(ARROW_WING, d));
-		// wing 2
-		p.addPoint(tx + xCor(ARROW_TIP, d - .5), ty + yCor(ARROW_TIP, d - .5));
-		// back to tip, close polygon
-		p.addPoint(tx, ty);
-		return p;
-	}
-
-	private static int xCor(final int len, final double dir) {
-		return (int) (len * Math.sin(dir));
-	}
-
-	private static int yCor(final int len, final double dir) {
-		return (int) (len * Math.cos(dir));
 	}
 
 	protected void addPipePart(final Class<? extends PipePart> part,
@@ -1084,9 +461,10 @@ public final class PipeConfigBoard extends JPanel {
 			createConfigureDialog("Add", pp, new Runnable() {
 				@Override
 				public void run() {
-					if (location != null)
-						pp.getGuiPosition().setLocation(location);
-					check(pp.getGuiPosition(), pp);
+					final Rectangle r = pp.getGuiPosition().createCopy();
+					if (location != null) r.setLocation(location);
+					getPainter().check(r, pp);
+					pp.setGuiPosition(r);
 					try {
 						if (pp instanceof Input)
 							Pipe.the().addInput((Input) pp);
@@ -1097,12 +475,12 @@ public final class PipeConfigBoard extends JPanel {
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
-						addToSet(pp);
+						getPainter().addToSet(pp, getGraphics(), true);
 						checkPipeOrdering(null);
 					} catch (final StateException e) {
 						Log.error(e, "Cannot add new PipePart");
 					}
-					updateSaneConfigCache();
+					getPainter().updateSaneConfigCache();
 					repaint();
 				}
 			});
@@ -1130,7 +508,7 @@ public final class PipeConfigBoard extends JPanel {
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
-						for (final PipePart srcPP : getSet())
+						for (final PipePart srcPP : getPainter().getSet())
 							if (srcPP.getConnectedPipeParts().contains(
 									getCurrentPart()))
 								srcPP.connectToPipePart(pp);
@@ -1140,11 +518,14 @@ public final class PipeConfigBoard extends JPanel {
 					} catch (final StateException e) {
 						Log.error(e, "Cannot replace PipePart");
 					}
-					pp.getGuiPosition().setLocation(
-							getCurrentPart().getGuiPosition().getLocation());
-					addToSet(pp);
+					getPainter().addToSet(pp, getGraphics(), true);
+					final Rectangle r = pp.getGuiPosition().createCopy();
+					r.setLocation(getCurrentPart().getGuiPosition().getX(),
+							getCurrentPart().getGuiPosition().getY());
 					removeCurrentPart();
-					check(pp.getGuiPosition(), pp);
+					getPainter().check(r, pp);
+					pp.setGuiPosition(r);
+					getPainter().updateSaneConfigCache();
 					checkPipeOrdering(null);
 				}
 			});
@@ -1165,7 +546,7 @@ public final class PipeConfigBoard extends JPanel {
 	 *            current cursor position (scaled to screen)
 	 */
 	protected void mouseDragged(final Point ps) {
-		if (currentPart == null || handlePoint == null) return;
+		if (!hasCurrentPart() || handlePoint == null) return;
 		final Point p = getOriginal(ps);
 		if (currentConnection != null) {
 			// move connector instead of pipe-part
@@ -1177,19 +558,19 @@ public final class PipeConfigBoard extends JPanel {
 				} catch (final StateException e) {
 					Log.error(e, "Cannot delete connection");
 				}
-				updateSaneConfigCache();
+				if (painter.updateSaneConfigCache()) repaint();
 				currentConnectionsTarget = null;
 			}
 
-			Rectangle r = new Rectangle(currentPart.getGuiPosition());
-			r = r.union(currentConnection);
+			final Rectangle r = currentPart.getGuiPosition().createCopy()
+					.union(currentConnection);
 
 			currentConnection.setLocation(p.x - handlePoint.x, p.y
 					- handlePoint.y);
 			currentConnection.setSize(0, 0);
-			check(currentConnection, null);
+			painter.check(currentConnection, null);
 			currentConnectionValid = false;
-			for (final PipePart pp : set)
+			for (final PipePart pp : painter.getSet())
 				if (pp.getGuiPosition().contains(
 						currentConnection.getLocation())) {
 					currentConnectionValid = currentPart
@@ -1205,28 +586,27 @@ public final class PipeConfigBoard extends JPanel {
 			repaint(r);
 		} else {
 			// move pipe-part
-			final Rectangle orgPos = new Rectangle(currentPart.getGuiPosition());
-			Rectangle r = new Rectangle(orgPos);
-			unionConnectionTargets(r);
-			unionConnectionSources(r);
-			currentPart.getGuiPosition().setLocation(p.x - handlePoint.x,
-					p.y - handlePoint.y);
-			check(currentPart.getGuiPosition(), currentPart);
-			if (!checkPipeOrdering(null))
-				currentPart.getGuiPosition().setLocation(orgPos.getLocation());
-			r = r.union(currentPart.getGuiPosition());
-			unionConnectionTargets(r);
-			unionConnectionSources(r);
+			final ImmutableRectangle orgPos = currentPart.getGuiPosition();
+			final Rectangle newPos = orgPos.createCopy();
+			Rectangle clip = orgPos.createCopy();
+			unionConnectionTargets(clip);
+			unionConnectionSources(clip);
+			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
+			painter.check(newPos, currentPart);
+			if (checkPipeOrdering(null)) currentPart.setGuiPosition(newPos);
+			clip = clip.union(newPos);
+			unionConnectionTargets(clip);
+			unionConnectionSources(clip);
 			// need to take care of labels
-			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
-			scaleRect(r);
-			repaint(r);
+			clip.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
+			scaleRect(clip);
+			repaint(clip);
 			updatePrefBounds();
 		}
 	}
 
 	private void unionConnectionSources(final Rectangle r) {
-		for (final PipePart srcPP : set)
+		for (final PipePart srcPP : painter.getSet())
 			if (srcPP.getConnectedPipeParts().contains(currentPart))
 				unionConnection(r, srcPP);
 	}
@@ -1238,67 +618,9 @@ public final class PipeConfigBoard extends JPanel {
 
 	private void unionConnection(final Rectangle r, final PipePart pp) {
 		final Point pt = new Point();
-		calcConnectorPositions(currentPart.getGuiPosition(), pp
+		BoardPainter.calcConnectorPositions(currentPart.getGuiPosition(), pp
 				.getGuiPosition(), null, pt);
 		Rectangle2D.union(r, new Rectangle(pt.x, pt.y, 0, 0), r);
-	}
-
-	protected void check(final Rectangle r, final PipePart pp) {
-		final int xMin;
-		final int xMax;
-		final int yMin = 1;
-		final int yMax = (int) (bounds.height / scale) - 1;
-		if (Input.class.isInstance(pp)) {
-			xMin = 1;
-			xMax = border1 - 1;
-		} else if (Converter.class.isInstance(pp)) {
-			xMin = border1 + 1;
-			xMax = border2 - 1;
-		} else if (Output.class.isInstance(pp)) {
-			xMin = border2 + 1;
-			xMax = (int) (bounds.width / scale) - 1;
-		} else {
-			xMin = 1;
-			xMax = (int) (bounds.width / scale) - 1;
-		}
-		if (r.x < xMin) r.x = xMin;
-		if (r.y < yMin) r.y = yMin;
-		if (r.x + r.width > xMax) r.x = xMax - r.width;
-		if (r.y + r.height > yMax) r.y = yMax - r.height;
-		for (final PipePart other : set)
-			if (other != pp && other.getGuiPosition().intersects(r)) {
-				// move r, so it doesn't intersect anymore
-				final Rectangle rO = other.getGuiPosition();
-				final Rectangle i = r.intersection(rO);
-				final int x0 = r.x + r.width / 2;
-				final int y0 = r.y + r.height / 2;
-				final int x1 = rO.x + rO.width / 2;
-				final int y1 = rO.y + rO.height / 2;
-				if (i.width < i.height && r.x - i.width >= xMin
-						&& r.x + r.width + i.width <= xMax) {
-					if (x0 > x1) // move right
-						r.translate(i.width, 0);
-					else
-						// move left
-						r.translate(-i.width, 0);
-				} else if (y0 > y1) {
-					if (r.y + r.height + i.height > yMax)
-						// move up instead of down
-						r.translate(0, i.height - r.height - rO.height);
-					else
-						r.translate(0, i.height); // move down
-				} else if (r.y - i.height < yMin)
-					// move down instead of up
-					r.translate(0, r.height + rO.height - i.height);
-				else
-					r.translate(0, -i.height); // move up
-				// check bounds again
-				// (overlapping is better than being out of bounds)
-				if (r.x < xMin) r.x = xMin;
-				if (r.y < yMin) r.y = yMin;
-				if (r.x + r.width > xMax) r.x = xMax - r.width;
-				if (r.y + r.height > yMax) r.y = yMax - r.height;
-			}
 	}
 
 	/**
@@ -1310,17 +632,18 @@ public final class PipeConfigBoard extends JPanel {
 	protected void mouseMoved(final Point ps) {
 		final Point p = getOriginal(ps);
 		PipePart found = null;
-		for (final PipePart pp : set)
+		for (final PipePart pp : painter.getSet())
 			if (pp.getGuiPosition().contains(p)) {
 				found = pp;
 				break;
 			}
 		if (underCursor != found) {
+			// FIXME remove if-clause above once hover is per icon
 			if (underCursor != null)
-				repaint(scaleRect(new Rectangle(underCursor.getGuiPosition())));
+				repaint(scaleRect(underCursor.getGuiPosition().createCopy()));
 			underCursor = found;
 			if (underCursor != null)
-				repaint(scaleRect(new Rectangle(underCursor.getGuiPosition())));
+				repaint(scaleRect(underCursor.getGuiPosition().createCopy()));
 		}
 	}
 
@@ -1339,49 +662,35 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	private void updateCurrent0(final Point pscr) {
-		currentPart = null;
-		currentIcon = null;
-		currentConnection = null;
-		currentConnectionsTarget = null;
-		currentConnectionValid = false;
-		handlePoint = null;
+		resetCurrentPart();
 
 		// check all pipe-parts
 		final Point p = getOriginal(pscr);
-		for (final PipePart pp : set)
+		for (final PipePart pp : painter.getSet())
 			if (pp.getGuiPosition().contains(p)) {
 				currentPart = pp;
-
-				final Rectangle inner = new Rectangle(pp.getGuiPosition());
-				inner.grow(-INNER_WIDTH, -INNER_HEIGHT);
-				final Rectangle ibC = getIconBounds(pp.getGuiPosition(),
-						ICON_CONF, ICON_CONF_POS);
-				final Rectangle ibD = getIconBounds(pp.getGuiPosition(),
-						ICON_DGR, ICON_DGR_POS);
-				if (ibC.contains(p))
-					currentIcon = ICON_CONF;
-				else if (ibD.contains(p))
-					currentIcon = ICON_DGR;
-				else if (inner.contains(p))
-					handlePoint = new Point(p.x - pp.getGuiPosition().x, p.y
-							- pp.getGuiPosition().y);
+				final Object res = BoardPainter.getPipePartElement(pp, p);
+				if (res instanceof Icon)
+					currentIcon = (Icon) res;
+				else if (res instanceof Point)
+					handlePoint = (Point) res;
 				else {
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					handlePoint = new Point(0, 0);
 				}
-
 				return;
 			}
 
 		// check all connections
-		for (final PipePart srcPP : set)
+		for (final PipePart srcPP : painter.getSet())
 			for (final PipePart trgPP : srcPP.getConnectedPipeParts()) {
 				final Point ps = new Point();
 				final Point pt = new Point();
-				calcConnectorPositions(srcPP.getGuiPosition(), trgPP
-						.getGuiPosition(), ps, pt);
+				BoardPainter.calcConnectorPositions(srcPP.getGuiPosition(),
+						trgPP.getGuiPosition(), ps, pt);
 				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, p.x, p.y) < LINE_CLICK_DIST
-						|| getArrowPolygon(ps.x, ps.y, pt.x, pt.y).contains(p)) {
+						|| BoardPainter.getArrowPolygon(ps.x, ps.y, pt.x, pt.y)
+								.contains(p)) {
 					currentPart = srcPP;
 					currentConnection = new Rectangle(p.x, p.y, 0, 0);
 					currentConnectionsTarget = trgPP;
@@ -1403,7 +712,7 @@ public final class PipeConfigBoard extends JPanel {
 		if (currentConnection != null && currentConnectionsTarget == null
 				&& ensureModifyable()) {
 			final Point p = new Point(currentConnection.getLocation());
-			for (final PipePart pp : set)
+			for (final PipePart pp : painter.getSet())
 				if (pp.getGuiPosition().contains(p)
 						&& currentPart.isConnectionAllowed(pp)) {
 					try {
@@ -1411,16 +720,11 @@ public final class PipeConfigBoard extends JPanel {
 					} catch (final StateException e) {
 						Log.error(e, "Cannot create connection");
 					}
-					updateSaneConfigCache();
+					painter.updateSaneConfigCache();
 					break;
 				}
 		}
-		// currentPart = null;
-		currentIcon = null;
-		currentConnection = null;
-		// currentConnectionsTarget = null;
-		currentConnectionValid = false;
-		handlePoint = null;
+		resetCurrentTransients();
 		repaint();
 	}
 
@@ -1437,15 +741,15 @@ public final class PipeConfigBoard extends JPanel {
 	@SuppressWarnings("unchecked")
 	private <T extends PipePart> List<T> getSortedParts(final Class<T> clazz) {
 		final List<T> res = new ArrayList<T>();
-		for (final PipePart pp : set)
+		for (final PipePart pp : painter.getSet())
 			if (clazz.isInstance(pp)) res.add((T) pp);
 		Collections.sort(res, new Comparator<T>() {
 			@Override
 			public int compare(final T pp1, final T pp2) {
-				final Rectangle r1 = pp1.getGuiPosition();
-				final Rectangle r2 = pp2.getGuiPosition();
-				int cmp = r1.y - r2.y;
-				if (cmp == 0) cmp = r1.x - r2.x;
+				final ImmutableRectangle r1 = pp1.getGuiPosition();
+				final ImmutableRectangle r2 = pp2.getGuiPosition();
+				int cmp = r1.getY() - r2.getY();
+				if (cmp == 0) cmp = r1.getX() - r2.getX();
 				return cmp;
 			}
 		});
@@ -1500,38 +804,22 @@ public final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void updatePrefBounds() {
-		// get lower right corner
-		int x = 0;
-		int y = 0;
-		for (final PipePart pp : set) {
-			final Rectangle r = pp.getGuiPosition();
-			x = Math.max(x, r.x + r.width);
-			y = Math.max(y, r.y + r.height);
-		}
-
-		// add some free space and consider scaling
-		setPreferredSize(new Dimension((int) (x * scale + 4),
-				(int) (y * scale + 4)));
+		setPreferredSize(painter.getPreferredSize());
 		revalidate();
 	}
 
 	protected void updateBounds(final int width, final int height) {
-		bounds.setSize(width, height);
-		border1 = Math
-				.min(width / SECTION_FRAC, MAX_RECT_WIDTH + SECTION_SPACE);
-		border2 = width - border1;
-		for (final PipePart pp : set)
-			check(pp.getGuiPosition(), pp);
+		painter.setBounds(width, height, true);
 		checkPipeOrdering("Resizing the board changed the ordering of the Pipe !!! "
 				+ "Please check ordering of all PipeParts.");
 		repaint();
 	}
 
 	protected void showMenu(final Component invoker, final int x, final int y) {
-		lastMenuLocation = new Point((int) (x / scale), (int) (y / scale));
-		if (x <= border1 * scale)
+		lastMenuLocation = getOriginal(new Point(x, y));
+		if (x <= painter.getBorder1(true))
 			showMenu(menuInput, invoker, x, y);
-		else if (x >= border2 * scale)
+		else if (x >= painter.getBorder2(true))
 			showMenu(menuOutput, invoker, x, y);
 		else
 			showMenu(menuConverter, invoker, x, y);
@@ -1541,27 +829,26 @@ public final class PipeConfigBoard extends JPanel {
 			final int x, final int y) {
 		final MenuElement[] items = menu.getSubElements();
 		((AbstractButton) items[idxMenuAdd]).setEnabled(modifyable
-				&& currentPart == null);
+				&& !hasCurrentPart());
 		((AbstractButton) items[idxMenuRepl]).setEnabled(modifyable
-				&& currentPart != null);
+				&& hasCurrentPart());
 		((AbstractButton) items[idxMenuConfPart]).setEnabled(modifyable
-				&& currentPart != null && currentConnection == null
+				&& hasCurrentPart() && currentConnection == null
 				&& !currentPart.getGuiConfigs().isEmpty());
 		((AbstractButton) items[idxMenuDelPart]).setEnabled(modifyable
-				&& currentPart != null && currentConnection == null);
+				&& hasCurrentPart() && currentConnection == null);
 		((AbstractButton) items[idxMenuDelPartConn]).setEnabled(modifyable
-				&& currentPart != null && currentConnection == null
+				&& hasCurrentPart() && currentConnection == null
 				&& !currentPart.getConnectedPipeParts().isEmpty());
 		((AbstractButton) items[idxMenuDelConn]).setEnabled(modifyable
 				&& currentConnection != null);
-		((AbstractButton) items[idxMenuToggleDgr])
-				.setEnabled(currentPart != null);
-		((AbstractButton) items[idxMenuToggleDgr])
-				.setSelected(currentPart != null && currentPart.isVisualize());
+		((AbstractButton) items[idxMenuToggleDgr]).setEnabled(hasCurrentPart());
+		((AbstractButton) items[idxMenuToggleDgr]).setSelected(hasCurrentPart()
+				&& currentPart.isVisualize());
 		((AbstractButton) items[idxMenuClearBoard]).setEnabled(modifyable
-				&& currentPart == null);
+				&& !hasCurrentPart());
 		((AbstractButton) items[idxMenuLayoutBoard])
-				.setEnabled(currentPart == null && layoutThread == null);
+				.setEnabled(!hasCurrentPart() && layoutThread == null);
 		menu.show(invoker, x, y);
 	}
 
@@ -1656,7 +943,7 @@ public final class PipeConfigBoard extends JPanel {
 		if (!ensureModifyable()) return false;
 		for (final ConfigValue v : pp.getGuiConfigs())
 			v.setFromGUIComponents();
-		updateSaneConfigCache();
+		if (painter.updateSaneConfigCache()) repaint();
 		final String cfgRes = pp.isConfigurationSane();
 		if (cfgRes != null) {
 			Log.error("Configuration is invalid: " + cfgRes);
@@ -1710,18 +997,20 @@ public final class PipeConfigBoard extends JPanel {
 
 	public void setZoom(final double zoom) {
 		if (zoom > 0)
-			scale = 1 + zoom * 9;
+			painter.setScale(1 + zoom * 9);
 		else
-			scale = zoom < 0 ? 1 / (1 + -zoom * 9) : 1;
+			painter.setScale(zoom < 0 ? 1 / (1 + -zoom * 9) : 1);
 		updatePrefBounds();
 		repaint();
 	}
 
 	private Point getOriginal(final Point scaled) {
+		final double scale = painter.getScale();
 		return new Point((int) (scaled.x / scale), (int) (scaled.y / scale));
 	}
 
 	private Rectangle scaleRect(final Rectangle r) {
+		final double scale = painter.getScale();
 		r.x *= scale;
 		r.y *= scale;
 		r.width *= scale;
@@ -1736,6 +1025,38 @@ public final class PipeConfigBoard extends JPanel {
 			layouter.interrupt();
 			layoutThread.interrupt();
 		}
+	}
+
+	public boolean hasCurrentPart() {
+		return currentPart != null;
+	}
+
+	public void resetCurrentTransients() {
+		currentIcon = null;
+		handlePoint = null;
+		currentConnection = null;
+		currentConnectionValid = false;
+	}
+
+	public void resetCurrentPart() {
+		currentPart = null;
+		currentIcon = null;
+		handlePoint = null;
+		resetCurrentConnection();
+	}
+
+	public void resetCurrentConnection() {
+		currentConnection = null;
+		currentConnectionsTarget = null;
+		currentConnectionValid = false;
+	}
+
+	public BoardPainter getPainter() {
+		return painter;
+	}
+
+	public PipePart getCurrentPart() {
+		return currentPart;
 	}
 
 }

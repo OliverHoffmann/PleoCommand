@@ -13,7 +13,7 @@ import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigBounds extends ConfigValue {
 
-	private Rectangle content;
+	private final Rectangle content = new Rectangle();
 
 	public ConfigBounds(final String label) {
 		super(label);
@@ -31,14 +31,14 @@ public final class ConfigBounds extends ConfigValue {
 
 	public void setContent(final Rectangle content) {
 		if (content == null) throw new NullPointerException();
-		this.content = content;
+		this.content.setBounds(content);
 	}
 
 	public void assignContent(final Component comp) {
 		final Rectangle r = content;
 		if (r.x == -1 && r.y == -1 && r.width == -1 && r.height == -1) {
 			// don't set, instead use the current one
-			content = comp.getBounds();
+			content.setBounds(comp.getBounds());
 			return;
 		}
 		if (r.x == -1 && r.y == -1) {
