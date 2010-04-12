@@ -40,7 +40,7 @@ public class ConfigItem<E> extends ConfigValue {
 			final List<E> identifiers) {
 		super(label);
 
-		if (identifiers.isEmpty())
+		if (identifiers.isEmpty() && !freeAssign)
 			throw new IllegalArgumentException("list of identifiers is empty");
 		try {
 			for (final E id : identifiers) {
@@ -54,7 +54,7 @@ public class ConfigItem<E> extends ConfigValue {
 		}
 
 		this.freeAssign = freeAssign;
-		setContentIndex(0);
+		if (!identifiers.isEmpty()) setContentIndex(0);
 	}
 
 	public ConfigItem(final String label, final String content,
