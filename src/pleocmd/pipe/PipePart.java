@@ -57,7 +57,7 @@ public abstract class PipePart extends StateHandling {
 		HelpFile,
 		/**
 		 * Name of an icon for this Pipe-Part (should be 16x16 pixels, defaults
-		 * to the class-name + ".png")
+		 * to the class-name + "-icon.png")
 		 */
 		Icon,
 		/**
@@ -541,7 +541,7 @@ public abstract class PipePart extends StateHandling {
 
 	public Icon getIcon() {
 		String name = PipePartDetection.callHelp(getClass(), HelpKind.Icon);
-		if (name == null) name = getClass().getSimpleName() + ".png";
+		if (name == null) name = getClass().getSimpleName() + "-icon.png";
 		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
 				: null;
 	}
