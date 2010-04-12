@@ -222,27 +222,15 @@ public final class PipeConfigBoard extends JPanel {
 
 	public PipeConfigBoard() {
 		setPreferredSize(new Dimension(400, 300));
+		ToolTipManager.sharedInstance().registerComponent(this);
 
 		menuInput = createMenu("Input", Input.class);
 		menuConverter = createMenu("Converter", Converter.class);
 		menuOutput = createMenu("Output", Output.class);
 
 		set = new HashSet<PipePart>();
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				for (final PipePart pp : Pipe.the().getInputList())
-					addToSet(pp);
-				for (final PipePart pp : Pipe.the().getConverterList())
-					addToSet(pp);
-				for (final PipePart pp : Pipe.the().getOutputList())
-					addToSet(pp);
-				updatePrefBounds();
-			}
-		});
 
 		saneConfigCache = new HashSet<PipePart>();
-		updateSaneConfigCache();
 
 		updateState();
 
@@ -300,7 +288,25 @@ public final class PipeConfigBoard extends JPanel {
 				updateBounds(getWidth(), getHeight());
 			}
 		});
-		ToolTipManager.sharedInstance().registerComponent(this);
+
+		EventQueue.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				assignFromPipe();
+			}
+		});
+	}
+
+	public void assignFromPipe() {
+		set.clear();
+		for (final PipePart pp : Pipe.the().getInputList())
+			addToSet(pp);
+		for (final PipePart pp : Pipe.the().getConverterList())
+			addToSet(pp);
+		for (final PipePart pp : Pipe.the().getOutputList())
+			addToSet(pp);
+		updatePrefBounds();
+		updateSaneConfigCache();
 	}
 
 	public PipePart getCurrentPart() {
@@ -332,6 +338,7 @@ public final class PipeConfigBoard extends JPanel {
 				ICON_WIDTH * 4, (int) g.getFontMetrics().getStringBounds(
 						pp.getName(), g).getWidth()
 						+ pp.getGuiPosition().height * 2));
+		check(pp.getGuiPosition(), pp);
 	}
 
 	private JPopupMenu createMenu(final String name,
