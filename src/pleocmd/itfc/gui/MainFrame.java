@@ -69,11 +69,10 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	private MainFrame() {
 		// don't change the order of the following lines !!!
 		// we need this order to avoid race conditions
-		getConfig();
 		knownWindows = new ArrayList<AutoDisposableWindow>();
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
-		pipe = new Pipe(config);
+		pipe = new Pipe(Configuration.getMain());
 		hasGUI = true;
 		mainInputPanel = new MainInputPanel();
 		mainPipePanel = new MainPipePanel();
@@ -120,7 +119,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		pack();
 		setLocationRelativeTo(null);
 		try {
-			config.registerConfigurableObject(this, getClass().getSimpleName());
+			Configuration.getMain().registerConfigurableObject(this,
+					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -167,8 +167,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			abortPipeThread();
 		}
 		try {
-			config.unregisterConfigurableObject(this);
-			config.writeToDefaultFile();
+			Configuration.getMain().unregisterConfigurableObject(this);
+			Configuration.getMain().writeToDefaultFile();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -289,18 +289,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	public Pipe getPipe() {
 		return pipe;
-	}
-
-	public Configuration getConfig() {
-		if (config == null) {
-			config = new Configuration();
-			try {
-				config.readFromDefaultFile();
-			} catch (final ConfigurationException e) {
-				Log.error(e);
-			}
-		}
-		return config;
 	}
 
 }

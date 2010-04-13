@@ -16,20 +16,11 @@ public final class CommandLine {
 
 	private static CommandLine commandLine;
 
-	private final Configuration config;
-
 	private final Pipe pipe;
 
 	private CommandLine() {
 		commandLine = this;
-		config = new Configuration();
-		try {
-			config.readFromDefaultFile();
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-			System.exit(1);
-		}
-		pipe = new Pipe(config);
+		pipe = new Pipe(Configuration.getMain());
 	}
 
 	public static CommandLine the() {
@@ -75,7 +66,7 @@ public final class CommandLine {
 
 	public void executePipe(final File pcaFile) {
 		try {
-			config.readFromFile(pcaFile);
+			Configuration.getMain().readFromFile(pcaFile);
 			pipe.configure();
 			pipe.pipeAllData();
 		} catch (final ConfigurationException e) {

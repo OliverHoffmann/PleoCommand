@@ -494,7 +494,7 @@ public final class Log {
 
 		LogConfig() {
 			try {
-				MainFrame.the().getConfig().registerConfigurableObject(this,
+				Configuration.getMain().registerConfigurableObject(this,
 						getClass().getSimpleName());
 			} catch (final ConfigurationException e) {
 				Log.error(e);

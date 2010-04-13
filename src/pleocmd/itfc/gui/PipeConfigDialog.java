@@ -125,7 +125,7 @@ public final class PipeConfigDialog extends JDialog implements
 		pack();
 		setLocationRelativeTo(null);
 		try {
-			MainFrame.the().getConfig().registerConfigurableObject(this,
+			Configuration.getMain().registerConfigurableObject(this,
 					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
@@ -149,7 +149,7 @@ public final class PipeConfigDialog extends JDialog implements
 	private void saveCurrentPipe() {
 		final CharArrayWriter out = new CharArrayWriter();
 		try {
-			MainFrame.the().getConfig().writeToWriter(out, board.getPipe());
+			Configuration.getMain().writeToWriter(out, board.getPipe());
 		} catch (final IOException e) {
 			throw new InternalException(e);
 		}
@@ -161,8 +161,8 @@ public final class PipeConfigDialog extends JDialog implements
 		if (resetChanges) {
 			final CharArrayReader in = new CharArrayReader(originalPipe);
 			try {
-				MainFrame.the().getConfig().readFromReader(
-						new BufferedReader(in), board.getPipe());
+				Configuration.getMain().readFromReader(new BufferedReader(in),
+						board.getPipe());
 			} catch (final ConfigurationException e) {
 				Log.error(e, "Cannot restore previous pipe");
 			} catch (final IOException e) {
@@ -171,7 +171,7 @@ public final class PipeConfigDialog extends JDialog implements
 			in.close();
 		}
 		try {
-			MainFrame.the().getConfig().unregisterConfigurableObject(this);
+			Configuration.getMain().unregisterConfigurableObject(this);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -189,7 +189,7 @@ public final class PipeConfigDialog extends JDialog implements
 	public void applyChanges() {
 		try {
 			saveCurrentPipe();
-			MainFrame.the().getConfig().writeToDefaultFile();
+			Configuration.getMain().writeToDefaultFile();
 			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();
 			Log.detail("Applied Config-Frame");

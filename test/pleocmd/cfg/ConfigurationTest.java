@@ -51,20 +51,20 @@ public final class ConfigurationTest extends Testcases {
 	private void testUserGroup(final String description, final Group group)
 			throws ConfigurationException, IOException {
 		final Configuration config = new Configuration();
-		config.reset();
 		Log.consoleOut("Testing user-created group: %s", description);
 		Log.consoleOut(group.toString());
 		final DummyObject dummy = new DummyObject(group);
 		config.registerConfigurableObject(dummy, group.getName());
 
 		// write to file
+		final File file = File.createTempFile("PleoCommand-ConfigTest", null);
+		file.deleteOnExit();
 		Log.consoleOut("Test writing to file");
-		config.writeToDefaultFile();
+		config.writeToFile(file);
 
 		// print file
 		Log.consoleOut("Resulting configuration file:");
-		final BufferedReader in = new BufferedReader(new FileReader(
-				Configuration.getDefaultConfigFile()));
+		final BufferedReader in = new BufferedReader(new FileReader(file));
 		String line;
 		while ((line = in.readLine()) != null)
 			Log.consoleOut("$" + line);
@@ -81,10 +81,6 @@ public final class ConfigurationTest extends Testcases {
 	@Test
 	public void testCreateWriteAndRead() throws IOException,
 			ConfigurationException {
-		Configuration.setDefaultConfigFile(File.createTempFile(
-				"ConfigurationTest", null));
-		Configuration.getDefaultConfigFile().deleteOnExit();
-
 		testUserGroup("Empty Group", new Group("test"));
 
 		final ConfigString cfg = new ConfigString("foo", true);
@@ -115,7 +111,8 @@ public final class ConfigurationTest extends Testcases {
 		final Configuration config = new Configuration();
 
 		// create file
-		final File file = File.createTempFile("PleoCommand", null);
+		final File file = File.createTempFile("PleoCommand-ConfigTest", null);
+		file.deleteOnExit();
 		final FileWriter out = new FileWriter(file);
 		for (final String s : content) {
 			out.write(s);
@@ -133,10 +130,6 @@ public final class ConfigurationTest extends Testcases {
 	@Test
 	public void testReadUsercreatedFiles() throws IOException,
 			ConfigurationException {
-		Configuration.setDefaultConfigFile(File.createTempFile(
-				"ConfigurationTest", null));
-		Configuration.getDefaultConfigFile().deleteOnExit();
-
 		// create file
 		testUserFile("Empty", new String[] {});
 		testUserFile("Simple", new String[] { "[Test]", "a:foo", "b:20", "c:{",

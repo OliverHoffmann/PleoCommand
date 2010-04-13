@@ -81,18 +81,25 @@ public final class Configuration {
 
 	private final Set<ConfigurationInterface> configObjects;
 
+	private static Configuration mainConfig;
+
 	public Configuration() {
+		// No Log call here - it would recursively create a new Configuration!
 		groupsUnassigned = new ArrayList<Group>();
 		groupsRegistered = new HashMap<String, ConfigurationInterface>();
 		configObjects = new HashSet<ConfigurationInterface>();
 	}
 
-	public static void setDefaultConfigFile(final File file) {
-		defaultConfigFile = file;
-	}
-
-	public static File getDefaultConfigFile() {
-		return defaultConfigFile;
+	public static Configuration getMain() {
+		if (mainConfig == null) {
+			mainConfig = new Configuration();
+			try {
+				mainConfig.readFromDefaultFile();
+			} catch (final ConfigurationException e) {
+				Log.error(e);
+			}
+		}
+		return mainConfig;
 	}
 
 	/**
@@ -116,6 +123,8 @@ public final class Configuration {
 	 */
 	public void registerConfigurableObject(final ConfigurationInterface co,
 			final Set<String> groupNames) throws ConfigurationException {
+		Log.detail("Register '%s' with '%s' to '%s'", co, groupNames, super
+				.toString());
 		if (configObjects.contains(co))
 			throw new IllegalStateException("Already registered");
 		for (final String groupName : groupNames)
@@ -198,6 +207,7 @@ public final class Configuration {
 	 */
 	public void unregisterConfigurableObject(final ConfigurationInterface co)
 			throws ConfigurationException {
+		Log.detail("Unregister '%s' from '%s'", co, super.toString());
 		if (!configObjects.contains(co))
 			throw new IllegalStateException("Not registered");
 
@@ -481,15 +491,6 @@ public final class Configuration {
 		final List<Group> res = new ArrayList<Group>(1);
 		res.add(group);
 		return res;
-	}
-
-	/**
-	 * Only for test-cases.
-	 */
-	public void reset() {
-		groupsUnassigned.clear();
-		groupsRegistered.clear();
-		configObjects.clear();
 	}
 
 }

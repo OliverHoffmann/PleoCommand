@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
+import pleocmd.cfg.Configuration;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter.Button;
 
@@ -114,8 +115,8 @@ public final class MainPipePanel extends JPanel {
 
 	public void writePipeConfigToFile(final File file) {
 		try {
-			MainFrame.the().getConfig().writeToFile(file,
-					MainFrame.the().getPipe());
+			Configuration.getMain()
+					.writeToFile(file, MainFrame.the().getPipe());
 			MainFrame.the().getPipe().setLastSaveFile(file);
 			updatePipeLabel();
 		} catch (final ConfigurationException e) {
@@ -136,9 +137,9 @@ public final class MainPipePanel extends JPanel {
 
 	public void readPipeConfigFromFile(final File file) {
 		try {
-			MainFrame.the().getConfig().readFromFile(file,
+			Configuration.getMain().readFromFile(file,
 					MainFrame.the().getPipe());
-			MainFrame.the().getConfig().writeToDefaultFile();
+			Configuration.getMain().writeToDefaultFile();
 			MainFrame.the().getPipe().setLastSaveFile(file);
 			updateState();
 			updatePipeLabel();

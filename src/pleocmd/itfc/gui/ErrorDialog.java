@@ -109,7 +109,7 @@ public final class ErrorDialog extends JDialog implements
 		pack();
 
 		try {
-			MainFrame.the().getConfig().registerConfigurableObject(this,
+			Configuration.getMain().registerConfigurableObject(this,
 					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
