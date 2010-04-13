@@ -2,6 +2,7 @@ package pleocmd;
 
 import java.awt.Color;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -60,6 +61,10 @@ public final class Log {
 	private static ConfigEnum<Type> cfgMinLogType = new ConfigEnum<Type>(
 			"Minimal Log-Type", Type.Detail);
 
+	private static boolean minLogTypeKnown;
+
+	private static List<Log> queuedLogs = new ArrayList<Log>(128);
+
 	/**
 	 * Needed to inline next line after a line-break when writing messages to a
 	 * plain {@link String}. Number of spaces must fit to format specificier in
@@ -103,6 +108,12 @@ public final class Log {
 				MainFrame.the().getMainLogPanel().addLog(this);
 			break;
 		default:
+			if (!minLogTypeKnown) {
+				// we have to queue it for later output, because
+				// we currently don't now, if we really have to output this log
+				queuedLogs.add(this);
+				break;
+			}
 			if (MainFrame.hasGUI())
 				MainFrame.the().getMainLogPanel().addLog(this);
 			else
@@ -424,6 +435,14 @@ public final class Log {
 				|| minLogType.ordinal() > Type.Console.ordinal())
 			throw new IllegalArgumentException("Invalid value for minLogType");
 		cfgMinLogType.setEnum(minLogType);
+		minLogTypeKnown = true;
+		if (MainFrame.hasGUI())
+			for (final Log log : queuedLogs)
+				MainFrame.the().getMainLogPanel().addLog(log);
+		else
+			for (final Log log : queuedLogs)
+				System.err.println(log.toString()); // CS_IGNORE
+		queuedLogs.clear();
 	}
 
 	/**
@@ -475,7 +494,7 @@ public final class Log {
 
 		LogConfig() {
 			try {
-				Configuration.the().registerConfigurableObject(this,
+				MainFrame.the().getConfig().registerConfigurableObject(this,
 						getClass().getSimpleName());
 			} catch (final ConfigurationException e) {
 				Log.error(e);
@@ -499,6 +518,7 @@ public final class Log {
 			DATE_FORMATTER.applyPattern(CFG_TIMEFORMAT.getContent());
 			if (MainFrame.hasGUI())
 				MainFrame.the().getMainLogPanel().updateState();
+			setMinLogType(getMinLogType());
 		}
 
 		@Override
