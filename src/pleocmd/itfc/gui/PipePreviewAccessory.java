@@ -6,7 +6,7 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 
-public class PipePreviewAccessory extends PipePreviewLabel {
+public final class PipePreviewAccessory extends PipePreviewLabel {
 
 	private static final long serialVersionUID = -7636683927913445711L;
 

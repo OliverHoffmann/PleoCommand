@@ -5,7 +5,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;
 
-public class ImmutableRectangle {
+public final class ImmutableRectangle {
 
 	private final Rectangle r;
 

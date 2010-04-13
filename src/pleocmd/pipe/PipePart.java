@@ -539,14 +539,14 @@ public abstract class PipePart extends StateHandling {
 		return name == null ? getClass().getSimpleName() + ".html" : name;
 	}
 
-	public String getConfigHelp(final int index) {
+	public final String getConfigHelp(final int index) {
 		final int cfgIndex = HelpKind.Config1.ordinal() + index;
 		if (cfgIndex >= HelpKind.values().length) return null;
 		return PipePartDetection.callHelp(getClass(),
 				HelpKind.values()[cfgIndex]);
 	}
 
-	public Icon getConfigImage() {
+	public final Icon getConfigImage() {
 		String name = PipePartDetection.callHelp(getClass(),
 				HelpKind.ConfigImage);
 		if (name == null) name = getClass().getSimpleName() + "-cfg.png";
@@ -554,7 +554,7 @@ public abstract class PipePart extends StateHandling {
 				: null;
 	}
 
-	public Icon getIcon() {
+	public final Icon getIcon() {
 		String name = PipePartDetection.callHelp(getClass(), HelpKind.Icon);
 		if (name == null) name = getClass().getSimpleName() + "-icon.png";
 		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)

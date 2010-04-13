@@ -31,7 +31,7 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public class BoardPainter {
+public final class BoardPainter {
 
 	private static final boolean PAINT_DEBUG = false;
 
@@ -160,6 +160,7 @@ public class BoardPainter {
 	 * Configuration icon.
 	 */
 	static final Icon ICON_CONF = IconLoader.getIcon("configure");
+	// CS_IGNORE_PREV sorted by type, not visibility
 
 	/**
 	 * Position of the Configuration icon.
@@ -170,6 +171,7 @@ public class BoardPainter {
 	 * Visualization icon.
 	 */
 	static final Icon ICON_DGR = IconLoader.getIcon("games-difficult");
+	// CS_IGNORE_PREV sorted by type, not visibility
 
 	/**
 	 * Position of the Visualization icon.

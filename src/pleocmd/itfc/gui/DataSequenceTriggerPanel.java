@@ -21,7 +21,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.Data;
 
-public class DataSequenceTriggerPanel extends JPanel {
+public final class DataSequenceTriggerPanel extends JPanel {
 
 	private static final long serialVersionUID = -8090213458513567801L;
 

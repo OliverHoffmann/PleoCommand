@@ -69,19 +69,19 @@ import pleocmd.exc.ConfigurationException;
  */
 public final class Configuration {
 
-	private final static File defaultConfigFile;
+	private static final File DEFAULT_CONFIG_FILE;
 	static {
-		defaultConfigFile = new File(System.getProperty("user.home")
+		DEFAULT_CONFIG_FILE = new File(System.getProperty("user.home")
 				+ File.separator + ".pleocommand.cfg");
 	}
+
+	private static Configuration mainConfig;
 
 	private final List<Group> groupsUnassigned;
 
 	private final Map<String, ConfigurationInterface> groupsRegistered;
 
 	private final Set<ConfigurationInterface> configObjects;
-
-	private static Configuration mainConfig;
 
 	public Configuration() {
 		// No Log call here - it would recursively create a new Configuration!
@@ -227,7 +227,7 @@ public final class Configuration {
 	}
 
 	public void readFromDefaultFile() throws ConfigurationException {
-		readFromFile(defaultConfigFile);
+		readFromFile(DEFAULT_CONFIG_FILE);
 	}
 
 	public void readFromFile(final File file) throws ConfigurationException {
@@ -389,7 +389,7 @@ public final class Configuration {
 	}
 
 	public void writeToDefaultFile() throws ConfigurationException {
-		writeToFile(defaultConfigFile);
+		writeToFile(DEFAULT_CONFIG_FILE);
 	}
 
 	public void writeToFile(final File file) throws ConfigurationException {
