@@ -69,6 +69,8 @@ public final class PipeConfigBoard extends JPanel {
 	 */
 	private static final int GROW_LABEL_REDRAW = 14;
 
+	private final Pipe pipe;
+
 	private final BoardPainter painter;
 
 	private final JPopupMenu menuInput;
@@ -121,7 +123,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private boolean closed;
 
-	public PipeConfigBoard() {
+	public PipeConfigBoard(final Pipe pipe) {
+		this.pipe = pipe;
 		painter = new BoardPainter();
 
 		setPreferredSize(new Dimension(400, 300));
@@ -199,9 +202,13 @@ public final class PipeConfigBoard extends JPanel {
 
 	protected void assignFromPipe() {
 		painter.setBounds(getWidth(), getHeight(), false);
-		painter.assignFromPipe(getGraphics(), true);
+		painter.setPipe(getPipe(), getGraphics(), true);
 		updatePrefBounds();
 		repaint();
+	}
+
+	public Pipe getPipe() {
+		return pipe;
 	}
 
 	@Override
@@ -375,11 +382,11 @@ public final class PipeConfigBoard extends JPanel {
 			painter.getSet().remove(currentPart);
 			try {
 				if (currentPart instanceof Input)
-					Pipe.the().removeInput((Input) currentPart);
+					getPipe().removeInput((Input) currentPart);
 				else if (currentPart instanceof Converter)
-					Pipe.the().removeConverter((Converter) currentPart);
+					getPipe().removeConverter((Converter) currentPart);
 				else if (currentPart instanceof Output)
-					Pipe.the().removeOutput((Output) currentPart);
+					getPipe().removeOutput((Output) currentPart);
 				else
 					throw new InternalException(
 							"Invalid sub-class of PipePart '%s'", currentPart);
@@ -413,7 +420,7 @@ public final class PipeConfigBoard extends JPanel {
 	protected void clearBoard() {
 		if (ensureModifyable()) {
 			try {
-				Pipe.the().reset();
+				getPipe().reset();
 			} catch (final PipeException e) {
 				Log.error(e, "Cannot clear the board");
 			}
@@ -467,11 +474,11 @@ public final class PipeConfigBoard extends JPanel {
 					pp.setGuiPosition(r);
 					try {
 						if (pp instanceof Input)
-							Pipe.the().addInput((Input) pp);
+							getPipe().addInput((Input) pp);
 						else if (pp instanceof Converter)
-							Pipe.the().addConverter((Converter) pp);
+							getPipe().addConverter((Converter) pp);
 						else if (pp instanceof Output)
-							Pipe.the().addOutput((Output) pp);
+							getPipe().addOutput((Output) pp);
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
@@ -500,11 +507,11 @@ public final class PipeConfigBoard extends JPanel {
 				public void run() {
 					try {
 						if (pp instanceof Input)
-							Pipe.the().addInput((Input) pp);
+							getPipe().addInput((Input) pp);
 						else if (pp instanceof Converter)
-							Pipe.the().addConverter((Converter) pp);
+							getPipe().addConverter((Converter) pp);
 						else if (pp instanceof Output)
-							Pipe.the().addOutput((Output) pp);
+							getPipe().addOutput((Output) pp);
 						else
 							throw new InternalException(
 									"Invalid sub-class of PipePart '%s'", pp);
@@ -774,9 +781,9 @@ public final class PipeConfigBoard extends JPanel {
 		final List<Input> orderInput = getSortedParts(Input.class);
 		final List<Converter> orderConverter = getSortedParts(Converter.class);
 		final List<Output> orderOutput = getSortedParts(Output.class);
-		if (Pipe.the().getInputList().equals(orderInput)
-				&& Pipe.the().getConverterList().equals(orderConverter)
-				&& Pipe.the().getOutputList().equals(orderOutput)) return true;
+		if (getPipe().getInputList().equals(orderInput)
+				&& getPipe().getConverterList().equals(orderConverter)
+				&& getPipe().getOutputList().equals(orderOutput)) return true;
 
 		if (warnIfNeeded != null && !warnIfNeeded.isEmpty())
 			Log.warn(warnIfNeeded);
@@ -790,9 +797,9 @@ public final class PipeConfigBoard extends JPanel {
 
 		// reorder
 		try {
-			Pipe.the().reorderInputs(orderInput);
-			Pipe.the().reorderConverter(orderConverter);
-			Pipe.the().reorderOutputs(orderOutput);
+			getPipe().reorderInputs(orderInput);
+			getPipe().reorderConverter(orderConverter);
+			getPipe().reorderOutputs(orderOutput);
 		} catch (final StateException e) {
 			Log.error(e, "Cannot reorder PipeParts");
 		} catch (final IllegalArgumentException e) {

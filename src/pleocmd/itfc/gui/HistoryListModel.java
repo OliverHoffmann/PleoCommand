@@ -24,7 +24,7 @@ public final class HistoryListModel extends AbstractListModel implements
 
 	public HistoryListModel() {
 		try {
-			Configuration.the().registerConfigurableObject(this,
+			MainFrame.the().getConfig().registerConfigurableObject(this,
 					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);

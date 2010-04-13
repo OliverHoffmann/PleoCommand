@@ -50,7 +50,7 @@ public final class DataFileEditFrame extends JDialog implements
 		pack();
 		setLocationRelativeTo(null);
 		try {
-			Configuration.the().registerConfigurableObject(this,
+			MainFrame.the().getConfig().registerConfigurableObject(this,
 					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
@@ -68,7 +68,7 @@ public final class DataFileEditFrame extends JDialog implements
 
 	protected void close() {
 		try {
-			Configuration.the().unregisterConfigurableObject(this);
+			MainFrame.the().getConfig().unregisterConfigurableObject(this);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}

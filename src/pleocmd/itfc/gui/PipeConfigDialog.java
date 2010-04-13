@@ -48,7 +48,7 @@ public final class PipeConfigDialog extends JDialog implements
 
 	private char[] originalPipe;
 
-	public PipeConfigDialog() {
+	public PipeConfigDialog(final Pipe pipe) {
 		Log.detail("Creating Config-Frame");
 		setTitle("Pending ....");
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -58,6 +58,7 @@ public final class PipeConfigDialog extends JDialog implements
 				close(true);
 			}
 		});
+		board = new PipeConfigBoard(pipe);
 		updatePipeLabel();
 
 		// Save current pipe's configuration
@@ -75,7 +76,6 @@ public final class PipeConfigDialog extends JDialog implements
 
 		// Add components
 		final Layouter lay = new Layouter(this);
-		board = new PipeConfigBoard();
 		lay.addWholeLine(new JScrollPane(board,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS), true);
@@ -125,7 +125,7 @@ public final class PipeConfigDialog extends JDialog implements
 		pack();
 		setLocationRelativeTo(null);
 		try {
-			Configuration.the().registerConfigurableObject(this,
+			MainFrame.the().getConfig().registerConfigurableObject(this,
 					getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
@@ -149,7 +149,7 @@ public final class PipeConfigDialog extends JDialog implements
 	private void saveCurrentPipe() {
 		final CharArrayWriter out = new CharArrayWriter();
 		try {
-			Configuration.the().writeToWriter(out, Pipe.the());
+			MainFrame.the().getConfig().writeToWriter(out, board.getPipe());
 		} catch (final IOException e) {
 			throw new InternalException(e);
 		}
@@ -161,8 +161,8 @@ public final class PipeConfigDialog extends JDialog implements
 		if (resetChanges) {
 			final CharArrayReader in = new CharArrayReader(originalPipe);
 			try {
-				Configuration.the().readFromReader(new BufferedReader(in),
-						Pipe.the());
+				MainFrame.the().getConfig().readFromReader(
+						new BufferedReader(in), board.getPipe());
 			} catch (final ConfigurationException e) {
 				Log.error(e, "Cannot restore previous pipe");
 			} catch (final IOException e) {
@@ -171,7 +171,7 @@ public final class PipeConfigDialog extends JDialog implements
 			in.close();
 		}
 		try {
-			Configuration.the().unregisterConfigurableObject(this);
+			MainFrame.the().getConfig().unregisterConfigurableObject(this);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -189,7 +189,7 @@ public final class PipeConfigDialog extends JDialog implements
 	public void applyChanges() {
 		try {
 			saveCurrentPipe();
-			Configuration.the().writeToDefaultFile();
+			MainFrame.the().getConfig().writeToDefaultFile();
 			MainFrame.the().getMainPipePanel().updateState();
 			MainFrame.the().getMainPipePanel().updatePipeLabel();
 			Log.detail("Applied Config-Frame");
@@ -221,9 +221,9 @@ public final class PipeConfigDialog extends JDialog implements
 
 	public void updateState() {
 		sldZoom.setEnabled(true);
-		btnSave.setEnabled(Pipe.the().getInputList().isEmpty()
-				|| !Pipe.the().getConverterList().isEmpty()
-				|| !Pipe.the().getOutputList().isEmpty());
+		btnSave.setEnabled(board.getPipe().getInputList().isEmpty()
+				|| !board.getPipe().getConverterList().isEmpty()
+				|| !board.getPipe().getOutputList().isEmpty());
 		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
 		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
 		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
@@ -231,10 +231,9 @@ public final class PipeConfigDialog extends JDialog implements
 	}
 
 	public void updatePipeLabel() {
-		String fn = Pipe.the().getLastSaveFile().getName();
+		String fn = board.getPipe().getLastSaveFile().getName();
 		if (fn.contains("."))
 			fn = " \"" + fn.substring(0, fn.lastIndexOf('.')) + "\"";
 		setTitle("Configure Pipe" + fn);
 	}
-
 }

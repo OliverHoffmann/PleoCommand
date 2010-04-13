@@ -50,15 +50,16 @@ public final class ConfigurationTest extends Testcases {
 
 	private void testUserGroup(final String description, final Group group)
 			throws ConfigurationException, IOException {
-		Configuration.the().reset();
+		final Configuration config = new Configuration();
+		config.reset();
 		Log.consoleOut("Testing user-created group: %s", description);
 		Log.consoleOut(group.toString());
 		final DummyObject dummy = new DummyObject(group);
-		Configuration.the().registerConfigurableObject(dummy, group.getName());
+		config.registerConfigurableObject(dummy, group.getName());
 
 		// write to file
 		Log.consoleOut("Test writing to file");
-		Configuration.the().writeToDefaultFile();
+		config.writeToDefaultFile();
 
 		// print file
 		Log.consoleOut("Resulting configuration file:");
@@ -72,9 +73,9 @@ public final class ConfigurationTest extends Testcases {
 
 		// read from file
 		Log.consoleOut("Test reading from file");
-		Configuration.the().readFromDefaultFile();
+		config.readFromDefaultFile();
 
-		Configuration.the().unregisterConfigurableObject(dummy);
+		config.unregisterConfigurableObject(dummy);
 	}
 
 	@Test
@@ -111,10 +112,11 @@ public final class ConfigurationTest extends Testcases {
 	private void testUserFile(final String description, final String[] content)
 			throws IOException, ConfigurationException {
 		Log.consoleOut("Testing user-created file: %s", description);
+		final Configuration config = new Configuration();
 
 		// create file
-		final FileWriter out = new FileWriter(Configuration
-				.getDefaultConfigFile());
+		final File file = File.createTempFile("PleoCommand", null);
+		final FileWriter out = new FileWriter(file);
 		for (final String s : content) {
 			out.write(s);
 			out.write('\n');
@@ -122,10 +124,10 @@ public final class ConfigurationTest extends Testcases {
 		out.close();
 
 		// read from file
-		Configuration.the().readFromDefaultFile();
+		config.readFromFile(file);
 
 		// test group
-		Log.consoleOut(Configuration.the().toString());
+		Log.consoleOut(config.toString());
 	}
 
 	@Test

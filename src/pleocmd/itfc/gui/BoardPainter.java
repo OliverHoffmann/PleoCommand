@@ -88,9 +88,14 @@ public class BoardPainter {
 	private static final boolean SHADOW_RECTS = true;
 
 	/**
-	 * Whether to draw a shadow for Connections (and their labels).
+	 * Whether to draw a shadow for connections.
 	 */
-	private static final boolean SHADOW_CONNECTIONS = true; // TODO
+	private static final boolean SHADOW_CONNECTIONS = true;
+
+	/**
+	 * Whether to draw a shadow for connections' labels.
+	 */
+	private static final boolean SHADOW_CONNECTIONS_LABEL = false;
 
 	// Order Hint Arrow
 
@@ -273,6 +278,8 @@ public class BoardPainter {
 
 	private int grayVal = 128;
 
+	private Pipe pipe;
+
 	public BoardPainter() {
 		set = new HashSet<PipePart>();
 		saneConfigCache = new HashSet<PipePart>();
@@ -284,6 +291,7 @@ public class BoardPainter {
 			final PipePart currentConnectionsTarget,
 			final boolean currentConnectionValid,
 			final BoardAutoLayouter layouter, final boolean modifyable) {
+		if (pipe == null || scale <= Double.MIN_NORMAL) return;
 		Rectangle clip = g.getClipBounds();
 		if (clip == null)
 			clip = new Rectangle(0, 0, bounds.width, bounds.height);
@@ -354,15 +362,15 @@ public class BoardPainter {
 		final int x0;
 		final int x1;
 		if (currentPart instanceof Input) {
-			list = Pipe.the().getInputList();
+			list = pipe.getInputList();
 			x0 = 0;
 			x1 = border1;
 		} else if (currentPart instanceof Converter) {
-			list = Pipe.the().getConverterList();
+			list = pipe.getConverterList();
 			x0 = border1;
 			x1 = border2;
 		} else if (currentPart instanceof Output) {
-			list = Pipe.the().getOutputList();
+			list = pipe.getOutputList();
 			x0 = border2;
 			x1 = (int) (bounds.width / scale);
 		} else
@@ -601,9 +609,11 @@ public class BoardPainter {
 			g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
 			g2.fillPolygon(arrow);
 			drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x,
-					trgPoint.y, src.getOutputDescription());
+					trgPoint.y, SHADOW_CONNECTIONS_LABEL ? src
+							.getOutputDescription() : "");
 			drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x,
-					srcPoint.y, trg == null ? "" : trg.getInputDescription());
+					srcPoint.y, trg == null || !SHADOW_CONNECTIONS_LABEL ? ""
+							: trg.getInputDescription());
 			g2.setTransform(at);
 			g2.setColor(clr);
 		}
@@ -621,12 +631,17 @@ public class BoardPainter {
 	private void drawConnectorLabel(final Graphics2D g2, final int sx,
 			final int sy, final int tx, final int ty, final String str) {
 		if (str.isEmpty()) return;
+		// FIXME wirken "angenagt"
 
 		// draw in image
 		final Rectangle sb = g2.getFontMetrics().getStringBounds(str, g2)
 				.getBounds();
-		final BufferedImage img = new BufferedImage((int) (sb.width * scale),
-				(int) (sb.height * scale), BufferedImage.TYPE_INT_ARGB);
+		sb.grow(4, 4);
+		final int sw = (int) (sb.width * scale);
+		final int sh = (int) (sb.height * scale);
+		if (sw <= 0 || sh <= 0) return;
+		final BufferedImage img = new BufferedImage(sw, sh,
+				BufferedImage.TYPE_INT_ARGB);
 		final Graphics2D imgG2D = img.createGraphics();
 		imgG2D.scale(scale, scale);
 		imgG2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -662,9 +677,9 @@ public class BoardPainter {
 		final int len = (int) (Math.sqrt((sx - tx) * (sx - tx) + (sy - ty)
 				* (sy - ty)) * scale);
 		if (xoffs < 0)
-			g2.clipRect(-len / 2, 0, len / 2, img.getHeight());
+			g2.clipRect(-len / 2, 0, len / 2, sh);
 		else
-			g2.clipRect(0, 0, len / 2, img.getHeight());
+			g2.clipRect(0, 0, len / 2, sh);
 		g2.drawImage(img, new AffineTransformOp(new AffineTransform(),
 				AffineTransformOp.TYPE_BILINEAR), xoffs, 0);
 		g2.setTransform(at);
@@ -800,15 +815,21 @@ public class BoardPainter {
 			return null;
 	}
 
-	public void assignFromPipe(final Graphics g, final boolean allowMoving) {
+	public void setPipe(final Pipe pipe, final Graphics g,
+			final boolean allowMoving) {
+		this.pipe = pipe;
 		set.clear();
-		for (final PipePart pp : Pipe.the().getInputList())
+		for (final PipePart pp : pipe.getInputList())
 			addToSet(pp, g, allowMoving);
-		for (final PipePart pp : Pipe.the().getConverterList())
+		for (final PipePart pp : pipe.getConverterList())
 			addToSet(pp, g, allowMoving);
-		for (final PipePart pp : Pipe.the().getOutputList())
+		for (final PipePart pp : pipe.getOutputList())
 			addToSet(pp, g, allowMoving);
 		updateSaneConfigCache();
+	}
+
+	public Pipe getPipe() {
+		return pipe;
 	}
 
 	void addToSet(final PipePart pp, final Graphics g, final boolean allowMoving) {
@@ -834,11 +855,11 @@ public class BoardPainter {
 	}
 
 	public boolean updateSaneConfigCache() {
-		final Set<PipePart> sane = Pipe.the().getSanePipeParts();
+		final Set<PipePart> sane = pipe.getSanePipeParts();
 		if (saneConfigCache.equals(sane)) return false;
 		saneConfigCache.clear();
 		saneConfigCache.addAll(sane);
-		Pipe.the().modified();
+		pipe.modified();
 		return true;
 	}
 

@@ -58,14 +58,20 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private final List<AutoDisposableWindow> knownWindows;
 
+	private Configuration config;
+
+	private final Pipe pipe;
+
 	private Thread pipeThread;
 
 	private MainFrame() {
 		// don't change the order of the following lines !!!
 		// we need this order to avoid race conditions
+		getConfig();
 		knownWindows = new ArrayList<AutoDisposableWindow>();
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
+		pipe = new Pipe(config);
 		hasGUI = true;
 		mainInputPanel = new MainInputPanel();
 		mainPipePanel = new MainPipePanel();
@@ -112,8 +118,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		pack();
 		setLocationRelativeTo(null);
 		try {
-			Configuration.the().registerConfigurableObject(this,
-					getClass().getSimpleName());
+			config.registerConfigurableObject(this, getClass().getSimpleName());
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -160,8 +165,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			abortPipeThread();
 		}
 		try {
-			Configuration.the().unregisterConfigurableObject(this);
-			Configuration.the().writeToDefaultFile();
+			config.unregisterConfigurableObject(this);
+			config.writeToDefaultFile();
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
@@ -188,8 +193,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			public void run() {
 				try {
 					StandardInput.the().resetCache();
-					Pipe.the().configure();
-					Pipe.the().pipeAllData();
+					getPipe().configure();
+					getPipe().pipeAllData();
 				} catch (final Throwable t) { // CS_IGNORE
 					Log.error(t);
 				}
@@ -210,7 +215,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		if (!isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread not running");
 		try {
-			Pipe.the().abortPipe();
+			pipe.abortPipe();
 		} catch (final InterruptedException e) {
 			Log.error(e);
 		} catch (final StateException e) {
@@ -268,6 +273,22 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	public void removeKnownWindow(final AutoDisposableWindow wnd) {
 		knownWindows.remove(wnd);
+	}
+
+	public Pipe getPipe() {
+		return pipe;
+	}
+
+	public Configuration getConfig() {
+		if (config == null) {
+			config = new Configuration();
+			try {
+				config.readFromDefaultFile();
+			} catch (final ConfigurationException e) {
+				Log.error(e);
+			}
+		}
+		return config;
 	}
 
 }

@@ -41,7 +41,6 @@ import pleocmd.exc.FormatException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.itfc.gui.Layouter.Button;
-import pleocmd.pipe.Pipe;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.out.ConsoleOutput;
 import pleocmd.pipe.out.Output;
@@ -263,7 +262,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 		if (playOutputList == null)
 			try {
 				String device = null;
-				for (final Output out : Pipe.the().getOutputList())
+				for (final Output out : MainFrame.the().getPipe()
+						.getOutputList())
 					if (out instanceof PleoRXTXOutput)
 						device = ((ConfigItem<?>) out.getGroup().get("Device"))
 								.getContent();

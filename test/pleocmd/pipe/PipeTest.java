@@ -9,6 +9,7 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
+import pleocmd.cfg.Configuration;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.in.FileInput;
@@ -23,7 +24,7 @@ public class PipeTest extends Testcases {
 	@Test
 	public final void testPipeAllData() throws Exception {
 		PipeFeedback fb;
-		final Pipe p = Pipe.the();
+		final Pipe p = new Pipe(new Configuration());
 
 		Log.consoleOut("Test empty pipe");
 		p.reset();
@@ -176,7 +177,7 @@ public class PipeTest extends Testcases {
 			final int intrCnt, final int dropCnt, final int behindCnt)
 			throws PipeException, InterruptedException, ConfigurationException {
 		// create pipe
-		final Pipe pipe = Pipe.the();
+		final Pipe pipe = new Pipe(new Configuration());
 		if (input != null) {
 			pipe.reset();
 			pipe.addInput(new StaticInput(input));

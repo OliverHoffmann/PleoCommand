@@ -41,8 +41,6 @@ import pleocmd.pipe.out.Output;
  */
 public final class Pipe extends StateHandling implements ConfigurationInterface {
 
-	private static Pipe pipe;
-
 	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
 			"HH:mm:ss.SSS");
 
@@ -133,9 +131,12 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	/**
 	 * Creates a new {@link Pipe}.
+	 * 
+	 * @param config
+	 *            the {@link Configuration} to save the Pipe and all its
+	 *            PipeParts to.
 	 */
-	private Pipe() {
-		pipe = this;
+	public Pipe(final Configuration config) {
 		feedback = new PipeFeedback();
 		final Set<String> groupNames = new HashSet<String>();
 		groupNames.add(getClass().getSimpleName());
@@ -143,16 +144,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			groupNames.add(getClass().getSimpleName() + ": "
 					+ ppc.getSimpleName());
 		try {
-			Configuration.the().registerConfigurableObject(this, groupNames);
+			config.registerConfigurableObject(this, groupNames);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 		constructed();
-	}
-
-	public static Pipe the() {
-		if (pipe == null) new Pipe();
-		return pipe;
 	}
 
 	/**

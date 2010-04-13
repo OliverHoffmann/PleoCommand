@@ -26,6 +26,7 @@ import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.MainFrame;
 
 /**
  * This is the central communication class with the Pleo.<br>
@@ -313,7 +314,7 @@ public final class PleoCommunication implements SerialPortEventListener {
 
 		PleoCommunicationConfig() {
 			try {
-				Configuration.the().registerConfigurableObject(this,
+				MainFrame.the().getConfig().registerConfigurableObject(this,
 						getClass().getSimpleName());
 			} catch (final ConfigurationException e) {
 				Log.error(e);

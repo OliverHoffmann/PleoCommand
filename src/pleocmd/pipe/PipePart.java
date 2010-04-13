@@ -467,8 +467,7 @@ public abstract class PipePart extends StateHandling {
 
 	protected final void plot(final int index, final double y) {
 		if (visualizationDialog != null)
-			visualizationDialog.plot(index, Pipe.the().getFeedback()
-					.getElapsed(), y);
+			visualizationDialog.plot(index, pipe.getFeedback().getElapsed(), y);
 	}
 
 	/**

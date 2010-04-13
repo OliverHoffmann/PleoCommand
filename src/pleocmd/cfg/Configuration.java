@@ -75,29 +75,16 @@ public final class Configuration {
 				+ File.separator + ".pleocommand.cfg");
 	}
 
-	private static Configuration config;
-
 	private final List<Group> groupsUnassigned;
 
 	private final Map<String, ConfigurationInterface> groupsRegistered;
 
 	private final Set<ConfigurationInterface> configObjects;
 
-	private Configuration() {
-		config = this;
+	public Configuration() {
 		groupsUnassigned = new ArrayList<Group>();
 		groupsRegistered = new HashMap<String, ConfigurationInterface>();
 		configObjects = new HashSet<ConfigurationInterface>();
-		try {
-			readFromDefaultFile();
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-		}
-	}
-
-	public static Configuration the() {
-		if (config == null) new Configuration();
-		return config;
 	}
 
 	public static void setDefaultConfigFile(final File file) {

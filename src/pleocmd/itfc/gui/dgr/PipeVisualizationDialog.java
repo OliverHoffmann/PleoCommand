@@ -14,7 +14,6 @@ import pleocmd.Log;
 import pleocmd.itfc.gui.AutoDisposableWindow;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.itfc.gui.MainFrame;
-import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 
 public final class PipeVisualizationDialog extends JDialog implements
@@ -105,7 +104,7 @@ public final class PipeVisualizationDialog extends JDialog implements
 			return;
 		}
 		dataSets.get(index).addPoint(new Point2D.Double(x, y));
-		final long elapsed = Pipe.the().getFeedback().getElapsed();
+		final long elapsed = part.getPipe().getFeedback().getElapsed();
 		diagram.getXAxis().setMin(Math.max(0, elapsed - TIME_SPAN) / 1000.0);
 		diagram.getXAxis().setMax(Math.max(TIME_SPAN, elapsed) / 1000.0);
 	}
