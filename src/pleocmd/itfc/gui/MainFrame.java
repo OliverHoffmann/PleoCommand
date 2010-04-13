@@ -5,6 +5,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -183,6 +185,16 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		ErrorDialog.canDisposeIfHidden();
 		HelpDialog.closeHelpIfOpen();
 		Log.detail("GUI-Frame has been closed");
+
+		final Timer t = new Timer("Fallback Exit Thread", true);
+		t.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				System.err.println("Application has not been shut down "
+						+ "normally but has to be exited forcefully.");
+				System.exit(0);
+			}
+		}, 3000);
 	}
 
 	public synchronized void startPipeThread() {
