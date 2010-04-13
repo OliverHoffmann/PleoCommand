@@ -1,13 +1,10 @@
 package pleocmd.itfc.gui;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
@@ -19,26 +16,14 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import pleocmd.Log;
-import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigDataMap;
-import pleocmd.cfg.ConfigInt;
-import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationInterface;
-import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.Data;
 
-// CS_IGNORE_NEXT The classes this one relies on are mainly GUI components
-public final class DataSequenceEditorFrame extends JDialog implements
-		ConfigurationInterface {
+public class DataSequenceTriggerPanel extends JPanel {
 
-	private static final long serialVersionUID = -5729115559356740425L;
-
-	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
-
-	private final ConfigInt cfgSplitterPos = new ConfigInt("Splitter Position",
-			-1);
+	private static final long serialVersionUID = -8090213458513567801L;
 
 	private final ConfigDataMap map;
 
@@ -60,21 +45,10 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 	private String trigger;
 
-	// CS_IGNORE_NEXT Contains only GUI component creation
-	public DataSequenceEditorFrame(final ConfigDataMap cfgMap) {
+	public DataSequenceTriggerPanel(final ConfigDataMap cfgMap) {
 		mapOrg = cfgMap;
 		map = new ConfigDataMap(mapOrg.getLabel());
 		map.assignFrom(mapOrg);
-
-		Log.detail("Creating DataSequenceEditorFrame");
-		setTitle("Edit Data Sequence");
-		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		addWindowListener(new WindowAdapter() {
-			@Override
-			public void windowClosing(final WindowEvent e) {
-				close();
-			}
-		});
 
 		// Add components
 		final Layouter lay = new Layouter(this);
@@ -118,53 +92,19 @@ public final class DataSequenceEditorFrame extends JDialog implements
 
 				});
 
-		dsePanel = new DataSequenceEditorPanel(this, new Runnable() {
-			@Override
-			public void run() {
-				saveChanges();
-			}
-		}, new Runnable() {
-			@Override
-			public void run() {
-				close();
-			}
-		});
+		dsePanel = new DataSequenceEditorPanel();
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
 				dsePanel);
 		splitPane.setResizeWeight(0.25);
 		lay.addWholeLine(splitPane, true);
 
-		pack();
-		setLocationRelativeTo(null);
-		try {
-			MainFrame.the().getConfig().registerConfigurableObject(this,
-					getClass().getSimpleName());
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-		}
-
 		updateTriggerModel();
 		updateState();
-
-		Log.detail("DataSequenceEditorFrame created");
-		// setModal(true);
-		HelpDialog.closeHelpIfOpen();
-		setVisible(true);
 	}
 
-	protected void saveChanges() {
+	public void saveChanges() {
 		writeTextPaneToMap();
 		mapOrg.assignFrom(map);
-	}
-
-	protected void close() {
-		try {
-			MainFrame.the().getConfig().unregisterConfigurableObject(this);
-		} catch (final ConfigurationException e) {
-			Log.error(e);
-		}
-		dispose();
-		HelpDialog.closeHelpIfOpen();
 	}
 
 	protected void triggerIndexChanged() {
@@ -254,39 +194,12 @@ public final class DataSequenceEditorFrame extends JDialog implements
 		}
 	}
 
-	@Override
-	public Group getSkeleton(final String groupName) {
-		return new Group(groupName).add(cfgBounds).add(cfgSplitterPos);
-	}
-
-	@Override
-	public void configurationAboutToBeChanged() {
-		// nothing to do
-	}
-
-	@Override
-	public void configurationChanged(final Group group) {
-		cfgBounds.assignContent(this);
-		splitPane.setDividerLocation(cfgSplitterPos.getContent());
-	}
-
-	@Override
-	public List<Group> configurationWriteback() throws ConfigurationException {
-		cfgBounds.setContent(getBounds());
-		cfgSplitterPos.setContent(splitPane.getDividerLocation());
-		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
-	}
-
 	public void updateState() {
 		btnAddTrigger.setEnabled(true);
 		btnRenameTrigger.setEnabled(trigger != null);
 		btnRemoveTrigger.setEnabled(trigger != null);
 		dsePanel.setEnabled(trigger != null);
 		dsePanel.updateState();
-	}
-
-	public void freeResources() {
-		dsePanel.freeResources();
 	}
 
 }

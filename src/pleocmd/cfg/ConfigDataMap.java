@@ -7,10 +7,13 @@ import java.util.List;
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
-import pleocmd.itfc.gui.DataSequenceEditorFrame;
+import pleocmd.itfc.gui.DataSequenceTriggerPanel;
+import pleocmd.itfc.gui.Layouter;
 import pleocmd.pipe.data.Data;
 
 public final class ConfigDataMap extends ConfigMap<String, Data> {
+
+	private DataSequenceTriggerPanel dataEditor;
 
 	public ConfigDataMap(final String label) {
 		super(label);
@@ -34,8 +37,16 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 	}
 
 	@Override
-	protected void modifiyMapViaGUI() {
-		new DataSequenceEditorFrame(this).freeResources();
+	public boolean insertGUIComponents(final Layouter lay) {
+		dataEditor = new DataSequenceTriggerPanel(this);
+		lay.addWholeLine(dataEditor, true);
+		return true;
+	}
+
+	@Override
+	public void setFromGUIComponents() {
+		dataEditor.saveChanges();
+		dataEditor = null;
 	}
 
 	/**

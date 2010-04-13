@@ -13,8 +13,6 @@ import javax.swing.JLabel;
 
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
-import pleocmd.itfc.gui.Layouter;
-import pleocmd.itfc.gui.Layouter.Button;
 
 public abstract class ConfigMap<K, V> extends ConfigValue {
 
@@ -171,8 +169,6 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	protected abstract V createValue(String valueAsString)
 			throws ConfigurationException;
 
-	protected abstract void modifiyMapViaGUI();
-
 	@Override
 	final String getIdentifier() {
 		return null;
@@ -181,24 +177,6 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	@Override
 	final boolean isSingleLined() {
 		return false;
-	}
-
-	@Override
-	public final boolean insertGUIComponents(final Layouter lay) {
-		lay.add(shortDescription = new JLabel(asString()), false);
-		lay.addButton(Button.Modify, "Modify the map", new Runnable() {
-			@Override
-			public void run() {
-				modifiyMapViaGUI();
-				getShortDescription().setText(asString());
-			}
-		});
-		return false;
-	}
-
-	@Override
-	public final void setFromGUIComponents() {
-		// handled internally
 	}
 
 	public final JLabel getShortDescription() {

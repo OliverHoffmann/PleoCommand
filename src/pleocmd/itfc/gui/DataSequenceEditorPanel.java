@@ -3,7 +3,6 @@ package pleocmd.itfc.gui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -74,8 +73,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 	private final Timer errorLabelTimer = new Timer("ErrorLabelTimer", true);
 	private TimerTask errorLabelTimerTask;
 
-	public DataSequenceEditorPanel(final Window owner,
-			final Runnable saveChanges, final Runnable close) {
+	public DataSequenceEditorPanel() {
 		final Layouter lay = new Layouter(this);
 
 		tpUndoManager = new UndoManager();
@@ -125,10 +123,6 @@ public final class DataSequenceEditorPanel extends JPanel {
 						addFromFile();
 					}
 				});
-		lay.addButton(Button.Help, Layouter.help(owner, getClass()
-				.getSimpleName()));
-		lay.setSpan(1);
-		lay.addSpacer();
 
 		lay.newLine();
 
@@ -160,16 +154,6 @@ public final class DataSequenceEditorPanel extends JPanel {
 				redo();
 			}
 		});
-		lay.addButton(Button.Ok, new Runnable() {
-			@Override
-			public void run() {
-				saveChanges.run();
-				close.run();
-			}
-		});
-		lay.addButton(Button.Apply, saveChanges);
-		lay.addSpacer();
-		lay.addButton(Button.Cancel, close);
 	}
 
 	public void addFromInputHistory() {

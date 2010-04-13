@@ -17,6 +17,7 @@ import pleocmd.Testcases;
 import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.itfc.gui.Layouter;
 
 public final class ConfigValueTest extends Testcases {
 
@@ -45,9 +46,16 @@ public final class ConfigValueTest extends Testcases {
 		}
 
 		@Override
-		protected void modifiyMapViaGUI() {
+		public boolean insertGUIComponents(final Layouter lay) {
+			// nothing to do, we have no GUI here
+			return true;
+		}
+
+		@Override
+		public void setFromGUIComponents() {
 			// nothing to do, we have no GUI here
 		}
+
 	};
 
 	private final ConfigItem<String> cfgItem = new ConfigItem<String>(

@@ -32,17 +32,7 @@ public final class DataFileEditFrame extends JDialog implements
 	public DataFileEditFrame(final File file) {
 		this.file = file;
 
-		dsePanel = new DataSequenceEditorPanel(this, new Runnable() {
-			@Override
-			public void run() {
-				saveChanges();
-			}
-		}, new Runnable() {
-			@Override
-			public void run() {
-				close();
-			}
-		});
+		dsePanel = new DataSequenceEditorPanel();
 		add(dsePanel, BorderLayout.CENTER);
 
 		updateTextPaneFromFile();
