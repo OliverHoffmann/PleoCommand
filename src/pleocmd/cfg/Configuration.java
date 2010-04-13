@@ -69,7 +69,7 @@ import pleocmd.exc.ConfigurationException;
  */
 public final class Configuration {
 
-	private static File defaultConfigFile;
+	private final static File defaultConfigFile;
 	static {
 		defaultConfigFile = new File(System.getProperty("user.home")
 				+ File.separator + ".pleocommand.cfg");
