@@ -14,7 +14,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 
-public final class ConfigString extends ConfigValue {
+public class ConfigString extends ConfigValue {
 
 	private final boolean multiLine;
 
@@ -50,11 +50,11 @@ public final class ConfigString extends ConfigValue {
 		}
 	}
 
-	public String getContent() {
+	public final String getContent() {
 		return content;
 	}
 
-	public List<String> getContentList() {
+	public final List<String> getContentList() {
 		final List<String> res = new ArrayList<String>();
 		final StringTokenizer st = new StringTokenizer(content, "\n");
 		while (st.hasMoreTokens())
@@ -62,7 +62,8 @@ public final class ConfigString extends ConfigValue {
 		return res;
 	}
 
-	public void setContent(final String content) throws ConfigurationException {
+	public final void setContent(final String content)
+			throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine && content.contains("\n"))
 			throw new ConfigurationException("content contains line-feeds");
@@ -70,7 +71,7 @@ public final class ConfigString extends ConfigValue {
 		this.content = content;
 	}
 
-	public void setContent(final List<String> content)
+	public final void setContent(final List<String> content)
 			throws ConfigurationException {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine)
@@ -88,42 +89,43 @@ public final class ConfigString extends ConfigValue {
 		}
 	}
 
-	public void clearContent() {
+	public final void clearContent() {
 		content = "";
 	}
 
 	@Override
-	public String asString() {
+	public final String asString() {
 		return content;
 	}
 
 	@Override
-	void setFromString(final String string) throws ConfigurationException {
+	final void setFromString(final String string) throws ConfigurationException {
 		setContent(string);
 	}
 
 	@Override
-	List<String> asStrings() {
+	final List<String> asStrings() {
 		return getContentList();
 	}
 
 	@Override
-	void setFromStrings(final List<String> strings)
+	final void setFromStrings(final List<String> strings)
 			throws ConfigurationException {
 		setContent(strings);
 	}
 
 	@Override
-	String getIdentifier() {
+	final String getIdentifier() {
 		return null;
 	}
 
 	@Override
-	boolean isSingleLined() {
+	final boolean isSingleLined() {
 		return !multiLine;
 	}
 
 	@Override
+	// CS_IGNORE_PREV need to be overridable
 	public boolean insertGUIComponents(final Layouter lay) {
 		tc = multiLine ? new JTextArea(content, 5, 20) : new JTextField(
 				content, 20);
@@ -136,6 +138,7 @@ public final class ConfigString extends ConfigValue {
 	}
 
 	@Override
+	// CS_IGNORE_PREV need to be overridable
 	public void setFromGUIComponents() {
 		try {
 			setContent(tc.getText());

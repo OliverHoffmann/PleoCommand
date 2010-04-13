@@ -310,8 +310,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected List<Data> writeTextPaneToList() throws IOException,
-			FormatException {
+	public List<Data> writeTextPaneToList() throws IOException, FormatException {
 		final List<Data> res = new ArrayList<Data>();
 		final BufferedReader in = new BufferedReader(new StringReader(
 				tpDataSequence.getText()));
@@ -325,7 +324,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		return res;
 	}
 
-	protected void writeTextPaneToWriter(final Writer out) throws IOException {
+	public void writeTextPaneToWriter(final Writer out) throws IOException {
 		final BufferedReader in = new BufferedReader(new StringReader(
 				tpDataSequence.getText()));
 		String line;
@@ -337,7 +336,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		out.flush();
 	}
 
-	protected void updateTextPaneFromList(final List<Data> dataList) {
+	public void updateTextPaneFromList(final List<Data> dataList) {
 		clear();
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
 		if (dataList != null)
@@ -352,7 +351,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		updateState(); // TODO needed?
 	}
 
-	protected void updateTextPaneFromReader(final BufferedReader in)
+	public void updateTextPaneFromReader(final BufferedReader in)
 			throws IOException {
 		clear();
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
