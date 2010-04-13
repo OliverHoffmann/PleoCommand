@@ -436,12 +436,14 @@ public final class Log {
 			throw new IllegalArgumentException("Invalid value for minLogType");
 		cfgMinLogType.setEnum(minLogType);
 		minLogTypeKnown = true;
-		if (MainFrame.hasGUI())
+		if (MainFrame.hasGUI()) {
 			for (final Log log : queuedLogs)
-				MainFrame.the().getMainLogPanel().addLog(log);
-		else
+				if (Log.canLog(log.getType()))
+					MainFrame.the().getMainLogPanel().addLog(log);
+		} else
 			for (final Log log : queuedLogs)
-				System.err.println(log.toString()); // CS_IGNORE
+				if (Log.canLog(log.getType()))
+					System.err.println(log.toString()); // CS_IGNORE
 		queuedLogs.clear();
 	}
 
