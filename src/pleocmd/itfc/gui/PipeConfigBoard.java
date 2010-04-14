@@ -51,7 +51,6 @@ import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
-import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -230,8 +229,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(menuAdd);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
-				final JMenuItem item = new JMenuItem(PipePartDetection
-						.callHelp(pp, HelpKind.Name));
+				final JMenuItem item = new JMenuItem(PipePart.getName(pp),
+						PipePart.getIcon(pp));
 				menuAdd.add(item);
 				item.addActionListener(new ActionListener() {
 					@Override
@@ -239,8 +238,7 @@ public final class PipeConfigBoard extends JPanel {
 						addPipePart(pp, getLastMenuLocation());
 					}
 				});
-				item.setToolTipText(PipePartDetection.callHelp(pp,
-						HelpKind.Description));
+				item.setToolTipText(PipePart.getDescription(pp));
 			}
 		idxMenuRepl = menu.getSubElements().length;
 		final JMenu menuRepl = new JMenu("Replace " + name + " With");
@@ -248,8 +246,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(menuRepl);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
-				final JMenuItem item = new JMenuItem(PipePartDetection
-						.callHelp(pp, HelpKind.Name));
+				final JMenuItem item = new JMenuItem(PipePart.getName(pp),
+						PipePart.getIcon(pp));
 				menuRepl.add(item);
 				item.addActionListener(new ActionListener() {
 					@Override
@@ -257,8 +255,7 @@ public final class PipeConfigBoard extends JPanel {
 						replacePipePart(pp);
 					}
 				});
-				item.setToolTipText(PipePartDetection.callHelp(pp,
-						HelpKind.Description));
+				item.setToolTipText(PipePart.getDescription(pp));
 			}
 		menu.addSeparator();
 

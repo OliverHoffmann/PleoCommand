@@ -526,37 +526,60 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	public final String getName() {
-		return PipePartDetection.callHelp(getClass(), HelpKind.Name);
+		return getName(getClass());
+	}
+
+	public static final String getName(final Class<? extends PipePart> ppc) {
+		return PipePartDetection.callHelp(ppc, HelpKind.Name);
 	}
 
 	public final String getDescription() {
-		return PipePartDetection.callHelp(getClass(), HelpKind.Description);
+		return getDescription(getClass());
+	}
+
+	public static final String getDescription(
+			final Class<? extends PipePart> ppc) {
+		return PipePartDetection.callHelp(ppc, HelpKind.Description);
 	}
 
 	public final String getHelpFile() {
-		final String name = PipePartDetection.callHelp(getClass(),
-				HelpKind.HelpFile);
-		return name == null ? getClass().getSimpleName() + ".html" : name;
+		return getHelpFile(getClass());
+	}
+
+	public static final String getHelpFile(final Class<? extends PipePart> ppc) {
+		final String name = PipePartDetection.callHelp(ppc, HelpKind.HelpFile);
+		return name == null ? ppc.getSimpleName() + ".html" : name;
 	}
 
 	public final String getConfigHelp(final int index) {
+		return getConfigHelp(getClass(), index);
+	}
+
+	public static final String getConfigHelp(
+			final Class<? extends PipePart> ppc, final int index) {
 		final int cfgIndex = HelpKind.Config1.ordinal() + index;
 		if (cfgIndex >= HelpKind.values().length) return null;
-		return PipePartDetection.callHelp(getClass(),
-				HelpKind.values()[cfgIndex]);
+		return PipePartDetection.callHelp(ppc, HelpKind.values()[cfgIndex]);
 	}
 
 	public final Icon getConfigImage() {
-		String name = PipePartDetection.callHelp(getClass(),
-				HelpKind.ConfigImage);
-		if (name == null) name = getClass().getSimpleName() + "-cfg.png";
+		return getConfigImage(getClass());
+	}
+
+	public static final Icon getConfigImage(final Class<? extends PipePart> ppc) {
+		String name = PipePartDetection.callHelp(ppc, HelpKind.ConfigImage);
+		if (name == null) name = ppc.getSimpleName() + "-cfg.png";
 		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
 				: null;
 	}
 
 	public final Icon getIcon() {
-		String name = PipePartDetection.callHelp(getClass(), HelpKind.Icon);
-		if (name == null) name = getClass().getSimpleName() + "-icon.png";
+		return getIcon(getClass());
+	}
+
+	public static final Icon getIcon(final Class<? extends PipePart> ppc) {
+		String name = PipePartDetection.callHelp(ppc, HelpKind.Icon);
+		if (name == null) name = ppc.getSimpleName() + "-icon.png";
 		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
 				: null;
 	}

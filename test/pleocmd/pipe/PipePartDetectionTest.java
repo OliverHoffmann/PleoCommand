@@ -7,7 +7,6 @@ import org.junit.Test;
 
 import pleocmd.Log;
 import pleocmd.Testcases;
-import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.in.FileInput;
 
 public final class PipePartDetectionTest extends Testcases {
@@ -24,8 +23,7 @@ public final class PipePartDetectionTest extends Testcases {
 		PipePartDetection.getHelp(FileInput.class);
 		Log.consoleOut("Checked getHelp()");
 
-		assertEquals("File Input", PipePartDetection.callHelp(FileInput.class,
-				HelpKind.Name));
+		assertEquals("File Input", PipePart.getName(FileInput.class));
 		Log.consoleOut("Checked callHelp()");
 	}
 }
