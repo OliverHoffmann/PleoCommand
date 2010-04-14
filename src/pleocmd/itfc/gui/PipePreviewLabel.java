@@ -34,7 +34,7 @@ public class PipePreviewLabel extends JLabel {
 	}
 
 	public final void update(final File pipeConfig) {
-		if (pipeConfig == null) {
+		if (pipeConfig == null || !pipeConfig.canRead()) {
 			update((Pipe) null);
 			return;
 		}
