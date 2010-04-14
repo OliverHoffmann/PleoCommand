@@ -633,12 +633,10 @@ public final class BoardPainter {
 	private void drawConnectorLabel(final Graphics2D g2, final int sx,
 			final int sy, final int tx, final int ty, final String str) {
 		if (str.isEmpty()) return;
-		// FIXME wirken "angenagt"
 
 		// draw in image
 		final Rectangle sb = g2.getFontMetrics().getStringBounds(str, g2)
 				.getBounds();
-		sb.grow(4, 4);
 		final int sw = (int) (sb.width * scale);
 		final int sh = (int) (sb.height * scale);
 		if (sw <= 0 || sh <= 0) return;
@@ -654,7 +652,7 @@ public final class BoardPainter {
 		}
 		imgG2D.setColor(g2.getColor());
 		imgG2D.setFont(g2.getFont());
-		imgG2D.drawString(str, 0, sb.height);
+		imgG2D.drawString(str, 0, -sb.y);
 
 		// make sure text is never bottom-up and correctly positioned
 		double d = Math.atan2(sy - ty, sx - tx);
