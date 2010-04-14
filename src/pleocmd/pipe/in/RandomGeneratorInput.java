@@ -138,7 +138,32 @@ public final class RandomGeneratorInput extends Input {
 		case Name:
 			return "Random Generator";
 		case Description:
-			return ""; // TODO
+			return "Generates noise with some random peaks";
+		case Config1:
+			return "Some integer which is sent as an additional argument in "
+					+ "the Data packets (mostly used for channel number)";
+		case Config2:
+			return "Number of Data packets created per second";
+		case Config3:
+			return "The probability to start a new peak on a Data packet "
+					+ "(if 0 there are no peaks at all, if 1 a peak is started "
+					+ "immediately after the last one)";
+		case Config4:
+			return "The maximum possible (absolute) value to send during a peak";
+		case Config5:
+			return "The maximum possible length of one peak in ms (rounded "
+					+ "down to the next value possible with the current samplerate)";
+		case Config6:
+			return "The maximum possible length from the start to the highest point "
+					+ "of a peak in ms (rounded  down to the next value possible "
+					+ "with the current samplerate)";
+		case Config7:
+			return "The maximum possible length from the highest point to the end "
+					+ "of a peak in ms (rounded  down to the next value possible "
+					+ "with the current samplerate)";
+		case Config8:
+			return "The maximum possible random noise added to / subtracted from "
+					+ "each generated Data packet.";
 		default:
 			return null;
 		}
