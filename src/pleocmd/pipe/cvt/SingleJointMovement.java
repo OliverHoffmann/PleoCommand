@@ -75,7 +75,7 @@ public final class SingleJointMovement extends Converter {
 		currentAngle = val;
 		if (isVisualize()) plot(0, val);
 		return asList(new CommandData("PMC", String.format("JOINT MOVE %d %d",
-				cfgJointNumber.getContent(), val), data));
+				cfgJointNumber.getContent(), (int) val), data));
 	}
 
 	public static String help(final HelpKind kind) {
