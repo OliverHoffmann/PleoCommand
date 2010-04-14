@@ -13,7 +13,7 @@ public final class BCISingleChannel extends Converter {
 	private final ConfigInt cfgChannelNr;
 
 	public BCISingleChannel() {
-		addConfig(cfgChannelNr = new ConfigInt("Channel-Number", 0, 0, 31));
+		addConfig(cfgChannelNr = new ConfigInt("Channel-Number", 1, 1, 32));
 		constructed();
 	}
 
@@ -37,7 +37,7 @@ public final class BCISingleChannel extends Converter {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
 		if (ds != null) {
 			ds.setLabel(String.format("Channel %d",
-					cfgChannelNr.getContent() + 1));
+					cfgChannelNr.getContent()));
 			ds.setPen(getVisualizationDialog().getDiagram().detectPen(
 					cfgChannelNr.getContent()));
 		}
