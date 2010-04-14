@@ -69,7 +69,7 @@ public final class PipeVisualizationDialog extends JDialog implements
 		diagram.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(final MouseEvent e) {
-				if (e.isPopupTrigger())
+				if (e.getButton() == MouseEvent.BUTTON3)
 					getDiagram().getMenu().show(PipeVisualizationDialog.this,
 							e.getX(), e.getY());
 			}

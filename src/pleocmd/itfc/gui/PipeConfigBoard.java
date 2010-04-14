@@ -139,7 +139,7 @@ public final class PipeConfigBoard extends JPanel {
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(final MouseEvent e) {
-				if (e.isPopupTrigger())
+				if (e.getButton() == MouseEvent.BUTTON3)
 					showPopup(e);
 				else
 					updateCurrent(e.getPoint());
@@ -161,7 +161,6 @@ public final class PipeConfigBoard extends JPanel {
 
 			@Override
 			public void mouseReleased(final MouseEvent e) {
-				// if (e.isPopupTrigger()) showPopup(e);
 				releaseCurrent();
 			}
 
