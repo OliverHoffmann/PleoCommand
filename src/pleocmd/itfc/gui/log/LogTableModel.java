@@ -13,6 +13,8 @@ import pleocmd.Log;
 
 public final class LogTableModel extends AbstractTableModel {
 
+	private static final String NOMARK = "XXXXXXXXXX";
+
 	private static final long serialVersionUID = 4577491604077043435L;
 
 	private static final Color CLR_MARK = new Color(1.0f, 1.0f, 0.8f, 1.0f);
@@ -21,7 +23,7 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private final LogTable table;
 
-	private String mark = "XXXXXXXXXX";
+	private String mark = NOMARK;
 
 	public LogTableModel(final LogTable table) {
 		this.table = table;
@@ -105,7 +107,7 @@ public final class LogTableModel extends AbstractTableModel {
 	}
 
 	public void setMark(final int index) {
-		mark = list.get(index).getFormattedCaller();
+		mark = index == -1 ? NOMARK : list.get(index).getFormattedCaller();
 		table.repaint();
 	}
 
