@@ -298,7 +298,7 @@ public abstract class PipePart extends StateHandling {
 			throw new InternalException(e);
 		}
 		connected.add(target);
-		pipe.modified();
+		if (pipe != null) pipe.modified();
 	}
 
 	public final void disconnectFromPipePart(final PipePart target)
@@ -306,7 +306,7 @@ public abstract class PipePart extends StateHandling {
 		ensureConstructed();
 		connected.remove(target);
 		cfgConnectedUIDs.removeContent(target.getUID());
-		pipe.modified();
+		if (pipe != null) pipe.modified();
 	}
 
 	/**
@@ -386,7 +386,7 @@ public abstract class PipePart extends StateHandling {
 
 	public final void setGuiPosition(final Rectangle guiPosition) {
 		cfgGuiPosition.setContent(guiPosition);
-		pipe.modified();
+		if (pipe != null) pipe.modified();
 	}
 
 	public final ImmutableRectangle getGuiPosition() {
@@ -415,7 +415,7 @@ public abstract class PipePart extends StateHandling {
 			createVisualization();
 		else
 			closeVisualization();
-		pipe.modified();
+		if (pipe != null) pipe.modified();
 	}
 
 	private void createVisualization() {
