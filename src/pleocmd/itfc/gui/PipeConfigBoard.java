@@ -970,19 +970,23 @@ public final class PipeConfigBoard extends JPanel {
 		return true;
 	}
 
+	private static String safeHTMLString(final String s) {
+		return s.replace("<", "&lt;").replace("\n", "<br>");
+	}
+
 	@Override
 	public String getToolTipText(final MouseEvent event) {
 		if (underCursor == null) return null;
 		final StringBuilder sb = new StringBuilder("<html><b>");
-		sb.append(underCursor.getName().replace("<", "&lt;"));
+		sb.append(safeHTMLString(underCursor.getName()));
 		sb.append("</b><p>");
-		sb.append(underCursor.getDescription().replace("<", "&lt;"));
+		sb.append(safeHTMLString(underCursor.getDescription()));
 		sb.append("<table border=1>");
 		for (final ConfigValue v : underCursor.getGuiConfigs()) {
 			sb.append("<tr><td align=right>");
-			sb.append(v.getLabel().replace("<", "&lt;"));
+			sb.append(safeHTMLString(v.getLabel()));
 			sb.append("</td><td align=left>");
-			sb.append(v.asString().replace("<", "&lt;"));
+			sb.append(safeHTMLString(v.asString()));
 			sb.append("</td></tr>");
 		}
 		sb.append("</table></html>");
