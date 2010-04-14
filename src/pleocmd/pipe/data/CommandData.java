@@ -13,7 +13,7 @@ public class CommandData extends Data {
 
 	public CommandData(final String command, final String argument,
 			final Data parent, final byte priority, final long time) {
-		super(l = new ArrayList<Value>(2), parent, priority, time);
+		super(l = new ArrayList<Value>(2), parent, priority, time, true);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(command);
 		l.add(val);
@@ -24,7 +24,8 @@ public class CommandData extends Data {
 
 	public CommandData(final String command, final String argument,
 			final Data parent) {
-		super(l = new ArrayList<Value>(2), parent);
+		super(l = new ArrayList<Value>(2), parent, PRIO_DEFAULT, TIME_NOTIME,
+				true);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(command);
 		l.add(val);

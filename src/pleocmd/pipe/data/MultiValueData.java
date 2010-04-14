@@ -42,7 +42,8 @@ public class MultiValueData extends Data {
 	}
 
 	public MultiValueData(final Data parent) {
-		super(l = new ArrayList<Value>(1 + parent.size()), parent);
+		super(l = new ArrayList<Value>(1 + parent.size()), parent,
+				PRIO_DEFAULT, TIME_NOTIME, true);
 		final Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);

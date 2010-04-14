@@ -91,7 +91,7 @@ public class Data extends AbstractList<Value> {
 	 */
 	public Data(final List<Value> values, final Data parent,
 			final byte priority, final long time) {
-		this(new ArrayList<Value>(values.size()), parent, priority, time, true);
+		this(new ArrayList<Value>(values), parent, priority, time, true);
 	}
 
 	/**
@@ -105,8 +105,8 @@ public class Data extends AbstractList<Value> {
 	 *            created - may be <b>null</b>
 	 */
 	public Data(final List<Value> values, final Data parent) {
-		this(new ArrayList<Value>(values.size()), parent, PRIO_DEFAULT,
-				TIME_NOTIME, true);
+		this(new ArrayList<Value>(values), parent, PRIO_DEFAULT, TIME_NOTIME,
+				true);
 	}
 
 	/**
@@ -125,8 +125,7 @@ public class Data extends AbstractList<Value> {
 	 *            just for distinction between other constructors
 	 */
 	protected Data(final List<Value> values, final Data parent,
-			final byte priority, final long time,
-			@SuppressWarnings("unused") final boolean dummy) {
+			final byte priority, final long time, final boolean dummy) {
 		this.values = values;
 		this.parent = parent;
 		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
