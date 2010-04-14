@@ -105,7 +105,6 @@ public final class ErrorDialog extends JDialog implements
 		btn.requestFocusInWindow();
 
 		setAlwaysOnTop(true);
-		setModal(true);
 		pack();
 
 		try {
@@ -194,7 +193,7 @@ public final class ErrorDialog extends JDialog implements
 		}
 		setSize(pref);
 		setLocationRelativeTo(null);
-		setVisible(true);
+		if (!isVisible()) setVisible(true);
 	}
 
 	protected void changeSuppress(final String caller, final boolean add)
