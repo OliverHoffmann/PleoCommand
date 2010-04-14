@@ -4,7 +4,6 @@ auto-save to selected pipe-file if any
 changing zoom doesn't handle recalc. of border1 and border2
 make all Data timed Data before writing to Output
 Null-Output
-make all Data timed Data before writing to Output
 checkstyle: no exception handling in pipe's, only pass them thru
 implement DataFilter
 check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)
@@ -19,3 +18,15 @@ size of error dialog may be wrong under windows
 display PipeParts in red if they permanently failed
 blink PipeParts in red if they temporarily failed
 check correct behavior on bad config files 
+
+
+Missing:			Icon	Image	Descr.	Config-Help
+ThresholdConverter	-		x		x		x
+[SE].*DataConverter	x		x		-		?
+StaticInput			-		-		-		?
+Std-Dev-Converter	x		x		-		-
+Int Cmd Output		x		x		-		-
+CodomainAdaption	-		x		-		-
+NormalizingCvt		-		x		-		-
+SingleJointMvmt		-		x		-		-
+DataBlockSplitter	x		x		-		x
