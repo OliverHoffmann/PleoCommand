@@ -1016,7 +1016,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 						"Superclass of PipePart '%s' unknown", pp);
 			try {
 				pp.connectedToPipe(this);
-				resolveConnectionUIDs(); // TODO correct here?
+				resolveConnectionUIDs();
 				pp.configure();
 			} catch (final PipeException e) {
 				throw new ConfigurationException(e,

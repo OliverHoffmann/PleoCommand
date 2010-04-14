@@ -30,7 +30,6 @@ public final class CommandLine {
 
 	public void parse(final String[] args) {
 		try {
-			// TODO already have some detailed output here
 			Log.setMinLogType(Type.Info);
 			for (final String arg : args) {
 				final File file = new File(arg);
