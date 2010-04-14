@@ -398,7 +398,7 @@ public abstract class PipePart extends StateHandling {
 		groupWriteback0();
 	}
 
-	protected void groupWriteback0() throws ConfigurationException {
+	protected void groupWriteback0() {
 		// do nothing by default
 	}
 

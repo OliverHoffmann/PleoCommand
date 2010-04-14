@@ -82,7 +82,7 @@ public final class InternalCommandOutput extends Output {
 		for (int i = 0;; ++i) {
 			final String cfg = PipePart.getConfigHelp(cpp, i);
 			if (cfg == null) break;
-			Log.consoleOut(String.format("Config %d: %s", i, cfg));
+			Log.consoleOut("Config %d: %s", i, cfg);
 		}
 		Log.consoleOut("");
 	}

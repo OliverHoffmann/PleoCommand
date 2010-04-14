@@ -60,8 +60,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private final List<AutoDisposableWindow> knownWindows;
 
-	private Configuration config;
-
 	private final Pipe pipe;
 
 	private Thread pipeThread;

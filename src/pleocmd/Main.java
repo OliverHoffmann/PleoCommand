@@ -3,26 +3,7 @@ package pleocmd;
 import java.awt.EventQueue;
 
 import pleocmd.itfc.cli.CommandLine;
-import pleocmd.itfc.gui.DataSequenceEditorFrame;
 import pleocmd.itfc.gui.MainFrame;
-
-/**
- * TODO: List of tasks:<br>
- * make all Data timed Data before writing to Output<br>
- * checkstyle: no exception handling in pipe's, only pass them thru<br>
- * implement DataFilter<br>
- * check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)<br>
- * add javadoc<br>
- * <br>
- * more Log.debug<br>
- * display power status<br>
- * disable "OK" and "Apply" if bad input in PipePart configuration<br>
- * online help<br>
- * combine History and {@link DataSequenceEditorFrame}<br>
- * make dialogs non-modal? (some fixes still needed)<br>
- * document which classes are immutable<br>
- * size of error dialog may be wrong under windows<br>
- */
 
 public final class Main {
 

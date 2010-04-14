@@ -191,10 +191,6 @@ public final class DiagramAxis {
 		cachedPixelPerGrid = cachedPixelPerUnit * cachedUnitsPerGrid;
 		cachedPixelPerSubGrid = subsPerUnit > 1 ? cachedPixelPerGrid
 				/ subsPerUnit : 0;
-		// System.out.println(cachedUnitsPerGrid + " " + cachedPixelPerGrid +
-		// " "
-		// + cachedPixelPerSubGrid + " " + cachedMinVisUnit + " "
-		// + cachedMaxVisUnit);
 	}
 
 	double unitToPixel(final double unit) {

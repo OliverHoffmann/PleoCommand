@@ -1,0 +1,21 @@
+clipping for shadows in board
+show some small information inside the PipePart's image (like channel for ChannelSplitter)
+auto-save to selected pipe-file if any
+changing zoom doesn't handle recalc. of border1 and border2
+make all Data timed Data before writing to Output
+Null-Output
+make all Data timed Data before writing to Output
+checkstyle: no exception handling in pipe's, only pass them thru
+implement DataFilter
+check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)
+add javadoc
+more Log.debug
+display power status
+online help
+combine History and {@link DataSequenceEditorPanel} ?
+document which classes are immutable
+size of error dialog may be wrong under windows
+"Modify" for pbd not working
+display PipeParts in red if they permanently failed
+blink PipeParts in red if they temporarily failed
+check correct behavior on bad config files 
