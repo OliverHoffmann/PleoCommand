@@ -22,8 +22,15 @@ public final class PleoRXTXOutput extends Output {
 	private PleoCommunication pc;
 
 	public PleoRXTXOutput() {
-		addConfig(cfgDevice = new ConfigItem<String>("Device", "",
-				getAllDeviceNames()));
+		ConfigItem<String> tmp;
+		try {
+			tmp = new ConfigItem<String>("Device", "", getAllDeviceNames());
+		} catch (UnsatisfiedLinkError e) {
+			Log.error(e, "Cannot find external library in '%s'", System
+					.getProperty("java.library.path"));
+			tmp = new ConfigItem<String>("Device", "", new ArrayList<String>());
+		}
+		addConfig(cfgDevice = tmp);
 		constructed();
 	}
 
