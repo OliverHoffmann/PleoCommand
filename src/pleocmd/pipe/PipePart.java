@@ -495,7 +495,9 @@ public abstract class PipePart extends StateHandling {
 		boolean outputReached = topDownCheck_outputReached();
 		boolean validConns = true;
 		visited.add(this);
-		for (final PipePart ppSub : getConnectedPipeParts()) {
+		final List<PipePart> copy = new ArrayList<PipePart>(
+				getConnectedPipeParts());
+		for (final PipePart ppSub : copy) {
 			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
 			validConns &= isConnectionAllowed(ppSub);
 		}

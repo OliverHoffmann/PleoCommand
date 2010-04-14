@@ -354,7 +354,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		final Set<PipePart> sane = new HashSet<PipePart>();
 		final Set<PipePart> visited = new HashSet<PipePart>();
 		final Set<PipePart> deadLocked = new HashSet<PipePart>();
-		for (final PipePart pp : inputList)
+		final List<PipePart> copy = new ArrayList<PipePart>(inputList);
+		for (final PipePart pp : copy)
 			pp.topDownCheck(sane, visited, deadLocked);
 		sane.removeAll(deadLocked);
 		return sane;
