@@ -17,7 +17,7 @@ public class SingleValueData extends Data {
 
 	public SingleValueData(final double value, final long user,
 			final Data parent, final byte priority, final long time) {
-		super(l = new ArrayList<Value>(3), parent, priority, time, true);
+		super(l = new ArrayList<Value>(3), parent, priority, time, CTOR_DIRECT);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);
@@ -31,8 +31,7 @@ public class SingleValueData extends Data {
 
 	public SingleValueData(final double value, final long user,
 			final Data parent) {
-		super(l = new ArrayList<Value>(3), parent, PRIO_DEFAULT, TIME_NOTIME,
-				true);
+		super(l = new ArrayList<Value>(3), parent, CTOR_DIRECT);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);

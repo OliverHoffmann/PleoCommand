@@ -17,7 +17,7 @@ public class MultiValueData extends Data {
 	public MultiValueData(final double[] values, final Data parent,
 			final byte priority, final long time) {
 		super(l = new ArrayList<Value>(1 + values.length), parent, priority,
-				time, true);
+				time, CTOR_DIRECT);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);
@@ -29,8 +29,7 @@ public class MultiValueData extends Data {
 	}
 
 	public MultiValueData(final double[] values, final Data parent) {
-		super(l = new ArrayList<Value>(1 + values.length), parent,
-				PRIO_DEFAULT, TIME_NOTIME, true);
+		super(l = new ArrayList<Value>(1 + values.length), parent, CTOR_DIRECT);
 		Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);
@@ -42,8 +41,7 @@ public class MultiValueData extends Data {
 	}
 
 	public MultiValueData(final Data parent) {
-		super(l = new ArrayList<Value>(1 + parent.size()), parent,
-				PRIO_DEFAULT, TIME_NOTIME, true);
+		super(l = new ArrayList<Value>(1 + parent.size()), parent, CTOR_DIRECT);
 		final Value val = Value.createForType(ValueType.NullTermString);
 		((StringValue) val).set(IDENT);
 		l.add(val);

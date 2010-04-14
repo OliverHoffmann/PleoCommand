@@ -34,6 +34,8 @@ import pleocmd.pipe.val.Value;
  */
 public class Data extends AbstractList<Value> {
 
+	protected static final long CTOR_DIRECT = 8297464393242L;
+
 	/**
 	 * The priority which will be used if no special one is specified.
 	 */
@@ -91,7 +93,7 @@ public class Data extends AbstractList<Value> {
 	 */
 	public Data(final List<Value> values, final Data parent,
 			final byte priority, final long time) {
-		this(new ArrayList<Value>(values), parent, priority, time, true);
+		this(new ArrayList<Value>(values), parent, priority, time, CTOR_DIRECT);
 	}
 
 	/**
@@ -105,8 +107,7 @@ public class Data extends AbstractList<Value> {
 	 *            created - may be <b>null</b>
 	 */
 	public Data(final List<Value> values, final Data parent) {
-		this(new ArrayList<Value>(values), parent, PRIO_DEFAULT, TIME_NOTIME,
-				true);
+		this(new ArrayList<Value>(values), parent, CTOR_DIRECT);
 	}
 
 	/**
@@ -125,7 +126,8 @@ public class Data extends AbstractList<Value> {
 	 *            just for distinction between other constructors
 	 */
 	protected Data(final List<Value> values, final Data parent,
-			final byte priority, final long time, final boolean dummy) {
+			final byte priority, final long time, final long dummy) {
+		assert dummy == CTOR_DIRECT;
 		this.values = values;
 		this.parent = parent;
 		this.priority = priority == PRIO_DEFAULT && parent != null ? parent
@@ -134,6 +136,21 @@ public class Data extends AbstractList<Value> {
 				: time;
 		Log.detail("New Data created: %s (parent: '%s' priority: %d time: %d)",
 				this, parent, priority, time);
+	}
+
+	/**
+	 * Internal constructor which directly uses the values list
+	 * 
+	 * @param values
+	 *            list of {@link Value} - will be directly used
+	 * @param parent
+	 *            the parent which was the cause for this {@link Data} being
+	 *            created - may be <b>null</b>
+	 * @param dummy
+	 *            just for distinction between other constructors
+	 */
+	protected Data(final List<Value> values, final Data parent, final long dummy) {
+		this(values, parent, PRIO_DEFAULT, TIME_NOTIME, dummy);
 	}
 
 	/**
