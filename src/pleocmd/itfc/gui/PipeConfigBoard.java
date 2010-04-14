@@ -47,6 +47,7 @@ import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.itfc.gui.help.HelpLoader;
+import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
@@ -225,6 +226,7 @@ public final class PipeConfigBoard extends JPanel {
 
 		idxMenuAdd = menu.getSubElements().length;
 		final JMenu menuAdd = new JMenu("Add " + name);
+		menuAdd.setIcon(IconLoader.getIcon("list-add"));
 		menu.add(menuAdd);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
@@ -242,6 +244,7 @@ public final class PipeConfigBoard extends JPanel {
 			}
 		idxMenuRepl = menu.getSubElements().length;
 		final JMenu menuRepl = new JMenu("Replace " + name + " With");
+		menuRepl.setIcon(IconLoader.getIcon("edit-rename"));
 		menu.add(menuRepl);
 		for (final Class<? extends PipePart> pp : PipePartDetection.ALL_PIPEPART)
 			if (clazz.isAssignableFrom(pp)) {
@@ -271,7 +274,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(itemConfPart);
 
 		idxMenuDelPart = menu.getSubElements().length;
-		final JMenuItem itemDelPart = new JMenuItem("Delete This PipePart");
+		final JMenuItem itemDelPart = new JMenuItem("Delete This PipePart",
+				IconLoader.getIcon("del-pipepart"));
 		itemDelPart.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -282,7 +286,8 @@ public final class PipeConfigBoard extends JPanel {
 
 		idxMenuDelPartConn = menu.getSubElements().length;
 		final JMenuItem itemDelPartConn = new JMenuItem(
-				"Delete Connections Of This PipePart");
+				"Delete Connections Of This PipePart", IconLoader
+						.getIcon("del-connection-all"));
 		itemDelPartConn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -292,7 +297,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(itemDelPartConn);
 
 		idxMenuDelConn = menu.getSubElements().length;
-		final JMenuItem itemDelConn = new JMenuItem("Delete This Connection");
+		final JMenuItem itemDelConn = new JMenuItem("Delete This Connection",
+				IconLoader.getIcon("del-connection"));
 		itemDelConn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -314,7 +320,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.addSeparator();
 
 		idxMenuClearBoard = menu.getSubElements().length;
-		final JMenuItem itemClearBoard = new JMenuItem("Clear The Board");
+		final JMenuItem itemClearBoard = new JMenuItem("Clear The Board",
+				IconLoader.getIcon("board-clear"));
 		itemClearBoard.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -324,7 +331,8 @@ public final class PipeConfigBoard extends JPanel {
 		menu.add(itemClearBoard);
 
 		idxMenuLayoutBoard = menu.getSubElements().length;
-		final JMenuItem itemLayoutBoard = new JMenuItem("Auto-Layout The Board");
+		final JMenuItem itemLayoutBoard = new JMenuItem(
+				"Auto-Layout The Board", IconLoader.getIcon("board-auto"));
 		itemLayoutBoard.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
