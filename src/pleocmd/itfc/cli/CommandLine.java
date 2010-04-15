@@ -57,7 +57,7 @@ public final class CommandLine {
 		if (arg.startsWith("--configure=")) {
 			// final String ppName = arg.substring(12);
 			// final PipePart pp = Pipe.the().find(ppName);
-			// TODO
+			// TODO ENH CommandLine
 		} else
 			throw new RuntimeException(String.format(
 					"Cannot recognize argument '%s'", arg));

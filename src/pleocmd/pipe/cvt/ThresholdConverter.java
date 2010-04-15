@@ -143,7 +143,7 @@ public final class ThresholdConverter extends Converter {
 		case Name:
 			return "Threshold Converter";
 		case Description:
-			return ""; // TODO
+			return "";
 		default:
 			return null;
 		}

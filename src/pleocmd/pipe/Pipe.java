@@ -85,8 +85,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
 			60000);
 
-	// TODO use a notify on the Output-Thread everytime a DataBlock is available
-	// to avoid the need for sleeping in the DataQueue if currently empty?
+	// TODO ENH use a notify on the Output-Thread everytime a DataBlock is
+	// available - avoids need for sleeping in DataQueue if currently empty?
 	/**
 	 * Number of milliseconds to wait until data is available in
 	 * {@link DataQueue#get(long)}.
@@ -652,7 +652,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		final boolean significant = delta < -cfgMaxBehind.getContent();
 		feedback.incBehindCount(-delta, significant);
 		if (significant)
-			// TODO only warn for the first in dataList?
+			// TODO MOD only warn for the first in dataList?
 			Log.warn("Output of '%s' is %d ms behind (should have been "
 					+ "executed at '%s')", data, -delta, DATE_FORMATTER
 					.format(new Date(execTime)));
@@ -751,7 +751,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 			// if time-to-wait is positive we wait here before we are
 			// forced to immediately drop a data block or clear the queue
-			// TODO wait here only if needed
+			// TODO SPEED wait here only if needed
 			if (data.getTime() != Data.TIME_NOTIME) {
 				final long execTime = feedback.getStartTime() + data.getTime();
 				final long delta = execTime - System.currentTimeMillis()
@@ -1001,7 +1001,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		} catch (final StateException e) {
 			throw new ConfigurationException(e, "Cannot change configuration");
 		}
-		// TODO if config loaded before register...() getUser() will return null
+		// TODO FIX if config loaded before register...() getUser() returns null
 		// because getSkeleton() has never been executed
 		if (group.getUser() instanceof PipePart) {
 			final PipePart pp = (PipePart) group.getUser();

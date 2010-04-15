@@ -150,7 +150,7 @@ public class PipeTest extends Testcases {
 
 		Log.consoleOut("Test error handling (converter fails)");
 		Log.consoleOut("TODO");
-		// TODO converter fails => output unconverted
+		// TODO ENH converter fails => output unconverted
 
 		Log.consoleOut("Test error handling (sole output fails)");
 		p.reset();
@@ -231,7 +231,7 @@ public class PipeTest extends Testcases {
 
 	@Test
 	public final void testReadWriteFiles() {
-		// TODO fail("Not yet implemented");
+		// TODO ENH fail("Not yet implemented");
 	}
 
 }

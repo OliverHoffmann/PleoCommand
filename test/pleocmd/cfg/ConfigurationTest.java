@@ -146,7 +146,7 @@ public final class ConfigurationTest extends Testcases {
 
 		// unregister object A
 
-		// TODO
+		// TODO ENH ConfigurationTest
 	}
 
 }

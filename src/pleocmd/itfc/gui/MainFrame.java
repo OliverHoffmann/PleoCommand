@@ -243,7 +243,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	}
 
 	private void updateStatusLabel() {
-		lblStatus.setText("Battery power: ???"); // TODO
+		lblStatus.setText("Battery power: ???");
+		// TODO ENH batter power
 	}
 
 	protected synchronized void resetPipeThread() {

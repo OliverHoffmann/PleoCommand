@@ -539,7 +539,7 @@ public final class BoardPainter {
 				.getWidth()) / 2), (float) (rect.getY() + sb.getHeight()));
 
 		// draw clickable icons
-		// TODO hover should be per icon here
+		// TODO ENH hover should be per icon here
 		drawIcon(g2, hover, rect, ICON_CONF, ICON_CONF_POS, !modifyable
 				|| part.getGuiConfigs().isEmpty(), false, modifyable);
 		drawIcon(g2, hover, rect, ICON_DGR, ICON_DGR_POS, false, part

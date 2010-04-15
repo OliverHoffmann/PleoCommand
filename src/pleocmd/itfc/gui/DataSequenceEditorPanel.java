@@ -348,7 +348,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 				throw new InternalException(e);
 			}
 		tpUndoManager.discardAllEdits();
-		updateState(); // TODO needed?
+		updateState(); // TODO SPEED needed?
 	}
 
 	public void updateTextPaneFromReader(final BufferedReader in)
@@ -363,7 +363,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 			throw new InternalException(e);
 		}
 		tpUndoManager.discardAllEdits();
-		updateState(); // TODO needed?
+		updateState(); // TODO SPEED needed?
 	}
 
 	void updateErrorLabel(final String text) {

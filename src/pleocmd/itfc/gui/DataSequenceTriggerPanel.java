@@ -149,7 +149,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			}
 		}));
 		triggerList.setSelectedValue(lastSelected, true);
-		updateState(); // TODO needed?
+		updateState(); // TODO SPEED needed?
 	}
 
 	protected void addNewTrigger() {

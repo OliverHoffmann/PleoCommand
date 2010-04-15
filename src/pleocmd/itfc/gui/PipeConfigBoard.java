@@ -649,7 +649,7 @@ public final class PipeConfigBoard extends JPanel {
 				break;
 			}
 		if (underCursor != found) {
-			// FIXME remove if-clause above once hover is per icon
+			// TODO FIX remove if-clause above once hover is per icon
 			if (underCursor != null)
 				repaint(scaleRect(underCursor.getGuiPosition().createCopy()));
 			underCursor = found;
