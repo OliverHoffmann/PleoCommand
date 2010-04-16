@@ -1078,7 +1078,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	}
 
 	public void modified() {
-		if (MainFrame.hasGUI() && MainFrame.the().getMainPipePanel() != null)
+		if (MainFrame.hasGUI() && MainFrame.the().getMainPipePanel() != null
+				&& MainFrame.the().getPipe() == this)
 			MainFrame.the().getMainPipePanel().timeUpdatePipeLabel();
 	}
 }
