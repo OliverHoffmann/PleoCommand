@@ -33,6 +33,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
@@ -923,7 +924,7 @@ public final class PipeConfigBoard extends JPanel {
 				lb.addButton(Button.Ok, new Runnable() {
 					@Override
 					public void run() {
-						if (saveConfigChanges(pp)) {
+						if (saveConfigChanges(dlg, pp, true)) {
 							dlg.dispose();
 							if (runIfOK != null) runIfOK.run();
 						}
@@ -932,7 +933,7 @@ public final class PipeConfigBoard extends JPanel {
 		lb.addButton(Button.Apply, new Runnable() {
 			@Override
 			public void run() {
-				saveConfigChanges(pp);
+				saveConfigChanges(dlg, pp, false);
 			}
 		});
 		lb.addButton(Button.Cancel, new Runnable() {
@@ -950,15 +951,22 @@ public final class PipeConfigBoard extends JPanel {
 		HelpDialog.closeHelpIfOpen();
 	}
 
-	protected boolean saveConfigChanges(final PipePart pp) {
+	protected boolean saveConfigChanges(final Component dlg, final PipePart pp,
+			final boolean continueable) {
 		if (!ensureModifyable()) return false;
 		for (final ConfigValue v : pp.getGuiConfigs())
 			v.setFromGUIComponents();
 		if (painter.updateSaneConfigCache()) repaint();
 		final String cfgRes = pp.isConfigurationSane();
 		if (cfgRes != null) {
-			Log.error("Configuration is invalid: " + cfgRes);
-			return false;
+			Log.warn("Configuration is invalid: %s", cfgRes);
+			if (JOptionPane.showOptionDialog(dlg, String.format(
+					"Configuration is invalid: %s%s", cfgRes,
+					continueable ? "\nIgnore and continue?" : ""), null,
+					continueable ? JOptionPane.YES_NO_OPTION
+							: JOptionPane.DEFAULT_OPTION,
+					JOptionPane.ERROR_MESSAGE, null, null, null) != JOptionPane.YES_OPTION)
+				return false;
 		}
 		try {
 			pp.configure();
