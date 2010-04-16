@@ -264,6 +264,18 @@ public final class BoardPainter {
 	 */
 	private static final int CONN_ARROW_WING = 8;
 
+	// Preferred Size Calculation
+	/**
+	 * Minimum width and height to return in getPreferredSize()
+	 */
+	private static final int PREFSIZE_MIN = 50;
+
+	/**
+	 * Number of pixel for free space right and below the PipePart at the most
+	 * lower-right position.
+	 */
+	private static final double PREFSIZE_FREE = 4;
+
 	// Miscellaneous
 
 	private final Set<PipePart> set;
@@ -294,9 +306,8 @@ public final class BoardPainter {
 			final boolean currentConnectionValid,
 			final BoardAutoLayouter layouter, final boolean modifyable) {
 		if (pipe == null || scale <= Double.MIN_NORMAL) return;
-		Rectangle clip = g.getClipBounds();
-		if (clip == null)
-			clip = new Rectangle(0, 0, bounds.width, bounds.height);
+		final Rectangle clip = g.getClipBounds();
+		if (clip == null) return;
 		final BufferedImage img = new BufferedImage(clip.width, clip.height,
 				BufferedImage.TYPE_INT_RGB);
 		final Graphics2D g2 = img.createGraphics();
@@ -825,7 +836,7 @@ public final class BoardPainter {
 			addToSet(pp, g, allowMoving);
 		for (final PipePart pp : pipe.getOutputList())
 			addToSet(pp, g, allowMoving);
-		updateSaneConfigCache();
+		updateSaneConfigCache0();
 	}
 
 	public Pipe getPipe() {
@@ -854,13 +865,18 @@ public final class BoardPainter {
 		return saneConfigCache;
 	}
 
-	public boolean updateSaneConfigCache() {
+	private boolean updateSaneConfigCache0() {
 		final Set<PipePart> sane = pipe.getSanePipeParts();
 		if (saneConfigCache.equals(sane)) return false;
 		saneConfigCache.clear();
 		saneConfigCache.addAll(sane);
-		pipe.modified();
 		return true;
+	}
+
+	public boolean updateSaneConfigCache() {
+		final boolean modified = updateSaneConfigCache0();
+		if (modified) pipe.modified();
+		return modified;
 	}
 
 	public Dimension getPreferredSize() {
@@ -874,7 +890,9 @@ public final class BoardPainter {
 		}
 
 		// add some free space and consider scaling
-		return new Dimension((int) (x * scale + 4), (int) (y * scale + 4));
+		return new Dimension(Math.max(PREFSIZE_MIN,
+				(int) (x * scale + PREFSIZE_FREE)), Math.max(PREFSIZE_MIN,
+				(int) (y * scale + PREFSIZE_FREE)));
 	}
 
 	public Dimension getBounds() {

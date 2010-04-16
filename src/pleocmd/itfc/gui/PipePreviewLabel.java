@@ -1,6 +1,7 @@
 package pleocmd.itfc.gui;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
@@ -63,9 +64,10 @@ public class PipePreviewLabel extends JLabel {
 			final Dimension pref = painter.getPreferredSize();
 			painter.setScale(Math.min((double) width / (double) pref.width,
 					(double) height / (double) pref.height));
-			painter.setBounds(pref.width, pref.height, false);
-			painter.paint(img.getGraphics(), null, null, null, null, false,
-					null, true);
+			painter.setBounds(width, height, false);
+			final Graphics g = img.getGraphics();
+			g.setClip(0, 0, width, height);
+			painter.paint(g, null, null, null, null, false, null, true);
 			setIcon(new ImageIcon(img));
 		}
 	}
