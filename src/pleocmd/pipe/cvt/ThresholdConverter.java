@@ -142,7 +142,21 @@ public final class ThresholdConverter extends Converter {
 		case Name:
 			return "Threshold Converter";
 		case Description:
-			return "";
+			return "Sends one of two different values depending on whether the "
+					+ "currently received value is below or above a specified "
+					+ "threshold, while a passing of the threshold-value is "
+					+ "ignored unless a specifiable margin has been exceeded.";
+		case Config1:
+			return "The threshold-value (is treated as an absolute value)";
+		case Config2:
+			return "The size of the marginal area around the threshold-value";
+		case Config3:
+			return "The value which will be send if the current one is "
+					+ "below the threshold";
+		case Config4:
+			return "The value which will be send if the current one is "
+					+ "above the threshold - if this is 0, the current "
+					+ "one itself will be sent";
 		default:
 			return null;
 		}

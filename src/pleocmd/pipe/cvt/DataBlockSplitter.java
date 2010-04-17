@@ -79,6 +79,12 @@ public final class DataBlockSplitter extends Converter {
 			return "Splits a multi-value data packet into its "
 					+ "single values, like 'Multi|2.5|7|0.01' to "
 					+ "'Single|2.5|1', 'Single|7|1' and 'Single|0.01|1'";
+		case Config1:
+			return "The Channel-Number which should be used for the "
+					+ "newly created data packets";
+		case Config2:
+			return "The delay between consecutive data packets coming from the "
+					+ "same multi-value packet (in ms)";
 		default:
 			return null;
 		}
