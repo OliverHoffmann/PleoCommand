@@ -15,8 +15,11 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import javax.swing.Icon;
+
 import pleocmd.Log;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.help.HelpLoader;
 import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
@@ -198,4 +201,73 @@ public final class PipePartDetection {
 		}
 		return "";
 	}
+
+	public static void checkStaticValidity() {
+		for (final Class<? extends PipePart> cpp : LIST_PIPEPART)
+			checkStaticValidity(cpp);
+	}
+
+	public static void checkStaticValidity(final Class<? extends PipePart> cpp) {
+		final List<String> res = new ArrayList<String>();
+
+		checkString(cpp, HelpKind.Name, res);
+
+		checkString(cpp, HelpKind.Description, res);
+
+		final String helpFile = PipePart.getHelpFile(cpp);
+		if (!HelpLoader.isHelpAvailable(helpFile))
+			res.add(String.format("Help-file '%s' does not exist", helpFile));
+
+		final Icon icon = PipePart.getIcon(cpp);
+		if (icon == null)
+			res.add("Icon does not exist or could not be loaded");
+
+		final Icon image = PipePart.getConfigImage(cpp);
+		if (image == null)
+			res.add("Config-Image does not exist or could not be loaded");
+
+		try {
+			final PipePart pp = cpp.newInstance();
+			final int ci1 = HelpKind.Config1.ordinal();
+			final int ciL = Math.min(ci1 + pp.getGuiConfigs().size(), HelpKind
+					.values().length);
+			for (int i = ci1; i < ciL; ++i)
+				checkString(cpp, HelpKind.values()[i], res);
+			for (int i = ciL; i < ci1 + pp.getGuiConfigs().size(); ++i)
+				res.add(String.format("No Config enum available for '%s'", pp
+						.getGuiConfigs().get(i)));
+			for (int i = ciL; i < HelpKind.values().length; ++i)
+				if (callHelp(cpp, HelpKind.values()[i]) != null)
+					res.add(String.format("Config enum not referenced by GUI "
+							+ "defined: '%s'", HelpKind.values()[i]));
+		} catch (final InstantiationException e) {
+			res.add(e.toString());
+		} catch (final IllegalAccessException e) {
+			res.add(e.toString());
+		}
+
+		if (!res.isEmpty()) {
+			final StringBuilder sb = new StringBuilder();
+			sb.append("Failed static checks for PipePart ");
+			sb.append(cpp.getName());
+			sb.append(":");
+			for (final String s : res) {
+				sb.append("\n");
+				sb.append(s);
+			}
+			Log.warn(sb.toString());
+		}
+	}
+
+	private static void checkString(final Class<? extends PipePart> cpp,
+			final HelpKind hk, final List<String> res) {
+		final String s = callHelp(cpp, hk);
+		if (s == null)
+			res.add(String.format("callHelp() for '%s' is null", hk));
+		else if (s.isEmpty())
+			res.add(String.format("callHelp() for '%s' is empty", hk));
+		else if (s.contains("?"))
+			res.add(String.format("callHelp() for '%s' contains '?'", hk));
+	}
+
 }

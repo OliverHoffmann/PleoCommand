@@ -27,6 +27,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
+import pleocmd.pipe.PipePartDetection;
 
 /**
  * @author oliver
@@ -125,6 +126,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 		updateStatusLabel();
 		Log.detail("GUI-Frame created");
+
+		PipePartDetection.checkStaticValidity();
 	}
 
 	public void showModalGUI() {
