@@ -1,6 +1,7 @@
 package pleocmd.pipe;
 
 import java.awt.Rectangle;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -101,6 +102,8 @@ public abstract class PipePart extends StateHandling {
 	private final PipePartVisualizationConfig visualizationConfig;
 
 	private final ImmutableRectangle immutableGUIPosition;
+
+	private Boolean sanityCache;
 
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
@@ -228,6 +231,16 @@ public abstract class PipePart extends StateHandling {
 			Log.error(e, "Cannot close '%s'", getName());
 			return false;
 		}
+	}
+
+	@Override
+	protected final void configure0() throws PipeException, IOException {
+		sanityCache = null;
+		configure1();
+	}
+
+	protected void configure1() throws PipeException, IOException {
+		// do nothing by default
 	}
 
 	public abstract String getInputDescription();
@@ -567,17 +580,16 @@ public abstract class PipePart extends StateHandling {
 		}
 		visited.remove(this);
 		if (outputReached && validConns) {
-			Boolean cfgSane = cfgSaneChecked.get(this);
-			if (cfgSane == null) {
+			final Boolean cfgSane = cfgSaneChecked.get(this);
+			if (cfgSane == null && sanityCache == null) {
 				final String cfgRes = isConfigurationSane();
-				cfgSane = cfgRes == null;
-				cfgSaneChecked.put(this, cfgSane);
-				if (!cfgSane)
-					Log
-							.error("Configuration for '%s' is bad: %s", this,
-									cfgRes);
+				sanityCache = cfgRes == null;
+				cfgSaneChecked.put(this, sanityCache);
+				if (!sanityCache)
+					Log.error("Configuration for '%s' is bad: '%s'", this,
+							cfgRes);
 			}
-			if (cfgSane) sane.add(this);
+			if (cfgSane == null ? sanityCache : cfgSane) sane.add(this);
 		}
 		return outputReached;
 	}

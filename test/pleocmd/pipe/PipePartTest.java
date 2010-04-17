@@ -34,11 +34,6 @@ public final class PipePartTest extends Testcases {
 			}
 
 			@Override
-			protected void configure0() throws PipeException, IOException {
-				// just ignore
-			}
-
-			@Override
 			protected void close0() throws PipeException, IOException {
 				throw new UnsupportedOperationException();
 			}

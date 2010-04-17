@@ -13,7 +13,7 @@ import pleocmd.pipe.data.Data;
 public abstract class Input extends PipePart {
 
 	@Override
-	protected void configure0() throws InputException, IOException {
+	protected void configure1() throws InputException, IOException {
 		// do nothing by default
 	}
 

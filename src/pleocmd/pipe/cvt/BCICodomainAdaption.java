@@ -44,7 +44,7 @@ public final class BCICodomainAdaption extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
+	protected void configure1() {
 		dec = cfgSourceMin.getContent();
 		inc = cfgTargetMin.getContent();
 		fl = (double) (cfgTargetMax.getContent() - cfgTargetMin.getContent())

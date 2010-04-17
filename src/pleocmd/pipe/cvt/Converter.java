@@ -14,7 +14,7 @@ import pleocmd.pipe.data.Data;
 public abstract class Converter extends PipePart {
 
 	@Override
-	protected void configure0() throws ConverterException, IOException {
+	protected void configure1() throws ConverterException, IOException {
 		// do nothing by default
 	}
 
