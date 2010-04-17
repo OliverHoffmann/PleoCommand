@@ -9,7 +9,7 @@ import pleocmd.exc.FormatException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class StatedIntervalConverter extends Converter {
 
@@ -56,7 +56,7 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
@@ -66,8 +66,8 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		sum += 1.0 / SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		sum += 1.0 / SingleFloatData.getValue(data);
 		if (isVisualize()) plot(0, sum);
 		if (sum < 1) return emptyList();
 		sum = .0;

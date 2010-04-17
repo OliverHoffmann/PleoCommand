@@ -6,7 +6,7 @@ import pleocmd.cfg.ConfigDouble;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class ThresholdConverter extends Converter {
 
@@ -77,18 +77,18 @@ public final class ThresholdConverter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		double val = SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		double val = SingleFloatData.getValue(data);
 
 		if (val < 0) val = -val; // consider values as absolute
 
@@ -135,7 +135,7 @@ public final class ThresholdConverter extends Converter {
 			plot(2, upper);
 			plot(3, thrs);
 		}
-		return asList(SingleValueData.create(val, data));
+		return asList(SingleFloatData.create(val, data));
 	}
 
 	public static String help(final HelpKind kind) {

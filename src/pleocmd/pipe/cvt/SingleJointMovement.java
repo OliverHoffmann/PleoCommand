@@ -7,7 +7,7 @@ import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class SingleJointMovement extends Converter {
 
@@ -58,7 +58,7 @@ public final class SingleJointMovement extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public final class SingleJointMovement extends Converter {
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		final double val = SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		final double val = SingleFloatData.getValue(data);
 		if (Math.abs(currentAngle - val) < cfgMinAngleMovement.getContent())
 			return emptyList(); // ignore small movements
 		currentAngle = val;

@@ -6,7 +6,7 @@ import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class StandardDeviationConverter extends Converter {
 
@@ -56,18 +56,18 @@ public final class StandardDeviationConverter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		double val = SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		double val = SingleFloatData.getValue(data);
 		final double avg = sum / values.length;
 		if (feeded) {
 			sum -= values[valPos];
@@ -81,7 +81,7 @@ public final class StandardDeviationConverter extends Converter {
 		if (valPos == 0) feeded = true; // at least one loop now
 		val = feeded ? sum2 / values.length : 0;
 		if (isVisualize()) plot(0, val);
-		return asList(SingleValueData.create(val, data));
+		return asList(SingleFloatData.create(val, data));
 	}
 
 	public static String help(final HelpKind kind) {

@@ -6,7 +6,7 @@ import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class BCISingleChannel extends Converter {
 
@@ -36,8 +36,7 @@ public final class BCISingleChannel extends Converter {
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
 		if (ds != null) {
-			ds.setLabel(String.format("Channel %d",
-					cfgChannelNr.getContent()));
+			ds.setLabel(String.format("Channel %d", cfgChannelNr.getContent()));
 			ds.setPen(getVisualizationDialog().getDiagram().detectPen(
 					cfgChannelNr.getContent()));
 		}
@@ -45,20 +44,20 @@ public final class BCISingleChannel extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		if (SingleValueData.getUser(data) != cfgChannelNr.getContent())
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		if (SingleFloatData.getUser(data) != cfgChannelNr.getContent())
 			return emptyList();
-		if (isVisualize()) plot(0, SingleValueData.getValue(data));
+		if (isVisualize()) plot(0, SingleFloatData.getValue(data));
 		return asList(data);
 	}
 

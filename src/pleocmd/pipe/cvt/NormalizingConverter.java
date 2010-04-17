@@ -6,7 +6,7 @@ import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class NormalizingConverter extends Converter {
 
@@ -51,29 +51,34 @@ public final class NormalizingConverter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		double val = SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		double val = SingleFloatData.getValue(data);
 		if (feeded) sum -= values[valPos];
 		sum += val;
 		values[valPos] = val;
 		valPos = (valPos + 1) % values.length;
 		if (valPos == 0) feeded = true; // at least one loop now
-		if (feeded)
-			val -= sum / values.length;
-		else
-			val = 0;
+		if (!feeded) return emptyList();
+
+		double realsum = .0;
+		for (final double d : values)
+			realsum += d;
+		System.out.println(sum + " " + realsum + " " + Math.abs(sum - realsum)
+				+ " " + val);
+
+		val -= sum / values.length;
 		if (isVisualize()) plot(0, val);
-		return asList(SingleValueData.create(val, data));
+		return asList(SingleFloatData.create(val, data));
 	}
 
 	public static String help(final HelpKind kind) {

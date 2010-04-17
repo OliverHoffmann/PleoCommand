@@ -6,8 +6,8 @@ import java.util.List;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.MultiValueData;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.MultiFloatData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class BCIChannelSplitter extends Converter {
 
@@ -43,22 +43,22 @@ public final class BCIChannelSplitter extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return MultiValueData.IDENT;
+		return MultiFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!MultiValueData.isMultiValueData(data)) return null;
-		final int cnt = MultiValueData.getValueCount(data);
+		if (!MultiFloatData.isMultiFloatData(data)) return null;
+		final int cnt = MultiFloatData.getValueCount(data);
 		final List<Data> res = new ArrayList<Data>(cnt);
 		for (int i = 0; i < cnt; ++i) {
-			final double val = MultiValueData.getValue(data, i);
-			res.add(new SingleValueData(val, i + 1, data));
+			final double val = MultiFloatData.getValue(data, i);
+			res.add(new SingleFloatData(val, i + 1, data));
 			if (isVisualize() && i <= MAX_VIS) plot(i, val);
 		}
 		return res;

@@ -6,7 +6,7 @@ import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class RandomGeneratorInput extends Input {
 
@@ -73,7 +73,7 @@ public final class RandomGeneratorInput extends Input {
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
@@ -128,7 +128,7 @@ public final class RandomGeneratorInput extends Input {
 			return null;
 		}
 
-		return new SingleValueData(d + rand11() * cfgMaxNoise.getContent(),
+		return new SingleFloatData(d + rand11() * cfgMaxNoise.getContent(),
 				cfgUserData.getContent(), null);
 	}
 

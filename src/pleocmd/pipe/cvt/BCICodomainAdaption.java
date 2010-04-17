@@ -8,7 +8,7 @@ import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
-import pleocmd.pipe.data.SingleValueData;
+import pleocmd.pipe.data.SingleFloatData;
 
 public final class BCICodomainAdaption extends Converter {
 
@@ -70,18 +70,18 @@ public final class BCICodomainAdaption extends Converter {
 
 	@Override
 	public String getInputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	public String getOutputDescription() {
-		return SingleValueData.IDENT;
+		return SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
-		if (!SingleValueData.isSingleValueData(data)) return null;
-		double val = SingleValueData.getValue(data);
+		if (!SingleFloatData.isSingleFloatData(data)) return null;
+		double val = SingleFloatData.getValue(data);
 		switch (cfgOutOfRange.getEnum()) {
 		case CutOff:
 			// return empty list, so "data" is just dropped
@@ -102,7 +102,7 @@ public final class BCICodomainAdaption extends Converter {
 			break;
 		}
 		if (isVisualize()) plot(0, val);
-		return asList(SingleValueData.create(val, data));
+		return asList(SingleFloatData.create(val, data));
 	}
 
 	public static String help(final HelpKind kind) {
