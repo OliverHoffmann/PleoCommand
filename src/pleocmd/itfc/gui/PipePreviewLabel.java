@@ -22,23 +22,21 @@ public class PipePreviewLabel extends JLabel {
 
 	private Pipe lastPipe;
 
-	private BoardPainter painter;
-
 	public PipePreviewLabel() {
 		setBorder(BorderFactory.createBevelBorder(1));
 		setPreferredSize(new Dimension(300, 100));
-		update((Pipe) null, true);
+		update((Pipe) null);
 		addComponentListener(new ComponentAdapter() {
 			@Override
 			public void componentResized(final ComponentEvent e) {
-				update(getLastPipe(), false);
+				update(getLastPipe());
 			}
 		});
 	}
 
 	public final void update(final File pipeConfig) {
 		if (pipeConfig == null || !pipeConfig.canRead()) {
-			update((Pipe) null, true);
+			update((Pipe) null);
 			return;
 		}
 		final Configuration config = new Configuration();
@@ -46,30 +44,23 @@ public class PipePreviewLabel extends JLabel {
 		try {
 			config.readFromFile(pipeConfig, pipe);
 			pipe.setLastSaveFile(pipeConfig);
-			update(pipe, true);
+			update(pipe);
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		}
 	}
 
 	public final void update(final Pipe pipe) {
-		update(pipe, true);
-	}
-
-	protected final void update(final Pipe pipe, final boolean setPipe) {
 		lastPipe = pipe;
 		final int width = getWidth();
 		final int height = getHeight();
 		if (pipe == null || width == 0 || height == 0)
 			setIcon(null);
 		else {
+			final BoardPainter painter = new BoardPainter();
 			final BufferedImage img = new BufferedImage(width, height,
 					BufferedImage.TYPE_INT_RGB);
-			if (painter == null) {
-				painter = new BoardPainter();
-				painter.setPipe(pipe, img.getGraphics(), false);
-			} else if (setPipe)
-				painter.setPipe(pipe, img.getGraphics(), false);
+			painter.setPipe(pipe, img.getGraphics(), false);
 			final Dimension pref = painter.getPreferredSize();
 			painter.setScale(Math.min((double) width / (double) pref.width,
 					(double) height / (double) pref.height));
