@@ -1,6 +1,5 @@
 package pleocmd.pipe.cvt;
 
-import java.io.IOException;
 import java.util.List;
 
 import pleocmd.cfg.ConfigDataMap;
@@ -20,21 +19,6 @@ public final class TriggeredSequenceConverter extends Converter {
 				"DO"));
 		addConfig(cfgMap = new ConfigDataMap("Data-Sequences"));
 		constructed();
-	}
-
-	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void init0() throws IOException {
-		// nothing to do
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
 	}
 
 	@Override

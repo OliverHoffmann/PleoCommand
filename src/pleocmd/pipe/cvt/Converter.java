@@ -14,13 +14,19 @@ import pleocmd.pipe.data.Data;
 public abstract class Converter extends PipePart {
 
 	@Override
-	protected abstract void configure0() throws ConverterException, IOException;
+	protected void configure0() throws ConverterException, IOException {
+		// do nothing by default
+	}
 
 	@Override
-	protected abstract void init0() throws ConverterException, IOException;
+	protected void init0() throws ConverterException, IOException {
+		// do nothing by default
+	}
 
 	@Override
-	protected abstract void close0() throws ConverterException, IOException;
+	protected void close0() throws ConverterException, IOException {
+		// do nothing by default
+	}
 
 	@Override
 	public final boolean isConnectionAllowed0(final PipePart trg) {

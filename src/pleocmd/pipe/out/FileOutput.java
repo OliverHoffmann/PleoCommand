@@ -46,11 +46,6 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() throws IOException {
 		Log.detail("Opening file '%s' for output of type '%s'", cfgFile
 				.getContent(), cfgType.getEnum());

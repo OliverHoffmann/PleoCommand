@@ -25,7 +25,7 @@ public final class PleoRXTXOutput extends Output {
 		ConfigItem<String> tmp;
 		try {
 			tmp = new ConfigItem<String>("Device", "", getAllDeviceNames());
-		} catch (UnsatisfiedLinkError e) {
+		} catch (final UnsatisfiedLinkError e) {
 			Log.error(e, "Cannot find external library in '%s'", System
 					.getProperty("java.library.path"));
 			tmp = new ConfigItem<String>("Device", "", new ArrayList<String>());
@@ -46,11 +46,6 @@ public final class PleoRXTXOutput extends Output {
 		for (final CommPortIdentifier port : ports)
 			names.add(port.getName());
 		return names;
-	}
-
-	@Override
-	protected void configure0() {
-		// nothing to do
 	}
 
 	@Override

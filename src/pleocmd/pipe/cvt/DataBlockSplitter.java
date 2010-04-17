@@ -26,21 +26,6 @@ public final class DataBlockSplitter extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void init0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
 		if (ds != null) {

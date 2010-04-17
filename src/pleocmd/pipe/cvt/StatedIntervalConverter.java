@@ -28,19 +28,9 @@ public final class StatedIntervalConverter extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() {
 		sum = .0;
 		nextCommand = 2;
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
 	}
 
 	@Override

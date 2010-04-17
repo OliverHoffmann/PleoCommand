@@ -56,11 +56,6 @@ public final class FileInput extends Input {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() throws IOException {
 		Log.detail("Opening file '%s' for input", cfgFile.getContent());
 		in = new DataInputStream(new FileInputStream(cfgFile.getContent()));

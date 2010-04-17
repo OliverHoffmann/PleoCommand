@@ -45,22 +45,12 @@ public final class ThresholdConverter extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() {
 		upper = cfgTheshold.getContent() + cfgMarginalArea.getContent() / 2;
 		lower = cfgTheshold.getContent() - cfgMarginalArea.getContent() / 2;
 		lastHit = Hit.Undef;
 		value = Val.Undef;
 		lastVal = .0;
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
 	}
 
 	@Override

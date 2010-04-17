@@ -16,21 +16,6 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
-	protected void configure0() throws OutputException, IOException {
-		// nothing to do
-	}
-
-	@Override
-	protected void init0() throws OutputException, IOException {
-		// nothing to do
-	}
-
-	@Override
-	protected void close0() throws OutputException, IOException {
-		// nothing to do
-	}
-
-	@Override
 	public String getInputDescription() {
 		return "SC";
 	}

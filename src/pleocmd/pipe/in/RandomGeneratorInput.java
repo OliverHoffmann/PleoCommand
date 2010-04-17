@@ -56,19 +56,9 @@ public final class RandomGeneratorInput extends Input {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() throws IOException {
 		last = 0;
 		peakPos = PeakPos.NoPeak;
-	}
-
-	@Override
-	protected void close0() throws IOException {
-		// nothing to do
 	}
 
 	@Override

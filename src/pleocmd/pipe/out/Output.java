@@ -13,13 +13,19 @@ import pleocmd.pipe.data.Data;
 public abstract class Output extends PipePart {
 
 	@Override
-	protected abstract void configure0() throws OutputException, IOException;
+	protected void configure0() throws OutputException, IOException {
+		// do nothing by default
+	}
 
 	@Override
-	protected abstract void init0() throws OutputException, IOException;
+	protected void init0() throws OutputException, IOException {
+		// do nothing by default
+	}
 
 	@Override
-	protected abstract void close0() throws OutputException, IOException;
+	protected void close0() throws OutputException, IOException {
+		// do nothing by default
+	}
 
 	@Override
 	public final String getOutputDescription() {

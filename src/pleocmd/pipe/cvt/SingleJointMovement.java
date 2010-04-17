@@ -34,18 +34,8 @@ public final class SingleJointMovement extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() {
 		currentAngle = ANGLE_UNDEFINED;
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
 	}
 
 	@Override

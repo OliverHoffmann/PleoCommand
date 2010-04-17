@@ -44,11 +44,6 @@ public final class TcpIpInput extends Input {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() throws IOException {
 		serverSocket = new ServerSocket();
 		serverSocket.setPerformancePreferences(0, 2, 1);

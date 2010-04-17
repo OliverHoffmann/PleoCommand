@@ -114,7 +114,9 @@ public abstract class StateHandling {
 		}
 	}
 
-	protected abstract void configure0() throws PipeException, IOException;
+	protected void configure0() throws PipeException, IOException {
+		// do nothing by default
+	}
 
 	public final void init() throws PipeException {
 		ensureConfigured();
@@ -127,7 +129,9 @@ public abstract class StateHandling {
 		}
 	}
 
-	protected abstract void init0() throws PipeException, IOException;
+	protected void init0() throws PipeException, IOException {
+		// do nothing by default
+	}
 
 	public final void close() throws PipeException {
 		ensureInitialized();
@@ -140,7 +144,9 @@ public abstract class StateHandling {
 		}
 	}
 
-	protected abstract void close0() throws PipeException, IOException;
+	protected void close0() throws PipeException, IOException {
+		// do nothing by default
+	}
 
 	private void setState(final State state) throws StateException {
 		if (!checkValidChange(this.state, state))

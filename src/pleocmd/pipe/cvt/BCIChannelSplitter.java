@@ -18,21 +18,6 @@ public final class BCIChannelSplitter extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void init0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void initVisualize0() {
 		for (int i = 0; i < MAX_VIS; ++i) {
 			final DiagramDataSet ds = getVisualizeDataSet(i);

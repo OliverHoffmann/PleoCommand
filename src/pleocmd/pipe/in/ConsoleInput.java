@@ -25,21 +25,6 @@ public final class ConsoleInput extends Input {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void init0() {
-		// nothing to do
-	}
-
-	@Override
-	protected void close0() {
-		// nothing to do
-	}
-
-	@Override
 	public String getOutputDescription() {
 		return "";
 	}

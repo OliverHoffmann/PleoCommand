@@ -63,11 +63,6 @@ public final class StaticInput extends Input {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() throws IOException {
 		in = new DataInputStream(new ByteArrayInputStream(cfgInput.getContent()
 				.getBytes("ISO-8859-1")));

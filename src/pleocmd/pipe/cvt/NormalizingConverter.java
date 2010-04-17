@@ -24,11 +24,6 @@ public final class NormalizingConverter extends Converter {
 	}
 
 	@Override
-	protected void configure0() {
-		// nothing to do
-	}
-
-	@Override
 	protected void init0() {
 		sum = .0;
 		valPos = 0;
