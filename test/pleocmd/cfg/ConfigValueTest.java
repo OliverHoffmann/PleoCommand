@@ -46,6 +46,16 @@ public final class ConfigValueTest extends Testcases {
 		}
 
 		@Override
+		protected String convertKey(final String key) {
+			return key;
+		}
+
+		@Override
+		protected String convertValue(final String value) {
+			return value;
+		}
+
+		@Override
 		public boolean insertGUIComponents(final Layouter lay) {
 			// nothing to do, we have no GUI here
 			return true;

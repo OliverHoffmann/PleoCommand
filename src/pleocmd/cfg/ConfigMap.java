@@ -49,15 +49,15 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	public final void setContent(final K key, final List<V> list)
 			throws ConfigurationException {
-		checkValidString(key.toString(), false);
+		checkValidString(convertKey(key), false);
 		for (final V v : list)
-			checkValidString(v.toString(), false);
+			checkValidString(convertValue(v), false);
 		content.put(key, list);
 	}
 
 	public final void renameContent(final K key, final K newKey)
 			throws ConfigurationException {
-		checkValidString(newKey.toString(), false);
+		checkValidString(convertKey(newKey), false);
 		final List<V> list = content.remove(key);
 		if (list == null)
 			throw new IllegalArgumentException(String.format(
@@ -69,17 +69,17 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 			throws ConfigurationException {
 		List<V> list = content.get(key);
 		if (list == null) {
-			checkValidString(key.toString(), false);
+			checkValidString(convertKey(key), false);
 			list = new ArrayList<V>();
 			content.put(key, list);
 		}
-		checkValidString(value.toString(), false);
+		checkValidString(convertValue(value), false);
 		list.add(value);
 	}
 
 	public final void createContent(final K key) throws ConfigurationException {
 		if (!content.containsKey(key)) {
-			checkValidString(key.toString(), false);
+			checkValidString(convertKey(key), false);
 			content.put(key, new ArrayList<V>());
 		}
 	}
@@ -115,7 +115,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	public final String asString() {
 		final StringBuilder sb = new StringBuilder("[");
 		for (final Entry<K, List<V>> entry : content.entrySet()) {
-			sb.append(entry.getKey());
+			sb.append(convertKey(entry.getKey()));
 			sb.append(": ");
 			sb.append(entry.getValue().size());
 			sb.append("x, ");
@@ -137,9 +137,9 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	final List<String> asStrings() {
 		final List<String> res = new ArrayList<String>();
 		for (final Entry<K, List<V>> entry : content.entrySet()) {
-			res.add(entry.getKey() + " =>");
+			res.add(convertKey(entry.getKey()) + " =>");
 			for (final V s : entry.getValue())
-				res.add("\t" + s);
+				res.add("\t" + convertValue(s));
 		}
 		return res;
 	}
@@ -168,6 +168,10 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	protected abstract V createValue(String valueAsString)
 			throws ConfigurationException;
+
+	protected abstract String convertKey(K key);
+
+	protected abstract String convertValue(V value);
 
 	@Override
 	final String getIdentifier() {

@@ -37,6 +37,16 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 	}
 
 	@Override
+	protected String convertKey(final String key) {
+		return key;
+	}
+
+	@Override
+	protected String convertValue(final Data value) {
+		return value.asString();
+	}
+
+	@Override
 	public boolean insertGUIComponents(final Layouter lay) {
 		dataEditor = new DataSequenceTriggerPanel(this);
 		lay.addWholeLine(dataEditor, true);
