@@ -46,7 +46,6 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 	@Override
 	public void setFromGUIComponents() {
 		dataEditor.saveChanges();
-		dataEditor = null;
 	}
 
 	/**
