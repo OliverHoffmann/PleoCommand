@@ -103,16 +103,30 @@ public final class PipeVisualizationDialog extends JDialog implements
 			Log.detail("Ignoring plotting of invalid DataSet %d", index);
 			return;
 		}
-		dataSets.get(index).addPoint(new Point2D.Double(x, y));
 		final long elapsed = part.getPipe().getFeedback().getElapsed();
+		final double rx = Double.isNaN(x) ? elapsed : x;
+		dataSets.get(index).addPoint(new Point2D.Double(rx, y));
 		diagram.getXAxis().setMin(Math.max(0, elapsed - TIME_SPAN) / 1000.0);
 		diagram.getXAxis().setMax(Math.max(TIME_SPAN, elapsed) / 1000.0);
 	}
 
-	public void reset() {
+	public void reset(final int dataSetCount) {
+		if (dataSetCount < 0 || dataSetCount > 128)
+			throw new IllegalArgumentException("dataSetCount is "
+					+ dataSetCount);
+		// remove all old data
 		for (final DiagramDataSet ds : dataSets)
 			ds.setPoints(new ArrayList<Point2D.Double>());
-		repaint();
+
+		// make sure that the number of DataSets is correct
+		while (dataSetCount > dataSets.size()) {
+			final DiagramDataSet ds = new DiagramDataSet(diagram, String
+					.format("#%d", dataSets.size() + 1));
+			ds.setValuePerUnitX(1000);
+			dataSets.add(ds);
+		}
+		while (dataSetCount < dataSets.size())
+			dataSets.remove(dataSets.size() - 1);
 	}
 
 }

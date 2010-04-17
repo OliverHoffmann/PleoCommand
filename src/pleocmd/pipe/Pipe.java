@@ -348,15 +348,17 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	/**
 	 * @return all {@link PipePart}s which are sane according to
-	 *         {@link PipePart#topDownCheck(Set, Set, Set)}
+	 *         {@link PipePart#topDownCheck(Set, Set, Set, Map)}
 	 */
 	public Set<PipePart> getSanePipeParts() {
 		final Set<PipePart> sane = new HashSet<PipePart>();
 		final Set<PipePart> visited = new HashSet<PipePart>();
 		final Set<PipePart> deadLocked = new HashSet<PipePart>();
+		final Map<PipePart, Boolean> cfgSaneChecked = new HashMap<PipePart, Boolean>();
 		final List<PipePart> copy = new ArrayList<PipePart>(inputList);
+		Log.detail("Starting top-down check for sanity");
 		for (final PipePart pp : copy)
-			pp.topDownCheck(sane, visited, deadLocked);
+			pp.topDownCheck(sane, visited, deadLocked, cfgSaneChecked);
 		sane.removeAll(deadLocked);
 		return sane;
 	}

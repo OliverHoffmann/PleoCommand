@@ -24,6 +24,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
+import pleocmd.itfc.gui.dgr.Diagram;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.itfc.gui.icons.IconLoader;
@@ -41,6 +42,8 @@ import pleocmd.pipe.out.Output;
 public abstract class PipePart extends StateHandling {
 
 	private static final Random RAND = new Random();
+
+	private static final int BUILTIN_VIS = 0;
 
 	public enum HelpKind {
 		/**
@@ -233,7 +236,19 @@ public abstract class PipePart extends StateHandling {
 
 	@Override
 	public String toString() { // CS_IGNORE_PREV keep overridable
-		return group.toString();
+		final StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		if (!guiConfigs.isEmpty()) {
+			sb.append(" [");
+			boolean first = true;
+			for (final ConfigValue cv : guiConfigs) {
+				if (!first) sb.append(", ");
+				first = false;
+				sb.append(cv.toString());
+			}
+			sb.append("]");
+		}
+		return sb.toString();
 	}
 
 	/**
@@ -270,6 +285,7 @@ public abstract class PipePart extends StateHandling {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
 				.equals(Pipe.class.getName()) : s1;
+		closeVisualization();
 
 		if (curPipe == null) throw new NullPointerException("curPipe");
 		if (pipe == null)
@@ -407,9 +423,6 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	public final void setVisualize(final boolean visualize) {
-		if (visualize && !supportsVisualization())
-			throw new IllegalStateException(
-					"This PipePart doesn't support visualization");
 		cfgVisualize.setContent(visualize);
 		if (getState() == State.Initialized) if (visualize)
 			createVisualization();
@@ -419,13 +432,14 @@ public abstract class PipePart extends StateHandling {
 	}
 
 	private void createVisualization() {
+		final int visDataCount = getVisualizeDataSetCount() + BUILTIN_VIS;
+
 		if (visualizationDialog != null) {
-			visualizationDialog.reset();
+			visualizationDialog.reset(visDataCount);
 			initVisualize0();
 			return;
 		}
-		visualizationDialog = new PipeVisualizationDialog(this,
-				getVisualizeDataSetCount());
+		visualizationDialog = new PipeVisualizationDialog(this, visDataCount);
 		visualizationConfig.assignConfig();
 		initVisualize0();
 		visualizationDialog.setVisible(true);
@@ -446,10 +460,14 @@ public abstract class PipePart extends StateHandling {
 		visualizationDialog = null;
 	}
 
-	public final boolean supportsVisualization() {
-		return getVisualizeDataSetCount() > 0;
-	}
-
+	/**
+	 * Invoked directly after {@link #init0()} and if the user enables
+	 * visualization while the {@link Pipe} is already running.<br>
+	 * Must return a constant value while being initialized.
+	 * 
+	 * @return the number of {@link DiagramDataSet}s which will be plotted via
+	 *         {@link #plot(int, double)}.
+	 */
 	protected abstract int getVisualizeDataSetCount();
 
 	public final PipeVisualizationDialog getVisualizationDialog() {
@@ -458,16 +476,57 @@ public abstract class PipePart extends StateHandling {
 
 	protected final DiagramDataSet getVisualizeDataSet(final int index) {
 		return visualizationDialog == null ? null : visualizationDialog
-				.getDataSet(index);
+				.getDataSet(index + BUILTIN_VIS);
 	}
 
-	protected final void plot(final int index, final double x, final double y) {
+	/**
+	 * Don't use this from any other than {@link Input}, {@link Output} and
+	 * {@link Converter}.
+	 * 
+	 * @param index
+	 *            real index of {@link DiagramDataSet}
+	 * @param x
+	 *            value for x-axis
+	 * @param y
+	 *            value for y-axis
+	 */
+	protected final void plot0(final int index, final double x, final double y) {
+		String s1;
+		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
+				.equals(Pipe.class.getName())
+				|| s1.equals(Input.class.getName())
+				|| s1.equals(Converter.class.getName())
+				|| s1.equals(Output.class.getName()) : s1;
 		if (visualizationDialog != null) visualizationDialog.plot(index, x, y);
 	}
 
+	/**
+	 * Plots a value to the visualization {@link Diagram}.<br>
+	 * Because this x-axis always represents the currently elapsed time,
+	 * {@link #plot(int, double)} may be more appropriate in most cases.
+	 * 
+	 * @param index
+	 *            index of {@link DiagramDataSet}
+	 * @param x
+	 *            value for x-axis
+	 * @param y
+	 *            value for y-axis
+	 */
+	protected final void plot(final int index, final double x, final double y) {
+		plot0(index + BUILTIN_VIS, x, y);
+	}
+
+	/**
+	 * Plots a value to the visualization {@link Diagram} with the currently
+	 * elapsed time of the {@link Pipe} as value for x-axis.
+	 * 
+	 * @param index
+	 *            index of {@link DiagramDataSet}
+	 * @param y
+	 *            value for y-axis
+	 */
 	protected final void plot(final int index, final double y) {
-		if (visualizationDialog != null)
-			visualizationDialog.plot(index, pipe.getFeedback().getElapsed(), y);
+		plot0(index + BUILTIN_VIS, Double.NaN, y);
 	}
 
 	/**
@@ -483,11 +542,15 @@ public abstract class PipePart extends StateHandling {
 	 *            recursion (handled like a kind of stack) to detect dead-locks
 	 * @param deadLocked
 	 *            a set of already detected dead-locks
+	 * @param cfgSaneChecked
+	 *            a set of all PipeParts which have already been checked for a
+	 *            correct configuration and whether the check was successful
 	 * @return true if an {@link Output} can be reached from the
 	 *         {@link PipePart}.
 	 */
 	final boolean topDownCheck(final Set<PipePart> sane,
-			final Set<PipePart> visited, final Set<PipePart> deadLocked) {
+			final Set<PipePart> visited, final Set<PipePart> deadLocked,
+			final Map<PipePart, Boolean> cfgSaneChecked) {
 		if (visited.contains(this)) {
 			deadLocked.add(this);
 			return false;
@@ -498,16 +561,23 @@ public abstract class PipePart extends StateHandling {
 		final List<PipePart> copy = new ArrayList<PipePart>(
 				getConnectedPipeParts());
 		for (final PipePart ppSub : copy) {
-			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
+			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked,
+					cfgSaneChecked);
 			validConns &= isConnectionAllowed(ppSub);
 		}
 		visited.remove(this);
 		if (outputReached && validConns) {
-			final String cfgRes = isConfigurationSane();
-			if (cfgRes == null)
-				sane.add(this);
-			else
-				Log.error("Configuration for '%s' is bad: %s", this, cfgRes);
+			Boolean cfgSane = cfgSaneChecked.get(this);
+			if (cfgSane == null) {
+				final String cfgRes = isConfigurationSane();
+				cfgSane = cfgRes == null;
+				cfgSaneChecked.put(this, cfgSane);
+				if (!cfgSane)
+					Log
+							.error("Configuration for '%s' is bad: %s", this,
+									cfgRes);
+			}
+			if (cfgSane) sane.add(this);
 		}
 		return outputReached;
 	}
