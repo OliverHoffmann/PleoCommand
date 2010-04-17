@@ -92,11 +92,11 @@ public final class StatedIntervalConverter extends Converter {
 		try {
 			return new Data(Data.createFromAscii(cfg.getContent()), parent);
 		} catch (final IOException e) {
-			throw new ConverterException(this, true, "Invalid "
-					+ cfg.getLabel(), e);
+			throw new ConverterException(this, true, e, "Invalid %s", cfg
+					.getLabel());
 		} catch (final FormatException e) {
-			throw new ConverterException(this, true, "Invalid "
-					+ cfg.getLabel(), e);
+			throw new ConverterException(this, true, e, "Invalid %s", cfg
+					.getLabel());
 		}
 	}
 
@@ -120,7 +120,8 @@ public final class StatedIntervalConverter extends Converter {
 
 	@Override
 	public String isConfigurationSane() {
-		return null;
+		return cfgCommand1.getContent().isEmpty() ? "No command 1 specified"
+				: null;
 	}
 
 	@Override
