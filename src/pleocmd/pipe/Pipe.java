@@ -806,11 +806,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		Log.detail("Converting data block to list of data blocks");
 		List<Data> res = null;
 		final List<Data> sum = new ArrayList<Data>();
+		boolean found = false;
 		for (final PipePart pp : data.getOrigin().getConnectedPipeParts())
 			if (pp instanceof Converter && !ignoredConverter.contains(pp)
-					&& (res = convertOneData(data, (Converter) pp)) != null)
+					&& (res = convertOneData(data, (Converter) pp)) != null) {
+				found = true;
 				sum.addAll(res);
-		if (!sum.isEmpty()) return sum;
+			}
+		if (found) return sum;
 
 		// no fitting (and not ignored and working) converter found
 		Log.detail("No Converter found, returning data as is: '%s'", data);
