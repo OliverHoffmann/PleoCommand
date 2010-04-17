@@ -181,7 +181,7 @@ public final class Log {
 		case Info:
 			return Color.BLUE;
 		case Warn:
-			return Color.ORANGE;
+			return new Color(160, 100, 0); // dark orange
 		case Error:
 			return Color.RED;
 		case Console:
