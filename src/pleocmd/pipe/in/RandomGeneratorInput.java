@@ -86,16 +86,20 @@ public final class RandomGeneratorInput extends Input {
 			return null;
 		}
 		last = System.currentTimeMillis();
-		double d = .0;
+		final double d;
 		switch (peakPos) {
 		case NoPeak:
+			d = .0;
 			if (Math.random() < cfgPeakPropbability.getContent()) {
 				peakPos = PeakPos.Grad0;
 				amp = rand11() * cfgMaxAmplitude.getContent();
-				final double spms = cfgSamplerate.getContent() / 1000.0;
-				peakLen = rand0N(cfgMaxPeakLength.getContent() * spms);
-				grad0Len = rand0N(cfgMaxGrad0Length.getContent() * spms);
-				grad1Len = rand0N(cfgMaxGrad1Length.getContent() * spms);
+				final double samplesPerMS = cfgSamplerate.getContent() / 1000.0;
+				peakLen = Math.max(1, rand0N(cfgMaxPeakLength.getContent()
+						* samplesPerMS));
+				grad0Len = Math.max(1, rand0N(cfgMaxGrad0Length.getContent()
+						* samplesPerMS));
+				grad1Len = Math.max(1, rand0N(cfgMaxGrad1Length.getContent()
+						* samplesPerMS));
 				grad0Inc = amp / grad0Len;
 				grad1Inc = amp / grad1Len;
 				value = 0;
@@ -120,7 +124,10 @@ public final class RandomGeneratorInput extends Input {
 			d = value -= grad1Inc;
 			if (++step >= grad1Len) peakPos = PeakPos.NoPeak;
 			break;
+		default:
+			return null;
 		}
+
 		return new SingleValueData(d + rand11() * cfgMaxNoise.getContent(),
 				cfgUserData.getContent(), null);
 	}
