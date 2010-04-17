@@ -55,6 +55,11 @@ public final class NormalizingConverter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("...%d...", cfgTimeFrameLength.getContent());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		double val = SingleFloatData.getValue(data);

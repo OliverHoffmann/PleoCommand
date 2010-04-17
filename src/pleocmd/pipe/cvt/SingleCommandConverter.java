@@ -30,6 +30,11 @@ public class SingleCommandConverter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return cfgCommand.getContent();
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleBoolData.isSingleBoolData(data)) return null;
 		if (!SingleBoolData.getValue(data)) return emptyList();

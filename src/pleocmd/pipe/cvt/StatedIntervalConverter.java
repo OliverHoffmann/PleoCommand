@@ -55,6 +55,13 @@ public final class StatedIntervalConverter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return cfgCommand2.getContent().isEmpty() ? cfgCommand1.getContent()
+				: String.format("%s <-> %s", cfgCommand1.getContent(),
+						cfgCommand2.getContent());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		sum += 1.0 / SingleFloatData.getValue(data);

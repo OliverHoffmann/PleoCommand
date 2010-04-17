@@ -37,6 +37,11 @@ public final class ConsoleOutput extends Output {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return cfgType.getContent();
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		Data root;

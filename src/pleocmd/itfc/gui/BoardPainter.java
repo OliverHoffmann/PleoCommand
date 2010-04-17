@@ -232,6 +232,12 @@ public final class BoardPainter {
 	 */
 	private static final int INNER_HEIGHT = 6;
 
+	/**
+	 * If true, a short summarize of the configuration is drawn instead of the
+	 * PipePart's name.
+	 */
+	private static final boolean DRAW_SHORTCONFIG = true;
+
 	// Drawing of connections
 
 	/**
@@ -511,7 +517,8 @@ public final class BoardPainter {
 		g2.setColor(outerClr);
 		rect.draw(g2);
 
-		final String s = part.getName();
+		final String s = DRAW_SHORTCONFIG ? part.getShortConfigDescr() : part
+				.getName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
 		if (hover) {

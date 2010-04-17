@@ -30,6 +30,11 @@ public final class ConsoleInput extends Input {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return cfgType.getContent();
+	}
+
+	@Override
 	protected Data readData0() throws InputException, IOException {
 		if (StandardInput.the().available() <= 0) return null;
 		switch (cfgType.getEnum()) {

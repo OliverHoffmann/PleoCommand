@@ -37,6 +37,11 @@ public final class BCIChannelSplitter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return getName();
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!MultiFloatData.isMultiFloatData(data)) return null;
 		final int cnt = MultiFloatData.getValueCount(data);

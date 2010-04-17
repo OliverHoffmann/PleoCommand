@@ -71,6 +71,11 @@ public final class PleoRXTXOutput extends Output {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return cfgDevice.getContent();
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		if (!CommandData.isCommandData(data, "PMC")) return false;

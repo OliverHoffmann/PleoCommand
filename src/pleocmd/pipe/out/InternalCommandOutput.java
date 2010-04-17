@@ -21,6 +21,11 @@ public final class InternalCommandOutput extends Output {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return getName();
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		if (!CommandData.isCommandData(data, "SC")) return false;

@@ -76,6 +76,15 @@ public final class ThresholdConverter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("|>%s±%s| => %s : %s", cfgTheshold.asString(),
+				String.valueOf(cfgMarginalArea.getContent() / 2), cfgValueBelow
+						.asString(),
+				cfgValueAbove.getContent() > 0 ? cfgValueAbove.asString()
+						: "<cur>");
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		double val = SingleFloatData.getValue(data);

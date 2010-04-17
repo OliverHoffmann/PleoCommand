@@ -57,6 +57,12 @@ public final class SingleJointMovement extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("joint %d if >%d°", cfgJointNumber.getContent(),
+				cfgMinAngleMovement.getContent());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		final double val = SingleFloatData.getValue(data);

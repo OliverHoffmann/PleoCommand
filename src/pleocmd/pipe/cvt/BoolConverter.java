@@ -46,9 +46,7 @@ public class BoolConverter extends Converter {
 	@Override
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
-		if (ds != null)
-			ds.setLabel(String.format("%s %f?", cfgComparator.getContent(),
-					cfgConstant.getContent()));
+		if (ds != null) ds.setLabel(getShortConfigDescr0());
 	}
 
 	@Override
@@ -59,6 +57,12 @@ public class BoolConverter extends Converter {
 	@Override
 	public String getOutputDescription() {
 		return SingleBoolData.IDENT;
+	}
+
+	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("%s %s?", cfgComparator.asString(), cfgConstant
+				.asString());
 	}
 
 	@Override

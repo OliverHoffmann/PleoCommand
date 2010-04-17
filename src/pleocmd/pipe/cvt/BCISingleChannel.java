@@ -38,6 +38,11 @@ public final class BCISingleChannel extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("only #%d", cfgChannelNr.getContent());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		if (SingleFloatData.getUser(data) != cfgChannelNr.getContent())

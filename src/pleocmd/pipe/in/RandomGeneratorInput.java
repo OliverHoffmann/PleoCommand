@@ -67,6 +67,12 @@ public final class RandomGeneratorInput extends Input {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("%s@p=%s ~%s", cfgMaxAmplitude.asString(),
+				cfgPeakPropbability.asString(), cfgMaxNoise.asString());
+	}
+
+	@Override
 	protected Data readData0() throws InputException, IOException {
 		try {
 			final long next = last + 1000 / cfgSamplerate.getContent();

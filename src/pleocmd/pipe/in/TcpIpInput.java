@@ -76,6 +76,12 @@ public final class TcpIpInput extends Input {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("%d [%ds, %ds]", cfgPort.getContent(),
+				cfgTimeoutConn.getContent(), cfgTimeoutRead.getContent());
+	}
+
+	@Override
 	protected Data readData0() throws IOException {
 		if (!socket.isConnected() || socket.isInputShutdown()) return null;
 		return new MultiFloatData(Data.createFromBinary(in));

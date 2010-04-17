@@ -80,6 +80,12 @@ public final class StaticInput extends Input {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		final int count = cfgInput.getContentList().size();
+		return String.format("%d Data block%s", count, count == 1 ? "" : "s");
+	}
+
+	@Override
 	protected Data readData0() throws InputException, IOException {
 		if (in.available() <= 0) return null;
 		try {

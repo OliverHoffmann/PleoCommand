@@ -105,6 +105,8 @@ public abstract class PipePart extends StateHandling {
 
 	private Boolean sanityCache;
 
+	private String shortConfigDescr;
+
 	public PipePart() {
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
@@ -236,6 +238,7 @@ public abstract class PipePart extends StateHandling {
 	@Override
 	protected final void configure0() throws PipeException, IOException {
 		sanityCache = null;
+		shortConfigDescr = null;
 		configure1();
 	}
 
@@ -599,15 +602,23 @@ public abstract class PipePart extends StateHandling {
 		return false;
 	}
 
-	protected final List<Data> asList(final Data data) {
+	protected static List<Data> asList(final Data data) {
 		final List<Data> res = new ArrayList<Data>(1);
 		res.add(data);
 		return res;
 	}
 
-	protected final List<Data> emptyList() {
+	protected static List<Data> emptyList() {
 		return new ArrayList<Data>(0);
 	}
+
+	public final String getShortConfigDescr() {
+		if (shortConfigDescr == null)
+			shortConfigDescr = getShortConfigDescr0();
+		return shortConfigDescr;
+	}
+
+	protected abstract String getShortConfigDescr0();
 
 	public final String getName() {
 		return getName(getClass());

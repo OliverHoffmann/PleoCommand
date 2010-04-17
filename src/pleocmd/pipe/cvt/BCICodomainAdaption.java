@@ -69,6 +69,13 @@ public final class BCICodomainAdaption extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("[%s-%s]=>[%s-%s]", cfgSourceMin.asString(),
+				cfgSourceMax.asString(), cfgTargetMin.asString(), cfgTargetMax
+						.asString());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		double val = SingleFloatData.getValue(data);

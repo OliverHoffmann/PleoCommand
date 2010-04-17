@@ -46,6 +46,14 @@ public final class DataBlockSplitter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		final String res = String
+				.format("split #%d", cfgChannelNr.getContent());
+		final long time = cfgDelay.getContent();
+		return time == 0 ? res : String.format("%s %dms", res, time);
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!MultiFloatData.isMultiFloatData(data)) return null;
 		final int cnt = MultiFloatData.getValueCount(data);

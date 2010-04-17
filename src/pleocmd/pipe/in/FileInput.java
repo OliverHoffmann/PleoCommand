@@ -74,6 +74,11 @@ public final class FileInput extends Input {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("\"%s\"", cfgFile.getContent().getName());
+	}
+
+	@Override
 	protected Data readData0() throws InputException, IOException {
 		if (in.available() <= 0) return null;
 		switch (cfgType.getEnum()) {

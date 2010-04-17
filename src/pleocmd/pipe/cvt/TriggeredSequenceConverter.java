@@ -32,6 +32,12 @@ public final class TriggeredSequenceConverter extends Converter {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("%s: %dx", cfgTriggerPrefix.getContent(), cfgMap
+				.getAllKeys().size());
+	}
+
+	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!CommandData.isCommandData(data, cfgTriggerPrefix.getContent()))
 			return null;

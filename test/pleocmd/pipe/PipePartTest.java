@@ -49,6 +49,11 @@ public final class PipePartTest extends Testcases {
 			}
 
 			@Override
+			protected String getShortConfigDescr0() {
+				return "";
+			}
+
+			@Override
 			protected boolean isConnectionAllowed0(final PipePart trg) {
 				return false;
 			}

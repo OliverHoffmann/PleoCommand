@@ -66,6 +66,11 @@ public final class FileOutput extends Output {
 	}
 
 	@Override
+	protected String getShortConfigDescr0() {
+		return String.format("\"%s\"", cfgFile.getContent().getName());
+	}
+
+	@Override
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		Data root;
