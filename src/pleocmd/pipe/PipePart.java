@@ -589,7 +589,7 @@ public abstract class PipePart extends StateHandling {
 				sanityCache = cfgRes == null;
 				cfgSaneChecked.put(this, sanityCache);
 				if (!sanityCache)
-					Log.error("Configuration for '%s' is bad: '%s'", this,
+					Log.warn("Configuration for '%s' is bad: '%s'", this,
 							cfgRes);
 			}
 			if (cfgSane == null ? sanityCache : cfgSane) sane.add(this);
