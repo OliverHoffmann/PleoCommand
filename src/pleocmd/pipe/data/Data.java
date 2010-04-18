@@ -34,8 +34,6 @@ import pleocmd.pipe.val.Value;
  */
 public class Data extends AbstractList<Value> {
 
-	protected static final long CTOR_DIRECT = 8297464393242L;
-
 	/**
 	 * The priority which will be used if no special one is specified.
 	 */
@@ -61,6 +59,8 @@ public class Data extends AbstractList<Value> {
 	 * the top position in the {@link DataQueue}.
 	 */
 	public static final long TIME_NOTIME = -1;
+
+	protected static final long CTOR_DIRECT = 8297464393242L;
 
 	private final List<Value> values;
 

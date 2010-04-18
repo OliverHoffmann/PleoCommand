@@ -329,7 +329,7 @@ public final class DiagramDataSet {
 		setPen(new Pen(color, stroke));
 	}
 
-	public void changePen(final float dash[]) {
+	public void changePen(final float[] dash) {
 		final Color color = pen == null ? diagram.detectPen(
 				diagram.getDataSets().indexOf(this)).getColor() : pen
 				.getColor();

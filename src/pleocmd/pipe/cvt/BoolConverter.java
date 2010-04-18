@@ -10,7 +10,7 @@ import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleBoolData;
 import pleocmd.pipe.data.SingleFloatData;
 
-public class BoolConverter extends Converter {
+public final class BoolConverter extends Converter {
 
 	public enum Comparator {
 		Equals {
