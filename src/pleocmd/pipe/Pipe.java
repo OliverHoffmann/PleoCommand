@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
@@ -348,38 +349,43 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	/**
 	 * @return all {@link PipePart}s which are sane according to
-	 *         {@link PipePart#topDownCheck(Set, Set, Set, Map)}
+	 *         {@link PipePart#topDownCheck(Map, Set, Set)}
 	 */
-	public Set<PipePart> getSanePipeParts() {
-		final Set<PipePart> sane = new HashSet<PipePart>();
+	public Map<PipePart, String> getSanePipeParts() {
+		final Map<PipePart, String> sane = new HashMap<PipePart, String>();
 		final Set<PipePart> visited = new HashSet<PipePart>();
 		final Set<PipePart> deadLocked = new HashSet<PipePart>();
-		final Map<PipePart, Boolean> cfgSaneChecked = new HashMap<PipePart, Boolean>();
 		final List<PipePart> copy = new ArrayList<PipePart>(inputList);
 		Log.detail("Starting top-down check for sanity");
 		for (final PipePart pp : copy)
-			pp.topDownCheck(sane, visited, deadLocked, cfgSaneChecked);
-		sane.removeAll(deadLocked);
+			pp.topDownCheck(sane, visited, deadLocked);
+		for (final PipePart pp : deadLocked) {
+			final String sc = sane.get(pp);
+			sane.put(pp, sc == null ? "Deadlocked" : sc + "\nDeadlocked");
+		}
+		for (final PipePart pp : converterList)
+			if (!sane.containsKey(pp))
+				sane.put(pp, "Cannot be reached by any Input");
+		for (final PipePart pp : outputList)
+			if (!sane.containsKey(pp))
+				sane.put(pp, "Cannot be reached by any Input or Converter");
 		return sane;
 	}
 
 	private void checkSanity() throws PipeException {
-		final Set<PipePart> sane = getSanePipeParts();
-		final Set<PipePart> bad = new HashSet<PipePart>();
-		for (final PipePart pp : getInputList())
-			if (!sane.contains(pp)) bad.add(pp);
-		for (final PipePart pp : getConverterList())
-			if (!sane.contains(pp)) bad.add(pp);
-		for (final PipePart pp : getOutputList())
-			if (!sane.contains(pp)) bad.add(pp);
-		if (bad.isEmpty()) return;
+		final Map<PipePart, String> sane = getSanePipeParts();
 		final StringBuilder sb = new StringBuilder("The following PipeParts "
 				+ "are not correctly configured or connected:");
-		for (final PipePart pp : bad) {
-			sb.append("\n");
-			sb.append(pp);
-		}
-		throw new PipeException(this, true, sb.toString());
+		boolean found = false;
+		for (final Entry<PipePart, String> e : sane.entrySet())
+			if (e.getValue() != null) {
+				found = true;
+				sb.append("\n");
+				sb.append(e.getKey());
+				sb.append(": ");
+				sb.append(e.getValue());
+			}
+		if (found) throw new PipeException(this, true, sb.toString());
 	}
 
 	@Override

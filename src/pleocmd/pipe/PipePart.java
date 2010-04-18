@@ -103,7 +103,7 @@ public abstract class PipePart extends StateHandling {
 
 	private final ImmutableRectangle immutableGUIPosition;
 
-	private Boolean sanityCache;
+	private String sanityCache;
 
 	private String shortConfigDescr;
 
@@ -552,21 +552,19 @@ public abstract class PipePart extends StateHandling {
 	 * configured.
 	 * 
 	 * @param sane
-	 *            {@link PipePart} is added to this set if it's sane
+	 *            {@link PipePart} is added to this map. The value assigned to
+	 *            it will be <b>null</b> if it is sane or some {@link String}
+	 *            otherwise.
 	 * @param visited
 	 *            a set of already visited {@link PipePart}s during the current
 	 *            recursion (handled like a kind of stack) to detect dead-locks
 	 * @param deadLocked
 	 *            a set of already detected dead-locks
-	 * @param cfgSaneChecked
-	 *            a set of all PipeParts which have already been checked for a
-	 *            correct configuration and whether the check was successful
 	 * @return true if an {@link Output} can be reached from the
 	 *         {@link PipePart}.
 	 */
-	final boolean topDownCheck(final Set<PipePart> sane,
-			final Set<PipePart> visited, final Set<PipePart> deadLocked,
-			final Map<PipePart, Boolean> cfgSaneChecked) {
+	final boolean topDownCheck(final Map<PipePart, String> sane,
+			final Set<PipePart> visited, final Set<PipePart> deadLocked) {
 		if (visited.contains(this)) {
 			deadLocked.add(this);
 			return false;
@@ -577,22 +575,25 @@ public abstract class PipePart extends StateHandling {
 		final List<PipePart> copy = new ArrayList<PipePart>(
 				getConnectedPipeParts());
 		for (final PipePart ppSub : copy) {
-			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked,
-					cfgSaneChecked);
+			outputReached |= ppSub.topDownCheck(sane, visited, deadLocked);
 			validConns &= isConnectionAllowed(ppSub);
 		}
 		visited.remove(this);
-		if (outputReached && validConns) {
-			final Boolean cfgSane = cfgSaneChecked.get(this);
-			if (cfgSane == null && sanityCache == null) {
-				final String cfgRes = isConfigurationSane();
-				sanityCache = cfgRes == null;
-				cfgSaneChecked.put(this, sanityCache);
-				if (!sanityCache)
-					Log.warn("Configuration for '%s' is bad: '%s'", this,
-							cfgRes);
-			}
-			if (cfgSane == null ? sanityCache : cfgSane) sane.add(this);
+		final StringBuilder sbError = new StringBuilder();
+		if (!outputReached)
+			sbError.append("An Output-PipePart cannot be reached\n");
+		if (!validConns)
+			sbError.append("One or more invalid connections attached\n");
+		if (sanityCache == null) {
+			sanityCache = isConfigurationSane();
+			if (sanityCache == null) sanityCache = "";
+		}
+		if (!sanityCache.isEmpty()) sbError.append(sanityCache + "\n");
+		if (sbError.length() == 0)
+			sane.put(this, null);
+		else {
+			sbError.delete(sbError.length() - 1, sbError.length());
+			sane.put(this, sbError.toString());
 		}
 		return outputReached;
 	}

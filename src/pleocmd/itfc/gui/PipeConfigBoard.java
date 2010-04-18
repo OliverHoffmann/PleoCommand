@@ -1015,7 +1015,14 @@ public final class PipeConfigBoard extends JPanel {
 			sb.append(safeHTMLString(v.asString()));
 			sb.append("</td></tr>");
 		}
-		sb.append("</table></html>");
+		sb.append("</table>");
+		final String sc = painter.getSaneConfigCache().get(underCursor);
+		if (sc != null) {
+			sb.append("<p color=red><b>Bad configuration:</b><br>");
+			sb.append(safeHTMLString(sc));
+			sb.append("</p>");
+		}
+		sb.append("</html>");
 		return sb.toString();
 	}
 

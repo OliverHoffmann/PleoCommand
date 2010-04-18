@@ -15,8 +15,10 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.Icon;
@@ -286,7 +288,7 @@ public final class BoardPainter {
 
 	private final Set<PipePart> set;
 
-	private final Set<PipePart> saneConfigCache;
+	private final Map<PipePart, String> saneConfigCache;
 
 	private final Dimension bounds = new Dimension();
 
@@ -302,7 +304,7 @@ public final class BoardPainter {
 
 	public BoardPainter() {
 		set = new HashSet<PipePart>();
-		saneConfigCache = new HashSet<PipePart>();
+		saneConfigCache = new HashMap<PipePart, String>();
 	}
 
 	public void paint(final Graphics g, final PipePart currentPart,
@@ -475,7 +477,7 @@ public final class BoardPainter {
 			for (final PipePart trg : src.getConnectedPipeParts()) {
 				final boolean sel = currentPart == src
 						&& currentConnectionsTarget == trg;
-				if (saneConfigCache.contains(src))
+				if (saneConfigCache.get(src) == null)
 					g2.setColor(sel ? CONNECTION_SEL_OK : CONNECTION_OK);
 				else
 					g2.setColor(sel ? CONNECTION_SEL_BAD : CONNECTION_BAD);
@@ -498,7 +500,7 @@ public final class BoardPainter {
 		if (!rect.intersects(clip)) return 0;
 
 		final Color outerClr;
-		if (saneConfigCache.contains(part))
+		if (saneConfigCache.get(part) == null)
 			outerClr = part == currentPart ? OUTER_SEL_OK : OUTER_OK;
 		else
 			outerClr = part == currentPart ? OUTER_SEL_BAD : OUTER_BAD;
@@ -868,15 +870,15 @@ public final class BoardPainter {
 		return set;
 	}
 
-	public Set<PipePart> getSaneConfigCache() {
+	public Map<PipePart, String> getSaneConfigCache() {
 		return saneConfigCache;
 	}
 
 	private boolean updateSaneConfigCache0() {
-		final Set<PipePart> sane = pipe.getSanePipeParts();
+		final Map<PipePart, String> sane = pipe.getSanePipeParts();
 		if (saneConfigCache.equals(sane)) return false;
 		saneConfigCache.clear();
-		saneConfigCache.addAll(sane);
+		saneConfigCache.putAll(sane);
 		return true;
 	}
 
