@@ -60,7 +60,15 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigItem<E> {
 	}
 
 	public E getEnum() {
-		return Enum.valueOf(enumClass, getContent());
+		try {
+			return Enum.valueOf(enumClass, getContent());
+		} catch (final IllegalArgumentException e) {
+			// check if the content matches a enum's string representation
+			final String cont = getContent();
+			for (final E ec : enumClass.getEnumConstants())
+				if (ec.toString().equals(cont)) return ec;
+			throw e;
+		}
 	}
 
 	public void setEnum(final E e) {
