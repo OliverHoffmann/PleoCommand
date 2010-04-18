@@ -4,7 +4,9 @@ import java.awt.EventQueue;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -63,10 +65,13 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private Thread pipeThread;
 
+	private final Map<Object, String> statusMessages;
+
 	private MainFrame() {
 		// don't change the order of the following lines !!!
 		// we need this order to avoid race conditions
 		knownWindows = new ArrayList<AutoDisposableWindow>();
+		statusMessages = new HashMap<Object, String>();
 		guiFrame = this;
 		mainLogPanel = new MainLogPanel();
 		pipe = new Pipe(Configuration.getMain());
@@ -256,7 +261,14 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	}
 
 	public void updateStatusLabel(final Object caller, final String text) {
-		lblStatus.setText(text);
+		if (text == null || text.equals(statusMessages.get(caller))) return;
+		statusMessages.put(caller, text);
+		final StringBuilder sb = new StringBuilder();
+		for (final String s : statusMessages.values()) {
+			sb.append(s);
+			sb.append(" ");
+		}
+		lblStatus.setText(sb.toString().trim());
 	}
 
 	protected synchronized void resetPipeThread() {
