@@ -7,6 +7,7 @@ import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -17,6 +18,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.FilteredImageSource;
+import java.awt.image.ImageFilter;
+import java.awt.image.RGBImageFilter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,6 +30,7 @@ import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
@@ -909,8 +914,10 @@ public final class PipeConfigBoard extends JPanel {
 		dlg.add(cfgItemPanel, BorderLayout.CENTER);
 		dlg.add(buttons, BorderLayout.SOUTH);
 		final Icon cfgImage = pp.getConfigImage();
-		if (cfgImage != null) {
-			final JLabel lbl = new JLabel(cfgImage, SwingConstants.RIGHT);
+		if (cfgImage instanceof ImageIcon) {
+			final JLabel lbl = new JLabel(
+					createTransparentImage((ImageIcon) cfgImage),
+					SwingConstants.RIGHT);
 			lbl.setVerticalAlignment(SwingConstants.TOP);
 			dlg.add(lbl, BorderLayout.WEST);
 		}
@@ -949,6 +956,18 @@ public final class PipeConfigBoard extends JPanel {
 		HelpDialog.closeHelpIfOpen();
 		dlg.setVisible(true);
 		HelpDialog.closeHelpIfOpen();
+	}
+
+	private Icon createTransparentImage(final ImageIcon image) {
+		final ImageFilter filter = new RGBImageFilter() {
+			@Override
+			public int filterRGB(final int x, final int y, final int rgb) {
+				// replace opaque white with transparent
+				return rgb == 0xFFFFFFFF ? 0 : rgb;
+			}
+		};
+		return new ImageIcon(Toolkit.getDefaultToolkit().createImage(
+				new FilteredImageSource(image.getImage().getSource(), filter)));
 	}
 
 	protected boolean saveConfigChanges(final Component dlg, final PipePart pp,
