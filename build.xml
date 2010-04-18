@@ -39,7 +39,8 @@
 		       destdir="${bin}"
 		       verbose="${verb}"
 		       classpath="${classpath}"
-		       includeantruntime="false" />
+		       includeantruntime="false"
+		       excludes="**/*.odg" />
 
 		<checkstyle config="checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
