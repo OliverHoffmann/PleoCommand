@@ -5,6 +5,7 @@ import java.io.IOException;
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.InputException;
+import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
@@ -59,6 +60,14 @@ public final class RandomGeneratorInput extends Input {
 	protected void init0() throws IOException {
 		last = 0;
 		peakPos = PeakPos.NoPeak;
+	}
+
+	@Override
+	protected void initVisualize0() {
+		final DiagramDataSet ds = getVisualizeDataSet(0);
+		if (ds != null)
+			ds.setLabel(String.format("Random [0-%s]", cfgMaxAmplitude
+					.getContent()));
 	}
 
 	@Override
@@ -124,8 +133,9 @@ public final class RandomGeneratorInput extends Input {
 			return null;
 		}
 
-		return new SingleFloatData(d + rand11() * cfgMaxNoise.getContent(),
-				cfgUserData.getContent(), null);
+		final double val = d + rand11() * cfgMaxNoise.getContent();
+		if (isVisualize()) plot(0, val);
+		return new SingleFloatData(val, cfgUserData.getContent(), null);
 	}
 
 	private static double rand11() {
@@ -179,7 +189,7 @@ public final class RandomGeneratorInput extends Input {
 
 	@Override
 	protected int getVisualizeDataSetCount() {
-		return 0;
+		return 1;
 	}
 
 }
