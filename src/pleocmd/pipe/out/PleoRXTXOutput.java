@@ -2,9 +2,11 @@ package pleocmd.pipe.out;
 
 import gnu.io.CommPortIdentifier;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.concurrent.TimeoutException;
 
 import pleocmd.Log;
@@ -12,6 +14,7 @@ import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigItem;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.OutputException;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
@@ -20,6 +23,8 @@ public final class PleoRXTXOutput extends Output {
 	private final ConfigItem<String> cfgDevice;
 
 	private PleoCommunication pc;
+
+	private Thread thrUpdateStatusLabel;
 
 	public PleoRXTXOutput() {
 		ConfigItem<String> tmp;
@@ -55,14 +60,85 @@ public final class PleoRXTXOutput extends Output {
 		pc = new PleoCommunication(PleoCommunication.getPort(cfgDevice
 				.getContent()));
 		pc.init();
+		thrUpdateStatusLabel = new Thread() {
+			@Override
+			public void run() {
+				while (isThrUpdateStatusLabel()) {
+					try {
+						final String res;
+						synchronized (PleoRXTXOutput.this) {
+							if (!MainFrame.hasGUI()
+									|| !isThrUpdateStatusLabel()) break;
+							getPC().send("STATS POWER");
+							res = getPC().readAnswer();
+						}
+						final StringTokenizer lineTok = new StringTokenizer(
+								res, "\n\r");
+						String power = "???";
+						while (lineTok.hasMoreTokens()) {
+							final String line = lineTok.nextToken();
+							if (line.contains("Battery sensor value")) {
+								final int idx1 = line.indexOf("=");
+								if (idx1 != -1) {
+									power = line.substring(idx1 + 1);
+									final int idx2 = power.indexOf("(");
+									if (idx2 != -1)
+										power = power.substring(0, idx2);
+								}
+								break;
+							}
+						}
+						final String powerFinal = String.format(
+								"Battery: %s%%", power.trim());
+						EventQueue.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								MainFrame.the().updateStatusLabel(
+										PleoRXTXOutput.this, powerFinal);
+							}
+						});
+					} catch (final TimeoutException e) {
+						MainFrame.the().updateStatusLabel(this, "ERROR");
+					} catch (final IOException e) {
+						MainFrame.the().updateStatusLabel(this, "ERROR");
+					}
+					try {
+						Thread.sleep(5000);
+					} catch (final InterruptedException e1) {
+						break;
+					}
+				}
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						MainFrame.the().updateStatusLabel(PleoRXTXOutput.this,
+								"");
+					}
+				});
+			}
+		};
+		thrUpdateStatusLabel.setDaemon(true);
+		thrUpdateStatusLabel.start();
+	}
+
+	protected synchronized boolean isThrUpdateStatusLabel() {
+		return thrUpdateStatusLabel != null;
+	}
+
+	protected PleoCommunication getPC() {
+		return pc;
 	}
 
 	@Override
 	protected void close0() {
 		Log.detail("Closing PleoRXTXOutput '%s' for device '%s'", pc, cfgDevice
 				.getContent());
-		pc.close();
-		pc = null;
+		synchronized (this) {
+			pc.close();
+			pc = null;
+			thrUpdateStatusLabel.interrupt();
+			thrUpdateStatusLabel = null;
+		}
 	}
 
 	@Override
@@ -79,12 +155,14 @@ public final class PleoRXTXOutput extends Output {
 	protected boolean write0(final Data data) throws OutputException,
 			IOException {
 		if (!CommandData.isCommandData(data, "PMC")) return false;
-		pc.send(CommandData.getArgument(data));
-		try {
-			Log.consoleOut(pc.readAnswer());
-		} catch (final TimeoutException e) {
-			throw new OutputException(this, true, e,
-					"Cannot read answer for command '%s'", data);
+		synchronized (this) {
+			pc.send(CommandData.getArgument(data));
+			try {
+				Log.consoleOut(pc.readAnswer());
+			} catch (final TimeoutException e) {
+				throw new OutputException(this, true, e,
+						"Cannot read answer for command '%s'", data);
+			}
 		}
 		return true;
 	}

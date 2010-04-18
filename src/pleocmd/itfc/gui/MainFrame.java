@@ -122,7 +122,6 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 			Log.error(e);
 		}
 
-		updateStatusLabel();
 		Log.detail("GUI-Frame created");
 
 		PipePartDetection.checkStaticValidity();
@@ -256,9 +255,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		getMainInputPanel().updateState();
 	}
 
-	private void updateStatusLabel() {
-		lblStatus.setText("Battery power: ???");
-		// TODO ENH batter power
+	public void updateStatusLabel(final Object caller, final String text) {
+		lblStatus.setText(text);
 	}
 
 	protected synchronized void resetPipeThread() {
