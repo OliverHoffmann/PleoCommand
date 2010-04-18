@@ -2,6 +2,7 @@ package pleocmd.pipe.cvt;
 
 import java.util.List;
 
+import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
@@ -68,13 +69,16 @@ public final class NormalizingConverter extends Converter {
 		values[valPos] = val;
 		valPos = (valPos + 1) % values.length;
 		if (valPos == 0) feeded = true; // at least one loop now
-		if (!feeded) return emptyList();
 
-		double realsum = .0;
-		for (final double d : values)
-			realsum += d;
-		System.out.println(sum + " " + realsum + " " + Math.abs(sum - realsum)
-				+ " " + val);
+		if (Double.isInfinite(sum) || Double.isNaN(sum)) {
+			Log.warn("Average sum exceeded range of "
+					+ "Double data type => Resetting");
+			sum = .0;
+			valPos = 0;
+			feeded = false;
+		}
+
+		if (!feeded) return emptyList();
 
 		val -= sum / values.length;
 		if (isVisualize()) plot(0, val);
