@@ -365,10 +365,15 @@ public final class Configuration {
 		}
 		if (value == null)
 			value = ConfigValue.createValue(identifier, label, singleLined);
-		if (singleLined)
-			value.setFromString(content);
-		else
-			value.setFromStrings(readList(in, nr));
+		try {
+			if (singleLined)
+				value.setFromString(content);
+			else
+				value.setFromStrings(readList(in, nr));
+		} catch (final ConfigurationException e) {
+			Log.warn("Failed to read value '%s' from '%s': '%s'", label, group
+					.getName(), e.getMessage());
+		}
 		group.set(value);
 	}
 
