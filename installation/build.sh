@@ -7,12 +7,12 @@ function check() { # filename size hash
 	[ -e "$1" ] || return 1
 	size=`stat -c "%s" "$1"`
 	if [ "$size" != "$2" ]; then
-		echo "Unexpected filesize of $1."
+		echo "Unexpected filesize of $1: Got $size but should be $2"
 		return 1
 	fi
 	sum=`md5sum "$1" | cut -d " " -f 1`
 	if [ "$sum" != "$3" ]; then
-		echo "Unexpected md5-sum of $1."
+		echo "Unexpected md5-sum of $1: Got $sum but should be $3"
 		return 1
 	fi
 	return 0
@@ -24,13 +24,13 @@ function dl() {
 	fs="$3"
 	fh="$4"
 	mod="$5"
-	shift 5
+	shift 5 || shift 4
 	echo $[ $part * 100 / $count ] "% - Downloading $fn"
 	part=$[ $part + 1 ]
 	if check "$fn" "$fs" "$fh"; then
 		echo "Already downloaded: Size and checksum OK."
 	else
-		wget "$url" --output-document "$fn" $*
+		wget "$url" --progress=dot:mega --output-document "$fn" "$@"
 		if ! check "$fn" "$fs" "$fh"; then
 			echo "!!! Downloading failed !!!"
 			exit 1
@@ -39,7 +39,7 @@ function dl() {
 	if [ "$mod" ]; then
 		chmod "$mod" "$fn"
 	fi
-	echo "==============================================="
+	echo "======================================================================"
 }
 
 if [ "$1" == "clean" ]; then
