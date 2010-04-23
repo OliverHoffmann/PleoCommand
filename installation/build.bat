@@ -3,6 +3,7 @@
 SET part=0
 SET count=8
 SETLOCAL enabledelayedexpansion
+SET "failed=0"
 
 GOTO MAIN
 
@@ -27,7 +28,6 @@ GOTO MAIN
 GOTO:EOF
 
 :DL
-	SET "failed=0"
 	SET url=%1
 	SET fn=%2
 	SET fs=%3
@@ -53,7 +53,6 @@ GOTO:EOF
 :MAIN
 	IF X%1 == Xclean (
 		DEL "runtime\BCI2000Setup_091110.exe" 
-		DEL "runtime\BCI2000Setup_091110.exe"
 		DEL "runtime\jre-6u20-linux-i586.bin"
 		DEL "runtime\jre-6u20-windows-i586-s.exe"
 		DEL "runtime\MySkit-v1.3-Installer.exe"
