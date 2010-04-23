@@ -1,7 +1,7 @@
 <ugobe_project name="donothing">
 
   <options>
-    <include value="includes" />
+    <include value="../includes" />
     <tools>
 	    <pawn value="./pawncc %i -V -O2 -S64 -v2 -C- %I TARGET=100 -o%o" />
     </tools>
