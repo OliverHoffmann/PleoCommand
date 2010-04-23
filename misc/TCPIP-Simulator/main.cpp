@@ -1,13 +1,27 @@
 #include <iostream>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef UNIX
 #include <netdb.h>
+static const int INVALID_SOCKET = -1;
+#define CS close
+#define S3 sleep(3)
+#define GP getpid
+#endif
+
+#ifdef WIN32
+#include <winsock.h>
+#include <process.h>
+#define CS closesocket
+#define S3 Sleep(3000)
+#define GP _getpid
+#endif
 
 using std::cout;
 using std::cerr;
 using std::endl;
 
-static const int INVALID_SOCKET = -1;
 static const int MAX_HOST = 256;
 
 typedef signed char prio_t;
@@ -47,7 +61,7 @@ type_t g_fieldType[MAX_FIELDS];
 
 bool connect() {
 	if (g_socket != INVALID_SOCKET)
-		close(g_socket);
+		CS(g_socket);
 	g_socket = INVALID_SOCKET;
 
 	struct hostent *he = gethostbyname(g_host);
@@ -81,7 +95,7 @@ bool safeSend(const void *data, int len) {
 		if (send(g_socket, static_cast<const char*> (data), len, 0) == len)
 			return true;
 		cout << "Could not send data - retrying" << endl;
-		sleep(3);
+		S3;
 		if (!connect())
 			return false;
 	}
@@ -238,7 +252,7 @@ int main(int argc, char **argv) {
 		return 2;
 	}
 
-	srand(time(NULL) + clock() + getpid());
+	srand(time(NULL) + clock() + GP());
 
 	for (int i = 1; i < argc; ++i) {
 		if (!strcmp(argv[i], "-p")) {
@@ -392,7 +406,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	close(g_socket);
+	CS(g_socket);
 	return 0;
 
 	// Results:

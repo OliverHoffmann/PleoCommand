@@ -15,7 +15,7 @@
 	<property name="exefile" value="${ant.project.name}.exe" />
 
 	<property name="mainclass" value="pleocmd.Main" />
-	<property name="classpath" value="/usr/share/rxtx-2/lib/RXTXcomm.jar" />
+	<property name="classpath" value="${lib}/RXTXcomm.jar" />
 
 	<!-- Define external tasks -->
 	<taskdef resource="checkstyletask.properties"
@@ -82,8 +82,11 @@
 			<arg value="svnlog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
-		<exec executable="make" dir="misc/TCPIP-Simulator">
-			<arg value="build" />
+		<exec executable="make" dir="misc/TCPIP-Simulator" osfamily="unix">
+			<arg value="unix" />
+		</exec>
+		<exec executable="make" dir="misc/TCPIP-Simulator" osfamily="windows">
+			<arg value="win" />
 		</exec>
 	</target>
 
