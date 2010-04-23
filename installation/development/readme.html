@@ -1,0 +1,55 @@
+<html>
+<body>
+<h1>Linux</h1>
+<h2>Eclipse</h2>
+If it's not already provided by the distributor, download from <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.
+<h2>C++ Builder Architect (optional)</h2>
+Borland Architect is only needed for BCI 2000, and currently only works unter Windows.<br>
+Maybe GCC works with a recent enough BCI 2000 version.
+<h2>OpenOffice (optional)</h2>
+Many of the icons and images in PleoCommand are created with OpenOffice Draw. To install OpenOffice, visit
+<a href="http://www.openoffice.org/">http://www.openoffice.org</a> or use the version provided by your distributor.
+<h2>Pleo's PAWN (optional)</h2>
+This is completely optional, as PleoCommand works fine without a PAWN script running in Pleo.<br>
+<br>
+To create PAWN scripts, unpack the <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> to any directory.<br>
+Copy <i>ugobe_project_tool</i> and <i>libpython2.5.so.1.0</i> from the <i>exe.linux-i686-2.5</i> directory from where
+you unpacked the zip file to your <i>/usr/local/bin</i> respectively <i>/usr/local/lib</i> directory.<br>
+<br>
+Additionaly you need to copy the file <a href="pawncc/bin/pawncc">pawncc/bin/pawncc</a> to <i>/usr/local/bin</i> and
+the file <a href="pawncc/lib/libpawnc.so">pawncc/lib/libpawnc.so</a> to <i>/usr/local/lib</i> (make sure both are executable).<br>
+You may also install the complete PAWN package instead, by executing <a href="pawn-3.3.4127.package">pawn-3.3.4127.package</a>
+but this installs many unneeded files.<br>
+If you want to use a newer version of PAWN, please make sure that it's still compatible with Pleo.<br>
+<br>
+Take a look in <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> for examples and documentation.
+
+<h1>Windows</h1>
+<h2>Eclipse</h2>
+Just unzip <a href="eclipse-java-galileo-SR2-win32.zip">eclipse-java-galileo-SR2-win32.zip</a> to any directory
+or visit <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.
+<h2>Borland Architect (optional)</h2>
+Borland Architect is only needed for BCI 2000.<br>
+BCI 2000 can only be compiled with Borland Architect, but newer releases may also work with GCC.<br>
+Visit <a href="https://downloads.embarcadero.com/free/c_builder">https://downloads.embarcadero.com/free/c_builder</a>
+do download a trial version or the free to use C++ Compiler.<br>
+Checkout the BCI 2000 sourcecode from their repository at <a href="http://www.bci2000.org/svn/trunk">
+http://www.bci2000.org/svn/trunk</a> (you need an account first), then copy the directory structure under 
+<a href="BCI2000Source">BCI2000Source</a> to the base directory from your repository copy.<br>
+It should be sufficient to only compile the NexusSource and the PleoCommandTCPIP projects you've just copied, and combine them
+with the binary version of the BCI 2000 toolset.<br>
+If not, read BCI's manual about to compile the whole BCI 2000 toolset.
+<h2>OpenOffice (optional)</h2>
+Many of the icons and images in PleoCommand are created with OpenOffice Draw. To install OpenOffice, visit
+<a href="http://www.openoffice.org/">http://www.openoffice.org</a>. 
+<h2>Pleo's PAWN (optional)</h2>
+This is completely optional, as PleoCommand works fine without a PAWN script running in Pleo.<br>
+<br>
+To create PAWN scripts, unpack the <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> to any directory.<br>
+The ugobe and PAWN compilers are under <i>bin</i> for Windows and <i>macosx</i> for MacOS.<br>
+You may need to put the directory in your <i>PATH</i>, so Windows is able to find the pawncc and the ugobe_project_tool executable.<br>
+<br>
+Take a look in <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> for examples and documentation.
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<html>
+<body>
+<h1>Linux</h1>
+<h2>Java</h2>
+If it's not already provided by the distributor,
+execute <a href="jre-6u20-linux-i586.bin">jre-6u20-linux-i586.bin</a>.
+<h2>Pleo USB Driver</h2>
+You can just use the <i>"USB Abstract Control Model driver for USB
+modems and ISDN adapters"</i> which should already be available in most distributons.<br>
+If not, you have to make sure CONFIG_USB_ACM is set to either "Y" or "M" in the kernel:<br>
+<pre>
+"Device Drivers"
+	[*] "USB support"
+		&lt;M&gt; "USB Modem (CDC ACM) support"
+</pre>
+<h2>PleoCommand</h2>
+To finally start PleoCommand, execute <a href="../../dist/pleocommand">dist/pleocommand</a>.<br>
+You may copy this file together with PleoCommand.jar and librxtxSerial.so to any directory.
+<h2>MySkit (optional)</h2>
+For creating your own motions or sounds, MySkit is a very good and fast solution.<br>
+Execute <a href="MySkit-v1.3-Installer.exe">MySkit-v1.3-Installer.exe</a> with 
+<a href="http://www.winehq.org/">Wine</a> to install MySkit.<br>
+MySkit should run perfectly with Wine (but maybe you have to turn of compositing in
+KDE4 to reduce flickering of the 3D-Pleo-Model).
+<h2>BCI 2000 (optional)</h2>
+BCI 2000 currently only works unter Windows.
+
+
+<h1>Windows</h1>
+<h2>Java</h2>
+Execute <a href="jre-6u20-windows-i586-s.exe">jre-6u20-windows-i586-s.exe</a>.
+<h2>Pleo USB Driver</h2>
+If a driver selection dialog pops up after plugging in Pleo, choose "Manual
+selection of driver source" and point the installation dialog to this directory.<br>
+If everything works fine, you should see a new COM port in the Device Manager.
+<h2>PleoCommand</h2>
+To finally start PleoCommand, execute <a href="../../dist/PleoCommand.exe">dist/PleoCommand.exe</a>.<br>
+You may copy this file together with rxtxSerial.dll to any directory.
+<h2>MySkit (optional)</h2>
+For creating your own motions or sounds, MySkit is a very good and fast solution.<br>
+Execute <a href="MySkit-v1.3-Installer.exe">MySkit-v1.3-Installer.exe</a> to install MySkit.
+<h2>BCI 2000 (optional)</h2>
+To use BCI 2000 as an input source for PleoCommand (via the TCP/IP Input component), execute
+<a href="BCI2000Setup_091110.exe">BCI2000Setup_091110.exe</a> and copy all files from the
+<a href="BCI2000-Prog">BCI2000-Prog</a> directory to the prog/ directory where BCI 2000 has been
+installed, overwriting existing files.<br>
+Start it by executing "BCI2000launcher.exe" and make sure that the Application module is set to
+"PleoCommandTCPIP".<br>
+To quickly set a fitting mask for the Application module, you may use the following line by
+simply pasting it in your parameter-file, replacing any exiting line beginning with "Application:PleoCommandTCPIPTask"
+(it should be on one line):
+<pre>
+Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixed%20Value } { #1 #2 #3 #4 #5 #6 #7 #8 } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } 0 1 2 3 4 5 6 7 % % % % % % % % // Type and number of channel or fixed value for each field
+</pre>
+
+
+<h1>Pleo's Firmware</h1>
+Pleo's firmware should be at least version 1.1 for PleoCommand to work properly.<br>
+To update it, unzip <a href="PleoSDSoftware_1.1.zip">PleoSDSoftware_1.1.zip</a> to an empty
+SD-Card, turn off Pleo, make sure it's battery <b>is fully charged</b> and cooled, insert the
+SD-Card and turn Pleo on. Several chimes will be played by Pleo and until a few minutes Pleo will
+fall asleep and can be turned off and the SD-Card can be removed.
+</body>
+</html>
