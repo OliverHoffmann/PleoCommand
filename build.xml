@@ -8,6 +8,7 @@
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
 	<property name="test" location="test" />
+	<property name="install" location="installation" />
 
 	<property name="jarfile" value="${ant.project.name}.jar" />
 	<property name="jarloc" location="${dist}/${jarfile}" />
@@ -28,6 +29,14 @@
 	<target name="clean">
 		<delete dir="${bin}" verbose="${verb}" />
 		<delete dir="${dist}" verbose="${verb}" />
+		<exec executable="${install}/build.sh"
+		      failonerror="true"
+		      dir="${install}">
+			<arg value="clean" />
+		</exec>
+		<exec executable="make" dir="misc/TCPIP-Simulator">
+			<arg value="clean" />
+		</exec>
 	</target>
 
 	<!-- Creates class files, checks for errors and dumps subversion log in bin/ -->
@@ -63,6 +72,9 @@
 		<exec executable="xsltproc" output="${dist}/changelog.html">
 			<arg value="svnlog.xsl" />
 			<arg value="${bin}/changelog.xml" />
+		</exec>
+		<exec executable="make" dir="misc/TCPIP-Simulator">
+			<arg value="build" />
 		</exec>
 	</target>
 
@@ -138,7 +150,12 @@
 			<fileset file="${dist}/pleocommand" />
 			<fileset file="${dist}/librxtxSerial.so" />
 			<fileset file="${dist}/${exefile}" />
+			<fileset file="${install}/build.sh" />
 		</chmod>
+		<exec executable="${install}/build.sh"
+		      failonerror="true"
+		      dir="${install}">
+		</exec>
 	</target>
 
 	<target name="rebuild" depends="clean, build, dist">
