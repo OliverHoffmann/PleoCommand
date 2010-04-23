@@ -1,0 +1,38 @@
+<ugobe_project name="donothing">
+
+  <options>
+    <include value="includes" />
+    <tools>
+	    <pawn value="./pawncc %i -V -O2 -S64 -v2 -C- %I TARGET=100 -o%o" />
+    </tools>
+    <directories>
+      <build value="build" />
+      <include value="include" />
+    </directories>
+    <umf value="3" />
+    <folders />
+  </options>
+
+  <set-default name="MEDIA" value="." />
+  <set name="SOUNDS" value="${MEDIA}/sounds" />
+  <set name="MOTIONS" value="${MEDIA}/motions" />
+  <set name="COMMANDS" value="${MEDIA}/commands" />
+
+  <resources>
+
+    <!-- Sounds -->
+    <!-- <sound path="${SOUNDS}/sound1.wav" /> -->
+
+    <!-- Motions -->
+    <!-- <motion path="${MOTIONS}/motion1.csv" /> -->
+
+    <!-- Commands -->
+    <!-- <command path="${COMMANDS}/command1.csv" /> -->
+
+    <!-- Scripts -->
+    <script path="main.p" />
+
+    <!-- User Properties -->
+
+  </resources>
+</ugobe_project>
