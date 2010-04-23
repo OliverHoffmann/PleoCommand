@@ -1,8 +1,16 @@
+FIX check correct behavior on bad config files:
+	PipePart mentioned doesn't exist
+	Config entries of a PipePart are missing/unknown/invalid
+FIX visualize data flow through PipePart-Connections 
+	
+FIX SingleJointMovement: don't move too fast !!!
+ENH RandomGenerator: plotting
+
+
 FIX clipping for shadows in board (Windows)
-FIX check correct behavior on bad config files 
 FIX size of error dialog may be wrong (Windows)
 FIX changing zoom doesn't handle recalc. of border1 and border2
-ENH show some small information inside the PipePart's image (like channel for ChannelSplitter)
+ENH "Copy PipePart" in board
 ENH auto-save to selected pipe-file if any
 ENH Null-Output
 ENH implement DataFilter
@@ -13,19 +21,10 @@ ENH document which classes are immutable
 ENH "Modify" for binary Data files in FileInput, ...
 ENH display PipeParts in red if they permanently failed
 ENH blink PipeParts in red if they temporarily failed
+ENH list known problems in PipePart's tooltip: deadlock, no output reachable,
+	bad configuration, permanently failed 
+ENH list statistics in PipePart's tooltip: temp. failures, packets received + sent 
 MOD make all Data timed Data before writing to Output
 MOD checkstyle: no exception handling in pipe's, only pass them thru
 MOD check terminology (Value, Data, Block, Sequence, Ascii <-> ASCII)
-MOD combine History and {@link DataSequenceEditorPanel} ?
-
-
-Missing:			Icon	Image	Descr.	Config-Help
-ThresholdConverter	-		x		x		x
-[SE].*DataConverter	x		x		-		?
-StaticInput			-		-		-		?
-Std-Dev-Converter	x		x		-		-
-Int Cmd Output		x		x		-		-
-CodomainAdaption	-		x		-		-
-NormalizingCvt		-		x		-		-
-SingleJointMvmt		-		x		-		-
-DataBlockSplitter	x		x		-		x
+MOD combine History and DataSequenceEditorPanel?
