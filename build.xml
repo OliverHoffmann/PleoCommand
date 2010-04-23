@@ -31,7 +31,16 @@
 		<delete dir="${dist}" verbose="${verb}" />
 		<exec executable="${install}/build.sh"
 		      failonerror="true"
-		      dir="${install}">
+		      dir="${install}"
+		      osfamily="unix">
+			<arg value="clean" />
+		</exec>
+		<exec executable="cmd"
+		      failonerror="true"
+		      dir="${install}"
+		      osfamily="windows">
+			<arg value="/c" />
+			<arg value="build.bat" />
 			<arg value="clean" />
 		</exec>
 		<exec executable="make" dir="misc/TCPIP-Simulator">
@@ -154,7 +163,15 @@
 		</chmod>
 		<exec executable="${install}/build.sh"
 		      failonerror="true"
-		      dir="${install}">
+		      dir="${install}"
+		      osfamily="unix">
+		</exec>
+		<exec executable="cmd"
+		      failonerror="true"
+		      dir="${install}"
+		      osfamily="windows">
+			<arg value="/c" />
+			<arg value="build.bat" />
 		</exec>
 	</target>
 
