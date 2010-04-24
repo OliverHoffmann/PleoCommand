@@ -41,6 +41,7 @@
 		      osfamily="windows">
 			<arg value="/c" />
 			<arg value="build.bat" />
+			<arg value="from-ant" />
 			<arg value="clean" />
 		</exec>
 		<exec executable="make" dir="misc/TCPIP-Simulator">
@@ -175,6 +176,7 @@
 		      osfamily="windows">
 			<arg value="/c" />
 			<arg value="build.bat" />
+			<arg value="from-ant" />
 		</exec>
 	</target>
 

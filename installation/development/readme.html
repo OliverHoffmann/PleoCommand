@@ -1,13 +1,24 @@
 <html>
 <body>
+The following instructions will not be needed for normal execution but only for rebuilding, 
+modifying or extending PleoCommand.<br>
+Building under Linux is better tested and known to work than under Windows as many tools
+needed for building are actually Linux/Unix tools and only (more or less completely) ported
+to Windows.
 <h1>Linux</h1>
+For building PleoCommand, execute "ant dist" in the root directory.<br>
+You need the following tools for successful building:
+<h2>Coreutils (rm, stat, md5sum, ...)</h2>
+Coreutils are always available under any known Linux distribution. 
+<h2>Java JDK, Ant, WGet, GCC, Subversion, xsltproc</h2>
+If it's not already provided by your distributor, download from the URL listed at the end of this document.
 <h2>Eclipse</h2>
 If it's not already provided by the distributor, download from <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.
 <h2>C++ Builder Architect (optional)</h2>
-Borland Architect is only needed for BCI 2000, and currently only works unter Windows.<br>
+Borland Architect is only needed for BCI 2000, and currently only works under Windows.<br>
 Maybe GCC works with a recent enough BCI 2000 version.
 <h2>OpenOffice (optional)</h2>
-Many of the icons and images in PleoCommand are created with OpenOffice Draw. To install OpenOffice, visit
+Many of the icons and images in PleoCommand have been created with OpenOffice Draw. To install OpenOffice, visit
 <a href="http://www.openoffice.org/">http://www.openoffice.org</a> or use the version provided by your distributor.
 <h2>Pleo's PAWN (optional)</h2>
 This is completely optional, as PleoCommand works fine without a PAWN script running in Pleo.<br>
@@ -25,9 +36,31 @@ If you want to use a newer version of PAWN, please make sure that it's still com
 Take a look in <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> for examples and documentation.
 
 <h1>Windows</h1>
+<h2>Coreutils (rm, stat, md5sum, ...)</h2>
+Install from <a href="coreutils-5.3.0.exe">coreutils-5.3.0.exe</a> and add the <i>bin</i>
+directory to your PATH environment variable.
+<h2>Java JDK</h2>
+Download from <a href="http://java.sun.com/javase/downloads/widget/jdk6.jsp">
+http://java.sun.com/javase/downloads/widget/jdk6.jsp</a> and install. You may need to 
+set the JAVA_HOME environment variable to the installation target directory.
+<h2>Ant</h2>
+Unzip <a href="apache-ant-1.8.0-bin.zip">apache-ant-1.8.0-bin.zip</a>.
+You must set the ANT_HOME environment variable to the directory where you unzipped the files
+and add the <i>bin</i> directory to your PATH environment variable.
+directory to your PATH environment variable.
+<h2>WGet</h2>
+Install from <a href="wget-1.11.4-1-setup.exe">wget-1.11.4-1-setup.exe</a> and add the <i>bin</i>
+directory to your PATH environment variable.
+<h2>GCC</h2>
+Install from <a href="MinGW-5.1.6.exe">MinGW-5.1.6.exe</a>. Enable "G++ Compiler" and "MinGW Make" in the setup and
+you must add the <i>bin</i> directory to your PATH environment variable.
+<h2>Subversion</h2>
+Install from <a href="Setup-Subversion-1.6.6.msi">Setup-Subversion-1.6.6.msi</a>.
+<h2>xsltproc</h2>
+Unzip all files in <a href="xsltproc">xsltproc</a> and put all files from all the <i>bin</i> directories
+together in one directory. Add this directory to your PATH environment variable.
 <h2>Eclipse</h2>
-Just unzip <a href="eclipse-java-galileo-SR2-win32.zip">eclipse-java-galileo-SR2-win32.zip</a> to any directory
-or visit <a href="http://www.eclipse.org/">http://www.eclipse.org</a>.
+Just unzip <a href="eclipse-java-galileo-SR2-win32.zip">eclipse-java-galileo-SR2-win32.zip</a> to any directory.
 <h2>Borland Architect (optional)</h2>
 Borland Architect is only needed for BCI 2000.<br>
 BCI 2000 can only be compiled with Borland Architect, but newer releases may also work with GCC.<br>
@@ -51,5 +84,20 @@ You may need to put the directory in your <i>PATH</i>, so Windows is able to fin
 <br>
 Take a look in <a href="PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</a> for examples and documentation.
 
+<h1>Additional Notes</h1>
+This is a list of all 3rd party tools and the versions which have been tested:
+	<table border=1>
+		<tr><th>Name</th><th>Minimal Version</th><th>Tested With</th><th>URL</th></tr>
+		<tr><td>java</td><td>6.0</td><td>6.20</td><td><a href="http://java.sun.com/">http://java.sun.com/</a></td></tr>
+		<tr><td>ant</td><td>1.8.0</td><td>1.8.0</td><td><a href="http://ant.apache.org/">http://ant.apache.org/</a></td></tr>
+		<tr><td>wget</td><td>1.11.0(?)</td><td>1.12.0</td><td><a href="http://www.gnu.org/software/wget/">http://www.gnu.org/software/wget/</a></td></tr>
+		<tr><td>md5sum</td><td rowspan=3>7.5(?)</td><td rowspan=3>8.4</td><td rowspan=3>
+				<a href="http://www.gnu.org/software/coreutils/">http://www.gnu.org/software/coreutils/</a></td></tr>
+		<tr><td>stat</td><td></td><td></td><td></td></tr>
+		<tr><td>rm</td><td></td><td></td><td></td></tr>
+		<tr><td>gcc</td><td>4.0.0(?)</td><td>4.4.3</td><td><a href="http://gcc.gnu.org/">http://gcc.gnu.org/</a></td></tr>
+		<tr><td>subversion</td><td>1.0.0(?)</td><td>1.6.9</td><td><a href="http://subversion.apache.org/">http://subversion.apache.org/</a></td></tr>
+		<tr><td>xsltproc</td><td>1.0.0(?)</td><td>1.1.26</td><td><a href="http://www.xmlsoft.org/">http://www.xmlsoft.org/</a></td></tr>
+	</table>
 </body>
 </html>
