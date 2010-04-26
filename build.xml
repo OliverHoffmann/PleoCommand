@@ -8,6 +8,7 @@
 	<property name="lib" location="lib" />
 	<property name="dist" location="dist" />
 	<property name="test" location="test" />
+	<property name="misc" location="misc" />
 	<property name="install" location="installation" />
 
 	<property name="jarfile" value="${ant.project.name}.jar" />
@@ -44,7 +45,10 @@
 			<arg value="from-ant" />
 			<arg value="clean" />
 		</exec>
-		<exec executable="make" dir="misc/TCPIP-Simulator">
+		<exec executable="make" dir="${misc}/ExpressionParser">
+			<arg value="clean" />
+		</exec>
+		<exec executable="make" dir="${misc}/TCPIP-Simulator">
 			<arg value="clean" />
 		</exec>
 	</target>
@@ -83,10 +87,20 @@
 			<arg value="svnlog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
-		<exec executable="make" dir="misc/TCPIP-Simulator" osfamily="unix">
+		<exec executable="make" dir="${misc}/ExpressionParser" osfamily="unix">
 			<arg value="unix" />
 		</exec>
-		<exec executable="make" dir="misc/TCPIP-Simulator" osfamily="windows">
+		<exec executable="make"
+		      dir="${misc}/ExpressionParser"
+		      osfamily="windows">
+			<arg value="win" />
+		</exec>
+		<exec executable="make" dir="${misc}/TCPIP-Simulator" osfamily="unix">
+			<arg value="unix" />
+		</exec>
+		<exec executable="make"
+		      dir="${misc}/TCPIP-Simulator"
+		      osfamily="windows">
 			<arg value="win" />
 		</exec>
 	</target>
@@ -158,6 +172,8 @@
 			<fileset file="${lib}/pleocommand" />
 			<fileset file="${lib}/librxtxSerial.so" />
 			<fileset file="${lib}/rxtxSerial.dll" />
+			<fileset file="${misc}/ExpressionParser/libExprParser.so" />
+			<fileset file="${misc}/ExpressionParser/ExprParser.dll" />
 		</copy>
 		<chmod perm="ugo+rx" verbose="${verb}">
 			<fileset file="${dist}/pleocommand" />
