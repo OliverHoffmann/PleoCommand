@@ -1,22 +1,28 @@
+FLAGS=-O2
+WARNS=-Wall -Wextra -Wdisabled-optimization \
+	-Wcast-qual -Wcast-align -Wpointer-arith -Wundef -Wredundant-decls \
+	-Wunused-macros -Wswitch-default -Wconversion -Wfloat-equal \
+	-Wold-style-cast -Weffc++ 
+
 build:
 	echo "Use 'make unix' or 'make win'"
 	exit 1
 
-unix: TCPIPSimulator-unix
+unix: TCPIPSimulator
 
-win: TCPIPSimulator-win
+win: TCPIPSimulator.exe
 
-TCPIPSimulator-unix: main.cpp
-	g++ -O2 main.cpp -o TCPIPSimulator -Wall -Wextra -Wdisabled-optimization \
-	-Wcast-qual -Wcast-align -Wpointer-arith -Wundef -Wredundant-decls \
-	-Wunused-macros -Wswitch-default -Wconversion -Wfloat-equal \
-	-Wold-style-cast -Weffc++ -DUNIX
+TCPIPSimulator: main-unix.o
+	g++ -o $@ $^
 
-TCPIPSimulator-win: main.cpp
-	g++ -O2 main.cpp -o TCPIPSimulator -Wall -Wextra -Wdisabled-optimization \
-	-Wcast-qual -Wcast-align -Wpointer-arith -Wundef -Wredundant-decls \
-	-Wunused-macros -Wswitch-default -Wconversion -Wfloat-equal \
-	-Wold-style-cast -Weffc++ -lwsock32 -DWIN32
+TCPIPSimulator.exe: main-win.o
+	g++ -o $@ $^ -lwsock32
+
+main-unix.o: main.cpp
+	g++ -c -o $@ $< $(FLAGS) $(WARNS) -DUNIX
+
+main-win.o: main.cpp
+	g++ -c -o $@ $< $(FLAGS) $(WARNS) -DWIN32
 
 clean:
-	rm -vf TCPIPSimulator
+	rm -vf TCPIPSimulator TCPIPSimulator.exe *.o
