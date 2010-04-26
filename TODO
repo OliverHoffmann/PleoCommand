@@ -6,7 +6,11 @@ FIX visualize data flow through PipePart-Connections
 FIX SingleJointMovement: don't move too fast !!!
 ENH RandomGenerator: plotting
 
-
+FIX if Data from Input is directly piped to Output and has an alternative
+	route thru a Converter, the direct route is ignored !!!
+	
+FIX forcefully aborting pipe thru exiting app will result in  
+	"Application has not been shut down normally but has to be exited forcefully." message
 FIX clipping for shadows in board (Windows)
 FIX size of error dialog may be wrong (Windows)
 FIX changing zoom doesn't handle recalc. of border1 and border2
