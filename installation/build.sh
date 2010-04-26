@@ -1,7 +1,7 @@
 #!/bin/bash
 
 part=0
-count=17
+count=18
 
 function check() { # filename size hash
 	[ -e "$1" ] || return 1
@@ -60,6 +60,7 @@ if [ "$1" == "clean" ]; then
 	rm -vf "development/xsltproc/libxml2-2.7.6.win32.zip"
 	rm -vf "development/xsltproc/libxmlsec-1.2.13.win32.zip"
 	rm -vf "development/xsltproc/libxslt-1.1.26.win32.zip"
+	rm -vf "development/xsltproc/zlib-1.2.3.win32.zip"
 else
 	# runtime
 	dl "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" \
@@ -93,6 +94,8 @@ else
 		"development/xsltproc/libxmlsec-1.2.13.win32.zip" 954228 "c6bafb19bb02eb733f7f3f672e736766"
 	dl "ftp://ftp.zlatkovic.com/libxml/libxslt-1.1.26.win32.zip" \
 		"development/xsltproc/libxslt-1.1.26.win32.zip" 408001 "36fb352ea5b6309305476bcb8cabc31e"
+	dl "ftp://ftp.zlatkovic.com/libxml/zlib-1.2.3.win32.zip" \
+		"development/xsltproc/zlib-1.2.3.win32.zip" 126580 "61f7b91539b0532eea3c30e3281dc424"
 	dl "http://mirror.selfnet.de/eclipse/technology/epp/downloads/release/galileo/SR2/eclipse-java-galileo-SR2-win32.zip" \
 		"development/eclipse-java-galileo-SR2-win32.zip" 97290250 "9e3048a9f26386130334134f4062232a"
 	dl "http://www.compuphase.com/pawn/pawn-3.3.4127.package" \
