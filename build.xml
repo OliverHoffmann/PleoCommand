@@ -45,10 +45,14 @@
 			<arg value="from-ant" />
 			<arg value="clean" />
 		</exec>
-		<exec executable="make" dir="${misc}/ExpressionParser">
+		<exec executable="make"
+		      dir="${misc}/ExpressionParser"
+		      failonerror="true">
 			<arg value="clean" />
 		</exec>
-		<exec executable="make" dir="${misc}/TCPIP-Simulator">
+		<exec executable="make"
+		      dir="${misc}/TCPIP-Simulator"
+		      failonerror="true">
 			<arg value="clean" />
 		</exec>
 	</target>
@@ -73,33 +77,45 @@
 			</classpath>
 		</checkstyle>
 
-		<exec executable="svn">
+		<exec executable="svn" failonerror="false">
 			<arg value="up" />
 			<arg value="--non-interactive" />
 		</exec>
-		<exec executable="svn" output="${bin}/changelog.xml">
+		<exec executable="svn"
+		      output="${bin}/changelog.xml"
+		      failonerror="false">
 			<arg value="log" />
 			<arg value="-v" />
 			<arg value="--xml" />
 			<arg value="--non-interactive" />
 		</exec>
-		<exec executable="xsltproc" output="${dist}/changelog.html">
+		<exec executable="xsltproc"
+		      output="${dist}/changelog.html"
+		      failonerror="false">
 			<arg value="svnlog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
-		<exec executable="make" dir="${misc}/ExpressionParser" osfamily="unix">
+		<exec executable="make"
+		      dir="${misc}/ExpressionParser"
+		      failonerror="true"
+		      osfamily="unix">
 			<arg value="unix" />
 		</exec>
 		<exec executable="make"
 		      dir="${misc}/ExpressionParser"
+		      failonerror="true"
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
-		<exec executable="make" dir="${misc}/TCPIP-Simulator" osfamily="unix">
+		<exec executable="make"
+		      dir="${misc}/TCPIP-Simulator"
+		      failonerror="true"
+		      osfamily="unix">
 			<arg value="unix" />
 		</exec>
 		<exec executable="make"
 		      dir="${misc}/TCPIP-Simulator"
+		      failonerror="true"
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
