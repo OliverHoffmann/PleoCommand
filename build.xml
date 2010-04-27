@@ -119,6 +119,12 @@
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
+		<exec executable="${misc}/tidy-all-html.sh"
+		      dir="${basedir}"
+		      failonerror="false"
+		      osfamily="unix">
+			<arg value="${basedir}" />
+		</exec>
 	</target>
 
 	<!-- Executes all JUnit test cases -->
