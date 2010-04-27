@@ -198,7 +198,7 @@
 
 	<!-- Filter -->
 	<module name="SuppressionFilter">
-		<property name="file" value="suppressions.xml" />
+		<property name="file" value="src/suppressions.xml" />
 	</module>
 	<module name="SuppressionCommentFilter">
 		<property name="offCommentFormat" value="CS_IGNORE_BEGIN" />

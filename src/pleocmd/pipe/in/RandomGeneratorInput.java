@@ -2,6 +2,7 @@ package pleocmd.pipe.in;
 
 import java.io.IOException;
 
+import pleocmd.Log;
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.InputException;
@@ -86,12 +87,17 @@ public final class RandomGeneratorInput extends Input {
 		try {
 			final long next = last + 1000 / cfgSamplerate.getContent();
 			final long now = System.currentTimeMillis();
-			if (next > now) Thread.sleep(next - now);
+			if (next > now) {
+				Log.detail("Artificially slow down by %d ms", next - now);
+				Thread.sleep(next - now);
+			}
 		} catch (final InterruptedException e) {
+			Log.detail("Slow down interrupted");
 			return null;
 		}
 		last = System.currentTimeMillis();
 		final double d;
+		Log.detail("PeakPos: %s", peakPos.toString());
 		switch (peakPos) {
 		case NoPeak:
 			d = .0;
@@ -109,6 +115,12 @@ public final class RandomGeneratorInput extends Input {
 				grad1Inc = amp / grad1Len;
 				value = 0;
 				step = 0;
+				if (Log.canLogDetail())
+					Log.detail("Switching to PeakPos %s with amp %f "
+							+ "and length %d, %d and %d => "
+							+ "peak-inc will be %f and %f", peakPos.toString(),
+							amp, grad0Len, peakLen, grad1Len, grad0Inc,
+							grad1Inc);
 			}
 			break;
 		case Grad0:
@@ -116,6 +128,7 @@ public final class RandomGeneratorInput extends Input {
 			if (++step >= grad0Len) {
 				step = 0;
 				peakPos = PeakPos.OnPeak;
+				Log.detail("Switching to PeakPos %s", peakPos.toString());
 			}
 			break;
 		case OnPeak:
@@ -123,17 +136,22 @@ public final class RandomGeneratorInput extends Input {
 			if (++step >= peakLen) {
 				step = 0;
 				peakPos = PeakPos.Grad1;
+				Log.detail("Switching to PeakPos %s", peakPos.toString());
 			}
 			break;
 		case Grad1:
 			d = value -= grad1Inc;
-			if (++step >= grad1Len) peakPos = PeakPos.NoPeak;
+			if (++step >= grad1Len) {
+				peakPos = PeakPos.NoPeak;
+				Log.detail("Switching to PeakPos %s", peakPos.toString());
+			}
 			break;
 		default:
 			return null;
 		}
 
 		final double val = d + rand11() * cfgMaxNoise.getContent();
+		if (Log.canLogDetail()) Log.detail("Adding noise to %f => %f", d, val);
 		if (isVisualize()) plot(0, val);
 		return new SingleFloatData(val, cfgUserData.getContent(), null);
 	}

@@ -1,66 +1,218 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <project name="PleoCommand" default="build" basedir=".">
 
 	<property name="verb" value="no" />
 
 	<property name="src" location="src" />
 	<property name="bin" location="bin" />
-	<property name="lib" location="lib" />
+	<property name="ext" location="ext" />
 	<property name="dist" location="dist" />
-	<property name="test" location="test" />
-	<property name="misc" location="misc" />
-	<property name="install" location="installation" />
-
-	<property name="jarfile" value="${ant.project.name}.jar" />
-	<property name="jarloc" location="${dist}/${jarfile}" />
-	<property name="exefile" value="${ant.project.name}.exe" />
+	<property name="test" location="${src}/test" />
 
 	<property name="mainclass" value="pleocmd.Main" />
-	<property name="classpath" value="${lib}/RXTXcomm.jar" />
-
-	<!-- Define external tasks -->
-	<taskdef resource="checkstyletask.properties"
-	         classpath="${lib}/checkstyle-all-5.0.jar" />
-
-	<taskdef name="jsmoothgen"
-	         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
-	         classpath="${lib}/jsmoothgen-ant.jar" />
+	<property name="classpath"
+	          value="${bin}/lib/RXTXcomm.jar:${bin}/lib/junit.jar" />
 
 	<!-- Cleans bin/ and dist/ diretory -->
 	<target name="clean">
-		<delete dir="${bin}" verbose="${verb}" />
-		<delete dir="${dist}" verbose="${verb}" />
-		<exec executable="${install}/build.sh"
+		<delete includeEmptyDirs="true" failonerror="true" verbose="${verb}">
+			<fileset dir="${bin}" excludes="**/ext/**" />
+			<fileset dir="${dist}" />
+		</delete>
+	</target>
+
+	<macrodef name="download">
+		<attribute name="src" />
+		<attribute name="dest" />
+		<attribute name="md5" />
+		<attribute name="user" default="" />
+		<attribute name="password" default="" />
+		<attribute name="ignoreerrors" default="true" />
+		<sequential>
+			<get src="@{src}"
+			     dest="@{dest}"
+			     verbose="${verb}"
+			     skipexisting="true"
+			     username="@{user}"
+			     password="@{password}"
+			     ignoreerrors="@{ignoreerrors}" />
+			<touch file="@{dest}" />
+			<checksum file="@{dest}"
+			          property="@{md5}"
+			          verifyproperty="csverify" />
+			<condition property="csbad">
+				<and>
+					<equals arg1="${csverify}" arg2="false" />
+					<equals arg1="@{ignoreerrors}" arg2="false" />
+				</and>
+			</condition>
+			<fail if="csbad" message="Checksum of @{dest} is bad." />
+		</sequential>
+	</macrodef>
+
+	<target name="download-build">
+		<mkdir dir="${bin}" />
+		<mkdir dir="${bin}/ext" />
+		<mkdir dir="${bin}/ext/prebuild" />
+		<mkdir dir="${bin}/ext/build" />
+
+		<echo message="Downloading files needed for pre-building" />
+
+		<download src="http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494"
+		          dest="${bin}/ext/prebuild/jre-6u20-windows-i586-s.exe"
+		          md5="71fdde020a4920f55c96e1121a1dbd4a"
+		          ignoreerrors="false" />
+
+		<download src="http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip"
+		          dest="${bin}/ext/prebuild/apache-ant-1.8.0-bin.zip"
+		          md5="c9eaa7b72e728a40ca748ff8e1fc6869"
+		          ignoreerrors="false" />
+
+		<echo message="Downloading files needed for building" />
+
+		<download src="http://rxtx.qbang.org/pub/rxtx/rxtx-2.1-7-bins-r2.zip"
+		          dest="${bin}/ext/build/rxtx-2.1-7-bins-r2.zip"
+		          md5="5f21ae633602a24fd3cdd096951476c2" />
+
+		<download src="http://cloud.github.com/downloads/KentBeck/junit/junit-4.8.2.jar"
+		          dest="${bin}/ext/build/junit-4.8.2.jar"
+		          md5="8a498c3d820db50cc7255d8c46c1ebd1" />
+
+		<download src="http://switch.dl.sourceforge.net/project/checkstyle/checkstyle/5.1/checkstyle-5.1.zip"
+		          dest="${bin}/ext/build/checkstyle-5.1.zip"
+		          md5="f80d1904b275080edcfc31d57ddad188" />
+
+		<download src="http://heanet.dl.sourceforge.net/project/jsmooth/jsmooth/0.9.9-7/jsmooth-0.9.9-7.zip"
+		          dest="${bin}/ext/build/jsmooth-0.9.9-7.zip"
+		          md5="af31eeda7d5f199c0eb5162f96a980e6" />
+
+		<download src="http://hamcrest.googlecode.com/files/hamcrest-core-1.1.jar"
+		          dest="${bin}/ext/build/hamcrest-core-1.1.jar"
+		          md5="447a5c012a4628bf43bcaad31cae3ff2" />
+
+		<download src="http://heanet.dl.sourceforge.net/project/gnuwin32/make/3.81/make-3.81.exe"
+		          dest="${bin}/ext/build/make-3.81.exe"
+		          md5="8ae51379d1f3eef8360df4e674f17d6d" />
+
+		<download src="http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe"
+		          dest="${bin}/ext/build/bison-2.4.1-setup.exe"
+		          md5="d24ed4f8a3b156899db96079fb869cbf" />
+
+	</target>
+
+	<target name="download-ext">
+		<mkdir dir="${bin}" />
+		<mkdir dir="${bin}/ext" />
+		<mkdir dir="${bin}/ext/rt" />
+		<mkdir dir="${bin}/ext/dev" />
+
+		<echo message="Downloading files needed for runtime" />
+
+		<download src="http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe"
+		          dest="${bin}/ext/rt/BCI2000Setup_091110.exe"
+		          md5="54198c14540d012c9b403c749bc725cb"
+		          user="ascheck"
+		          password="eibah7cohB" />
+
+		<download src="http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe"
+		          dest="${bin}/ext/rt/MySkit-v1.3-Installer.exe"
+		          md5="880a163f157d377ea8fb7bb203e3dbc0" />
+
+		<download src="http://www.pleoworld.com/downloads/PleoSDSoftware_1.1.zip"
+		          dest="${bin}/ext/rt/PleoSDSoftware_1.1.zip"
+		          md5="3812d55f0d9d5c88066b9ee16793523f" />
+
+		<echo message="Downloading files needed for development" />
+
+		<download src="http://pearl.plunder.com/x/$1OGj-51GptNM3Uy7aA0CbyFGQfPF0yYW/dd68920451/?/jdk-6u20-windows-i586.exe"
+		          dest="${bin}/ext/dev/jdk-6u20-windows-i586.exe"
+		          md5="cd336cbf94b74dacfdd519b1e1c02a3b" />
+
+		<download src="http://mirror.selfnet.de/eclipse/technology/epp/downloads/release/galileo/SR2/eclipse-java-galileo-SR2-win32.zip"
+		          dest="${bin}/ext/dev/eclipse-java-galileo-SR2-win32.zip"
+		          md5="9e3048a9f26386130334134f4062232a" />
+
+		<download src="http://www.compuphase.com/pawn/pawn-3.3.4127.package"
+		          dest="${bin}/ext/dev/pawn-3.3.4127.package"
+		          md5="0b429bf95ed11762cb5840906b622a8a" />
+
+		<download src="http://www.pleoworld.com/downloads/PleoDevelopmentKit.zip"
+		          dest="${bin}/ext/dev/PleoDevelopmentKit.zip"
+		          md5="cfc20448351b6b13c3908f36ca40f5c5" />
+
+		<download src="http://prdownloads.sourceforge.net/int64/tidy-060405-exe.zip?download"
+		          dest="${bin}/ext/dev/tidy-060405-exe.zip"
+		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
+
+	</target>
+
+	<target name="prepare-build" depends="download-build">
+		<mkdir dir="${bin}/lib" />
+
+		<echo message="Unzipping libraries needed for building" />
+
+		<unzip src="${bin}/ext/build/rxtx-2.1-7-bins-r2.zip" dest="${bin}/lib">
+			<patternset>
+				<include name="**/RXTXcomm.jar" />
+				<include name="**/i686-unknown-linux-gnu/librxtxSerial.so" />
+				<include name="**/i368-mingw32/rxtxSerial.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+
+		<unzip src="${bin}/ext/build/checkstyle-5.1.zip" dest="${bin}/lib">
+			<patternset>
+				<include name="**/checkstyle-all-5.1.jar" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+
+		<unzip src="${bin}/ext/build/jsmooth-0.9.9-7.zip" dest="${bin}/lib">
+			<patternset>
+				<include name="**/jsmoothgen-ant.jar" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+		<unzip src="${bin}/ext/build/jsmooth-0.9.9-7.zip" dest="${bin}/lib">
+			<patternset>
+				<include name="**/skeletons/windowed-wrapper/*" />
+			</patternset>
+		</unzip>
+		<move file="${bin}/lib/jsmooth-0.9.9-7/skeletons"
+		      todir="${bin}/lib"
+		      overwrite="true"
 		      failonerror="true"
-		      dir="${install}"
-		      osfamily="unix">
-			<arg value="clean" />
-		</exec>
-		<exec executable="cmd"
+		      verbose="${verb}" />
+		<delete includeemptydirs="true" failonerror="false" verbose="${verb}">
+			<fileset dir="${bin}/lib/jsmooth-0.9.9-7" excludes="**/*" />
+		</delete>
+
+		<copy file="${bin}/ext/build/junit-4.8.2.jar"
+		      tofile="${bin}/lib/junit.jar"
+		      overwrite="true"
 		      failonerror="true"
-		      dir="${install}"
-		      osfamily="windows">
-			<arg value="/c" />
-			<arg value="build.bat" />
-			<arg value="from-ant" />
-			<arg value="clean" />
-		</exec>
-		<exec executable="make"
-		      dir="${misc}/ExpressionParser"
-		      failonerror="true">
-			<arg value="clean" />
-		</exec>
-		<exec executable="make"
-		      dir="${misc}/TCPIP-Simulator"
-		      failonerror="true">
-			<arg value="clean" />
-		</exec>
+		      verbose="{verb}" />
+
+		<copy file="${bin}/ext/build/hamcrest-core-1.1.jar"
+		      tofile="${bin}/lib/hamcrest-core.jar"
+		      overwrite="true"
+		      failonerror="true"
+		      verbose="{verb}" />
+
 	</target>
 
 	<!-- Creates class files, checks for errors and dumps subversion log in bin/ -->
-	<target name="build">
+	<target name="build" depends="prepare-build">
 		<mkdir dir="${bin}" />
-		<mkdir dir="${dist}" />
+
+		<copy todir="${bin}"
+		      overwrite="true"
+		      failonerror="true"
+		      verbose="{verb}">
+			<fileset dir="${src}">
+				<include name="ExpressionParser/**" />
+				<include name="TCPIP-Simulator/**" />
+			</fileset>
+		</copy>
 
 		<javac srcdir="${src}"
 		       destdir="${bin}"
@@ -69,7 +221,9 @@
 		       includeantruntime="false"
 		       excludes="**/*.odg" />
 
-		<checkstyle config="checkstyle.xml" failonviolation="false">
+		<taskdef resource="checkstyletask.properties"
+		         classpath="${bin}/lib/checkstyle-all-5.1.jar" />
+		<checkstyle config="${src}/checkstyle.xml" failonviolation="false">
 			<fileset dir="${src}" includes="**/*.java" />
 			<fileset dir="${test}" includes="**/*.java" />
 			<classpath>
@@ -89,37 +243,31 @@
 			<arg value="--xml" />
 			<arg value="--non-interactive" />
 		</exec>
-		<exec executable="xsltproc"
-		      output="${dist}/changelog.html"
-		      failonerror="false">
-			<arg value="svnlog.xsl" />
-			<arg value="${bin}/changelog.xml" />
-		</exec>
 		<exec executable="make"
-		      dir="${misc}/ExpressionParser"
+		      dir="${bin}/ExpressionParser"
 		      failonerror="true"
 		      osfamily="unix">
 			<arg value="unix" />
 		</exec>
 		<exec executable="make"
-		      dir="${misc}/ExpressionParser"
+		      dir="${bin}/ExpressionParser"
 		      failonerror="true"
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
 		<exec executable="make"
-		      dir="${misc}/TCPIP-Simulator"
+		      dir="${bin}/TCPIP-Simulator"
 		      failonerror="true"
 		      osfamily="unix">
 			<arg value="unix" />
 		</exec>
 		<exec executable="make"
-		      dir="${misc}/TCPIP-Simulator"
+		      dir="${bin}/TCPIP-Simulator"
 		      failonerror="true"
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
-		<exec executable="${misc}/tidy-all-html.sh"
+		<exec executable="${src}/tidy-all-html.sh"
 		      dir="${basedir}"
 		      failonerror="false"
 		      osfamily="unix">
@@ -131,24 +279,39 @@
 	<target name="test" depends="dist">
 		<junit showoutput="true" failureproperty="testfailed">
 			<classpath>
-				<pathelement path="${lib}/junit.jar" />
-				<pathelement path="${lib}/hamcrest-core.jar" />
+				<pathelement path="${bin}/lib/junit.jar" />
+				<pathelement path="${bin}/lib/hamcrest-core.jar" />
 				<pathelement path="${bin}" />
 			</classpath>
 			<formatter type="plain" usefile="false" />
 			<batchtest>
-				<fileset dir="${test}" includes="**/*.java" />
+				<fileset dir="${src}/test" includes="**/*.java" />
 			</batchtest>
 		</junit>
 		<fail message="At least one JUnit test failed" if="testfailed" />
 	</target>
 
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
-	<target name="dist" depends="build">
-		<delete file="${jarloc}" verbose="${verb}" />
+	<target name="dist" depends="build, download-ext">
+		<mkdir dir="${dist}" />
+
+		<exec executable="xsltproc"
+		      output="${dist}/changelog.html"
+		      failonerror="false">
+			<arg value="svnlog.xsl" />
+			<arg value="${bin}/changelog.xml" />
+		</exec>
+
+		<taskdef name="jsmoothgen"
+		         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
+		         classpath="${bin}/lib/jsmoothgen-ant.jar" />
+		<property name="jarloc" location="${dist}/${ant.project.name}.jar" />
+		<property name="exefile" value="${ant.project.name}.exe" />
+
+		<delete file="${jarloc}" failonerror="true" verbose="${verb}" />
 		<jar jarfile="${jarloc}" duplicate="fail" strict="warn">
 			<zipfileset dir="${bin}/pleocmd" prefix="pleocmd" />
-			<zipfileset src="${lib}/RXTXcomm.jar" />
+			<zipfileset src="${bin}/lib/RXTXcomm.jar" />
 			<manifest>
 				<attribute name="Implementation-Vendor"
 				           value="Oliver Hoffmann" />
@@ -169,7 +332,7 @@
 				<mainClassName>${mainclass}</mainClassName>
 
 				<executableName>${exefile}</executableName>
-				<iconLocation>../${ant.project.name}.ico</iconLocation>
+				<iconLocation>../src/${ant.project.name}.ico</iconLocation>
 				<classPath>${classpath}</classPath>
 
 				<embeddedJar>true</embeddedJar>
@@ -185,40 +348,31 @@
 				<value>0</value>
 			</jsmoothproject>
 		</echoxml>
-		<jsmoothgen skeletonroot="${lib}/skeletons"
+		<jsmoothgen skeletonroot="${bin}/lib/skeletons"
 		            verbose="${verb}"
 		            project="${jsloc}" />
 
-		<copy todir="${dist}" verbose="${verb}">
+		<copy todir="${dist}"
+		      overwrite="true"
+		      failonerror="false"
+		      verbose="${verb}">
+			<fileset file="${src}/pleocommand" />
 			<fileset file="${bin}/${exefile}" />
-			<fileset file="${lib}/pleocommand" />
-			<fileset file="${lib}/librxtxSerial.so" />
-			<fileset file="${lib}/rxtxSerial.dll" />
-			<fileset file="${misc}/ExpressionParser/libExprParser.so" />
-			<fileset file="${misc}/ExpressionParser/ExprParser.dll" />
+			<fileset file="${bin}/lib/librxtxSerial.so" />
+			<fileset file="${bin}/lib/rxtxSerial.dll" />
+			<fileset file="${bin}/ExpressionParser/libExprParser.so" />
+			<fileset file="${bin}/ExpressionParser/ExprParser.dll" />
 		</copy>
-		<chmod perm="ugo+rx" verbose="${verb}">
+		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
 			<fileset file="${dist}/pleocommand" />
-			<fileset file="${dist}/librxtxSerial.so" />
 			<fileset file="${dist}/${exefile}" />
-			<fileset file="${install}/build.sh" />
+			<fileset file="${dist}/librxtxSerial.so" />
+			<fileset file="${dist}/libExprParser.so" />
 		</chmod>
-		<exec executable="${install}/build.sh"
-		      failonerror="true"
-		      dir="${install}"
-		      osfamily="unix">
-		</exec>
-		<exec executable="cmd"
-		      failonerror="true"
-		      dir="${install}"
-		      osfamily="windows">
-			<arg value="/c" />
-			<arg value="build.bat" />
-			<arg value="from-ant" />
-		</exec>
+		<echo message="This script has be run once under Windows and once under Linux so that all files can be created." />
 	</target>
 
-	<target name="rebuild" depends="clean, build, dist">
+	<target name="rebuild" depends="clean, dist">
 	</target>
 
 </project>
