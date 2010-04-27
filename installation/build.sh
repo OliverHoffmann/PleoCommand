@@ -1,7 +1,7 @@
 #!/bin/bash
 
 part=0
-count=18
+count=20
 
 function check() { # filename size hash
 	[ -e "$1" ] || return 1
@@ -44,14 +44,16 @@ function dl() {
 
 if [ "$1" == "clean" ]; then
 	rm -vf "runtime/BCI2000Setup_091110.exe"
-	rm -vf "runtime/jre-6u20-linux-i586.bin"
 	rm -vf "runtime/jre-6u20-windows-i586-s.exe"
 	rm -vf "runtime/MySkit-v1.3-Installer.exe"
 	rm -vf "runtime/PleoSDSoftware_1.1.zip"
+	rm -vf "development/jdk-6u20-windows-i586.exe"
 	rm -vf "development/eclipse-java-galileo-SR2-win32.zip"
 	rm -vf "development/pawn-3.3.4127.package"
 	rm -vf "development/PleoDevelopmentKit.zip"
 	rm -vf "development/apache-ant-1.8.0-bin.zip"
+	rm -vf "development/make-3.81.exe"
+	rm -vf "development/bison-2.4.1-setup.exe"
 	rm -vf "development/coreutils-5.3.0.exe"
 	rm -vf "development/wget-1.11.4-1-setup.exe"
 	rm -vf "development/MinGW-5.1.6.exe"
@@ -66,8 +68,6 @@ else
 	dl "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" \
 		"runtime/BCI2000Setup_091110.exe" 35760134 "54198c14540d012c9b403c749bc725cb" +x \
 		--user "ascheck" --password "eibah7cohB"
-	dl "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39485" \
-		"runtime/jre-6u20-linux-i586.bin" 21079390  "a6d7381cbca6ffcb1670f5e7eea1d41b" +x
 	dl "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494" \
 		"runtime/jre-6u20-windows-i586-s.exe" 16529184 "71fdde020a4920f55c96e1121a1dbd4a" +x
 	dl "http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe" \
@@ -76,8 +76,14 @@ else
 		"runtime/PleoSDSoftware_1.1.zip" 2273358 "3812d55f0d9d5c88066b9ee16793523f"
 
 	# development
+	dl "http://pearl.plunder.com/x/\$1OGj-51GptNM3Uy7aA0CbyFGQfPF0yYW/dd68920451/?/jdk-6u20-windows-i586.exe" \
+		"development/jdk-6u20-windows-i586.exe" 80398104 "cd336cbf94b74dacfdd519b1e1c02a3b"
 	dl "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" \
 		"development/apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	dl "http://heanet.dl.sourceforge.net/project/gnuwin32/make/3.81/make-3.81.exe" \
+		"development/make-3.81.exe" 3384653 "8ae51379d1f3eef8360df4e674f17d6d"
+	dl "http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe" \
+		"development/bison-2.4.1-setup.exe" 3840350 "d24ed4f8a3b156899db96079fb869cbf"
 	dl "http://ignum.dl.sourceforge.net/project/gnuwin32/coreutils/5.3.0/coreutils-5.3.0.exe" \
 		"development/coreutils-5.3.0.exe" 6439882 "5a3e9d30b906dadf54de0635522fd62c" +x
 	dl "http://surfnet.dl.sourceforge.net/project/gnuwin32/wget/1.11.4-1/wget-1.11.4-1-setup.exe" \

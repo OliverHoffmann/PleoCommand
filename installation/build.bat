@@ -3,7 +3,7 @@
 SETLOCAL enabledelayedexpansion
 
 SET part=0
-SET count=18
+SET count=20
 
 SET myexit=EXIT /B
 if X%1 == Xfrom-ant (
@@ -63,10 +63,13 @@ GOTO:EOF
 		DEL "runtime\jre-6u20-windows-i586-s.exe"
 		DEL "runtime\MySkit-v1.3-Installer.exe"
 		DEL "runtime\PleoSDSoftware_1.1.zip"
+		DEL "development\jdk-6u20-windows-i586.exe"
 		DEL "development\eclipse-java-galileo-SR2-win32.zip"
 		DEL "development\pawn-3.3.4127.package"
 		DEL "development\PleoDevelopmentKit.zip"
 		DEL "development\apache-ant-1.8.0-bin.zip"
+		DEL "development\make-3.81.exe"
+		DEL "development\bison-2.4.1-setup.exe"
 		DEL "development\coreutils-5.3.0.exe"
 		DEL "development\wget-1.11.4-1-setup.exe"
 		DEL "development\MinGW-5.1.6.exe"
@@ -80,20 +83,24 @@ GOTO:EOF
 	)
 	REM runtime
 	CALL :DL "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" ^
-		"runtime\BCI2000Setup_091110.exe" 35760134 "54198c14540d012c9b403c749bc725cb" ^
+		"runtime/BCI2000Setup_091110.exe" 35760134 "54198c14540d012c9b403c749bc725cb" ^
 		--user "ascheck" --password "eibah7cohB"
-	CALL :DL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39485" ^
-		"runtime\jre-6u20-linux-i586.bin" 21079390  "a6d7381cbca6ffcb1670f5e7eea1d41b"
 	CALL :DL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494" ^
-		"runtime\jre-6u20-windows-i586-s.exe" 16529184 "71fdde020a4920f55c96e1121a1dbd4a"
+		"runtime/jre-6u20-windows-i586-s.exe" 16529184 "71fdde020a4920f55c96e1121a1dbd4a"
 	CALL :DL "http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe" ^
-		"runtime\MySkit-v1.3-Installer.exe" 3666219 "880a163f157d377ea8fb7bb203e3dbc0"
+		"runtime/MySkit-v1.3-Installer.exe" 3666219 "880a163f157d377ea8fb7bb203e3dbc0"
 	CALL :DL "http://www.pleoworld.com/downloads/PleoSDSoftware_1.1.zip" ^
-		"runtime\PleoSDSoftware_1.1.zip" 2273358 "3812d55f0d9d5c88066b9ee16793523f"
+		"runtime/PleoSDSoftware_1.1.zip" 2273358 "3812d55f0d9d5c88066b9ee16793523f"
 
 	REM development
+	CALL :DL "http://pearl.plunder.com/x/$1OGj-51GptNM3Uy7aA0CbyFGQfPF0yYW/dd68920451/?/jdk-6u20-windows-i586.exe" ^
+		"development/jdk-6u20-windows-i586.exe" 80398104 "cd336cbf94b74dacfdd519b1e1c02a3b"
 	CALL :DL "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" ^
 		"development/apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	CALL :DL "http://heanet.dl.sourceforge.net/project/gnuwin32/make/3.81/make-3.81.exe" ^
+		"development/make-3.81.exe" 3384653 "8ae51379d1f3eef8360df4e674f17d6d"
+	CALL :DL "http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe" ^
+		"development/bison-2.4.1-setup.exe" 3840350 "d24ed4f8a3b156899db96079fb869cbf"
 	CALL :DL "http://ignum.dl.sourceforge.net/project/gnuwin32/coreutils/5.3.0/coreutils-5.3.0.exe" ^
 		"development/coreutils-5.3.0.exe" 6439882 "5a3e9d30b906dadf54de0635522fd62c"
 	CALL :DL "http://surfnet.dl.sourceforge.net/project/gnuwin32/wget/1.11.4-1/wget-1.11.4-1-setup.exe" ^
@@ -113,11 +120,11 @@ GOTO:EOF
 	CALL :DL "ftp://ftp.zlatkovic.com/libxml/zlib-1.2.3.win32.zip" ^
 		"development/xsltproc/zlib-1.2.3.win32.zip" 126580 "61f7b91539b0532eea3c30e3281dc424"
 	CALL :DL "http://mirror.selfnet.de/eclipse/technology/epp/downloads/release/galileo/SR2/eclipse-java-galileo-SR2-win32.zip" ^
-		"development\eclipse-java-galileo-SR2-win32.zip" 97290250 "9e3048a9f26386130334134f4062232a"
+		"development/eclipse-java-galileo-SR2-win32.zip" 97290250 "9e3048a9f26386130334134f4062232a"
 	CALL :DL "http://www.compuphase.com/pawn/pawn-3.3.4127.package" ^
-		"development\pawn-3.3.4127.package" 3523216 "0b429bf95ed11762cb5840906b622a8a"
+		"development/pawn-3.3.4127.package" 3523216 "0b429bf95ed11762cb5840906b622a8a"
 	CALL :DL "http://www.pleoworld.com/downloads/PleoDevelopmentKit.zip" ^
-		"development\PleoDevelopmentKit.zip" 53194900 "cfc20448351b6b13c3908f36ca40f5c5"
+		"development/PleoDevelopmentKit.zip" 53194900 "cfc20448351b6b13c3908f36ca40f5c5"
 
 	ECHO "Finished downloading and md5-checking of all files."
 	%myexit% 0
