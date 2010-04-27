@@ -57,7 +57,7 @@ GOTO:EOF
 GOTO:EOF
 
 :MAIN
-	set dir=bin\ext\prebuild
+	SET dir=bin\ext\prebuild
 
 	IF X%1 == Xclean (
 		DEL "%dir%\jre-6u20-windows-i586-s.exe"
@@ -70,5 +70,19 @@ GOTO:EOF
 	CALL :DL "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" ^
 		"%dir%\apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
 
-	ECHO Finished downloading and md5-checking of files needed for 'ant build'.
+	SET mustinst=0
+	CALL java -version
+	IF ERRORLEVEL 1 SET mustinst=1
+	CALL ant -version
+	IF ERRORLEVEL 1 SET mustinst=1
+	IF %mustinst% == 0 (
+		ECHO ======================================================================
+		ECHO Finished downloading and md5-checking of pre-build files.
+		ECHO You may now call 'ant dist'.
+	) ELSE (
+		ECHO ======================================================================
+		ECHO You have to install java and/or ant from %dir%.
+		ECHO Then invoke %0 again.
+	)
+	
 	%myexit% 0

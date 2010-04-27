@@ -55,5 +55,13 @@ else
 	dl "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" \
 		"$dir/apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
 
-	echo "Finished downloading and md5-checking of files needed for 'ant build'."
+	java -version && ant -version && {
+		echo "======================================================================"
+		echo "Finished downloading and md5-checking of pre-build files."
+		echo "You may now call 'ant dist'."
+	} || {
+		echo "======================================================================"
+		echo "You have to install java and/or ant from $dir."
+		echo "Then invoke $0 again."
+	}
 fi
