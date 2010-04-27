@@ -2,30 +2,37 @@
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-	<xsl:output method="xml" encoding="utf-8" indent="yes" />
-
+	<xsl:output
+		method="html"
+		encoding="utf-8"
+		indent="yes"
+		omit-xml-declaration="yes"
+		doctype-public="-//W3C//DTD HTML 4.01//EN" />
+			
 	<xsl:template match="log">
-		<title>PleoCommand Changelog</title>
-		<xsl:apply-templates />
+		<html>
+			<head>
+				<title>PleoCommand Changelog</title>
+			</head>
+			<body>
+				<xsl:apply-templates />
+			</body>
+		</html>
 	</xsl:template>
 
 	<xsl:template match="logentry">
-		<entry>
-			<content type="xhtml">
-				<div>
-					<h2>SVN Commit <xsl:value-of select="@revision" />
-					</h2>
-					<p>From <xsl:value-of select="date" />
-					</p>
-					<xsl:apply-templates select="msg" />
-					<xsl:apply-templates select="paths" />
-				</div>
-			</content>
-		</entry>
+		<div>
+			<h2>SVN Commit <xsl:value-of select="@revision" />
+			</h2>
+			<p>From <xsl:value-of select="date" />
+			</p>
+			<xsl:apply-templates select="msg" />
+			<xsl:apply-templates select="paths" />
+		</div>
 	</xsl:template>
 
 	<xsl:template match="paths">
-		<table border="0">
+		<table border="0" summary="All files affected by this revision">
 			<xsl:apply-templates select="path" />
 		</table>
 	</xsl:template>
