@@ -101,9 +101,6 @@
 		<download src="ftp://ftp.zlatkovic.com/libxml/libxml2-2.7.6.win32.zip"
 		          dest="${extBuild}/xsltproc/temp/libxml2.zip"
 		          md5="d7b1f133b286751cdf5a50f39dbb6ddf" />
-		<download src="ftp://ftp.zlatkovic.com/libxml/libxmlsec-1.2.13.win32.zip"
-		          dest="${extBuild}/xsltproc/temp/libxmlsec.zip"
-		          md5="c6bafb19bb02eb733f7f3f672e736766" />
 		<download src="ftp://ftp.zlatkovic.com/libxml/libxslt-1.1.26.win32.zip"
 		          dest="${extBuild}/xsltproc/temp/libxslt.zip"
 		          md5="36fb352ea5b6309305476bcb8cabc31e" />
@@ -120,13 +117,6 @@
 			<mapper type="flatten" />
 		</unzip>
 		<unzip src="${extBuild}/xsltproc/temp/libxml2.zip"
-		       dest="${extBuild}/xsltproc/bin">
-			<patternset>
-				<include name="**/bin/*.dll" />
-			</patternset>
-			<mapper type="flatten" />
-		</unzip>
-		<unzip src="${extBuild}/xsltproc/temp/libxmlsec.zip"
 		       dest="${extBuild}/xsltproc/bin">
 			<patternset>
 				<include name="**/bin/*.dll" />
