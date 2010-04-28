@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package test.pleocmd.pipe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,16 +8,18 @@ import java.io.File;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
 import pleocmd.cfg.Configuration;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
+import pleocmd.pipe.Pipe;
+import pleocmd.pipe.PipeFeedback;
 import pleocmd.pipe.in.FileInput;
 import pleocmd.pipe.in.ReadType;
 import pleocmd.pipe.in.StaticInput;
 import pleocmd.pipe.out.FileOutput;
 import pleocmd.pipe.out.InternalCommandOutput;
 import pleocmd.pipe.out.PrintType;
+import test.pleocmd.Testcases;
 
 public class PipeTest extends Testcases {
 

@@ -1,4 +1,4 @@
-package pleocmd.pipe.data;
+package test.pleocmd.pipe.data;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -15,10 +15,11 @@ import java.util.List;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
 import pleocmd.exc.FormatException;
+import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
+import test.pleocmd.Testcases;
 
 public final class DataTest extends Testcases {
 

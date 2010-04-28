@@ -39,7 +39,7 @@ public final class ConfigInt extends ConfigNumber<Integer> {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "int";
 	}
 

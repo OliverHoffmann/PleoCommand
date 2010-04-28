@@ -1,4 +1,4 @@
-package pleocmd;
+package test.pleocmd;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -8,6 +8,8 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import pleocmd.Log;
+import pleocmd.StandardInput;
 import pleocmd.itfc.gui.MainFrame;
 
 public final class StandardInputTest extends Testcases {

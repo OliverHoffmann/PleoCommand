@@ -37,7 +37,8 @@ public final class ConfigBoolean extends ConfigValue {
 	}
 
 	@Override
-	void setFromString(final String string) throws ConfigurationException {
+	public void setFromString(final String string)
+			throws ConfigurationException {
 		if ("true".equals(string))
 			setContent(true);
 		else if ("false".equals(string))
@@ -58,7 +59,7 @@ public final class ConfigBoolean extends ConfigValue {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "bool";
 	}
 

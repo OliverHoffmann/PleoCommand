@@ -1,4 +1,4 @@
-package pleocmd.cfg;
+package test.pleocmd.cfg;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -13,11 +13,24 @@ import java.util.Arrays;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
+import pleocmd.cfg.ConfigBoolean;
+import pleocmd.cfg.ConfigBounds;
+import pleocmd.cfg.ConfigCollection;
+import pleocmd.cfg.ConfigDataMap;
+import pleocmd.cfg.ConfigDouble;
+import pleocmd.cfg.ConfigEnum;
+import pleocmd.cfg.ConfigInt;
+import pleocmd.cfg.ConfigItem;
+import pleocmd.cfg.ConfigLong;
+import pleocmd.cfg.ConfigMap;
+import pleocmd.cfg.ConfigPath;
+import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.ConfigValue;
 import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
+import test.pleocmd.Testcases;
 
 public final class ConfigValueTest extends Testcases {
 

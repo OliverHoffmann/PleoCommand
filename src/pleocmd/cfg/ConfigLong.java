@@ -39,7 +39,7 @@ public final class ConfigLong extends ConfigNumber<Long> {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "long";
 	}
 

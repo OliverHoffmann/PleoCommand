@@ -1,4 +1,4 @@
-package pleocmd.pipe.data;
+package test.pleocmd.pipe.data;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertNull;
@@ -10,8 +10,10 @@ import java.util.ArrayList;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
+import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.DataQueue;
 import pleocmd.pipe.val.Value;
+import test.pleocmd.Testcases;
 
 public final class DataQueueTest extends Testcases {
 

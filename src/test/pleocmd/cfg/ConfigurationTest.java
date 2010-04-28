@@ -1,4 +1,4 @@
-package pleocmd.cfg;
+package test.pleocmd.cfg;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -13,8 +13,12 @@ import java.util.List;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
+import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.Configuration;
+import pleocmd.cfg.ConfigurationInterface;
+import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
+import test.pleocmd.Testcases;
 
 public final class ConfigurationTest extends Testcases {
 

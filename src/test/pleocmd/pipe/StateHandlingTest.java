@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package test.pleocmd.pipe;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -8,9 +8,10 @@ import java.io.IOException;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
+import pleocmd.pipe.StateHandling;
+import test.pleocmd.Testcases;
 
 public class StateHandlingTest extends Testcases {
 

@@ -62,7 +62,8 @@ public final class ConfigBounds extends ConfigValue {
 	}
 
 	@Override
-	void setFromString(final String string) throws ConfigurationException {
+	public void setFromString(final String string)
+			throws ConfigurationException {
 		try {
 			final int index1 = string.indexOf(',');
 			final int index2 = string.indexOf('/');
@@ -90,7 +91,7 @@ public final class ConfigBounds extends ConfigValue {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "bounds";
 	}
 

@@ -115,7 +115,7 @@ public class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	final String getIdentifier() {
+	public final String getIdentifier() {
 		return null;
 	}
 

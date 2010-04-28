@@ -48,7 +48,7 @@ public abstract class StateHandling {
 	 * Must be called as the last statement in all constructors of all sub
 	 * classes.
 	 */
-	protected final void constructed() {
+	public final void constructed() {
 		try {
 			ensureConstructing();
 			setState(State.Constructed);

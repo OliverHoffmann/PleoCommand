@@ -116,7 +116,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		switch (type) {
 		case FileForReading:
 			return "read";

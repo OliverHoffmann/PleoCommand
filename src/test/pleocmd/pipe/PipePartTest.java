@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package test.pleocmd.pipe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -9,10 +9,11 @@ import java.io.IOException;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
 import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
+import pleocmd.pipe.PipePart;
+import test.pleocmd.Testcases;
 
 public final class PipePartTest extends Testcases {
 

@@ -1,7 +1,8 @@
-package pleocmd;
+package test.pleocmd;
 
 import org.junit.BeforeClass;
 
+import pleocmd.Log;
 import pleocmd.Log.Type;
 
 public class Testcases { // CS_IGNORE not an utility class

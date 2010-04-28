@@ -129,7 +129,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	@Override
-	final String getIdentifier() {
+	public final String getIdentifier() {
 		switch (type) {
 		case List:
 			return "list";

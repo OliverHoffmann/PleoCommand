@@ -174,7 +174,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	protected abstract String convertValue(V value);
 
 	@Override
-	final String getIdentifier() {
+	public final String getIdentifier() {
 		return null;
 	}
 

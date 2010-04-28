@@ -60,7 +60,7 @@ public abstract class ConfigValue {
 	abstract void setFromStrings(final List<String> strings)
 			throws ConfigurationException;
 
-	abstract String getIdentifier();
+	public abstract String getIdentifier();
 
 	abstract boolean isSingleLined();
 

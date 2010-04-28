@@ -39,7 +39,7 @@ public final class ConfigDouble extends ConfigNumber<Double> {
 	}
 
 	@Override
-	String getIdentifier() {
+	public String getIdentifier() {
 		return "double";
 	}
 

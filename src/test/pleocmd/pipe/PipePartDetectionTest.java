@@ -1,4 +1,4 @@
-package pleocmd.pipe;
+package test.pleocmd.pipe;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -6,8 +6,10 @@ import static org.junit.Assert.assertFalse;
 import org.junit.Test;
 
 import pleocmd.Log;
-import pleocmd.Testcases;
+import pleocmd.pipe.PipePart;
+import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.in.FileInput;
+import test.pleocmd.Testcases;
 
 public final class PipePartDetectionTest extends Testcases {
 
