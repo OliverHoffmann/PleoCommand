@@ -304,15 +304,17 @@
 			<fileset dir="${src}">
 				<include name="ExpressionParser/**" />
 				<include name="TCPIP-Simulator/**" />
+				<include name="**/help/*.html" />
+				<include name="**/icons/*.png" />
 			</fileset>
 		</copy>
 
 		<javac srcdir="${src}"
 		       destdir="${bin}"
 		       verbose="${verb}"
+		       listfiles="true"
 		       classpath="${classpath}"
-		       includeantruntime="false"
-		       excludes="**/*.odg" />
+		       includeantruntime="false" />
 
 		<taskdef resource="checkstyletask.properties"
 		         classpath="${lib}/checkstyle-all-5.1.jar" />
@@ -369,7 +371,7 @@
 		<exec executable="xsltproc"
 		      output="${dist}/changelog.html"
 		      failonerror="false">
-			<arg value="svnlog.xsl" />
+			<arg value="${src}/svnlog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
 
@@ -377,9 +379,10 @@
 		      dir="${basedir}"
 		      failonerror="true"
 		      osfamily="unix">
-			<arg value="${basedir}" />
+			<arg value="${bin}" />
+			<arg value="${dist}" />
 		</exec>
-	
+
 		<taskdef name="jsmoothgen"
 		         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
 		         classpath="${lib}/jsmoothgen-ant.jar" />
