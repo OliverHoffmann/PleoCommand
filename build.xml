@@ -139,7 +139,16 @@
 			<mapper type="flatten" />
 		</unzip>
 
-
+		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
+			<fileset file="${extPreBuild}/jdk-setup.bin" />
+			<fileset file="${extPreBuild}/jdk-setup.exe" />
+			<fileset file="${extBuild}/bison-setup.exe" />
+			<fileset file="${extBuild}/coreutils-setup.exe" />
+			<fileset file="${extBuild}/gcc-setup.exe" />
+			<fileset file="${extBuild}/make-setup.exe" />
+			<fileset file="${extBuild}/subversion-setup.msi" />
+			<fileset file="${extBuild}/xsltproc/bin/xsltproc.exe" />
+		</chmod>
 
 	</target>
 
@@ -177,6 +186,11 @@
 			</fileset>
 		</copy>
 
+		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
+			<fileset file="${extRT}/BCI2000-setup.exe" />
+			<fileset file="${extRT}/MySkit-setup.exe" />
+		</chmod>
+
 		<echo message="Downloading files needed for development" />
 
 		<download src="http://www.compuphase.com/pawn/pawn-3.3.4127.package"
@@ -202,6 +216,10 @@
 				<include name="BCI2000Source/**" />
 			</fileset>
 		</copy>
+
+		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
+			<fileset file="${extDev}/pawn-setup.package" />
+		</chmod>
 
 	</target>
 
