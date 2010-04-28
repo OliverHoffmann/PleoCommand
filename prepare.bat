@@ -3,7 +3,7 @@
 SETLOCAL enabledelayedexpansion
 
 SET part=0
-SET count=20
+SET count=4
 
 SET myexit=EXIT /B
 if X%1 == Xfrom-ant (
@@ -57,18 +57,30 @@ GOTO:EOF
 GOTO:EOF
 
 :MAIN
-	SET dir=bin\ext\prebuild
+	SET dir=ext\prebuild
 
 	IF X%1 == Xclean (
-		DEL "%dir%\jre-6u20-windows-i586-s.exe"
-		DEL "%dir%\apache-ant-1.8.0-bin.zip"
+		DEL "%dir%\jdk-setup.bin"
+		DEL "%dir%\jdk-setup.exe"
+		DEL "%dir%\ant-bin.zip"
 		%myexit% 0
 	)
-	REM pre-build files only
-	CALL :DL "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494" ^
-		"%dir%\jre-6u20-windows-i586-s.exe" 16529184 "71fdde020a4920f55c96e1121a1dbd4a"
+	MD ext
+	MD ext\rt
+	MD %dir%
+
+	REM pre-build files
 	CALL :DL "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" ^
-		"%dir%\apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+		"$dir/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-linux-i586-01_apr_2010.bin" ^
+		"$dir/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568"
+	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" ^
+		"$dir/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a"
+		
+	REM need to use wget because ant's downloader can't handle the URL
+	CALL :DL "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" ^
+		"ext/rt/BCI2000-setup.exe" 35760134 "54198c14540d012c9b403c749bc725cb" ^
+		--user "ascheck" --password "eibah7cohB"
 
 	SET mustinst=0
 	CALL java -version
@@ -78,7 +90,7 @@ GOTO:EOF
 	IF %mustinst% == 0 (
 		ECHO ======================================================================
 		ECHO Finished downloading and md5-checking of pre-build files.
-		ECHO You may now call 'ant dist'.
+		ECHO You may now call 'ant fetch' or 'ant dist'.
 	) ELSE (
 		ECHO ======================================================================
 		ECHO You have to install java and/or ant from %dir%.

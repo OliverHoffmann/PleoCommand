@@ -17,31 +17,13 @@
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="${lib}/RXTXcomm.jar:${lib}/junit.jar" />
 
-	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
-	<target name="clean">
-		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
-			<fileset dir="${bin}" />
-			<fileset dir="${dist}" />
-		</delete>
-		<echo message="Downloaded external files are not deleted. 'ant mrproper' cleans all." />
-	</target>
-
-	<!-- Cleans bin/ and dist/ diretory completely -->
-	<target name="mrproper">
-		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
-			<fileset dir="${bin}" />
-			<fileset dir="${ext}" />
-			<fileset dir="${dist}" />
-		</delete>
-	</target>
-
 	<macrodef name="download">
 		<attribute name="src" />
 		<attribute name="dest" />
 		<attribute name="md5" />
 		<attribute name="user" default="" />
 		<attribute name="password" default="" />
-		<attribute name="ignoreerrors" default="true" />
+		<attribute name="ignoreerrors" default="false" />
 		<sequential>
 			<get src="@{src}"
 			     dest="@{dest}"
@@ -64,59 +46,115 @@
 		</sequential>
 	</macrodef>
 
-	<!-- Downloads prebuild and build files needed for build and dist targets -->
-	<target name="download-build">
+	<!-- Downloads build files needed for build and dist targets -->
+	<target name="_download-build">
 		<mkdir dir="${bin}" />
 		<mkdir dir="${ext}" />
-		<mkdir dir="${extPreBuild}" />
 		<mkdir dir="${extBuild}" />
-
-		<echo message="Downloading files needed for pre-building" />
-
-		<download src="http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494"
-		          dest="${extPreBuild}/jre-6u20-windows-i586-s.exe"
-		          md5="71fdde020a4920f55c96e1121a1dbd4a"
-		          ignoreerrors="false" />
-
-		<download src="http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip"
-		          dest="${extPreBuild}/apache-ant-1.8.0-bin.zip"
-		          md5="c9eaa7b72e728a40ca748ff8e1fc6869"
-		          ignoreerrors="false" />
 
 		<echo message="Downloading files needed for building" />
 
 		<download src="http://rxtx.qbang.org/pub/rxtx/rxtx-2.1-7-bins-r2.zip"
-		          dest="${extBuild}/rxtx-2.1-7-bins-r2.zip"
+		          dest="${extBuild}/rxtx-bin.zip"
 		          md5="5f21ae633602a24fd3cdd096951476c2" />
 
 		<download src="http://cloud.github.com/downloads/KentBeck/junit/junit-4.8.2.jar"
-		          dest="${extBuild}/junit-4.8.2.jar"
+		          dest="${extBuild}/junit.jar"
 		          md5="8a498c3d820db50cc7255d8c46c1ebd1" />
 
 		<download src="http://switch.dl.sourceforge.net/project/checkstyle/checkstyle/5.1/checkstyle-5.1.zip"
-		          dest="${extBuild}/checkstyle-5.1.zip"
+		          dest="${extBuild}/checkstyle-bin.zip"
 		          md5="f80d1904b275080edcfc31d57ddad188" />
 
 		<download src="http://heanet.dl.sourceforge.net/project/jsmooth/jsmooth/0.9.9-7/jsmooth-0.9.9-7.zip"
-		          dest="${extBuild}/jsmooth-0.9.9-7.zip"
+		          dest="${extBuild}/jsmooth-bin.zip"
 		          md5="af31eeda7d5f199c0eb5162f96a980e6" />
 
 		<download src="http://hamcrest.googlecode.com/files/hamcrest-core-1.1.jar"
-		          dest="${extBuild}/hamcrest-core-1.1.jar"
+		          dest="${extBuild}/hamcrest-core.jar"
 		          md5="447a5c012a4628bf43bcaad31cae3ff2" />
 
+		<download src="http://ignum.dl.sourceforge.net/project/gnuwin32/coreutils/5.3.0/coreutils-5.3.0.exe"
+		          dest="${extBuild}/coreutils-setup.exe"
+		          md5="5a3e9d30b906dadf54de0635522fd62c" />
+
+		<download src="http://alagazam.net/Setup-Subversion-1.6.6.msi"
+		          dest="${extBuild}/subversion-setup.msi"
+		          md5="379fbeb45067f98ebd830affd4afdcc1" />
+
+		<download src="http://downloads.sourceforge.net/project/mingw/Automated%20MinGW%20Installer/MinGW%205.1.6/MinGW-5.1.6.exe"
+		          dest="${extBuild}/gcc-setup.exe"
+		          md5="9cf4ab0b4c9f858d32f5d5c89009c4dc" />
+
 		<download src="http://heanet.dl.sourceforge.net/project/gnuwin32/make/3.81/make-3.81.exe"
-		          dest="${extBuild}/make-3.81.exe"
+		          dest="${extBuild}/make-setup.exe"
 		          md5="8ae51379d1f3eef8360df4e674f17d6d" />
 
 		<download src="http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe"
-		          dest="${extBuild}/bison-2.4.1-setup.exe"
+		          dest="${extBuild}/bison-setup.exe"
 		          md5="d24ed4f8a3b156899db96079fb869cbf" />
+
+		<mkdir dir="${extBuild}/xsltproc/temp" />
+		<download src="ftp://ftp.zlatkovic.com/libxml/iconv-1.9.2.win32.zip"
+		          dest="${extBuild}/xsltproc/temp/icon.zip"
+		          md5="da5f3164bbd21e7830faef7e5a7ea5e6" />
+		<download src="ftp://ftp.zlatkovic.com/libxml/libxml2-2.7.6.win32.zip"
+		          dest="${extBuild}/xsltproc/temp/libxml2.zip"
+		          md5="d7b1f133b286751cdf5a50f39dbb6ddf" />
+		<download src="ftp://ftp.zlatkovic.com/libxml/libxmlsec-1.2.13.win32.zip"
+		          dest="${extBuild}/xsltproc/temp/libxmlsec.zip"
+		          md5="c6bafb19bb02eb733f7f3f672e736766" />
+		<download src="ftp://ftp.zlatkovic.com/libxml/libxslt-1.1.26.win32.zip"
+		          dest="${extBuild}/xsltproc/temp/libxslt.zip"
+		          md5="36fb352ea5b6309305476bcb8cabc31e" />
+		<download src="ftp://ftp.zlatkovic.com/libxml/zlib-1.2.3.win32.zip"
+		          dest="${extBuild}/xsltproc/temp/zlib.zip"
+		          md5="61f7b91539b0532eea3c30e3281dc424" />
+
+		<mkdir dir="${extBuild}/xsltproc/bin" />
+		<unzip src="${extBuild}/xsltproc/temp/icon.zip"
+		       dest="${extBuild}/xsltproc/bin">
+			<patternset>
+				<include name="**/bin/*.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+		<unzip src="${extBuild}/xsltproc/temp/libxml2.zip"
+		       dest="${extBuild}/xsltproc/bin">
+			<patternset>
+				<include name="**/bin/*.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+		<unzip src="${extBuild}/xsltproc/temp/libxmlsec.zip"
+		       dest="${extBuild}/xsltproc/bin">
+			<patternset>
+				<include name="**/bin/*.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+		<unzip src="${extBuild}/xsltproc/temp/libxslt.zip"
+		       dest="${extBuild}/xsltproc/bin">
+			<patternset>
+				<include name="**/bin/*.dll" />
+				<include name="**/bin/*.exe" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+		<unzip src="${extBuild}/xsltproc/temp/zlib.zip"
+		       dest="${extBuild}/xsltproc/bin">
+			<patternset>
+				<include name="**/bin/*.dll" />
+			</patternset>
+			<mapper type="flatten" />
+		</unzip>
+
+
 
 	</target>
 
 	<!-- Downloads runtime and development files -->
-	<target name="download-ext">
+	<target name="_download-ext">
 		<mkdir dir="${bin}" />
 		<mkdir dir="${ext}" />
 		<mkdir dir="${extRT}" />
@@ -124,41 +162,19 @@
 
 		<echo message="Downloading files needed for runtime" />
 
+		<download src="http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe"
+		          dest="${extRT}/MySkit-setup.exe"
+		          md5="880a163f157d377ea8fb7bb203e3dbc0" />
+
 		<download src="http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe"
-		          dest="${extRT}/BCI2000Setup_091110.exe"
+		          dest="${extRT}/BCI2000-setup.exe"
 		          md5="54198c14540d012c9b403c749bc725cb"
 		          user="ascheck"
 		          password="eibah7cohB" />
 
-		<download src="http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe"
-		          dest="${extRT}/MySkit-v1.3-Installer.exe"
-		          md5="880a163f157d377ea8fb7bb203e3dbc0" />
-
 		<download src="http://www.pleoworld.com/downloads/PleoSDSoftware_1.1.zip"
 		          dest="${extRT}/PleoSDSoftware_1.1.zip"
 		          md5="3812d55f0d9d5c88066b9ee16793523f" />
-
-		<echo message="Downloading files needed for development" />
-
-		<download src="http://pearl.plunder.com/x/$1OGj-51GptNM3Uy7aA0CbyFGQfPF0yYW/dd68920451/?/jdk-6u20-windows-i586.exe"
-		          dest="${extDev}/jdk-6u20-windows-i586.exe"
-		          md5="cd336cbf94b74dacfdd519b1e1c02a3b" />
-
-		<download src="http://mirror.selfnet.de/eclipse/technology/epp/downloads/release/galileo/SR2/eclipse-java-galileo-SR2-win32.zip"
-		          dest="${extDev}/eclipse-java-galileo-SR2-win32.zip"
-		          md5="9e3048a9f26386130334134f4062232a" />
-
-		<download src="http://www.compuphase.com/pawn/pawn-3.3.4127.package"
-		          dest="${extDev}/pawn-3.3.4127.package"
-		          md5="0b429bf95ed11762cb5840906b622a8a" />
-
-		<download src="http://www.pleoworld.com/downloads/PleoDevelopmentKit.zip"
-		          dest="${extDev}/PleoDevelopmentKit.zip"
-		          md5="cfc20448351b6b13c3908f36ca40f5c5" />
-
-		<download src="http://prdownloads.sourceforge.net/int64/tidy-060405-exe.zip?download"
-		          dest="${extDev}/tidy-060405-exe.zip"
-		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
 
 		<copy todir="${extRT}"
 		      overwrite="true"
@@ -169,6 +185,20 @@
 			</fileset>
 		</copy>
 
+		<echo message="Downloading files needed for development" />
+
+		<download src="http://www.compuphase.com/pawn/pawn-3.3.4127.package"
+		          dest="${extDev}/pawn-setup.package"
+		          md5="0b429bf95ed11762cb5840906b622a8a" />
+
+		<download src="http://www.pleoworld.com/downloads/PleoDevelopmentKit.zip"
+		          dest="${extDev}/PleoDevelopmentKit.zip"
+		          md5="cfc20448351b6b13c3908f36ca40f5c5" />
+
+		<download src="http://prdownloads.sourceforge.net/int64/tidy-060405-exe.zip?download"
+		          dest="${extDev}/tidy-bin.zip"
+		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
+
 		<copy todir="${extDev}"
 		      overwrite="true"
 		      failonerror="true"
@@ -176,18 +206,20 @@
 			<fileset dir="${src}/ext/dev">
 				<include name="pawncc/**" />
 			</fileset>
+			<fileset dir="${src}">
+				<include name="BCI2000Source/**" />
+			</fileset>
 		</copy>
-
 
 	</target>
 
 	<!-- Unzips and moves files needed for build and dist targets -->
-	<target name="prepare-build" depends="download-build">
+	<target name="_prepare-build" depends="_download-build">
 		<mkdir dir="${lib}" />
 
 		<echo message="Unzipping libraries needed for building" />
 
-		<unzip src="${extBuild}/rxtx-2.1-7-bins-r2.zip" dest="${lib}">
+		<unzip src="${extBuild}/rxtx-bin.zip" dest="${lib}">
 			<patternset>
 				<include name="**/RXTXcomm.jar" />
 				<include name="**/i686-unknown-linux-gnu/librxtxSerial.so" />
@@ -196,40 +228,41 @@
 			<mapper type="flatten" />
 		</unzip>
 
-		<unzip src="${extBuild}/checkstyle-5.1.zip" dest="${lib}">
+		<unzip src="${extBuild}/checkstyle-bin.zip" dest="${lib}">
 			<patternset>
 				<include name="**/checkstyle-all-5.1.jar" />
 			</patternset>
 			<mapper type="flatten" />
 		</unzip>
 
-		<unzip src="${extBuild}/jsmooth-0.9.9-7.zip" dest="${lib}">
+		<unzip src="${extBuild}/jsmooth-bin.zip" dest="${lib}">
 			<patternset>
 				<include name="**/jsmoothgen-ant.jar" />
 			</patternset>
 			<mapper type="flatten" />
 		</unzip>
-		<unzip src="${extBuild}/jsmooth-0.9.9-7.zip" dest="${lib}">
+		<unzip src="${extBuild}/jsmooth-bin.zip" dest="${lib}">
 			<patternset>
 				<include name="**/skeletons/windowed-wrapper/*" />
 			</patternset>
 		</unzip>
-		<move file="${lib}/jsmooth-0.9.9-7/skeletons"
-		      todir="${lib}"
+		<move todir="${lib}/skeletons/windowed-wrapper"
 		      overwrite="true"
+		      flatten="true"
 		      failonerror="true"
-		      verbose="${verb}" />
-		<delete includeemptydirs="true" failonerror="false" verbose="${verb}">
-			<fileset dir="${lib}/jsmooth-0.9.9-7" excludes="**/*" />
-		</delete>
+		      verbose="${verb}">
+			<fileset dir="${lib}">
+				<include name="jsmooth*/skeletons/windowed-wrapper/**" />
+			</fileset>
+		</move>
 
-		<copy file="${extBuild}/junit-4.8.2.jar"
+		<copy file="${extBuild}/junit.jar"
 		      tofile="${lib}/junit.jar"
 		      overwrite="true"
 		      failonerror="true"
 		      verbose="{verb}" />
 
-		<copy file="${extBuild}/hamcrest-core-1.1.jar"
+		<copy file="${extBuild}/hamcrest-core.jar"
 		      tofile="${lib}/hamcrest-core.jar"
 		      overwrite="true"
 		      failonerror="true"
@@ -237,8 +270,31 @@
 
 	</target>
 
+	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
+	<target name="clean">
+		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
+			<fileset dir="${bin}" />
+			<fileset dir="${dist}" />
+			<fileset dir="${extBuild}/xsltproc/bin" />
+		</delete>
+		<echo message="Downloaded external files are not deleted. 'ant mrproper' cleans all." />
+	</target>
+
+	<!-- Cleans bin/ and dist/ diretory completely -->
+	<target name="mrproper">
+		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
+			<fileset dir="${bin}" />
+			<fileset dir="${ext}" />
+			<fileset dir="${dist}" />
+		</delete>
+	</target>
+
+	<!-- Downloads all external files needed from URLs -->
+	<target name="fetch" depends="_download-build, _download-ext">
+	</target>
+
 	<!-- Compiles Java, C and C++ files, checks for errors and dumps subversion log -->
-	<target name="build" depends="prepare-build">
+	<target name="build" depends="_prepare-build">
 		<mkdir dir="${bin}" />
 
 		<copy todir="${bin}"
@@ -312,24 +368,8 @@
 		</exec>
 	</target>
 
-	<!-- Executes all JUnit test cases -->
-	<target name="test" depends="dist">
-		<junit showoutput="true" failureproperty="testfailed">
-			<classpath>
-				<pathelement path="${lib}/junit.jar" />
-				<pathelement path="${lib}/hamcrest-core.jar" />
-				<pathelement path="${bin}" />
-			</classpath>
-			<formatter type="plain" usefile="false" />
-			<batchtest>
-				<fileset dir="${src}/test" includes="**/*.java" />
-			</batchtest>
-		</junit>
-		<fail message="At least one JUnit test failed" if="testfailed" />
-	</target>
-
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
-	<target name="dist" depends="build, download-ext">
+	<target name="dist" depends="build, _download-ext">
 		<mkdir dir="${dist}" />
 
 		<exec executable="xsltproc"
@@ -418,6 +458,22 @@
 		<fail message="This script has be run again under Windows because some missing files have to be created under Windows."
 		      unless="build.win" />
 
+	</target>
+
+	<!-- Executes all JUnit test cases -->
+	<target name="test" depends="dist">
+		<junit showoutput="true" failureproperty="testfailed">
+			<classpath>
+				<pathelement path="${lib}/junit.jar" />
+				<pathelement path="${lib}/hamcrest-core.jar" />
+				<pathelement path="${bin}" />
+			</classpath>
+			<formatter type="plain" usefile="false" />
+			<batchtest>
+				<fileset dir="${src}/test" includes="**/*.java" />
+			</batchtest>
+		</junit>
+		<fail message="At least one JUnit test failed" if="testfailed" />
 	</target>
 
 	<target name="rebuild" depends="clean, dist">

@@ -1,4 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 
 <HTML>
 <HEAD>
@@ -9,7 +9,9 @@
 </HEAD>
 
 <BODY lang="en-US" dir="ltr">
-  <TABLE>
+  <H1>Directory structure</H1>
+
+  <TABLE border="1" cellpadding="8">
     <TR>
       <TD>src</TD>
 
@@ -19,7 +21,7 @@
     <TR>
       <TD>bin</TD>
 
-      <TD>Contains temporary files creating during building. Can safely be deleted.</TD>
+      <TD>Contains temporary files created during building. Will be recreated during build.</TD>
     </TR>
 
     <TR>
@@ -29,34 +31,608 @@
     </TR>
 
     <TR>
-      <TD>ext/rt</TD>
+      <TD>ext</TD>
 
-      <TD>Additional external dependencies which may be required to execute files in dist/. Can be recreated from src/
-      if deleted.</TD>
-    </TR>
-
-    <TR>
-      <TD></TD>
-    </TR>
-
-    <TR>
-      <TD>ext/dev</TD>
-
-      <TD>Additional external dependencies which may be required to (re)build, modify or extend files in src/. Can be
-      recreated from src/ if deleted.</TD>
-    </TR>
-
-    <TR>
-      <TD>lib</TD>
-
-      <TD>External libraries required for building. TODO: remove this dir</TD>
-    </TR>
-
-    <TR>
-      <TD></TD>
-
-      <TD></TD>
+      <TD>Additional external dependencies which are required for certain steps during building or running the
+      application. Can be recreated from src/ if deleted.</TD>
     </TR>
   </TABLE>
+  <HR>
+
+  <H1>First Building</H1>If only build under Linux, PleoCommand will only work under Linux and vice versa, so building
+  under both systems is needed to get a full working distribution.
+
+  <H2>Linux</H2>Execute prepare.sh from the root directory. This will download some files.<BR>
+  Install <A href="ext/prebuild/jdk-setup.bin">jdk-setup.bin</A> and unzip <A href=
+  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> if needed. You may also use any recent enough version provided by your
+  distributor.<BR>
+  Open a console and execute "ant fetch" in the root directory of PleoCommand.<BR>
+  Continue with "Rebuilding".
+
+  <H2>Windows</H2>Execute prepare.bat from the root directory. This will download some files.<BR>
+  Install <A href="ext/prebuild/jdk-setup.exe">jdk-setup.exe</A> and unzip <A href=
+  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> if needed.<BR>
+  You must set the ANT_HOME environment variable to the directory where you unzipped the Ant files and add the
+  <I>bin</I> directory to your PATH environment variable. You must also set the JAVA_HOME environment variable to the
+  installation target directory of the JDK (not a JRE).<BR>
+  Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant fetch" in the root directory
+  of PleoCommand.<BR>
+  Continue with "Rebuilding".
+  <HR>
+
+  <H1>Rebuilding</H1>
+
+  <P>If any of the following files linked in this document should be missing, execute "ant fetch" or "ant dist" to get
+  them downloaded.</P>
+
+  <H2>Linux</H2>Open a console and execute "ant dist" in the root directory of PleoCommand.<BR>
+  You need the following tools for successful building, so if the build fails, install the missing tools, and retry:
+
+  <H3>Coreutils (rm, stat, md5sum, ...)</H3>
+
+  <P>Coreutils are always available under any known Linux distribution.</P>
+
+  <H3>Subversion, GCC, Make, Bison, XSLTProc</H3>
+
+  <P>If it's not already provided by your distributor, download from the URL listed at the end of this document.</P>
+
+  <H2>Windows</H2>Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant dist" in the
+  root directory of PleoCommand.<BR>
+  You need the following tools for successful building, so if the build fails, install the missing tools, and retry:
+
+  <H3>Coreutils (rm, stat, md5sum, ...)</H3>
+
+  <P>Install from <A href="ext/build/coreutils-setup.exe">coreutils-setup.exe</A> and add the <I>bin</I> directory to
+  your PATH environment variable.</P>
+
+  <H3>Subversion</H3>
+
+  <P>Install from <A href="ext/build/subversion-setup.msi">subversion-setup.msi</A>.</P>
+
+  <H3>GCC</H3>
+
+  <P>Install from <A href="ext/build/gcc-setup.exe">gcc-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in the
+  setup.<BR>
+  You must add the <I>bin</I> directory to your PATH environment variable.</P>
+
+  <H3>Make</H3>
+
+  <P>Install from <A href="ext/build/make-setup.exe">make-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in the
+  setup.<BR>
+  You must add the <I>bin</I> directory to your PATH environment variable.</P>
+
+  <H3>Bison</H3>
+
+  <P>Install from <A href="ext/build/bison-setup.exe">bison-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in
+  the setup.<BR>
+  You must add the <I>bin</I> directory to your PATH environment variable.</P>
+
+  <H3>XSLTProc</H3>
+
+  <P>Add the directory <A href="ext/build/xsltproc/bin">xsltproc/bin</A> to your PATH environment variable.<br>
+  You may also copy the content to some other directory and add this to the PATH instead.</P>
+  
+  <HR>
+
+  <H1>Running</H1>
+
+  <P>PleoCommand needs the following prerequisites to be met in order to function properly.<BR>
+  PleoCommand itself is located in the <A href="dist">dist</A> directory. If this directory should be missing or be
+  empty, a rebuild according to the "Rebuilding" section in this document must be done.</P>
+
+  <P>If any of the following files linked in this document should be missing, execute "ant fetch" or "ant dist" to get
+  them downloaded.</P>
+
+  <H2>Linux</H2>
+
+  <H3>Java Runtime Environment</H3>
+
+  <P>If it's not already provided by the distributor, go to <A href=
+  "http://www.java.com/en/download/installed.jsp">http://www.java.com/en/download/installed.jsp</A>.<BR>
+  You may also use the JDK version listed in the "First Building" section of this document.</P>
+
+  <H3>Pleo USB Driver</H3>
+
+  <P>You can just use the <I>"USB Abstract Control Model driver for USB modems and ISDN adapters"</I> which should
+  already be available in most distributions.<BR>
+  If not, you have to make sure CONFIG_USB_ACM is set to either "Y" or "M" in the kernel:</P>
+  <PRE>
+"Device Drivers"
+        [*] "USB support"
+                &lt;M&gt; "USB Modem (CDC ACM) support"
+</PRE>
+
+  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/pleocommand">dist/pleocommand</A>.
+
+  <H3>MySkit (optional)</H3>
+
+  <P>For creating your own motions or sounds, MySkit is a very good and fast solution.<BR>
+  Execute <A href="ext/rt/MySkit-setup.exe">MySkit-setup.exe</A> with <A href="http://www.winehq.org/">Wine</A> to
+  install MySkit.<BR>
+  MySkit should run perfectly with Wine (but maybe you have to turn of compositing in KDE4 to reduce flickering of the
+  3D-Pleo-Model).</P>
+
+  <H3>BCI 2000 (optional)</H3>
+
+  <P>BCI 2000 currently only works under Windows.</P>
+
+  <H2>Windows</H2>
+
+  <H3>Java Runtime Environment</H3>
+
+  <P>Go to <A href=
+  "http://www.java.com/en/download/installed.jsp">http://www.java.com/en/download/installed.jsp</A>.<BR>
+  You may also use the JDK version listed in the "First Building" section of this document.</P>
+
+  <H3>Pleo USB Driver</H3>
+
+  <P>If a driver selection dialog pops up after plugging in Pleo, choose "Manual selection of driver source" and point
+  the installation dialog to this directory.<BR>
+  If everything works fine, you should see a new COM port in the Device Manager.</P>
+
+  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/PleoCommand.exe">dist/PleoCommand.exe</A>.
+
+  <H3>MySkit (optional)</H3>
+
+  <P>For creating your own motions or sounds, MySkit is a very good and fast solution.<BR>
+  Execute <A href="ext/rt/MySkit-setup.exe">MySkit-setup.exe</A> to install MySkit.</P>
+
+  <H3>BCI 2000 (optional)</H3>
+
+  <P>To use BCI 2000 as an input source for PleoCommand (via the TCP/IP Input component), execute <A href=
+  "ext/rt/BCI2000-setup.exe">BCI2000-setup.exe</A> and copy all files from the <A href=
+  "ext/rt/BCI2000-Prog">BCI2000-Prog</A> directory to the prog/ directory where BCI 2000 has been installed,
+  overwriting existing files.<BR>
+  TODO Hint about creating missing exe files in the BCI2000-Prog dir<BR>
+  Start it by executing "BCI2000launcher.exe" and make sure that the Application module is set to
+  "PleoCommandTCPIP".<BR>
+  To quickly set a fitting mask for the Application module, you may use the following line by simply pasting it in your
+  parameter-file, replacing any exiting line beginning with "Application:PleoCommandTCPIPTask" (it should be on one
+  line):</P>
+  <PRE>
+Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixed%20Value } { #1 #2 #3 #4 #5 #6 #7 #8 } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } { matrix { int8 int32 int64 float32 float64 utfString ansiString hexData &lt;omitted&gt; } { Choose } % % % % x % % % % } 0 1 2 3 4 5 6 7 % % % % % % % % // Type and number of channel or fixed value for each field
+</PRE>
+
+  <H2>Pleo's Firmware</H2>
+
+  <P>Pleo's firmware should be at least version 1.1 for PleoCommand to work properly.<BR>
+  To update it, unzip <A href="ext/rt/PleoSDSoftware_1.1.zip">PleoSDSoftware_1.1.zip</A> to an empty SD-Card, turn off Pleo,
+  make sure it's battery <B>is fully charged</B> and cooled, insert the SD-Card and turn Pleo on. Several chimes will
+  be played by Pleo and until a few minutes Pleo will fall asleep and can be turned off and the SD-Card can be
+  removed.</P>
+  <HR>
+
+  <H1>Extending, Modifying</H1>These are tools which help in extending or otherwise modifying PleoCommand, BCI 2000 and
+  other sources in the src/ directory.
+
+  <H2>Linux</H2>
+
+  <H3>Eclipse</H3>
+
+  <P>If it's not already provided by your distributor, download "Eclipse IDE for Java Developers" from <A href=
+  "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</A>.<BR>
+  You may additionally want to install CDT from <A href="http://www.eclipse.org/cdt/">http://www.eclipse.org/cdt/</A>
+  and SubClipse from <A href="http://subclipse.tigris.org/">http://subclipse.tigris.org</A>.</P>
+
+  <H3>C++ Builder Architect (optional)</H3>
+
+  <P>Borland Architect is only needed for BCI 2000, and currently only works under Windows.<BR></P>
+
+  <H3>OpenOffice (optional)</H3>
+
+  <P>Many of the icons and images in PleoCommand have been created with OpenOffice Draw. To install OpenOffice, visit
+  <A href="http://www.openoffice.org/">http://www.openoffice.org</A> or use the version provided by your
+  distributor.</P>
+
+  <H3>Pleo's PAWN (optional)</H3>
+
+  <P>This is completely optional, as PleoCommand works fine without a PAWN script running in Pleo.<BR>
+  <BR>
+  To create PAWN scripts, unpack the <A href="ext/dev/PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</A> to any
+  directory.<BR>
+  Copy <I>ugobe_project_tool</I> and <I>libpython2.5.so.1.0</I> from the <I>exe.linux-i686-2.5</I> directory from where
+  you unpacked the zip file to your <I>/usr/local/bin</I> respectively <I>/usr/local/lib</I> directory.<BR>
+  <BR>
+  Additionaly you need to copy the file <A href="ext/dev/pawncc/bin/pawncc">ext/dev/pawncc/bin/pawncc</A> to
+  <I>/usr/local/bin</I> and the file <A href="ext/dev/pawncc/lib/libpawnc.so">ext/dev/pawncc/lib/libpawnc.so</A> to
+  <I>/usr/local/lib</I> (make sure both are executable).<BR>
+  You may also install the complete PAWN package instead, by executing <A href=
+  "ext/dev/pawn-setup.package">pawn-setup.package</A> but this installs many unneeded files.<BR>
+  If you want to use a newer version of PAWN, please make sure that it's still compatible with Pleo.<BR>
+  <BR>
+  Take a look in <A href="ext/dev/PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</A> for examples and
+  documentation.</P>
+
+  <H2>Windows</H2>
+
+  <H3>Eclipse</H3>
+
+  <P>Download "Eclipse IDE for Java Developers" from <A href=
+  "http://www.eclipse.org/downloads/">http://www.eclipse.org/downloads/</A>.<BR>
+  You may additionally want to install CDT from <A href="http://www.eclipse.org/cdt/">http://www.eclipse.org/cdt/</A>
+  and SubClipse from <A href="http://subclipse.tigris.org/">http://subclipse.tigris.org</A>.</P>
+
+  <H3>Borland Architect (optional)</H3>
+
+  <P>Borland Architect is only needed for BCI 2000.<BR>
+  BCI 2000 can only be compiled with Borland Architect, but newer releases may also work with GCC.<BR>
+  Visit <A href="https://downloads.embarcadero.com/free/c_builder">https://downloads.embarcadero.com/free/c_builder</A>
+  do download a trial version or the free to use C++ Compiler.<BR>
+  Checkout the BCI 2000 sourcecode from their repository at <A href=
+  "http://www.bci2000.org/svn/trunk">http://www.bci2000.org/svn/trunk</A> (you need an account first), then copy the
+  directory structure under <A href="ext/dev/BCI2000Source">BCI2000Source</A> to the base directory from your
+  repository copy.<BR>
+  It should be sufficient to only compile the NexusSource and the PleoCommandTCPIP projects you've just copied, and
+  combine them with the binary version of the BCI 2000 toolset.<BR>
+  If not, read BCI's manual about to compile the whole BCI 2000 toolset.</P>
+
+  <H3>OpenOffice (optional)</H3>
+
+  <P>Many of the icons and images in PleoCommand are created with OpenOffice Draw. To install OpenOffice, visit
+  <A href="http://www.openoffice.org/">http://www.openoffice.org</A>.</P>
+
+  <H3>Pleo's PAWN (optional)</H3>
+
+  <P>This is completely optional, as PleoCommand works fine without a PAWN script running in Pleo.<BR>
+  <BR>
+  To create PAWN scripts, unpack the <A href="ext/dev/PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</A> to any
+  directory.<BR>
+  The ugobe and PAWN compilers are under <I>bin</I> for Windows and <I>macosx</I> for MacOS.<BR>
+  You may need to put the directory in your <I>PATH</I>, so Windows is able to find the pawncc and the
+  ugobe_project_tool executable.<BR>
+  <BR>
+  Take a look in <A href="ext/dev/PleoDevelopmentKit.zip">PleoDevelopmentKit.zip</A> for examples and
+  documentation.</P>
+  <HR>
+
+  <H1>Distributing</H1>Copy the contents of the <A href="dist">dist</A> and the <A href="ext/rt">ext/rt</A> directory
+  to the target machine.<BR>
+  Then follow the steps in the "Running" section on the target machine, i.e. install at least a Java Runtime
+  Environment and the Pleo USB Driver.
+  <HR>
+
+  <H1>3rd Party Tools</H1>
+
+  <P>This is a list of all 3rd party tools used by this project and the versions which have been tested (and
+  shipped):</P>
+
+  <TABLE border="1">
+    <TR>
+      <TH>Name</TH>
+
+      <TH>Used For</TH>
+
+      <TH>Minimal Version</TH>
+
+      <TH>Tested With(Linux)</TH>
+
+      <TH>Tested With(Windows)</TH>
+
+      <TH>URL</TH>
+    </TR>
+
+    <TR>
+      <TD>Java JDK</TD>
+
+      <TD>P, R</TD>
+
+      <TD>1.6</TD>
+
+      <TD>1.6.0.20</TD>
+
+      <TD>1.6.0.20</TD>
+
+      <TD><A href="http://java.sun.com/">http://java.sun.com/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Apache Ant</TD>
+
+      <TD>P</TD>
+
+      <TD>1.8</TD>
+
+      <TD>1.8.0</TD>
+
+      <TD>1.8.0</TD>
+
+      <TD><A href="http://ant.apache.org/">http://ant.apache.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>wget</TD>
+
+      <TD>P</TD>
+
+      <TD>1.10.0</TD>
+
+      <TD>1.12.0</TD>
+
+      <TD>1.11.4</TD>
+
+      <TD><A href="http://www.gnu.org/software/wget/">http://www.gnu.org/software/wget/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Coreutils (md5sum, stat)</TD>
+
+      <TD>B</TD>
+
+      <TD>5.3</TD>
+
+      <TD>8.5</TD>
+
+      <TD>5.3</TD>
+
+      <TD><A href="http://www.gnu.org/software/coreutils/">http://www.gnu.org/software/coreutils/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>RXTX</TD>
+
+      <TD>B</TD>
+
+      <TD>2.1.7.2</TD>
+
+      <TD>2.1.7.2</TD>
+
+      <TD>2.1.7.2</TD>
+
+      <TD><A href="http://rxtx.org/">http://rxtx.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>CheckStyle</TD>
+
+      <TD>B</TD>
+
+      <TD>5.0</TD>
+
+      <TD>5.1</TD>
+
+      <TD>5.1</TD>
+
+      <TD><A href="http://checkstyle.sourceforge.net/">http://checkstyle.sourceforge.net/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>SubVersion</TD>
+
+      <TD>B</TD>
+
+      <TD>1.6.0</TD>
+
+      <TD>1.6.9</TD>
+
+      <TD>1.6.6</TD>
+
+      <TD><A href="http://subversion.apache.org/">http://subversion.apache.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>GCC</TD>
+
+      <TD>B</TD>
+
+      <TD>3.4.0</TD>
+
+      <TD>4.4.3</TD>
+
+      <TD>3.4.5 (MinGW 5.1.6)</TD>
+
+      <TD><A href="http://gcc.gnu.org/">http://gcc.gnu.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Make</TD>
+
+      <TD>B</TD>
+
+      <TD>3.0 (?)</TD>
+
+      <TD>3.81.2</TD>
+
+      <TD>???</TD>
+
+      <TD><A href="http://www.gnu.org/software/make/">http://www.gnu.org/software/make/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Bison</TD>
+
+      <TD>B</TD>
+
+      <TD>2.0 (?)</TD>
+
+      <TD>2.4.2</TD>
+
+      <TD>???</TD>
+
+      <TD><A href="http://www.gnu.org/software/bison/">http://www.gnu.org/software/bison/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>XSLTProc</TD>
+
+      <TD>B</TD>
+
+      <TD>???</TD>
+
+      <TD>1.1.26 + 2.7.7</TD>
+
+      <TD>1.1.26 + 2.7.6</TD>
+
+      <TD><A href="http://www.xmlsoft.org/">http://www.xmlsoft.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>JSmooth</TD>
+
+      <TD>B</TD>
+
+      <TD>0.9.9.5</TD>
+
+      <TD>0.9.9.7</TD>
+
+      <TD>0.9.9.7</TD>
+
+      <TD><A href="http://jsmooth.sourceforge.net/">http://jsmooth.sourceforge.net/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>JUnit</TD>
+
+      <TD>B</TD>
+
+      <TD>4.6</TD>
+
+      <TD>4.7</TD>
+
+      <TD>-</TD>
+
+      <TD><A href="http://www.junit.org/">http://www.junit.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>hamcrest</TD>
+
+      <TD>B</TD>
+
+      <TD>1.1</TD>
+
+      <TD>1.2</TD>
+
+      <TD>1.2</TD>
+
+      <TD><A href="http://code.google.com/p/hamcrest/">http://code.google.com/p/hamcrest/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>BCI 2000</TD>
+
+      <TD>R</TD>
+
+      <TD>2.0</TD>
+
+      <TD>-</TD>
+
+      <TD>2.1</TD>
+
+      <TD><A href="http://www.bci2000.org/">http://www.bci2000.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Pleo USB</TD>
+
+      <TD>R</TD>
+
+      <TD>2.6.0 or 2007-06-04</TD>
+
+      <TD>2.6.34 (Linux-Kernel)</TD>
+
+      <TD>2007-06-04 (ugobe.inf)</TD>
+
+      <TD><A href="http://www.kernel.org/">http://www.kernel.org/</A><BR>
+      <A href="http://www.pleoworld.com/">http://www.pleoworld.com/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Pleo Firmware</TD>
+
+      <TD>R</TD>
+
+      <TD>1.1</TD>
+
+      <TD colspan="2" align="center">1.1</TD>
+
+      <TD><A href="http://www.pleoworld.com/">http://www.pleoworld.com/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Eclipse SDK</TD>
+
+      <TD>D</TD>
+
+      <TD>3.5.0</TD>
+
+      <TD>3.5.1</TD>
+
+      <TD>3.5.1</TD>
+
+      <TD><A href="http://www.eclipse.org/">http://www.eclipse.org/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>Borland C++ Builder</TD>
+
+      <TD>D</TD>
+
+      <TD>5.5 Compiler</TD>
+
+      <TD>-</TD>
+
+      <TD>2010 Architect</TD>
+
+      <TD><A href="http://www.embarcadero.com/">http://www.embarcadero.com/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>PleoDevelopmentKit</TD>
+
+      <TD>D</TD>
+
+      <TD>2.0</TD>
+
+      <TD>2.0</TD>
+
+      <TD>2.0</TD>
+
+      <TD><A href="http://www.pleoworld.com/">http://www.pleoworld.com/</A></TD>
+    </TR>
+
+    <TR>
+      <TD>PAWN</TD>
+
+      <TD>D</TD>
+
+      <TD>3.3.3930</TD>
+
+      <TD>3.3.4127</TD>
+
+      <TD>3.3.4127</TD>
+
+      <TD><A href="http://www.compuphase.com/pawn/pawn.htm">http://www.compuphase.com/pawn/pawn.htm</A></TD>
+    </TR>
+
+    <TR>
+      <TD>OpenOffice</TD>
+
+      <TD>D</TD>
+
+      <TD>3.0</TD>
+
+      <TD>3.2</TD>
+
+      <TD>-</TD>
+
+      <TD><A href="http://go-oo.org">http://go-oo.org</A></TD>
+    </TR>
+
+    <TR>
+      <TD>HTML Tidy</TD>
+
+      <TD>D</TD>
+
+      <TD>4.8.0</TD>
+
+      <TD>20090325</TD>
+
+      <TD>-</TD>
+
+      <TD><A href="http://tidy.sourceforge.net/">http://tidy.sourceforge.net/</A></TD>
+    </TR>
+  </TABLE>
+
+  <P>Legend: R = Runtime, B = Building, D = Development, P = Prebuild - Needs to be installed before first building</P>
 </BODY>
 </HTML>

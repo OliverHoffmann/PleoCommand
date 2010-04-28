@@ -1,7 +1,7 @@
 #!/bin/bash
 
 part=0
-count=2
+count=4
 
 function check() { # filename size hash
 	[ -e "$1" ] || return 1
@@ -42,23 +42,35 @@ function dl() {
 	echo "======================================================================"
 }
 
-dir="bin/ext/prebuild"
+dir="ext/prebuild"
 
 if [ "$1" == "clean" ]; then
-	rm -vf "$dir/jre-6u20-windows-i586-s.exe"
-	rm -vf "$dir/apache-ant-1.8.0-bin.zip"
+	rm -vf "$dir/jdk-setup.bin"
+	rm -vf "$dir/jdk-setup.exe"
+	rm -vf "$dir/ant-bin.zip"
 	
 else
-	# pre-build files only
-	dl "http://javadl.sun.com/webapps/download/AutoDL?BundleId=39494" \
-		"$dir/jre-6u20-windows-i586-s.exe" 16529184 "71fdde020a4920f55c96e1121a1dbd4a" +x
-	dl "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" \
-		"$dir/apache-ant-1.8.0-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	mkdir -p "ext/rt"
+	mkdir -p "$dir"
 
+	# pre-build files
+	dl "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" \
+		"$dir/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	dl "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-linux-i586-01_apr_2010.bin" \
+		"$dir/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568" +x
+	dl "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" \
+		"$dir/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a" +x
+
+	# need to use wget because ant's downloader can't handle the URL
+	dl "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" \
+		"ext/rt/BCI2000-setup.exe" 35760134 "54198c14540d012c9b403c749bc725cb" +x \
+		--user "ascheck" --password "eibah7cohB"
+	
+	
 	java -version && ant -version && {
 		echo "======================================================================"
 		echo "Finished downloading and md5-checking of pre-build files."
-		echo "You may now call 'ant dist'."
+		echo "You may now call 'ant fetch' or 'ant dist'."
 	} || {
 		echo "======================================================================"
 		echo "You have to install java and/or ant from $dir."

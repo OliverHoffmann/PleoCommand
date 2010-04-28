@@ -1,3 +1,7 @@
+FIX tidy-bin.zip not used atm.
+FIX BCI2000Source not build, and hint about creating missing exe in readme.html missing
+
+
 FIX check correct behavior on bad config files:
 	PipePart mentioned doesn't exist
 	Config entries of a PipePart are missing/unknown/invalid
