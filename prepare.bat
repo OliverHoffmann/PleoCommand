@@ -71,11 +71,11 @@ GOTO:EOF
 
 	REM pre-build files
 	CALL :DL "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" ^
-		"$dir/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+		"%dir%/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
 	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-linux-i586-01_apr_2010.bin" ^
-		"$dir/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568"
+		"%dir%/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568"
 	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" ^
-		"$dir/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a"
+		"%dir%/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a"
 		
 	REM need to use wget because ant's downloader can't handle the URL
 	CALL :DL "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" ^
