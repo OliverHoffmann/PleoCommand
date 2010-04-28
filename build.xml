@@ -360,12 +360,6 @@
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
-		<exec executable="${src}/tidy-all-html.sh"
-		      dir="${basedir}"
-		      failonerror="false"
-		      osfamily="unix">
-			<arg value="${basedir}" />
-		</exec>
 	</target>
 
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
@@ -379,6 +373,13 @@
 			<arg value="${bin}/changelog.xml" />
 		</exec>
 
+		<exec executable="${src}/tidy-all-html.sh"
+		      dir="${basedir}"
+		      failonerror="true"
+		      osfamily="unix">
+			<arg value="${basedir}" />
+		</exec>
+	
 		<taskdef name="jsmoothgen"
 		         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
 		         classpath="${lib}/jsmoothgen-ant.jar" />
