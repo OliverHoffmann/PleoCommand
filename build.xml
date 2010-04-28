@@ -182,6 +182,8 @@
 		      verbose="{verb}">
 			<fileset dir="${src}/ext/rt">
 				<include name="BCI2000-Prog/**" />
+				<include name="libusb*" />
+				<include name="UGOBE*" />
 			</fileset>
 		</copy>
 
