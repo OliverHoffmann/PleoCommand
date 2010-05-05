@@ -77,11 +77,6 @@ GOTO:EOF
 	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" ^
 		"%dir%/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a"
 		
-	REM need to use wget because ant's downloader can't handle the URL
-	CALL :DL "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" ^
-		"ext/rt/BCI2000-setup.exe" 35760134 "54198c14540d012c9b403c749bc725cb" ^
-		--user "ascheck" --password "eibah7cohB"
-
 	SET mustinst=0
 	CALL java -version
 	IF ERRORLEVEL 1 SET mustinst=1

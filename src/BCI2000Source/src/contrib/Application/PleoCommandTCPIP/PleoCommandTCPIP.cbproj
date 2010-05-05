@@ -9,11 +9,6 @@
 		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Debug' or '$(Cfg_1)'!=''">
-			<Cfg_1>true</Cfg_1>
-			<CfgParent>Base</CfgParent>
-			<Base>true</Base>
-		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_2)'!=''">
 			<Cfg_2>true</Cfg_2>
 			<CfgParent>Base</CfgParent>
@@ -25,6 +20,7 @@
 			<LinkPackageStatics>rtl.lib;vcl.lib;vclx.lib</LinkPackageStatics>
 			<TASM_Defines>MODTYPE=3;$(TASM_Defines)</TASM_Defines>
 			<BRCC_Defines>MODTYPE=3;$(BRCC_Defines)</BRCC_Defines>
+			<BCC_Defines>NO_STRICT;MODTYPE=3;$(BCC_Defines)</BCC_Defines>
 			<PackageImports>rtl.bpi;vcl.bpi;vclx.bpi;vcljpg.bpi</PackageImports>
 			<DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
 			<DCC_UnitSearchPath>.\;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
@@ -36,36 +32,17 @@
 			<DCC_IncludePath>.\;$(BDS)\lib;$(BDS)\lib\obj;$(DCC_IncludePath)</DCC_IncludePath>
 			<TASM_IncludePath>..\..\..\shared\modules\application\human_interface_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BDS)\include;$(BDS)\include\vcl;$(BDS)\include\dinkumware;$(TASM_IncludePath)</TASM_IncludePath>
 			<BCC_GenerateMultithreaded>true</BCC_GenerateMultithreaded>
-			<FinalOutputDir>..\..\..\..\prog\</FinalOutputDir>
+			<FinalOutputDir>.</FinalOutputDir>
 			<DCC_DcuOutput>obj\</DCC_DcuOutput>
 			<AllPackageLibs>rtl.lib;vcl.lib;vclx.lib</AllPackageLibs>
 			<TASM_Debugging>None</TASM_Debugging>
 			<TASM_AdditionalSwitches> /w2 obj\</TASM_AdditionalSwitches>
 			<ILINK_IntermediateOutputPath>obj</ILINK_IntermediateOutputPath>
 			<ILINK_LibraryPath>..\..\..\shared\modules\application\;..\..\..\shared\modules\application\utils\;..\..\..\shared\modules\application\human_interface_devices\;..\..\..\shared\bcistream\;..\..\..\shared\accessors\;..\..\..\shared\gui\;..\..\..\shared\utils\;..\..\..\shared\types\;..\..\..\shared\modules\;..\..\..\shared\fileio\;..\..\..\shared\utils\Expression\;..\..\..\shared\modules\application\human_interface_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BDS)\lib;$(BDS)\lib\obj;$(BDS)\lib\psdk;$(BDS)\lib\psdk;$(ILINK_LibraryPath)</ILINK_LibraryPath>
-			<BCC_UserSuppliedOptions> -5 -Vx -Ve</BCC_UserSuppliedOptions>
-			<BCC_Defines>NO_STRICT;MODTYPE=3;$(BCC_Defines)</BCC_Defines>
 			<Multithreaded>true</Multithreaded>
 			<BCC_OutputDir>obj\</BCC_OutputDir>
 			<BCC_GenerateWindowsApp>true</BCC_GenerateWindowsApp>
 			<OutputExt>exe</OutputExt>
-		</PropertyGroup>
-		<PropertyGroup Condition="'$(Cfg_1)'!=''">
-			<BCC_Defines>_DEBUG;$(BCC_Defines);$(BCC_Defines)</BCC_Defines>
-			<BCC_UserSuppliedOptions> -5 -Vx -Ve -k</BCC_UserSuppliedOptions>
-			<ILINK_LibraryPath>$(BDS)\lib\debug;$(ILINK_LibraryPath);$(ILINK_LibraryPath)</ILINK_LibraryPath>
-			<DCC_Define>DEBUG;$(DCC_Define);$(DCC_Define)</DCC_Define>
-			<BCC_SourceDebuggingOn>true</BCC_SourceDebuggingOn>
-			<IntermediateOutputDir>Debug_Build</IntermediateOutputDir>
-			<ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
-			<TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>
-			<ILINK_DisableIncrementalLinking>true</ILINK_DisableIncrementalLinking>
-			<BCC_DisableOptimizations>true</BCC_DisableOptimizations>
-			<TASM_Debugging>Full</TASM_Debugging>
-			<DCC_AdditionalSwitches> -V</DCC_AdditionalSwitches>
-			<BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
-			<DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
-			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
 			<BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
@@ -329,49 +306,6 @@
 					<ExcludedPackages>
 						<ExcludedPackages Name="c:\programme\borland\cbuilder6\Bin\dclite60.bpl">Borland Integrated Translation Environment</ExcludedPackages>
 					</ExcludedPackages>
-					<HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Count">10</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item0">..\..\..\shared\modules\application\human_interface_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item1">..\..\..\shared\modules\application\human_input_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item2">..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item3">..\..\..\shared;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item4">..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item5">..\..\..\shared\accessors;..\..\..\shared\modules;..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item6">..\..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item7">..\..\shared\config;..;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item8">..;$(BCB)\include;$(BCB)\include\vcl;..\shared\gui</HistoryLists_hlIncludePath>
-						<HistoryLists_hlIncludePath Name="Item9">..\shared\gui;..\shared\utils;..\shared\filters;..\..\shared\gui;..\shared\3DAPI;..\..\shared\utils\Expression;..\..\shared\modules;..\..\shared\config;..\..\shared\fileio;..\..\shared\utils;..\..\shared\bcistream;..\..\shared\types;..\..\shared\accessors;..;DataGlove;..\..\shared;..\shared;$(BCB)\include;$(BCB)\include\vcl</HistoryLists_hlIncludePath>
-					</HistoryLists_hlIncludePath>
-					<HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Count">9</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item0">..\..\..\shared\modules\application\human_interface_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib;$(BCB)\lib\obj;$(BDS)\lib\psdk</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item1">..\..\..\shared\modules\application\human_interface_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item2">..\..\..\shared\modules\application\human_input_devices;..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item3">..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item4">..\..\..\shared\fileio;..\..\..\shared\utils\Expression;..\..\..\shared\gui;..\..\..\extlib\3DAPI;..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib;..\shared\gui</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item5">..\..\..\shared\modules\application\utils;..\..\..\shared\modules\application;..\..\..\shared\utils;..\..\..\shared\bcistream;..\..\..\shared\types;..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib;..\shared\gui</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item6">..\..\..\shared\accessors;..\..\..\shared\modules;..;$(BCB)\lib\obj;$(BCB)\lib;..\shared\gui</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item7">..;$(BCB)\lib\obj;$(BCB)\lib;..\shared\gui</HistoryLists_hlLibraryPath>
-						<HistoryLists_hlLibraryPath Name="Item8">..\shared\gui;..\shared\utils;..\shared\filters;..\..\shared\gui;..\shared\3DAPI;..\..\shared\utils\Expression;..\..\shared\modules;..\..\shared\fileio;..\..\shared\utils;..\..\shared\bcistream;..\..\shared\types;..\..\shared\accessors;..;DataGlove;..\..\shared;..\shared;$(BCB)\lib\obj;$(BCB)\lib</HistoryLists_hlLibraryPath>
-					</HistoryLists_hlLibraryPath>
-					<HistoryLists_hlDebugSourcePath>
-						<HistoryLists_hlDebugSourcePath Name="Count">1</HistoryLists_hlDebugSourcePath>
-						<HistoryLists_hlDebugSourcePath Name="Item0">$(BCB)\source\vcl</HistoryLists_hlDebugSourcePath>
-					</HistoryLists_hlDebugSourcePath>
-					<HistoryLists_hlConditionals>
-						<HistoryLists_hlConditionals Name="Count">2</HistoryLists_hlConditionals>
-						<HistoryLists_hlConditionals Name="Item0">MODTYPE=3</HistoryLists_hlConditionals>
-						<HistoryLists_hlConditionals Name="Item1">_DEBUG;MODTYPE=3</HistoryLists_hlConditionals>
-					</HistoryLists_hlConditionals>
-					<HistoryLists_hlIntOutputDir>
-						<HistoryLists_hlIntOutputDir Name="Count">1</HistoryLists_hlIntOutputDir>
-						<HistoryLists_hlIntOutputDir Name="Item0">obj</HistoryLists_hlIntOutputDir>
-					</HistoryLists_hlIntOutputDir>
-					<HistoryLists_hlFinalOutputDir>
-						<HistoryLists_hlFinalOutputDir Name="Count">2</HistoryLists_hlFinalOutputDir>
-						<HistoryLists_hlFinalOutputDir Name="Item0">..\..\..\..\prog\</HistoryLists_hlFinalOutputDir>
-						<HistoryLists_hlFinalOutputDir Name="Item1">..\..\..\prog\</HistoryLists_hlFinalOutputDir>
-					</HistoryLists_hlFinalOutputDir>
 					<Debugging>
 						<Debugging Name="DebugSourceDirs">$(BCB)\source\vcl</Debugging>
 					</Debugging>

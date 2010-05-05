@@ -61,12 +61,6 @@ else
 	dl "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" \
 		"$dir/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a" +x
 
-	# need to use wget because ant's downloader can't handle the URL
-	dl "http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe" \
-		"ext/rt/BCI2000-setup.exe" 35760134 "54198c14540d012c9b403c749bc725cb" +x \
-		--user "ascheck" --password "eibah7cohB"
-	
-	
 	java -version && ant -version && {
 		echo "======================================================================"
 		echo "Finished downloading and md5-checking of pre-build files."

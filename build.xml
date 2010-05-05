@@ -14,16 +14,26 @@
 	<property name="extRT" location="${ext}/rt" />
 	<property name="extDev" location="${ext}/dev" />
 
+	<property name="srcBCI" location="${src}/BCI2000Source" />
+	<property name="binBCI" location="${bin}/BCI2000Source" />
+	<property name="subNexus" value="src/contrib/SignalSource/NexusSource" />
+	<property name="subTCPIP"
+	          value="src/contrib/Application/PleoCommandTCPIP" />
+	<property name="srcBCINexus" location="${srcBCI}/${subNexus}" />
+	<property name="binBCINexus" location="${binBCI}/${subNexus}" />
+	<property name="srcBCIPleo" location="${srcBCI}/${subTCPIP}" />
+	<property name="binBCIPleo" location="${binBCI}/${subTCPIP}" />
+
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="${lib}/RXTXcomm.jar:${lib}/junit.jar" />
 
 	<macrodef name="download">
 		<attribute name="src" />
+		<attribute name="srcAlt" default="@{src}" />
 		<attribute name="dest" />
 		<attribute name="md5" />
 		<attribute name="user" default="" />
 		<attribute name="password" default="" />
-		<attribute name="ignoreerrors" default="false" />
 		<sequential>
 			<get src="@{src}"
 			     dest="@{dest}"
@@ -31,18 +41,20 @@
 			     skipexisting="true"
 			     username="@{user}"
 			     password="@{password}"
-			     ignoreerrors="@{ignoreerrors}" />
-			<touch file="@{dest}" />
+			     ignoreerrors="true" />
+			<get src="@{srcAlt}"
+			     dest="@{dest}"
+			     verbose="${verb}"
+			     skipexisting="true"
+			     ignoreerrors="true" />
 			<checksum file="@{dest}"
 			          property="@{md5}"
-			          verifyproperty="csverify" />
-			<condition property="csbad">
-				<and>
-					<equals arg1="${csverify}" arg2="false" />
-					<equals arg1="@{ignoreerrors}" arg2="false" />
-				</and>
+			          algorithm="md5"
+			          verifyproperty="csverify.@{dest}" />
+			<condition property="csbad.@{dest}">
+				<equals arg1="${csverify.@{dest}}" arg2="false" />
 			</condition>
-			<fail if="csbad" message="Checksum of @{dest} is bad." />
+			<fail if="csbad.@{dest}" message="Checksum of @{dest} is bad." />
 		</sequential>
 	</macrodef>
 
@@ -51,7 +63,17 @@
 		<mkdir dir="${bin}" />
 		<mkdir dir="${ext}" />
 		<mkdir dir="${extBuild}" />
+		<mkdir dir="${extPreBuild}" />
 
+		<echo message="Downloading files needed for build system" />
+
+		<!--
+		<download src="" dest="${extPreBuild}/" md5="" />
+
+		<download src="" dest="${extPreBuild}/" md5="" />
+
+		<download src="" dest="${extPreBuild}/" md5="" />
+-->
 		<echo message="Downloading files needed for building" />
 
 		<download src="http://rxtx.qbang.org/pub/rxtx/rxtx-2.1-7-bins-r2.zip"
@@ -80,7 +102,7 @@
 
 		<download src="http://alagazam.net/Setup-Subversion-1.6.6.msi"
 		          dest="${extBuild}/subversion-setup.msi"
-		          md5="379fbeb45067f98ebd830affd4afdcc1" />
+		          md5="f21d87f859e317e65ff38706e54862e1" />
 
 		<download src="http://downloads.sourceforge.net/project/mingw/Automated%20MinGW%20Installer/MinGW%205.1.6/MinGW-5.1.6.exe"
 		          dest="${extBuild}/gcc-setup.exe"
@@ -93,6 +115,10 @@
 		<download src="http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe"
 		          dest="${extBuild}/bison-setup.exe"
 		          md5="d24ed4f8a3b156899db96079fb869cbf" />
+
+		<download src="http://tinyurl.com/2w56qx9"
+		          dest="${extBuild}/BCI2000-source.zip"
+		          md5="be3875e3f21eeb58a5f082b6042f9a93" />
 
 		<mkdir dir="${extBuild}/xsltproc/temp" />
 		<download src="ftp://ftp.zlatkovic.com/libxml/iconv-1.9.2.win32.zip"
@@ -166,10 +192,9 @@
 		          md5="880a163f157d377ea8fb7bb203e3dbc0" />
 
 		<download src="http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe"
+		          srcAlt="http://tinyurl.com/335oz5m"
 		          dest="${extRT}/BCI2000-setup.exe"
-		          md5="54198c14540d012c9b403c749bc725cb"
-		          user="ascheck"
-		          password="eibah7cohB" />
+		          md5="54198c14540d012c9b403c749bc725cb" />
 
 		<download src="http://www.pleoworld.com/downloads/PleoSDSoftware_1.1.zip"
 		          dest="${extRT}/PleoSDSoftware_1.1.zip"
@@ -214,6 +239,7 @@
 			</fileset>
 			<fileset dir="${src}">
 				<include name="BCI2000Source/**" />
+				<!-- TODO remove this? -->
 			</fileset>
 		</copy>
 
@@ -266,6 +292,8 @@
 			</fileset>
 		</move>
 
+		<unzip src="${extBuild}/BCI2000-source.zip" dest="${binBCI}" />
+
 		<copy file="${extBuild}/junit.jar"
 		      tofile="${lib}/junit.jar"
 		      overwrite="true"
@@ -282,7 +310,7 @@
 
 	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
 	<target name="clean">
-		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
+		<delete includeEmptyDirs="true" failonerror="true" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${dist}" />
 			<fileset dir="${extBuild}/xsltproc/bin" />
@@ -292,7 +320,7 @@
 
 	<!-- Cleans bin/ and dist/ diretory completely -->
 	<target name="mrproper">
-		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
+		<delete includeEmptyDirs="true" failonerror="true" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${ext}" />
 			<fileset dir="${dist}" />
@@ -317,6 +345,7 @@
 				<include name="**/help/*.html" />
 				<include name="**/icons/*.png" />
 			</fileset>
+			<fileset dir="${srcBCI}/.." />
 		</copy>
 
 		<javac srcdir="${src}"
@@ -336,6 +365,7 @@
 			</classpath>
 		</checkstyle>
 
+		<echo message="Creating changelog" />
 		<exec executable="svn" failonerror="false">
 			<arg value="up" />
 			<arg value="--non-interactive" />
@@ -348,6 +378,8 @@
 			<arg value="--xml" />
 			<arg value="--non-interactive" />
 		</exec>
+
+		<echo message="Building ExpressionParser" />
 		<exec executable="make"
 		      dir="${bin}/ExpressionParser"
 		      failonerror="true"
@@ -360,6 +392,8 @@
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
+
+		<echo message="Building TCPIP-Simulator" />
 		<exec executable="make"
 		      dir="${bin}/TCPIP-Simulator"
 		      failonerror="true"
@@ -372,6 +406,19 @@
 		      osfamily="windows">
 			<arg value="win" />
 		</exec>
+
+		<echo message="Building BCI-2000 modules" />
+		<exec executable="make"
+		      dir="${binBCINexus}"
+		      failonerror="true"
+		      osfamily="windows">
+		</exec>
+		<exec executable="make"
+		      dir="${binBCIPleo}"
+		      failonerror="true"
+		      osfamily="windows">
+		</exec>
+
 	</target>
 
 	<!-- Creates Java JAR archive and Windows executable in dist/ -->
@@ -445,32 +492,62 @@
 
 		<copy todir="${dist}"
 		      overwrite="true"
-		      failonerror="false"
+		      failonerror="true"
 		      verbose="${verb}">
 			<fileset file="${src}/pleocommand" />
 			<fileset file="${bin}/${exefile}" />
 			<fileset file="${lib}/librxtxSerial.so" />
 			<fileset file="${lib}/rxtxSerial.dll" />
+		</copy>
+		<copy todir="${dist}"
+		      overwrite="true"
+		      failonerror="false"
+		      verbose="${verb}">
 			<fileset file="${bin}/ExpressionParser/libExprParser.so" />
 			<fileset file="${bin}/ExpressionParser/ExprParser.dll" />
 		</copy>
+		<copy todir="${extRT}/BCI2000-Prog/"
+		      overwrite="true"
+		      failonerror="false"
+		      verbose="${verb}">
+			<fileset file="${binBCINexus}/NexusSource.exe" />
+			<fileset file="${binBCIPleo}/PleoCommandTCPIP.exe" />
+		</copy>
 		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
 			<fileset file="${dist}/pleocommand" />
+			<fileset file="${extRT}/BCI2000-Prog/NexusSource.exe" />
+			<fileset file="${extRT}/BCI2000-Prog/PleoCommandTCPIP.exe" />
 			<fileset file="${dist}/${exefile}" />
 			<fileset file="${dist}/librxtxSerial.so" />
 			<fileset file="${dist}/libExprParser.so" />
 		</chmod>
 
-		<uptodate property="build.linux"
-		          srcfile="${bin}/ExpressionParser/libExprParser.so"
-		          targetfile="${dist}/libExprParser.so" />
-		<uptodate property="build.win"
-		          srcfile="${bin}/ExpressionParser/ExprParser.dll"
-		          targetfile="${dist}/ExprParser.dll" />
+		<uptodate property="buildok.linux"
+		          targetfile="${dist}/libExprParser.so">
+			<srcfiles dir="${src}/ExpressionParser" includes="*" />
+		</uptodate>
+		<uptodate property="buildok.win1" targetfile="${dist}/ExprParser.dll">
+			<srcfiles dir="${src}/ExpressionParser" includes="*" />
+		</uptodate>
+		<uptodate property="buildok.win2"
+		          targetfile="${extRT}/BCI2000-Prog/NexusSource.exe">
+			<srcfiles dir="${srcBCINexus}" includes="*" />
+		</uptodate>
+		<uptodate property="buildok.win3"
+		          targetfile="${extRT}/BCI2000-Prog/PleoCommandTCPIP.exe">
+			<srcfiles dir="${srcBCIPleo}" includes="*" />
+		</uptodate>
+		<condition property="buildok.win">
+			<and>
+				<isset property="buildok.win1" />
+				<isset property="buildok.win2" />
+				<isset property="buildok.win3" />
+			</and>
+		</condition>
 		<fail message="This script has be run again under Linux because some missing files have to be created under Linux."
-		      unless="build.linux" />
+		      unless="buildok.linux" />
 		<fail message="This script has be run again under Windows because some missing files have to be created under Windows."
-		      unless="build.win" />
+		      unless="buildok.win" />
 
 	</target>
 
