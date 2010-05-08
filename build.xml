@@ -320,7 +320,7 @@
 
 	<!-- Cleans bin/ and dist/ diretory completely -->
 	<target name="mrproper">
-		<delete includeEmptyDirs="true" failonerror="true" verbose="${verb}">
+		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${ext}" />
 			<fileset dir="${dist}" />
