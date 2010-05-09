@@ -1,4 +1,4 @@
-//#ifdef WIN
+#ifdef WIN
 
 #include "main.h"
 
@@ -853,4 +853,4 @@ char *strptime(const char *buf, const char *format, struct tm *tm) {
 	return __strptime_internal(buf, format, tm, NULL);
 }
 
-//#endif
+#endif
