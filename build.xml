@@ -251,6 +251,11 @@
 
 	</target>
 
+	<target name="_unzipBCISource" unless="uptodateBCISource">
+		<unzip src="${extBuild}/BCI2000-source.zip" dest="${binBCI}" />
+		<touch file="${binBCI}/.unpack-timestamp" />
+	</target>
+
 	<!-- Unzips and moves files needed for build and dist targets -->
 	<target name="_prepare-build" depends="_download-build">
 		<mkdir dir="${lib}" />
@@ -294,8 +299,6 @@
 			</fileset>
 		</move>
 
-		<unzip src="${extBuild}/BCI2000-source.zip" dest="${binBCI}" />
-
 		<copy file="${extBuild}/junit.jar"
 		      tofile="${lib}/junit.jar"
 		      overwrite="true"
@@ -312,6 +315,10 @@
 
 		<unzip src="${extDev}/tidy-bin.zip" dest="${bin}" />
 
+		<uptodate property="uptodateBCISource"
+		          srcfile="${extBuild}/BCI2000-source.zip"
+		          targetfile="${binBCI}/.unpack-timestamp" />
+		<antcall target="_unzipBCISource" />
 	</target>
 
 	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
@@ -437,6 +444,9 @@
 			<arg value="--date=iso" />
 			<arg value="--numstat" />
 			<arg value="--stat=10000,10000" />
+			<arg value="--abbrev-commit" />
+			<arg value="-M" />
+			<arg value="-C" />
 			<arg value="--color=never" />
 		</exec>
 		<exec executable="cmd"
@@ -450,6 +460,9 @@
 			<arg value="--date=iso" />
 			<arg value="--numstat" />
 			<arg value="--stat=10000,10000" />
+			<arg value="--abbrev-commit" />
+			<arg value="-M" />
+			<arg value="-C" />
 		</exec>
 		<echo message="Converting GIT changelog to XML" />
 		<exec executable="${bin}/GitLogHTML/GitLogHTML"
@@ -474,7 +487,6 @@
 			<arg value="${src}/changelog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
-
 
 	</target>
 
