@@ -202,6 +202,7 @@
 
 		<copy todir="${extRT}"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="{verb}">
 			<fileset dir="${src}/ext/rt">
@@ -232,6 +233,7 @@
 
 		<copy todir="${extDev}"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="{verb}">
 			<fileset dir="${src}/ext/dev">
@@ -297,14 +299,18 @@
 		<copy file="${extBuild}/junit.jar"
 		      tofile="${lib}/junit.jar"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="{verb}" />
 
 		<copy file="${extBuild}/hamcrest-core.jar"
 		      tofile="${lib}/hamcrest-core.jar"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="{verb}" />
+
+		<unzip src="${extDev}/tidy-bin.zip" dest="${bin}" />
 
 	</target>
 
@@ -337,6 +343,7 @@
 
 		<copy todir="${bin}"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="{verb}">
 			<fileset dir="${src}">
@@ -424,12 +431,25 @@
 		<exec executable="git"
 		      output="${bin}/changelog.git"
 		      failonerror="true"
-		      logerror="true">
+		      logerror="true"
+		      osfamily="unix">
 			<arg value="log" />
 			<arg value="--date=iso" />
 			<arg value="--numstat" />
 			<arg value="--stat=10000,10000" />
 			<arg value="--color=never" />
+		</exec>
+		<exec executable="cmd"
+		      output="${bin}/changelog.git"
+		      failonerror="true"
+		      logerror="true"
+		      osfamily="windows">
+			<arg value="/c" />
+			<arg value="git.cmd" />
+			<arg value="log" />
+			<arg value="--date=iso" />
+			<arg value="--numstat" />
+			<arg value="--stat=10000,10000" />
 		</exec>
 		<echo message="Converting GIT changelog to XML" />
 		<exec executable="${bin}/GitLogHTML/GitLogHTML"
@@ -466,7 +486,17 @@
 		      dir="${basedir}"
 		      failonerror="true"
 		      osfamily="unix">
-			<arg value="${bin}/pleocmd" />
+			<arg value="${bin}/pleocmd/itfc/gui/help" />
+			<arg value="${bin}/changelog.html" />
+		</exec>
+
+		<exec executable="${src}/tidy-all-html.bat"
+		      dir="${basedir}"
+		      failonerror="true"
+		      osfamily="windows">
+			<!-- location of tidy.exe must be first argument -->
+			<arg value="${bin}" />
+			<arg value="${bin}/pleocmd/itfc/gui/help" />
 			<arg value="${bin}/changelog.html" />
 		</exec>
 
@@ -522,6 +552,7 @@
 
 		<copy todir="${dist}"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="true"
 		      verbose="${verb}">
 			<fileset file="${src}/pleocommand" />
@@ -532,6 +563,7 @@
 		</copy>
 		<copy todir="${dist}"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="false"
 		      verbose="${verb}">
 			<fileset file="${bin}/ExpressionParser/libExprParser.so" />
@@ -539,6 +571,7 @@
 		</copy>
 		<copy todir="${extRT}/BCI2000-Prog/"
 		      overwrite="true"
+		      preservelastmodified="true"
 		      failonerror="false"
 		      verbose="${verb}">
 			<fileset file="${binBCINexus}/NexusSource.exe" />

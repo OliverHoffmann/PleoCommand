@@ -12,11 +12,11 @@ unix: GitLogHTML
 
 win: GitLogHTML.exe
 
-GitLogHTML: main-unix.o list-unix.o parser-unix.o printer-unix.o
+GitLogHTML: main-unix.o list-unix.o parser-unix.o printer-unix.o mingw_compat-unix.o
 	gcc -o $@ $^
 
-GitLogHTML.exe: main-win.o list-win.o parser-win.o printer-win.o
-	gcc -o $@ $^
+GitLogHTML.exe: main-win.o list-win.o parser-win.o printer-win.o mingw_compat-win.o
+	gcc -o $@ $^ -liberty
 
 main-unix.o: main.c main.h
 	gcc -c -o $@ $< $(FLAGS_UNIX) $(WARNS)
@@ -40,6 +40,12 @@ parser-unix.o: parser.c main.h
 	gcc -c -o $@ $< $(FLAGS_UNIX) $(WARNS)
 
 parser-win.o: parser.c main.h
+	gcc -c -o $@ $< $(FLAGS_WIN) $(WARNS)
+
+mingw_compat-unix.o: mingw_compat.c main.h
+	gcc -c -o $@ $< $(FLAGS_UNIX) $(WARNS)
+
+mingw_compat-win.o: mingw_compat.c main.h
 	gcc -c -o $@ $< $(FLAGS_WIN) $(WARNS)
 
 clean:

@@ -73,4 +73,14 @@ void printerInit();
 void printerFinalize();
 void printEntry(const header *hdr, const list *statList);
 
+#ifdef WIN
+int setenv(const char *name, const char *value, int overwrite);
+int unsetenv(const char *name);
+int getline(char **lineptr, size_t *n, FILE *stream);
+int mkstemp(char *template);
+struct tm *localtime_r(const time_t *timep, struct tm *result);
+int getdate_r(const char *string, struct tm *res);
+int getdate_err;
+#endif
+
 #endif

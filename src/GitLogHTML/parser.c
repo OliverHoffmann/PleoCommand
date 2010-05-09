@@ -1,6 +1,12 @@
 #include "main.h"
 
+#ifdef UNIX
 static char templateFile[] = "/tmp/gitloghtml-datemsk-XXXXXX";
+#endif
+
+#ifdef WIN
+static char templateFile[] = "C:\\Windows\\Temp\\gitloghtml-datemsk-XXXXXX";
+#endif
 
 void parserInit() {
 	int fd = mkstemp(templateFile);
