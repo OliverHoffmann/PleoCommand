@@ -40,7 +40,10 @@ public abstract class Output extends PipePart {
 	public final boolean write(final Data data) throws OutputException {
 		try {
 			ensureInitialized();
-			return write0(data);
+			getFeedback().incDataReceivedCount();
+			final boolean res = write0(data);
+			if (res) getFeedback().incDataSentCount(1); // TODO not correct
+			return res;
 		} catch (final IOException e) {
 			throw new OutputException(this, false, e,
 					"Cannot write data block '%s'", data);

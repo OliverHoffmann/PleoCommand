@@ -1022,6 +1022,9 @@ public final class PipeConfigBoard extends JPanel {
 			sb.append(safeHTMLString(sc));
 			sb.append("</p>");
 		}
+		sb.append("<p color=blue><b>Statistics:</b><br>");
+		sb.append(underCursor.getFeedback().getHTMLTable());
+		sb.append("</p>");
 		sb.append("</html>");
 		return sb.toString();
 	}

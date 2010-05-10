@@ -35,8 +35,11 @@ public abstract class Converter extends PipePart {
 
 	public final List<Data> convert(final Data data) throws ConverterException {
 		try {
+			getFeedback().incDataReceivedCount();
 			ensureInitialized();
-			return convert0(data);
+			final List<Data> res = convert0(data);
+			if (res != null) getFeedback().incDataSentCount(res.size());
+			return res;
 		} catch (final IOException e) {
 			throw new ConverterException(this, false, e,
 					"Cannot convert data block");

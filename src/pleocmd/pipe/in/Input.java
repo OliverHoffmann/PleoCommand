@@ -40,7 +40,10 @@ public abstract class Input extends PipePart {
 	public final Data readData() throws InputException {
 		try {
 			ensureInitialized();
-			return readData0();
+			final Data res = readData0();
+			if (res != null) // got a valid data packet
+				getFeedback().incDataSentCount(1);
+			return res;
 		} catch (final IOException e) {
 			throw new InputException(this, true, e, "Cannot read data block");
 		} catch (final StateException e) {

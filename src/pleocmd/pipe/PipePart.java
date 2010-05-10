@@ -107,7 +107,11 @@ public abstract class PipePart extends StateHandling {
 
 	private String shortConfigDescr;
 
+	private final PipePartFeedback feedback;
+
 	public PipePart() {
+		feedback = new PipePartFeedback();
+
 		group = new Group(Pipe.class.getSimpleName() + ": "
 				+ getClass().getSimpleName(), this);
 		guiConfigs = new ArrayList<ConfigValue>();
@@ -133,6 +137,7 @@ public abstract class PipePart extends StateHandling {
 
 		immutableGUIPosition = new ImmutableRectangle(cfgGuiPosition
 				.getContent());
+
 	}
 
 	final long getUID() {
@@ -191,9 +196,11 @@ public abstract class PipePart extends StateHandling {
 	 */
 	public final boolean tryConfigure() {
 		try {
+			feedback.incConfiguredCount();
 			configure();
 			return true;
 		} catch (final PipeException e) {
+			feedback.addError(e, e.isPermanent());
 			pipe.getFeedback().addError(e, e.isPermanent());
 			Log.error(e, "Cannot configure '%s'", getName());
 			return false;
@@ -209,9 +216,12 @@ public abstract class PipePart extends StateHandling {
 	public final boolean tryInit() {
 		try {
 			init();
+			feedback.incInitializedCount();
+			feedback.started();
 			if (cfgVisualize.getContent()) createVisualization();
 			return true;
 		} catch (final PipeException e) {
+			feedback.addError(e, e.isPermanent());
 			pipe.getFeedback().addError(e, e.isPermanent());
 			Log.error(e, "Cannot initialize '%s'", getName());
 			return false;
@@ -226,9 +236,12 @@ public abstract class PipePart extends StateHandling {
 	 */
 	public final boolean tryClose() {
 		try {
+			feedback.stopped();
+			feedback.incClosedCount();
 			close();
 			return true;
 		} catch (final PipeException e) {
+			feedback.addError(e, e.isPermanent());
 			pipe.getFeedback().addError(e, e.isPermanent());
 			Log.error(e, "Cannot close '%s'", getName());
 			return false;
@@ -513,7 +526,10 @@ public abstract class PipePart extends StateHandling {
 				|| s1.equals(Input.class.getName())
 				|| s1.equals(Converter.class.getName())
 				|| s1.equals(Output.class.getName()) : s1;
-		if (visualizationDialog != null) visualizationDialog.plot(index, x, y);
+		if (visualizationDialog != null) {
+			visualizationDialog.plot(index, x, y);
+			feedback.incDataPlotCount();
+		}
 	}
 
 	/**
@@ -678,6 +694,10 @@ public abstract class PipePart extends StateHandling {
 		if (name == null) name = ppc.getSimpleName() + "-icon.png";
 		return IconLoader.isIconAvailable(name) ? IconLoader.getIcon(name)
 				: null;
+	}
+
+	public PipePartFeedback getFeedback() {
+		return feedback;
 	}
 
 }

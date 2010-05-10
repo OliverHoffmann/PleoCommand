@@ -1,25 +1,17 @@
 package pleocmd.pipe;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
 /**
- * Fully synchronized class that provided feedback about a {@link Pipe} that is
+ * Fully synchronized class that provides feedback about a {@link Pipe} that is
  * currently running or has recently run.
  * 
  * @author oliver
  */
-public final class PipeFeedback {
-
-	private long startTime;
-
-	private long stopTime;
+public final class PipeFeedback extends Feedback {
 
 	private int dataInputCount;
 
@@ -27,57 +19,10 @@ public final class PipeFeedback {
 
 	private int dataOutputCount;
 
-	private final List<Throwable> temporaryErrors;
-
-	private final List<Throwable> permanentErrors;
-
-	private int interruptionCount;
-
-	private int dropCount;
-
-	private int behindCountSignificant;
-
-	private long behindCount;
-
-	private long behindMax;
-
-	private long behindSum;
-
-	/**
-	 * Constructs a new {@link PipeFeedback}.<br>
-	 * Must only be called from {@link Pipe}.
-	 */
 	PipeFeedback() {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
 				.equals(Pipe.class.getName()) : s1;
-		startTime = 0;
-		temporaryErrors = new ArrayList<Throwable>();
-		permanentErrors = new ArrayList<Throwable>();
-	}
-
-	/**
-	 * @return time at which the {@link Pipe} has been started
-	 */
-	public synchronized long getStartTime() {
-		return startTime;
-	}
-
-	/**
-	 * @return time at which the {@link Pipe} has been stopped or <b>0</b> if
-	 *         the pipe is still running
-	 */
-	public synchronized long getStopTime() {
-		return stopTime;
-	}
-
-	/**
-	 * @return time which has elapsed since the {@link Pipe} has been started if
-	 *         it's currently running or the time it has run otherwise.
-	 */
-	public synchronized long getElapsed() {
-		return (stopTime == 0 ? System.currentTimeMillis() : stopTime)
-				- startTime;
 	}
 
 	/**
@@ -101,147 +46,42 @@ public final class PipeFeedback {
 		return dataOutputCount;
 	}
 
-	/**
-	 * @return a list of all {@link Exception}s that have been thrown and which
-	 *         only caused temporary failure (i.e. affected only one
-	 *         {@link Data})
-	 */
-	public synchronized List<Throwable> getTemporaryErrors() {
-		return Collections.unmodifiableList(temporaryErrors);
-	}
-
-	/**
-	 * @return a list of all {@link Exception}s that have been thrown and which
-	 *         only caused permanent failure (i.e. possibly affected more than
-	 *         one {@link Data})
-	 */
-	public synchronized List<Throwable> getPermanentErrors() {
-		return Collections.unmodifiableList(permanentErrors);
-	}
-
-	/**
-	 * @return number of {@link Data} that have been interrupted because a
-	 *         {@link Data} with a higher priority has to be executed
-	 */
-	public synchronized int getInterruptionCount() {
-		return interruptionCount;
-	}
-
-	/**
-	 * @return number of {@link Data} that have been dropped because a
-	 *         {@link Data} with a higher priority is currently been executed or
-	 *         has been queued for execution
-	 */
-	public synchronized int getDropCount() {
-		return dropCount;
-	}
-
-	public synchronized long getSignificantBehindCount() {
-		return behindCountSignificant;
-	}
-
-	public synchronized long getBehindCount() {
-		return behindCount;
-	}
-
-	public synchronized long getBehindMax() {
-		return behindMax;
-	}
-
-	public synchronized long getBehindSum() {
-		return behindSum;
-	}
-
-	public synchronized long getBehindAverage() {
-		return behindCount == 0 ? 0 : behindSum / behindCount;
-	}
-
-	synchronized void started() {
-		startTime = System.currentTimeMillis();
-	}
-
-	synchronized void stopped() {
-		stopTime = System.currentTimeMillis();
-		((ArrayList<?>) temporaryErrors).trimToSize();
-		((ArrayList<?>) permanentErrors).trimToSize();
-	}
-
-	/**
-	 * Called from {@link Pipe} if a {@link Data} has been read from an
-	 * {@link Input}.
-	 */
 	synchronized void incDataInputCount() {
 		++dataInputCount;
 	}
 
-	/**
-	 * Called from {@link Pipe} if a {@link Data} has been send to a
-	 * {@link Converter}.
-	 */
 	synchronized void incDataConvertedCount() {
 		++dataConvertedCount;
 	}
 
-	/**
-	 * Called from {@link Pipe} if a {@link Data} has been send to an
-	 * {@link Output}.
-	 */
 	synchronized void incDataOutputCount() {
 		++dataOutputCount;
 	}
 
-	synchronized void addError(final Throwable t, final boolean permanent) {
-		if (permanent)
-			permanentErrors.add(t);
-		else
-			temporaryErrors.add(t);
-	}
-
-	synchronized void incInterruptionCount() {
-		++interruptionCount;
-	}
-
-	synchronized void incDropCount() {
-		++dropCount;
-	}
-
-	synchronized void incDropCount(final int increment) {
-		dropCount += increment;
-	}
-
-	synchronized void incBehindCount(final long behind,
-			final boolean significant) {
-		if (significant) ++behindCountSignificant;
-		++behindCount;
-		if (behindMax < behind) behindMax = behind;
-		behindSum += behind;
-	}
-
-	private String getCurrentRunningState() {
-		if (stopTime != 0)
-			return String.format("has run %d milliseconds", getElapsed());
-		if (startTime != 0)
-			return String.format("is running since %d milliseconds",
-					getElapsed());
-		return "has never been run";
+	@Override
+	protected String getAdditionalString1() {
+		return String.format(
+				" has read %d, converted %d and written %d data(s), ",
+				getDataInputCount(), getDataConvertedCount(),
+				getDataOutputCount());
 	}
 
 	@Override
-	public synchronized String toString() {
-		if (startTime == 0 && stopTime == 0)
-			return String.format("Pipe %s", getCurrentRunningState());
-		return String.format("Pipe %s, has read %d, "
-				+ "converted %d and written %d data(s), encountered %d "
-				+ "temporary and %d permanent error(s), "
-				+ "output has been %d time(s) interrupted "
-				+ "due to high-priority data and a data block "
-				+ "has %d time(s) been dropped due to low-priority and "
-				+ "it was %d time(s) behind (average %d, max %d, sum %d).",
-				getCurrentRunningState(), dataInputCount, dataConvertedCount,
-				dataOutputCount, temporaryErrors.size(),
-				permanentErrors.size(), interruptionCount, dropCount,
-				behindCountSignificant, getBehindAverage(), behindMax,
-				behindSum);
+	protected String getAdditionalString2() {
+		return "";
+	}
+
+	@Override
+	protected void addAdditionalHTMLTable1(final StringBuilder sb) {
+		appendToHTMLTable(sb, "Data read from Inputs", getDataInputCount());
+		appendToHTMLTable(sb, "Data converted in Converters",
+				getDataConvertedCount());
+		appendToHTMLTable(sb, "Data written from Outputs", getDataOutputCount());
+	}
+
+	@Override
+	protected void addAdditionalHTMLTable2(final StringBuilder sb) {
+		// nothing to do
 	}
 
 }

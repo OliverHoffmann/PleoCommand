@@ -658,6 +658,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			return true;
 		}
 		final boolean significant = delta < -cfgMaxBehind.getContent();
+		data.getOrigin().getFeedback().incBehindCount(-delta, significant);
 		feedback.incBehindCount(-delta, significant);
 		if (significant)
 			// TODO MOD only warn for the first in dataList?
@@ -711,6 +712,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				}
 			} catch (final InputException e) {
 				Log.error(e);
+				in.getFeedback().addError(e, e.isPermanent());
 				feedback.addError(e, e.isPermanent());
 				if (e.isPermanent()) {
 					Log.info("Skipping no longer working input '%s'", in);
@@ -722,6 +724,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				continue;
 			} catch (final Throwable e) { // CS_IGNORE catch any Input-problems
 				Log.error(e);
+				in.getFeedback().addError(e, false);
 				feedback.addError(e, false);
 				Log.info("Skipping one data block from input '%s'", in);
 				// try next data packet / try from next input
@@ -790,6 +793,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				feedback.incDropCount(dataQueue.getSizeBeforeClear());
 				break;
 			case Dropped:
+				data.getOrigin().getFeedback().incDropCount();
 				feedback.incDropCount();
 				break;
 			case Put:
@@ -866,6 +870,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			}
 		} catch (final ConverterException e) {
 			Log.error(e);
+			cvt.getFeedback().addError(e, e.isPermanent());
 			feedback.addError(e, e.isPermanent());
 			if (e.isPermanent()) {
 				Log.info("Removing no longer working converter '%s'", cvt);
@@ -876,6 +881,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 						cvt, data);
 		} catch (final Throwable e) { // CS_IGNORE catch all what may go wrong
 			Log.error(e);
+			cvt.getFeedback().addError(e, false);
 			feedback.addError(e, false);
 			Log.info("Skipping converter '%s' for one data block '%s'", cvt,
 					data);
@@ -920,16 +926,20 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private boolean writeToOutput(final Data data, final Output out) {
 		try {
 			final boolean succeeded = out.write(data);
-			data.setOrigin(out);
+			// data.setOrigin(out);
 			if (!succeeded) return false;
 		} catch (final OutputException e) {
-			data.setOrigin(out);
+			// data.setOrigin(out);
 			Log.error(e);
 			if (!e.isPermanent()
-					&& e.getCause() instanceof InterruptedException)
+					&& e.getCause() instanceof InterruptedException) {
+				out.getFeedback().incExecutionInterruptedCount();
+				data.getOrigin().getFeedback().incInterruptionCount();
 				feedback.incInterruptionCount();
-			else
+			} else {
+				out.getFeedback().addError(e, e.isPermanent());
 				feedback.addError(e, e.isPermanent());
+			}
 			if (e.isPermanent()) {
 				Log.info("Removing no longer working output '%s'", out);
 				out.tryClose();
@@ -938,8 +948,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				Log.info("Skipping output '%s' for one data block '%s'", out,
 						data);
 		} catch (final Throwable e) { // CS_IGNORE catch all what may go wrong
-			data.setOrigin(out);
+			// data.setOrigin(out);
 			Log.error(e);
+			out.getFeedback().addError(e, false);
 			feedback.addError(e, false);
 			Log.info("Skipping output '%s' for one data block '%s'", out, data);
 		}
