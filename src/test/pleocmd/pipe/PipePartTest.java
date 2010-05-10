@@ -85,7 +85,7 @@ public final class PipePartTest extends Testcases {
 		}
 		Log.consoleOut("Checked owner management of PipePart '%s'", pp);
 
-		assertEquals(2, pp.getGroup().getSize());
+		assertEquals(2, pp.getGuiConfigs().size());
 		cfg0.setContent("foo");
 		cfg1.setContent("foo\nbar");
 		assertEquals("ConfigValue not referenced", cfg0.getContent(),

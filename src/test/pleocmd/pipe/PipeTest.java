@@ -13,11 +13,11 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.PipeException;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipeFeedback;
-import pleocmd.pipe.in.FileInput;
-import pleocmd.pipe.in.ReadType;
+import pleocmd.pipe.in.Input;
 import pleocmd.pipe.in.StaticInput;
 import pleocmd.pipe.out.FileOutput;
 import pleocmd.pipe.out.InternalCommandOutput;
+import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PrintType;
 import test.pleocmd.Testcases;
 
@@ -37,7 +37,7 @@ public class PipeTest extends Testcases {
 				0, 2, 0, 0, 0, 0, 0);
 
 		Log.consoleOut("Test bad input");
-		fb = testSimplePipe("SC|HELP", -1, -1, 0, 0, 0, 1, 0, 0, 0, 0);
+		fb = testSimplePipe("SC|HELP", -1, -1, 0, 0, 0, 0, 1, 0, 0, 0);
 
 		Log.consoleOut("Test unknown command");
 		fb = testSimplePipe("UNKNOWN|0|6.5|Hello\n", -1, -1, 1, 0, 0, 1, 0, 0,
@@ -66,7 +66,13 @@ public class PipeTest extends Testcases {
 				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
 				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
 				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
-				+ "[P05]SC|ECHO|HighPrio\n", -1, -1, 23, 0, 2, 0, 0, 1, 21, 0);
+				+ "[P05]SC|ECHO|HighPrio\n", -1, -1, 23, 0, -1, 0, 0, 1, -1, 0);
+		assertTrue("Expected 1 output and 22 drops (slow computer) or "
+				+ "2 outputs and 21 drops (fast computer): ", fb
+				.getDataOutputCount() == 2
+				&& fb.getDropCount() == 21
+				|| fb.getDataOutputCount() == 1
+				&& fb.getDropCount() == 22);
 
 		Log.consoleOut("Test timed execution (need to wait)");
 		fb = testSimplePipe(
@@ -142,48 +148,62 @@ public class PipeTest extends Testcases {
 				0, 0);
 
 		Log.consoleOut("Test error handling (two inputs, first one fails)");
+		Input in1, in2;
+		Output out1, out2;
 		p.reset();
-		final File tmpFile = File.createTempFile("PipeTest", null);
-		p.addInput(new FileInput(tmpFile, ReadType.Ascii));
-		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
-		p.addOutput(new InternalCommandOutput());
-		tmpFile.delete();
-		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+		p.addInput(in1 = new StaticInput("FAILURE"));
+		p.addInput(in2 = new StaticInput("SC|ECHO|Second is working\n"));
+		p.addOutput(out1 = new InternalCommandOutput());
+		in1.connectToPipePart(out1);
+		in2.connectToPipePart(out1);
+		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 
 		Log.consoleOut("Test error handling (converter fails)");
 		Log.consoleOut("TODO");
 		// TODO ENH converter fails => output unconverted
 
 		Log.consoleOut("Test error handling (sole output fails)");
+		final File tmpFile = File.createTempFile("PipeTest", null);
 		p.reset();
-		p.addInput(new StaticInput("[T1s]\n[T8sP10]\n"));
-		p.addOutput(new FileOutput(tmpFile, PrintType.DataAscii));
+		p.addInput(in1 = new StaticInput("[T1s]\n[T8sP10]\n"));
+		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.DataAscii));
+		in1.connectToPipePart(out1);
+		tmpFile.delete();
 		tmpFile.mkdir();
-		fb = testSimplePipe(null, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(p, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
 		tmpFile.delete();
 
 		Log.consoleOut("Test error handling (two outputs, first one fails)");
 		p.reset();
-		p.addInput(new StaticInput("SC|ECHO|Second is working\n"));
-		p.addOutput(new FileOutput(tmpFile, PrintType.DataAscii));
-		p.addOutput(new InternalCommandOutput());
+		p.addInput(in1 = new StaticInput("SC|ECHO|Second is working\n"));
+		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.DataAscii));
+		p.addOutput(out2 = new InternalCommandOutput());
+		in1.connectToPipePart(out1);
+		in1.connectToPipePart(out2);
 		tmpFile.mkdir();
-		fb = testSimplePipe(null, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 		tmpFile.delete();
 	}
 
 	// CS_IGNORE_NEXT this many parameters are ok here - only a test case
-	private PipeFeedback testSimplePipe(final String input, final long minTime,
+	private PipeFeedback testSimplePipe(final Object input, final long minTime,
 			final long maxTime, final int dataIn, final int dataCvt,
 			final int dataOut, final int tempErr, final int permErr,
 			final int intrCnt, final int dropCnt, final int behindCnt)
 			throws PipeException, InterruptedException, ConfigurationException {
 		// create pipe
-		final Pipe pipe = new Pipe(new Configuration());
-		if (input != null) {
+		final Pipe pipe;
+		if (input instanceof Pipe)
+			pipe = (Pipe) input;
+		else
+			pipe = new Pipe(new Configuration());
+		if (input instanceof String) {
+			final StaticInput in;
+			final InternalCommandOutput out;
 			pipe.reset();
-			pipe.addInput(new StaticInput(input));
-			pipe.addOutput(new InternalCommandOutput());
+			pipe.addInput(in = new StaticInput((String) input));
+			pipe.addOutput(out = new InternalCommandOutput());
+			in.connectToPipePart(out);
 		}
 
 		// execute pipe
@@ -192,11 +212,11 @@ public class PipeTest extends Testcases {
 
 		// print log
 		Log.consoleOut(pipe.getFeedback().toString());
-		if (input != null)
-			Log.consoleOut("Finished Pipe '%s' containing '%s'", pipe, input
+		if (input instanceof String)
+			Log.consoleOut("Finished Pipe containing '%s'", ((String) input)
 					.replaceAll("\n(.)", "; $1").replace("\n", ""));
 		else
-			Log.consoleOut("Finished Pipe '%s'", pipe);
+			Log.consoleOut("Finished Pipe");
 		Log.consoleOut("");
 
 		// check result

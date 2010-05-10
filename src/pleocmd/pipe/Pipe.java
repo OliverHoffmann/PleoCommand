@@ -689,7 +689,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			if (inputThreadInterruped) return null;
 			assert inputPosition <= inputList.size();
 			if (inputPosition >= inputList.size()) {
-				Log.detail("Finished InputList");
+				Log.detail("Finished InputList: %d of %d", inputPosition,
+						inputList.size());
 				return null;
 			}
 			in = inputList.get(inputPosition);
@@ -699,10 +700,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				++inputPosition;
 				continue;
 			}
+			Log.detail("Trying input '%s'", in);
 			try {
 				final Data res = in.readData();
-				feedback.incDataInputCount();
 				if (res != null) {
+					feedback.incDataInputCount();
 					// found a valid data packet
 					res.setOrigin(in);
 					return res;
@@ -777,6 +779,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				}
 			}
 
+			if (Log.canLogDetail())
+				Log.detail("Currently on queue: " + dataQueue.getAll());
 			final PutResult res = dataQueue.put(data);
 			switch (res) {
 			case ClearedAndPut:

@@ -118,4 +118,13 @@ public final class StaticInput extends Input {
 		return 0;
 	}
 
+	@Override
+	public String toString() { // CS_IGNORE_PREV keep overridable
+		final StringBuilder sb = new StringBuilder();
+		sb.append(getClass().getSimpleName());
+		sb.append(" [");
+		sb.append(cfgInput.getContentList().size());
+		sb.append("]");
+		return sb.toString();
+	}
 }

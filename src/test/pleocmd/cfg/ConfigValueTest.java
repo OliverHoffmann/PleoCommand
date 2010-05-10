@@ -257,8 +257,9 @@ public final class ConfigValueTest extends Testcases {
 		Log.consoleOut("Got identifier '%s' which constructs '%s' which "
 				+ "in return has identifier '%s'", ident, cvFromIdent
 				.getClass().getName(), cvFromIdent.getIdentifier());
-		assertEquals("Wrong class returned by createValue():", expected,
-				cvFromIdent.getClass());
+		if (expected != null)
+			assertEquals("Wrong class returned by createValue():", expected,
+					cvFromIdent.getClass());
 		assertEquals("Newly constructed by createValue() has "
 				+ "other identifier:", ident, cvFromIdent.getIdentifier());
 	}
@@ -289,13 +290,13 @@ public final class ConfigValueTest extends Testcases {
 					throws ConfigurationException {
 				return itemAsString;
 			}
-		}, ConfigCollection.class);
+		}, null);
 		compareIdentifier(new ConfigCollection<String>("foo", Type.Set) {
 			@Override
 			protected String createItem(final String itemAsString)
 					throws ConfigurationException {
 				return itemAsString;
 			}
-		}, ConfigCollection.class);
+		}, null);
 	}
 }

@@ -74,31 +74,33 @@ public final class DataTest extends Testcases {
 		try {
 			Data.createFromAscii("ß");
 			fail("IOException not thrown");
-		} catch (final IOException e) {
-			assertTrue(e.toString(), e.getMessage().contains(
-					"Invalid character"));
+		} catch (final FormatException e) {
+			assertTrue(e.toString(), e.getIndex() == 0
+					&& e.getMessage().contains("Invalid character"));
 		}
 
 		try {
 			Data.createFromAscii("1|2|\0");
 			fail("IOException not thrown");
-		} catch (final IOException e) {
-			assertTrue(e.toString(), e.getMessage().contains(
-					"Invalid character"));
+		} catch (final FormatException e) {
+			assertTrue(e.toString(), e.getIndex() == 4
+					&& e.getMessage().contains("Invalid character"));
 		}
 
 		try {
 			Data.createFromAscii("Bx:F850BEXYA0");
 			fail("IOException not thrown");
-		} catch (final IOException e) {
-			assertTrue(e.toString(), e.getMessage().endsWith("9: 0x58"));
+		} catch (final FormatException e) {
+			assertTrue(e.toString(), e.getIndex() == 9
+					&& e.getMessage().endsWith(": 0x58"));
 		}
 
 		try {
 			Data.createFromAscii("Bx:F850B");
 			fail("IOException not thrown");
-		} catch (final IOException e) {
-			assertTrue(e.toString(), e.getMessage().endsWith(": 5"));
+		} catch (final FormatException e) {
+			assertTrue(e.toString(), e.getIndex() == 7
+					&& e.getMessage().contains("multiple of two"));
 		}
 
 		Log.consoleOut("Data testing done");

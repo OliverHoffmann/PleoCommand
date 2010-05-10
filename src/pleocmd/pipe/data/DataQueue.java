@@ -1,9 +1,13 @@
 package pleocmd.pipe.data;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.StandardInput;
+import pleocmd.exc.FormatException;
+import pleocmd.exc.InternalException;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -233,6 +237,23 @@ public final class DataQueue {
 		return String.format("cap: %d, read: %d, write: %d, lastPrio: %d",
 				buffer == null ? -1 : buffer.length, readPos, writePos,
 				priority);
+	}
+
+	public synchronized List<Data> getAll() {
+		final List<Data> res = new ArrayList<Data>();
+		if (readPos == writePos) return res;
+		for (int i = readPos; i <= writePos && i < buffer.length; ++i)
+			res.add(buffer[i]);
+		for (int i = 0; i <= writePos; ++i)
+			res.add(buffer[i]);
+		if (closed) try {
+			res.add(Data.createFromAscii("QUEUE CLOSED"));
+		} catch (final IOException e) {
+			throw new InternalException(e);
+		} catch (final FormatException e) {
+			throw new InternalException(e);
+		}
+		return res;
 	}
 
 }
