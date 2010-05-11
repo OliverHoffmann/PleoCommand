@@ -57,6 +57,7 @@
   installation target directory of the JDK (not a JRE)<BR>
   The final environment settings should be something like:<BR>
   PATH="...;C:\Programme\Java\jdk1.6.0_20\bin;C:\ant\apache-ant-1.8.0\bin;C:\Programme\Git\cmd;C:\Programme\GnuWin32\bin;C:\MinGW\bin"<BR>
+
   JAVA_HOME="C:\Programme\Java\jdk1.6.0_20" (not the bin sub-directory!!!)<BR>
   Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant fetch" in the root directory
   of PleoCommand.<BR>
@@ -92,8 +93,8 @@
 
   <P>Install from <A href="ext/build/git-setup.zip">git-setup.zip</A>.<BR>
   It doesn't matter whether you select "additional icons, windows explorer integration, etc." but you have to select
-  "Run Git From Windows Command Prompt (second option)" and "Check out as-is, commit Unix-Style (second option
-  !!!)" when prompted for it.</P>
+  "Run Git From Windows Command Prompt (second option)" and "Check out as-is, commit Unix-Style (second option !!!)"
+  when prompted for it.</P>
 
   <H3>GCC</H3>
 
@@ -103,17 +104,18 @@
 
   <H3>Make</H3>
 
-  <P>Install from <A href="ext/build/make-setup.zip">make-setup.zip</A>.
-  You must add the <I>bin</I> directory to your PATH environment variable.</P>
+  <P>Install from <A href="ext/build/make-setup.zip">make-setup.zip</A>. You must add the <I>bin</I> directory to your
+  PATH environment variable.</P>
 
   <H3>Bison</H3>
 
-  <P>Install from <A href="ext/build/bison-setup.zip">bison-setup.zip</A>.
-  You must add the <I>bin</I> directory to your PATH environment variable.</P>
+  <P>Install from <A href="ext/build/bison-setup.zip">bison-setup.zip</A>. You must add the <I>bin</I> directory to
+  your PATH environment variable.</P>
 
   <H3>XSLTProc</H3>
 
-  <P>Add the directory <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> to your PATH environment variable.<BR>
+  <P>Add the directory <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> to your PATH environment
+  variable.<BR>
   You may also copy the content to some other directory and add this to the PATH instead.</P>
   <HR>
 
@@ -261,12 +263,13 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   BCI 2000 can only be compiled with Borland Architect, but newer releases may also work with GCC.<BR>
   Visit <A href="https://downloads.embarcadero.com/free/c_builder">https://downloads.embarcadero.com/free/c_builder</A>
   do download a trial version or the free to use C++ Compiler (which didn't quite work for me).<BR>
-  Use "4BHK-8BCD5M-DTW77V-HBLA" as serial for the free trial (only works for 30 days).<br>
-  You may disable everything except "Embarcadero RAD Studio" during installation.
-  You may alternatively download the already compiled executables from <a href="http://www.fileden.com/files/2007/4/27/1021443/BCI2000-modules.zip">BCI2000-modules.zip</a> and put them in
-  "bin/BCI2000Source/src/contrib/Application/PleoCommandTCPIP" and 
-  "bin/BCI2000Source/src/contrib/SignalSource/NexusSource" respectively, so the build process should
-  be happy and skip the "Building BCI-2000 modules" step.
+  Use "4BHK-8BCD5M-DTW77V-HBLA" as serial for the free trial (only works for 30 days).<BR>
+  You may disable everything except "Embarcadero RAD Studio" during installation. You may alternatively download the
+  already compiled executables from <A href=
+  "http://www.fileden.com/files/2007/4/27/1021443/BCI2000-modules.zip">BCI2000-modules.zip</A> and put them in
+  "bin/BCI2000Source/src/contrib/Application/PleoCommandTCPIP" and
+  "bin/BCI2000Source/src/contrib/SignalSource/NexusSource" respectively, so the build process should be happy and skip
+  the "Building BCI-2000 modules" step.</P>
 
   <H3>OpenOffice (optional)</H3>
 
@@ -637,18 +640,27 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
 
   <P>Legend: R = Runtime, B = Building, D = Development, P = Prebuild - Needs to be installed before first building</P>
   <HR>
-  <H1>FAQ</h1>
-  <H2>Der Befehl "..." ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>
-  Please check that you PATH is correct. See "First Building" for an example of a correct PATH environment if all
-  of the above tools have been installed to their default directories. 
-  <H2>Der Befehl "bds" ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>
-  You need to install Borland Architect. See "Extending, Modifying" for additional information.
-  <H2>Unable to find a javac compiler; com.sun.tools.javac.Main is not on the classpath. Perhaps JAVA_HOME does not point to the JDK.</H2>
-  Make sure that JAVA_HOME points to the root of the JDK directory, not to any subdirectory within, so for example:<BR>
+
+  <H1>Troubleshooting</H1>
+
+  <H2>Der Befehl "..." ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>Please check that you
+  PATH is correct. See "First Building" for an example of a correct PATH environment if all of the above tools have
+  been installed to their default directories.
+
+  <H2>Der Befehl "bds" ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>You need to install
+  Borland Architect. See "Extending, Modifying" for additional information.
+
+  <H2>Unable to find a javac compiler; com.sun.tools.javac.Main is not on the classpath. Perhaps JAVA_HOME does not
+  point to the JDK.</H2>Make sure that JAVA_HOME points to the root of the JDK directory, not to any subdirectory
+  within, so for example:<BR>
   JAVA_HOME="C:\Programme\Java\jdk1.6.0_20"
-  <H2>Cannot run program "xsltproc": CreateProcess error=2, Das System kann die angegebene Datei nicht finden.</H2>
-  Either put <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> onto your PATH or just copy the files into a directory which is on the PATH, like "C:\Programme\GnuWin32\bin".
-  <H2>[jsmoothgen] java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung ist falsch</H2>
-  This seems to have to negative effect, the resulting executable is working fine. If you however compile unter Linux, you won't get this error message.
+
+  <H2>Cannot run program "xsltproc": CreateProcess error=2, Das System kann die angegebene Datei nicht
+  finden.</H2>Either put <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> onto your PATH or just copy the
+  files into a directory which is on the PATH, like "C:\Programme\GnuWin32\bin".
+
+  <H2>[jsmoothgen] java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung
+  ist falsch</H2>This seems to have to negative effect, the resulting executable is working fine. If you however
+  compile unter Linux, you won't get this error message.
 </BODY>
 </HTML>
