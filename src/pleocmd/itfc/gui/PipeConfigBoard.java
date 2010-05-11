@@ -1054,6 +1054,8 @@ public final class PipeConfigBoard extends JPanel {
 			painter.setScale(zoom < 0 ? 1 / (1 + -zoom * 9) : 1);
 		updatePrefBounds();
 		repaint();
+		MainFrame.the().getMainPipePanel().getPipeFlowVisualization()
+				.modified();
 	}
 
 	private Point getOriginal(final Point scaled) {

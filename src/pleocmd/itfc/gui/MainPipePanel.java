@@ -36,6 +36,8 @@ public final class MainPipePanel extends JPanel {
 
 	private PipeConfigDialog cfgDialog;
 
+	private PipeFlowVisualization pipeFlowVisualization;
+
 	public MainPipePanel() {
 		final Layouter lay = new Layouter(this);
 		updateTimer = new Timer("Pipe Thumbnail Update Timer", true);
@@ -92,9 +94,11 @@ public final class MainPipePanel extends JPanel {
 
 	public void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
-		if (cfgDialog == null)
+		if (cfgDialog == null) {
 			cfgDialog = new PipeConfigDialog(MainFrame.the().getPipe());
-		else
+			pipeFlowVisualization = new PipeFlowVisualization(cfgDialog
+					.getBoard());
+		} else
 			cfgDialog.toFront();
 	}
 
@@ -160,6 +164,7 @@ public final class MainPipePanel extends JPanel {
 
 	void configDialogDisposed() {
 		cfgDialog = null;
+		pipeFlowVisualization = null;
 	}
 
 	public void timeUpdatePipeLabel() {
@@ -173,6 +178,10 @@ public final class MainPipePanel extends JPanel {
 			}
 		};
 		updateTimer.schedule(updateTimerTask, 1000);
+	}
+
+	public PipeFlowVisualization getPipeFlowVisualization() {
+		return pipeFlowVisualization;
 	}
 
 }

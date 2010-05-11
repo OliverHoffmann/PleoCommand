@@ -28,6 +28,8 @@ import pleocmd.exc.OutputException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.MainFrame;
+import pleocmd.itfc.gui.MainPipePanel;
+import pleocmd.itfc.gui.PipeFlowVisualization;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataQueue;
@@ -859,6 +861,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		try {
 			Log.detail("Converting '%s' with '%s'", data, cvt);
 			feedback.incDataConvertedCount();
+			visualizePipeFlow(data.getOrigin(), cvt);
 			final List<Data> newDatas = cvt.convert(data);
 			if (newDatas != null) {
 				final List<Data> res = new ArrayList<Data>(newDatas.size());
@@ -925,6 +928,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 */
 	private boolean writeToOutput(final Data data, final Output out) {
 		try {
+			visualizePipeFlow(data.getOrigin(), out);
 			final boolean succeeded = out.write(data);
 			// data.setOrigin(out);
 			if (!succeeded) return false;
@@ -1104,8 +1108,23 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	}
 
 	public void modified() {
-		if (MainFrame.hasGUI() && MainFrame.the().getMainPipePanel() != null
-				&& MainFrame.the().getPipe() == this)
-			MainFrame.the().getMainPipePanel().timeUpdatePipeLabel();
+		if (MainFrame.hasGUI()) {
+			final MainPipePanel mpp = MainFrame.the().getMainPipePanel();
+			if (mpp != null) {
+				final PipeFlowVisualization pfv = mpp
+						.getPipeFlowVisualization();
+				if (MainFrame.the().getPipe() == this)
+					mpp.timeUpdatePipeLabel();
+				if (pfv != null) pfv.modified();
+			}
+		}
+	}
+
+	private void visualizePipeFlow(final PipePart src, final PipePart dst) {
+		if (MainFrame.hasGUI()) {
+			final PipeFlowVisualization pfv = MainFrame.the()
+					.getMainPipePanel().getPipeFlowVisualization();
+			if (pfv != null) pfv.addPipeFlow(src, dst);
+		}
 	}
 }
