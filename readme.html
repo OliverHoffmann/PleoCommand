@@ -43,27 +43,30 @@
   under both systems is needed to get a full working distribution.
 
   <H2>Linux</H2>Execute prepare.sh from the root directory. This will download some files.<BR>
-  Install <A href="ext/prebuild/jdk-setup.bin">jdk-setup.bin</A> and unzip <A href=
-  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> if needed. You may also use any recent enough version provided by your
-  distributor.<BR>
+  Install from <A href="ext/prebuild/jdk-setup-linux.bin">jdk-setup-linux.bin</A> and unzip <A href=
+  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> from "ext/prebuild" if needed. You may also use any recent enough version
+  provided by your distributor.<BR>
   Open a console and execute "ant fetch" in the root directory of PleoCommand.<BR>
-  Continue with "Rebuilding".
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".
 
   <H2>Windows</H2>Execute prepare.bat from the root directory. This will download some files.<BR>
-  Install <A href="ext/prebuild/jdk-setup.exe">jdk-setup.exe</A> and unzip <A href=
-  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> if needed.<BR>
+  Install from <A href="ext/prebuild/jdk-setup-win.exe">jdk-setup-win.exe</A> and unzip <A href=
+  "ext/prebuild/ant-bin.zip">ant-bin.zip</A> from "ext/prebuild" if needed.<BR>
   You must set the ANT_HOME environment variable to the directory where you unzipped the Ant files and add the
   <I>bin</I> directory to your PATH environment variable. You must also set the JAVA_HOME environment variable to the
-  installation target directory of the JDK (not a JRE).<BR>
+  installation target directory of the JDK (not a JRE)<BR>
+  The final environment settings should be something like:<BR>
+  PATH="...;C:\Programme\Java\jdk1.6.0_20\bin;C:\ant\apache-ant-1.8.0\bin;C:\Programme\Git\cmd;C:\Programme\GnuWin32\bin;C:\MinGW\bin"<BR>
+  JAVA_HOME="C:\Programme\Java\jdk1.6.0_20" (not the bin sub-directory!!!)<BR>
   Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant fetch" in the root directory
   of PleoCommand.<BR>
-  Continue with "Rebuilding".
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".
   <HR>
 
   <H1>Rebuilding</H1>
 
-  <P>If any of the following files linked in this document should be missing, execute "ant fetch" or "ant dist" to get
-  them downloaded.</P>
+  <P>If any of the following files linked in this document are missing, execute "ant fetch" or "ant dist" to get them
+  downloaded.</P>
 
   <H2>Linux</H2>Open a console and execute "ant dist" in the root directory of PleoCommand.<BR>
   You need the following tools for successful building, so if the build fails, install the missing tools, and retry:
@@ -82,48 +85,46 @@
 
   <H3>Coreutils (rm, stat, md5sum, ...)</H3>
 
-  <P>Install from <A href="ext/build/coreutils-setup.exe">coreutils-setup.exe</A> and add the <I>bin</I> directory to
+  <P>Install from <A href="ext/build/coreutils-setup.zip">coreutils-setup.zip</A> and add the <I>bin</I> directory to
   your PATH environment variable.</P>
 
   <H3>GIT</H3>
 
-  <P>Install from <A href="ext/build/git-setup.exe">git-setup.exe</A>.<BR>
+  <P>Install from <A href="ext/build/git-setup.zip">git-setup.zip</A>.<BR>
   It doesn't matter whether you select "additional icons, windows explorer integration, etc." but you have to select
-  "Run Git From Windows Command Prompt (second or third option)" and "Check out as-is, commit Unix-Style (second option
+  "Run Git From Windows Command Prompt (second option)" and "Check out as-is, commit Unix-Style (second option
   !!!)" when prompted for it.</P>
 
   <H3>GCC</H3>
 
-  <P>Install from <A href="ext/build/gcc-setup.exe">gcc-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in the
+  <P>Install from <A href="ext/build/gcc-setup.zip">gcc-setup.zip</A>. Enable "G++ Compiler" and "MinGW Make" in the
   setup.<BR>
   You must add the <I>bin</I> directory to your PATH environment variable.</P>
 
   <H3>Make</H3>
 
-  <P>Install from <A href="ext/build/make-setup.exe">make-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in the
-  setup.<BR>
+  <P>Install from <A href="ext/build/make-setup.zip">make-setup.zip</A>.
   You must add the <I>bin</I> directory to your PATH environment variable.</P>
 
   <H3>Bison</H3>
 
-  <P>Install from <A href="ext/build/bison-setup.exe">bison-setup.exe</A>. Enable "G++ Compiler" and "MinGW Make" in
-  the setup.<BR>
+  <P>Install from <A href="ext/build/bison-setup.zip">bison-setup.zip</A>.
   You must add the <I>bin</I> directory to your PATH environment variable.</P>
 
   <H3>XSLTProc</H3>
 
-  <P>Add the directory <A href="ext/build/xsltproc/bin">xsltproc/bin</A> to your PATH environment variable.<BR>
+  <P>Add the directory <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> to your PATH environment variable.<BR>
   You may also copy the content to some other directory and add this to the PATH instead.</P>
   <HR>
 
   <H1>Running</H1>
 
   <P>PleoCommand needs the following prerequisites to be met in order to function properly.<BR>
-  PleoCommand itself is located in the <A href="dist">dist</A> directory. If this directory should be missing or be
-  empty, a rebuild according to the "Rebuilding" section in this document must be done.</P>
+  PleoCommand itself is located in the <A href="dist">dist</A> directory. If this directory is missing or empty, a
+  rebuild according to the "Rebuilding" section in this document must be done.</P>
 
-  <P>If any of the following files linked in this document should be missing, execute "ant fetch" or "ant dist" to get
-  them downloaded.</P>
+  <P>If any of the following files linked in this document are missing, execute "ant fetch" or "ant dist" to get them
+  downloaded.</P>
 
   <H2>Linux</H2>
 
@@ -149,7 +150,7 @@
   <H3>MySkit (optional)</H3>
 
   <P>For creating your own motions or sounds, MySkit is a very good and fast solution.<BR>
-  Execute <A href="ext/rt/MySkit-setup.exe">MySkit-setup.exe</A> with <A href="http://www.winehq.org/">Wine</A> to
+  Execute from <A href="ext/rt/MySkit-setup.zip">MySkit-setup.zip</A> with <A href="http://www.winehq.org/">Wine</A> to
   install MySkit.<BR>
   MySkit should run perfectly with Wine (but maybe you have to turn of compositing in KDE4 to reduce flickering of the
   3D-Pleo-Model).</P>
@@ -172,17 +173,17 @@
   the installation dialog to this directory.<BR>
   If everything works fine, you should see a new COM port in the Device Manager.</P>
 
-  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/PleoCommand.exe">dist/PleoCommand.exe</A>.
+  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/PleoCommand.exe">dist/PleoCommand.zip</A>.
 
   <H3>MySkit (optional)</H3>
 
   <P>For creating your own motions or sounds, MySkit is a very good and fast solution.<BR>
-  Execute <A href="ext/rt/MySkit-setup.exe">MySkit-setup.exe</A> to install MySkit.</P>
+  Execute from <A href="ext/rt/MySkit-setup.zip">MySkit-setup.zip</A> to install MySkit.</P>
 
   <H3>BCI 2000 (optional)</H3>
 
   <P>To use BCI 2000 as an input source for PleoCommand (via the TCP/IP Input component), execute <A href=
-  "ext/rt/BCI2000-setup.exe">BCI2000-setup.exe</A> and copy all files from the <A href=
+  "ext/rt/BCI2000-setup.zip">BCI2000-setup.zip</A> and copy all files from the <A href=
   "ext/rt/BCI2000-Prog">BCI2000-Prog</A> directory to the prog/ directory where BCI 2000 has been installed,
   overwriting existing files.<BR>
   TODO Hint about creating missing exe files in the BCI2000-Prog dir<BR>
@@ -259,14 +260,13 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   <P>Borland Architect is only needed for BCI 2000.<BR>
   BCI 2000 can only be compiled with Borland Architect, but newer releases may also work with GCC.<BR>
   Visit <A href="https://downloads.embarcadero.com/free/c_builder">https://downloads.embarcadero.com/free/c_builder</A>
-  do download a trial version or the free to use C++ Compiler.<BR>
-  Checkout the BCI 2000 sourcecode from their repository at <A href=
-  "http://www.bci2000.org/svn/trunk">http://www.bci2000.org/svn/trunk</A> (you need an account first), then copy the
-  directory structure under <A href="ext/dev/BCI2000Source">BCI2000Source</A> to the base directory from your
-  repository copy.<BR>
-  It should be sufficient to only compile the NexusSource and the PleoCommandTCPIP projects you've just copied, and
-  combine them with the binary version of the BCI 2000 toolset.<BR>
-  If not, read BCI's manual about to compile the whole BCI 2000 toolset.</P>
+  do download a trial version or the free to use C++ Compiler (which didn't quite work for me).<BR>
+  Use "4BHK-8BCD5M-DTW77V-HBLA" as serial for the free trial (only works for 30 days).<br>
+  You may disable everything except "Embarcadero RAD Studio" during installation.
+  You may alternatively download the already compiled executables from <a href="http://www.fileden.com/files/2007/4/27/1021443/BCI2000-modules.zip">BCI2000-modules.zip</a> and put them in
+  "bin/BCI2000Source/src/contrib/Application/PleoCommandTCPIP" and 
+  "bin/BCI2000Source/src/contrib/SignalSource/NexusSource" respectively, so the build process should
+  be happy and skip the "Building BCI-2000 modules" step.
 
   <H3>OpenOffice (optional)</H3>
 
@@ -636,5 +636,19 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   </TABLE>
 
   <P>Legend: R = Runtime, B = Building, D = Development, P = Prebuild - Needs to be installed before first building</P>
+  <HR>
+  <H1>FAQ</h1>
+  <H2>Der Befehl "..." ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>
+  Please check that you PATH is correct. See "First Building" for an example of a correct PATH environment if all
+  of the above tools have been installed to their default directories. 
+  <H2>Der Befehl "bds" ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>
+  You need to install Borland Architect. See "Extending, Modifying" for additional information.
+  <H2>Unable to find a javac compiler; com.sun.tools.javac.Main is not on the classpath. Perhaps JAVA_HOME does not point to the JDK.</H2>
+  Make sure that JAVA_HOME points to the root of the JDK directory, not to any subdirectory within, so for example:<BR>
+  JAVA_HOME="C:\Programme\Java\jdk1.6.0_20"
+  <H2>Cannot run program "xsltproc": CreateProcess error=2, Das System kann die angegebene Datei nicht finden.</H2>
+  Either put <A href="ext/build/xsltproc/bin">ext/build/xsltproc/bin</A> onto your PATH or just copy the files into a directory which is on the PATH, like "C:\Programme\GnuWin32\bin".
+  <H2>[jsmoothgen] java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung ist falsch</H2>
+  This seems to have to negative effect, the resulting executable is working fine. If you however compile unter Linux, you won't get this error message.
 </BODY>
 </HTML>

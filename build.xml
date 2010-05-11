@@ -27,9 +27,11 @@
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="${lib}/RXTXcomm.jar:${lib}/junit.jar" />
 
+	<property name="dlprefix"
+	          value="http://www.fileden.com/files/2007/4/27/1021443/" />
+
 	<macrodef name="download">
 		<attribute name="src" />
-		<attribute name="srcAlt" default="@{src}" />
 		<attribute name="dest" />
 		<attribute name="md5" />
 		<attribute name="user" default="" />
@@ -42,11 +44,6 @@
 			     username="@{user}"
 			     password="@{password}"
 			     ignoreerrors="true" />
-			<get src="@{srcAlt}"
-			     dest="@{dest}"
-			     verbose="${verb}"
-			     skipexisting="true"
-			     ignoreerrors="true" />
 			<checksum file="@{dest}"
 			          property="@{md5}"
 			          algorithm="md5"
@@ -55,6 +52,7 @@
 				<equals arg1="${csverify.@{dest}}" arg2="false" />
 			</condition>
 			<fail if="csbad.@{dest}" message="Checksum of @{dest} is bad." />
+			<echo message="Checksum of @{dest} ok" />
 		</sequential>
 	</macrodef>
 
@@ -65,72 +63,63 @@
 		<mkdir dir="${extBuild}" />
 		<mkdir dir="${extPreBuild}" />
 
-		<echo message="Downloading files needed for build system" />
-
-		<!--
-		<download src="" dest="${extPreBuild}/" md5="" />
-
-		<download src="" dest="${extPreBuild}/" md5="" />
-
-		<download src="" dest="${extPreBuild}/" md5="" />
--->
 		<echo message="Downloading files needed for building" />
 
-		<download src="http://rxtx.qbang.org/pub/rxtx/rxtx-2.1-7-bins-r2.zip"
+		<download src="${dlprefix}/rxtx-bin.zip"
 		          dest="${extBuild}/rxtx-bin.zip"
 		          md5="5f21ae633602a24fd3cdd096951476c2" />
 
-		<download src="http://cloud.github.com/downloads/KentBeck/junit/junit-4.8.2.jar"
+		<download src="${dlprefix}/junit.jar"
 		          dest="${extBuild}/junit.jar"
 		          md5="8a498c3d820db50cc7255d8c46c1ebd1" />
 
-		<download src="http://switch.dl.sourceforge.net/project/checkstyle/checkstyle/5.1/checkstyle-5.1.zip"
+		<download src="${dlprefix}/checkstyle-bin.zip"
 		          dest="${extBuild}/checkstyle-bin.zip"
 		          md5="f80d1904b275080edcfc31d57ddad188" />
 
-		<download src="http://heanet.dl.sourceforge.net/project/jsmooth/jsmooth/0.9.9-7/jsmooth-0.9.9-7.zip"
+		<download src="${dlprefix}/jsmooth-bin.zip"
 		          dest="${extBuild}/jsmooth-bin.zip"
 		          md5="af31eeda7d5f199c0eb5162f96a980e6" />
 
-		<download src="http://hamcrest.googlecode.com/files/hamcrest-core-1.1.jar"
+		<download src="${dlprefix}/hamcrest-core.jar"
 		          dest="${extBuild}/hamcrest-core.jar"
 		          md5="447a5c012a4628bf43bcaad31cae3ff2" />
 
-		<download src="http://ignum.dl.sourceforge.net/project/gnuwin32/coreutils/5.3.0/coreutils-5.3.0.exe"
-		          dest="${extBuild}/coreutils-setup.exe"
-		          md5="5a3e9d30b906dadf54de0635522fd62c" />
+		<download src="${dlprefix}/coreutils-setup.zip"
+		          dest="${extBuild}/coreutils-setup.zip"
+		          md5="a70509e7a0a085bb648620ca3bf69b4d" />
 
-		<download src="http://msysgit.googlecode.com/files/Git-1.7.0.2-preview20100309.exe"
-		          dest="${extBuild}/git-setup.exe"
-		          md5="44a0e3eb6990207148d9e9f4236f5169" />
+		<download src="${dlprefix}/git-setup.zip"
+		          dest="${extBuild}/git-setup.zip"
+		          md5="f9a619b559319d1be43b2ec1120e342c" />
 
-		<download src="http://downloads.sourceforge.net/project/mingw/Automated%20MinGW%20Installer/MinGW%205.1.6/MinGW-5.1.6.exe"
-		          dest="${extBuild}/gcc-setup.exe"
-		          md5="9cf4ab0b4c9f858d32f5d5c89009c4dc" />
+		<download src="${dlprefix}/gcc-setup.zip"
+		          dest="${extBuild}/gcc-setup.zip"
+		          md5="be062892a0bcd044b3d1dd4e825a9e94" />
 
-		<download src="http://heanet.dl.sourceforge.net/project/gnuwin32/make/3.81/make-3.81.exe"
-		          dest="${extBuild}/make-setup.exe"
-		          md5="8ae51379d1f3eef8360df4e674f17d6d" />
+		<download src="${dlprefix}/make-setup.zip"
+		          dest="${extBuild}/make-setup.zip"
+		          md5="272ca557a3d400ee6b565fa9ff5fc7c0" />
 
-		<download src="http://garr.dl.sourceforge.net/project/gnuwin32/bison/2.4.1/bison-2.4.1-setup.exe"
-		          dest="${extBuild}/bison-setup.exe"
-		          md5="d24ed4f8a3b156899db96079fb869cbf" />
+		<download src="${dlprefix}/bison-setup.zip"
+		          dest="${extBuild}/bison-setup.zip"
+		          md5="291915440a40696be185400cff02c039" />
 
-		<download src="http://tinyurl.com/2w56qx9"
+		<download src="${dlprefix}/BCI2000-source.zip"
 		          dest="${extBuild}/BCI2000-source.zip"
 		          md5="be3875e3f21eeb58a5f082b6042f9a93" />
 
 		<mkdir dir="${extBuild}/xsltproc/temp" />
-		<download src="ftp://ftp.zlatkovic.com/libxml/iconv-1.9.2.win32.zip"
+		<download src="${dlprefix}/icon.zip"
 		          dest="${extBuild}/xsltproc/temp/icon.zip"
 		          md5="da5f3164bbd21e7830faef7e5a7ea5e6" />
-		<download src="ftp://ftp.zlatkovic.com/libxml/libxml2-2.7.6.win32.zip"
+		<download src="${dlprefix}/libxml2.zip"
 		          dest="${extBuild}/xsltproc/temp/libxml2.zip"
 		          md5="d7b1f133b286751cdf5a50f39dbb6ddf" />
-		<download src="ftp://ftp.zlatkovic.com/libxml/libxslt-1.1.26.win32.zip"
+		<download src="${dlprefix}/libxslt.zip"
 		          dest="${extBuild}/xsltproc/temp/libxslt.zip"
 		          md5="36fb352ea5b6309305476bcb8cabc31e" />
-		<download src="ftp://ftp.zlatkovic.com/libxml/zlib-1.2.3.win32.zip"
+		<download src="${dlprefix}/zlib.zip"
 		          dest="${extBuild}/xsltproc/temp/zlib.zip"
 		          md5="61f7b91539b0532eea3c30e3281dc424" />
 
@@ -187,16 +176,15 @@
 
 		<echo message="Downloading files needed for runtime" />
 
-		<download src="http://www.dogsbodynet.com/myskit/downloads/MySkit-v1.3-Installer.exe"
-		          dest="${extRT}/MySkit-setup.exe"
-		          md5="880a163f157d377ea8fb7bb203e3dbc0" />
+		<download src="${dlprefix}/MySkit-setup.zip"
+		          dest="${extRT}/MySkit-setup.zip"
+		          md5="5b36b16d3eaf108b57552eeb5780a75c" />
 
-		<download src="http://bci2000.org/downloads/bin/BCI2000Setup_091110.exe"
-		          srcAlt="http://tinyurl.com/335oz5m"
-		          dest="${extRT}/BCI2000-setup.exe"
-		          md5="54198c14540d012c9b403c749bc725cb" />
+		<download src="${dlprefix}/BCI2000-setup.zip"
+		          dest="${extRT}/BCI2000-setup.zip"
+		          md5="7917a6d8a4d9108f60462303ae6621d5" />
 
-		<download src="http://www.pleoworld.com/downloads/PleoSDSoftware_1.1.zip"
+		<download src="${dlprefix}/PleoSDSoftware_1.1.zip"
 		          dest="${extRT}/PleoSDSoftware_1.1.zip"
 		          md5="3812d55f0d9d5c88066b9ee16793523f" />
 
@@ -219,15 +207,15 @@
 
 		<echo message="Downloading files needed for development" />
 
-		<download src="http://www.compuphase.com/pawn/pawn-3.3.4127.package"
+		<download src="${dlprefix}/pawn-setup.package"
 		          dest="${extDev}/pawn-setup.package"
 		          md5="0b429bf95ed11762cb5840906b622a8a" />
 
-		<download src="http://www.pleoworld.com/downloads/PleoDevelopmentKit.zip"
+		<download src="${dlprefix}/PleoDevelopmentKit.zip"
 		          dest="${extDev}/PleoDevelopmentKit.zip"
-		          md5="cfc20448351b6b13c3908f36ca40f5c5" />
+		          md5="443033eff235a141842a46cee8847a14" />
 
-		<download src="http://prdownloads.sourceforge.net/int64/tidy-060405-exe.zip?download"
+		<download src="${dlprefix}/tidy-bin.zip"
 		          dest="${extDev}/tidy-bin.zip"
 		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
 
@@ -323,7 +311,7 @@
 
 	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
 	<target name="clean">
-		<delete includeEmptyDirs="true" failonerror="true" verbose="${verb}">
+		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${dist}" />
 			<fileset dir="${extBuild}/xsltproc/bin" />

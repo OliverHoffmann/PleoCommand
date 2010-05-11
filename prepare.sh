@@ -43,31 +43,51 @@ function dl() {
 }
 
 dir="ext/prebuild"
+prefix="http://www.fileden.com/files/2007/4/27/1021443/"
 
 if [ "$1" == "clean" ]; then
-	rm -vf "$dir/jdk-setup.bin"
-	rm -vf "$dir/jdk-setup.exe"
 	rm -vf "$dir/ant-bin.zip"
+	rm -vf "$dir/jdk-setup-win.part1"
+	rm -vf "$dir/jdk-setup-win.part2"
+	rm -vf "$dir/jdk-setup-linux.part1"
+	rm -vf "$dir/jdk-setup-linux.part2"
+	rm -vf "$dir/jdk-setup-win.exe"
+	rm -vf "$dir/jdk-setup-linux.bin"
 	
 else
-	mkdir -p "ext/rt"
 	mkdir -p "$dir"
 
 	# pre-build files
-	dl "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" \
+	dl "$prefix/ant-bin.zip" \
 		"$dir/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
-	dl "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-linux-i586-01_apr_2010.bin" \
-		"$dir/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568" +x
-	dl "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" \
-		"$dir/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a" +x
+	dl "$prefix/jdk-setup-win.part1" \
+		"$dir/jdk-setup-win.part1" 42991616 "d84296ec023605520c584a4d53a5753d"
+	dl "$prefix/jdk-setup-win.part2" \
+		"$dir/jdk-setup-win.part2" 37406488 "9d1617a11b175060b146e2c5236c0d09"
+	dl "$prefix/jdk-setup-linux.part1" \
+		"$dir/jdk-setup-linux.part1" 42991616 "e3d0692e4390b424343f5a41bf3773f7"
+	dl "$prefix/jdk-setup-linux.part2" \
+		"$dir/jdk-setup-linux.part2" 41805351 "ad1e7e42c056e9a4605725c5215bcd2a"
 
-	java -version && ant -version && {
+	cat "$dir/jdk-setup-win.part1" "$dir/jdk-setup-win.part2" > "$dir/jdk-setup-win.exe"
+	if ! check $dir/jdk-setup-win.exe 80398104 cd336cbf94b74dacfdd519b1e1c02a3b; then
+		echo "!!! Concatenating files failed !!!"
+		exit 1
+	fi
+
+	cat "$dir/jdk-setup-linux.part1" "$dir/jdk-setup-linux.part2" > "$dir/jdk-setup-linux.bin"
+	if ! check $dir/jdk-setup-linux.bin 84796967 ffc72e433b1ef56332610d90b947a4da; then
+		echo "!!! Concatenating files failed !!!"
+		exit 1
+	fi
+
+	javac -version && ant -version && {
 		echo "======================================================================"
 		echo "Finished downloading and md5-checking of pre-build files."
 		echo "You may now call 'ant fetch' or 'ant dist'."
 	} || {
 		echo "======================================================================"
-		echo "You have to install java and/or ant from $dir."
+		echo "You have to install Java JDK and/or ant from the files in $dir."
 		echo "Then invoke $0 again."
 	}
 fi

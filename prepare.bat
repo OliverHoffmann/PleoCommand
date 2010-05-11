@@ -50,6 +50,7 @@ GOTO:EOF
 		CALL :CHECK %fn% %fs% %fh%
 		IF !checkres! == 0 (
 			ECHO "!!! Downloading failed !!!"
+			PAUSE
 			%myexit% 1
 		)
 	)
@@ -58,27 +59,52 @@ GOTO:EOF
 
 :MAIN
 	SET dir=ext\prebuild
+	SET prefix=http://www.fileden.com/files/2007/4/27/1021443/
 
 	IF X%1 == Xclean (
-		DEL "%dir%\jdk-setup.bin"
-		DEL "%dir%\jdk-setup.exe"
 		DEL "%dir%\ant-bin.zip"
+		DEL "%dir%\jdk-setup-win.part1"
+		DEL "%dir%\jdk-setup-win.part2"
+		DEL "%dir%\jdk-setup-linux.part1"
+		DEL "%dir%\jdk-setup-linux.part2"
+		DEL "%dir%\jdk-setup-win.exe"
+		DEL "%dir%\jdk-setup-linux.bin"
+		PAUSE
 		%myexit% 0
 	)
 	MD ext
-	MD ext\rt
 	MD %dir%
 
 	REM pre-build files
-	CALL :DL "http://mirror.netcologne.de/apache.org/ant/binaries/apache-ant-1.8.0-bin.zip" ^
-		"%dir%/ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
-	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-linux-i586-01_apr_2010.bin" ^
-		"%dir%/jdk-setup.bin" 85095082 "3167dd9663469022d937eecde22fd568"
-	CALL :DL "http://www.java.net/download/jdk6/6u21/promoted/b02/binaries/jdk-6u20-ea-bin-b02-windows-i586-01_apr_2010.exe" ^
-		"%dir%/jdk-setup.exe" 80701208 "385ebd92bd83c2bd04fdd787c352487a"
-		
+	CALL :DL "%prefix%/ant-bin.zip" ^
+		"%dir%\ant-bin.zip" 12088734 "c9eaa7b72e728a40ca748ff8e1fc6869"
+	CALL :DL "%prefix%/jdk-setup-win.part1" ^
+		"%dir%\jdk-setup-win.part1" 42991616 "d84296ec023605520c584a4d53a5753d"
+	CALL :DL "%prefix%/jdk-setup-win.part2" ^
+		"%dir%\jdk-setup-win.part2" 37406488 "9d1617a11b175060b146e2c5236c0d09"
+	CALL :DL "%prefix%/jdk-setup-linux.part1" ^
+		"%dir%\jdk-setup-linux.part1" 42991616 "e3d0692e4390b424343f5a41bf3773f7"
+	CALL :DL "%prefix%/jdk-setup-linux.part2" ^
+		"%dir%\jdk-setup-linux.part2" 41805351 "ad1e7e42c056e9a4605725c5215bcd2a"
+
+	TYPE "%dir%\jdk-setup-win.part1" "%dir%\jdk-setup-win.part2" > "%dir%\jdk-setup-win.exe"
+	CALL :CHECK %dir%\jdk-setup-win.exe 80398104 "cd336cbf94b74dacfdd519b1e1c02a3b"
+	IF %checkres% == 0 (
+		ECHO "!!! Concatenating files failed !!!"
+		PAUSE
+		%myexit% 1
+	)
+
+	TYPE "%dir%\jdk-setup-linux.part1" "%dir%\jdk-setup-linux.part2" > "%dir%\jdk-setup-linux.bin"
+	CALL :CHECK %dir%\jdk-setup-linux.bin 84796967 "ffc72e433b1ef56332610d90b947a4da"
+	IF %checkres% == 0 (
+		ECHO "!!! Concatenating files failed !!!"
+		PAUSE
+		%myexit% 1
+	)
+
 	SET mustinst=0
-	CALL java -version
+	CALL javac -version
 	IF ERRORLEVEL 1 SET mustinst=1
 	CALL ant -version
 	IF ERRORLEVEL 1 SET mustinst=1
@@ -88,8 +114,9 @@ GOTO:EOF
 		ECHO You may now call 'ant fetch' or 'ant dist'.
 	) ELSE (
 		ECHO ======================================================================
-		ECHO You have to install java and/or ant from %dir%.
+		ECHO You have to install Java JDK and/or ant from the files in %dir%.
 		ECHO Then invoke %0 again.
 	)
-	
+
+	PAUSE
 	%myexit% 0
