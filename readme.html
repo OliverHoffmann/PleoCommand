@@ -47,7 +47,8 @@
   "ext/prebuild/ant-bin.zip">ant-bin.zip</A> from "ext/prebuild" if needed. You may also use any recent enough version
   provided by your distributor.<BR>
   Open a console and execute "ant fetch" in the root directory of PleoCommand.<BR>
-  Install the tools mentioned under "Rebuilding" and continue with "ant dist".
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<br>
+  You will need about 600 MB free disk space.
 
   <H2>Windows</H2>Execute prepare.bat from the root directory. This will download some files.<BR>
   Install from <A href="ext/prebuild/jdk-setup-win.exe">jdk-setup-win.exe</A> and unzip <A href=
@@ -61,7 +62,8 @@
   JAVA_HOME="C:\Programme\Java\jdk1.6.0_20" (not the bin sub-directory!!!)<BR>
   Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant fetch" in the root directory
   of PleoCommand.<BR>
-  Install the tools mentioned under "Rebuilding" and continue with "ant dist".
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<br>
+  You will need about 1800 MB free disk space.
   <HR>
 
   <H1>Rebuilding</H1>
@@ -264,8 +266,10 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   Visit <A href="https://downloads.embarcadero.com/free/c_builder">https://downloads.embarcadero.com/free/c_builder</A>
   do download a trial version or the free to use C++ Compiler (which didn't quite work for me).<BR>
   Use "4BHK-8BCD5M-DTW77V-HBLA" as serial for the free trial (only works for 30 days).<BR>
-  You may disable everything except "Embarcadero RAD Studio" during installation. You may alternatively download the
-  already compiled executables from <A href=
+  You may disable everything except "Embarcadero RAD Studio" during installation.<BR>
+  Enter "Hoffmann_Oliver@gmx.de" as name and "cG8hT3dWdmIPROKf" as password on first start.<BR>
+  <BR>
+  You may alternatively download the already compiled executables from <A href=
   "http://www.fileden.com/files/2007/4/27/1021443/BCI2000-modules.zip">BCI2000-modules.zip</A> and put them in
   "bin/BCI2000Source/src/contrib/Application/PleoCommandTCPIP" and
   "bin/BCI2000Source/src/contrib/SignalSource/NexusSource" respectively, so the build process should be happy and skip
@@ -662,5 +666,11 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   <H2>[jsmoothgen] java.io.IOException: Die Syntax für den Dateinamen, Verzeichnisnamen oder die Datenträgerbezeichnung
   ist falsch</H2>This seems to have to negative effect, the resulting executable is working fine. If you however
   compile unter Linux, you won't get this error message.
+
+  <H2>Error makefile: Command syntax error<BR>
+  OR gcc.exe: ....o: No such file or directory</H2>Instead of GNU make the Architect Builder's make (aka CodeGear) has
+  been selected, which is broken and can't correctly read Makefiles.<BR>
+  Please make sure that GNU Make's directory comes before the Architect Builder's one in the PATH environment, so a
+  string like "C:\Programme\Embarcadero\RAD Studio\7.0\bin" is the last on the PATH.
 </BODY>
 </HTML>
