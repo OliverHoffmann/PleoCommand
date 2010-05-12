@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -496,6 +497,30 @@ public final class Configuration {
 		final List<Group> res = new ArrayList<Group>(1);
 		res.add(group);
 		return res;
+	}
+
+	public List<Group> getGroupsUnassigned() {
+		return Collections.unmodifiableList(groupsUnassigned);
+	}
+
+	public Group getGroupUnassigned(final String name) {
+		for (final Group g : groupsUnassigned)
+			if (g.getName().equals(name)) return g;
+		return null;
+	}
+
+	public Group getGroupUnassignedSafe(final String name) {
+		for (final Group g : groupsUnassigned)
+			if (g.getName().equals(name)) return g;
+		return new Group(name);
+	}
+
+	public Map<String, ConfigurationInterface> getGroupsRegistered() {
+		return Collections.unmodifiableMap(groupsRegistered);
+	}
+
+	public Set<ConfigurationInterface> getConfigObjects() {
+		return Collections.unmodifiableSet(configObjects);
 	}
 
 }

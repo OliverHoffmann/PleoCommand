@@ -2,6 +2,7 @@ package pleocmd.cfg;
 
 import java.util.List;
 
+import pleocmd.Log;
 import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
@@ -141,7 +142,9 @@ public abstract class ConfigValue {
 				}
 			};
 
-		// "str", "item", null
+		if (identifier != null)
+			Log.warn("Ignoring unknown identifier '%s' and "
+					+ "parsing value as simple string", identifier);
 		return new ConfigString(label, !singleLined);
 	}
 

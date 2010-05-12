@@ -1,5 +1,6 @@
 package test.pleocmd.cfg;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -8,6 +9,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.List;
 
 import org.junit.Test;
@@ -109,8 +111,9 @@ public final class ConfigurationTest extends Testcases {
 
 	}
 
-	private void testUserFile(final String description, final String[] content)
-			throws IOException, ConfigurationException {
+	private Configuration testUserFile(final String description,
+			final String[] content) throws IOException, ConfigurationException {
+		Log.consoleOut("");
 		Log.consoleOut("Testing user-created file: %s", description);
 		final Configuration config = new Configuration();
 
@@ -128,18 +131,75 @@ public final class ConfigurationTest extends Testcases {
 		config.readFromFile(file);
 
 		// test group
-		Log.consoleOut(config.toString());
+		final StringWriter sw = new StringWriter();
+		config.writeToWriter(sw, null);
+		for (final String s : sw.toString().split("\n"))
+			Log.consoleOut("$" + s);
+
+		return config;
+	}
+
+	private void assertGroupCount(final Configuration cfg, final int count) {
+		assertEquals("Number of groups is wrong:", count, cfg
+				.getGroupsUnassigned().size());
+	}
+
+	private void assertGroupSize(final Configuration cfg, final String name,
+			final int size) {
+		assertEquals("Number of values in group is wrong:", size, cfg
+				.getGroupUnassignedSafe(name).getSize());
+	}
+
+	private void assertValue(final Configuration cfg, final String group,
+			final String label, final String content) {
+		assertEquals("Content of value in group is wrong:", content, cfg
+				.getGroupUnassignedSafe(group).get(label,
+						new ConfigString(label, false)).asString());
 	}
 
 	@Test
 	public void testReadUsercreatedFiles() throws IOException,
 			ConfigurationException {
-		// create file
-		testUserFile("Empty", new String[] {});
-		testUserFile("Simple", new String[] { "[Test]", "a:foo", "b:20", "c:{",
-				"1", "2", "3", "}" });
-		testUserFile("List", new String[] { "[foo]", "list:{", "[no group]",
-				"}" });
+		Configuration cfg = testUserFile("Empty Config", new String[] {});
+		assertGroupCount(cfg, 0);
+
+		cfg = testUserFile("Simple Config", new String[] { "[Test]", "a:foo",
+				"b:20", "c:{", "1", "2", "3", "}" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "Test", 3);
+
+		cfg = testUserFile("Config with List", new String[] { "[foo]",
+				"list:{", "[no group]", "}" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "foo", 1);
+
+		cfg = testUserFile("Invalid identifier", new String[] { "[group]",
+				"val<xy>:20", "next:5" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "group", 2);
+		assertValue(cfg, "group", "val", "20");
+		assertValue(cfg, "group", "next", "5");
+
+		cfg = testUserFile("Wrong identifier", new String[] { "[group]",
+				"val<list>:20", "next:5" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "group", 2);
+		assertValue(cfg, "group", "val", "[20]");
+		assertValue(cfg, "group", "next", "5");
+
+		cfg = testUserFile("Wrong identifier", new String[] { "[group]",
+				"val<bool>:20", "next:5" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "group", 2);
+		assertValue(cfg, "group", "val", "false");
+		assertValue(cfg, "group", "next", "5");
+
+		cfg = testUserFile("Data out of range", new String[] { "[group]",
+				"val<bool>:20", "next:5" });
+		assertGroupCount(cfg, 1);
+		assertGroupSize(cfg, "group", 2);
+		assertValue(cfg, "group", "val", "false");
+		assertValue(cfg, "group", "next", "5");
 	}
 
 	@Test
