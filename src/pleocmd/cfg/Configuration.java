@@ -362,11 +362,10 @@ public final class Configuration {
 
 		ConfigValue value = null;
 		final boolean singleLined = !"{".equals(content);
+		boolean isUnknown = false;
 		if (hasSkeleton) {
 			value = group.get(label);
-			if (value == null)
-				Log.warn("Ignoring value with unknown label '%s' "
-						+ "for group '%s'", label, group.getName());
+			if (value == null) isUnknown = true;
 		}
 		if (value == null)
 			value = ConfigValue.createValue(identifier, label, singleLined);
@@ -379,7 +378,11 @@ public final class Configuration {
 			Log.warn("Failed to read value '%s' from '%s': '%s'", label, group
 					.getName(), e.getMessage());
 		}
-		group.set(value);
+		if (isUnknown)
+			Log.error("Ignoring value '%s' of group '%s' "
+					+ "because of unknown label", value, group.getName());
+		else
+			group.set(value);
 	}
 
 	private List<String> readList(final BufferedReader in, final int[] nr)

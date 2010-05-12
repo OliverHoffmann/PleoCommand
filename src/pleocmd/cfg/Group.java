@@ -132,15 +132,23 @@ public final class Group {
 		for (final ConfigValue vt : valueMap.values()) {
 			final ConfigValue vs = src.get(vt.getLabel());
 			if (vs == null)
-				Log.warn("Cannot assign to '%s', because the value does not "
-						+ "exist in the source group", vt);
+				Log.error("Cannot assign to '%s', because the value does not "
+						+ "exist in the group '%s'. Using default value '%s' "
+						+ "instead.", vt.getLabel(), src.name, vt.asString());
 			else
-				vt.assign(vs);
+				try {
+					vt.assign(vs);
+				} catch (final ConfigurationException e) {
+					Log.error("Cannot assign to '%s', because the value "
+							+ "in '%s' is invalid: '%s'. Using default "
+							+ "value '%s' instead.", vt.getLabel(), src.name, e
+							.getMessage(), vt.asString());
+				}
 		}
 		for (final ConfigValue vs : src.valueMap.values())
 			if (!valueMap.containsKey(vs.getLabel()))
-				Log.warn("Ignoring value with unknown label '%s' "
-						+ "for group '%s'", vs.getLabel(), this);
+				Log.error("Ignoring value '%s' of group '%s' "
+						+ "because of unknown label", vs, name);
 	}
 
 	@Override
