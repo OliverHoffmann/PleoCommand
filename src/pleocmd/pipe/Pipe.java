@@ -589,7 +589,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				final List<Data> dataList = convertDataToDataList(data);
 
 				// ... and put it into the queue for Output classes
-				putIntoOutputQueue(dataList);
+				for (final Data d : dataList)
+					putIntoOutputQueue(d);
 			}
 		} finally {
 			Log.info("Input-Thread finished");
@@ -745,7 +746,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	}
 
 	/**
-	 * Puts all {@link Data}s in the list to the {@link DataQueue}.
+	 * Puts all the {@link Data} to the {@link DataQueue}.
 	 * <p>
 	 * Drops the {@link Data} if it's priority is lower than the one in the
 	 * queue. <br>
@@ -758,54 +759,50 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * Immediately returns if sleeping for timed {@link Data} has been
 	 * interrupted.
 	 * 
-	 * @param dataList
-	 *            list of {@link Data} objects to put into the {@link DataQueue}
+	 * @param data
+	 *            {@link Data} object to put into the {@link DataQueue}
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been closed
 	 */
-	private void putIntoOutputQueue(final List<Data> dataList)
-			throws IOException {
-		for (final Data data : dataList) {
-
-			// if time-to-wait is positive we wait here before we are
-			// forced to immediately drop a data block or clear the queue
-			// TODO SPEED wait here only if needed
-			if (data.getTime() != Data.TIME_NOTIME) {
-				final long execTime = feedback.getStartTime() + data.getTime();
-				final long delta = execTime - System.currentTimeMillis()
-						- cfgOverheadReductionTime.getContent();
-				if (delta > 0) {
-					Log.detail("Waiting %d ms", delta);
-					try {
-						Thread.sleep(delta);
-					} catch (final InterruptedException e) {
-						Log.error(e, "Failed to wait %d ms for "
-								+ "correct output time", delta);
-						// no incInterruptionCount() here
-						return;
-					}
+	private void putIntoOutputQueue(final Data data) throws IOException {
+		// if time-to-wait is positive we wait here before we are
+		// forced to immediately drop a data block or clear the queue
+		// TODO SPEED wait here only if needed
+		if (data.getTime() != Data.TIME_NOTIME) {
+			final long execTime = feedback.getStartTime() + data.getTime();
+			final long delta = execTime - System.currentTimeMillis()
+					- cfgOverheadReductionTime.getContent();
+			if (delta > 0) {
+				Log.detail("Waiting %d ms", delta);
+				try {
+					Thread.sleep(delta);
+				} catch (final InterruptedException e) {
+					Log.error(e, "Failed to wait %d ms for "
+							+ "correct output time", delta);
+					// no incInterruptionCount() here
+					return;
 				}
 			}
+		}
 
-			if (Log.canLogDetail())
-				Log.detail("Currently on queue: " + dataQueue.getAll());
-			final PutResult res = dataQueue.put(data);
-			switch (res) {
-			case ClearedAndPut:
-				Log.info("Canceling current command, "
-						+ "because of higher-priority command '%s'", data);
-				thrOutput.interrupt();
-				feedback.incDropCount(dataQueue.getSizeBeforeClear());
-				break;
-			case Dropped:
-				data.getOrigin().getFeedback().incDropCount();
-				feedback.incDropCount();
-				break;
-			case Put:
-				break;
-			default:
-				throw new InternalException(res);
-			}
+		if (Log.canLogDetail())
+			Log.detail("Currently on queue: " + dataQueue.getAll());
+		final PutResult res = dataQueue.put(data);
+		switch (res) {
+		case ClearedAndPut:
+			Log.info("Canceling current command, "
+					+ "because of higher-priority command '%s'", data);
+			thrOutput.interrupt();
+			feedback.incDropCount(dataQueue.getSizeBeforeClear());
+			break;
+		case Dropped:
+			data.getOrigin().getFeedback().incDropCount();
+			feedback.incDropCount();
+			break;
+		case Put:
+			break;
+		default:
+			throw new InternalException(res);
 		}
 	}
 
@@ -822,18 +819,26 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 *         <b>data</b> if no fitting {@link Converter} could be found or a
 	 *         list of new {@link Data} objects returned by the first fitting
 	 *         {@link Converter}.
+	 * @throws IOException
+	 *             if the DataQueue has been closed
 	 */
-	private List<Data> convertDataToDataList(final Data data) {
+	private List<Data> convertDataToDataList(final Data data)
+			throws IOException {
 		Log.detail("Converting data block to list of data blocks");
 		List<Data> res = null;
 		final List<Data> sum = new ArrayList<Data>();
 		boolean found = false;
-		for (final PipePart pp : data.getOrigin().getConnectedPipeParts())
+		boolean outputExists = false;
+		for (final PipePart pp : data.getOrigin().getConnectedPipeParts()) {
 			if (pp instanceof Converter && !ignoredConverter.contains(pp)
 					&& (res = convertOneData(data, (Converter) pp)) != null) {
 				found = true;
 				sum.addAll(res);
 			}
+			if (pp instanceof Output && !ignoredOutputs.contains(pp))
+				outputExists = true;
+		}
+		if (outputExists) putIntoOutputQueue(data);
 		if (found) return sum;
 
 		// no fitting (and not ignored and working) converter found
