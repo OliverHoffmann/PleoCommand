@@ -58,7 +58,6 @@
 
 	<!-- Downloads build files needed for build and dist targets -->
 	<target name="_download-build">
-		<mkdir dir="${bin}" />
 		<mkdir dir="${ext}" />
 		<mkdir dir="${extBuild}" />
 		<mkdir dir="${extPreBuild}" />
@@ -169,7 +168,6 @@
 
 	<!-- Downloads runtime and development files -->
 	<target name="_download-ext">
-		<mkdir dir="${bin}" />
 		<mkdir dir="${ext}" />
 		<mkdir dir="${extRT}" />
 		<mkdir dir="${extDev}" />
@@ -227,10 +225,6 @@
 			<fileset dir="${src}/ext/dev">
 				<include name="pawncc/**" />
 			</fileset>
-			<fileset dir="${src}">
-				<include name="BCI2000Source/**" />
-				<!-- TODO remove this? -->
-			</fileset>
 		</copy>
 
 		<chmod perm="ugo+rx" failonerror="false" verbose="${verb}">
@@ -246,6 +240,7 @@
 
 	<!-- Unzips and moves files needed for build and dist targets -->
 	<target name="_prepare-build" depends="_download-build">
+		<mkdir dir="${bin}" />
 		<mkdir dir="${lib}" />
 
 		<echo message="Unzipping libraries needed for building" />
