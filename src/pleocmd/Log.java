@@ -63,6 +63,8 @@ public final class Log {
 
 	private static boolean minLogTypeKnown;
 
+	private static boolean quiStatusKnown;
+
 	private static List<Log> queuedLogs = new ArrayList<Log>(128);
 
 	/**
@@ -99,25 +101,28 @@ public final class Log {
 			if (MainFrame.hasGUI()) {
 				MainFrame.the().getMainLogPanel().addLog(this);
 				ErrorDialog.show(this);
-			} else
+			} else if (quiStatusKnown)
 				System.err.println(toString()); // CS_IGNORE
+			else
+				queuedLogs.add(this);
 			break;
 		case Console:
 			System.out.println(msg); // CS_IGNORE
 			if (MainFrame.hasGUI())
 				MainFrame.the().getMainLogPanel().addLog(this);
+			else if (!quiStatusKnown) queuedLogs.add(this);
 			break;
 		default:
-			if (!minLogTypeKnown) {
+			if (!minLogTypeKnown)
 				// we have to queue it for later output, because
 				// we currently don't now, if we really have to output this log
 				queuedLogs.add(this);
-				break;
-			}
-			if (MainFrame.hasGUI())
+			else if (MainFrame.hasGUI())
 				MainFrame.the().getMainLogPanel().addLog(this);
-			else
+			else if (quiStatusKnown)
 				System.err.println(toString()); // CS_IGNORE
+			else
+				queuedLogs.add(this);
 			break;
 		}
 	}
@@ -436,10 +441,24 @@ public final class Log {
 			throw new IllegalArgumentException("Invalid value for minLogType");
 		cfgMinLogType.setEnum(minLogType);
 		minLogTypeKnown = true;
+		processQueue();
+	}
+
+	public static void setGUIStatusKnown() {
+		quiStatusKnown = true;
+		processQueue();
+	}
+
+	private static void processQueue() {
+		// wait with processing until known
+		if (!minLogTypeKnown || !quiStatusKnown) return;
+
 		if (MainFrame.hasGUI()) {
 			for (final Log log : queuedLogs)
-				if (Log.canLog(log.getType()))
+				if (Log.canLog(log.getType())) {
 					MainFrame.the().getMainLogPanel().addLog(log);
+					if (log.getType() == Type.Error) ErrorDialog.show(log);
+				}
 		} else
 			for (final Log log : queuedLogs)
 				if (Log.canLog(log.getType()))
@@ -511,6 +530,11 @@ public final class Log {
 
 		@Override
 		public void configurationAboutToBeChanged() {
+			// nothing to do
+		}
+
+		@Override
+		public void configurationRead() {
 			// nothing to do
 		}
 
