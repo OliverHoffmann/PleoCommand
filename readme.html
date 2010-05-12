@@ -47,7 +47,7 @@
   "ext/prebuild/ant-bin.zip">ant-bin.zip</A> from "ext/prebuild" if needed. You may also use any recent enough version
   provided by your distributor.<BR>
   Open a console and execute "ant fetch" in the root directory of PleoCommand.<BR>
-  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<br>
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<BR>
   You will need about 600 MB free disk space.
 
   <H2>Windows</H2>Execute prepare.bat from the root directory. This will download some files.<BR>
@@ -62,7 +62,7 @@
   JAVA_HOME="C:\Programme\Java\jdk1.6.0_20" (not the bin sub-directory!!!)<BR>
   Open a console by clicking on the <A href="win-cmd.lnk">win-cmd.lnk</A> and execute "ant fetch" in the root directory
   of PleoCommand.<BR>
-  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<br>
+  Install the tools mentioned under "Rebuilding" and continue with "ant dist".<BR>
   You will need about 1800 MB free disk space.
   <HR>
 
@@ -177,7 +177,7 @@
   the installation dialog to this directory.<BR>
   If everything works fine, you should see a new COM port in the Device Manager.</P>
 
-  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/PleoCommand.exe">dist/PleoCommand.zip</A>.
+  <H3>PleoCommand</H3>To finally start PleoCommand, execute <A href="dist/PleoCommand.exe">dist/PleoCommand.exe</A>.
 
   <H3>MySkit (optional)</H3>
 
@@ -655,8 +655,9 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   Borland Architect. See "Extending, Modifying" for additional information.
 
   <H2>Unable to find a javac compiler; com.sun.tools.javac.Main is not on the classpath. Perhaps JAVA_HOME does not
-  point to the JDK.</H2>Make sure that JAVA_HOME points to the root of the JDK directory, not to any subdirectory
-  within, so for example:<BR>
+  point to the JDK.<BR>
+  OR Unable to locate tools.jar. Expected to find it in ...</H2>Make sure that JAVA_HOME points to the root of the JDK
+  directory, not to any subdirectory within, so for example:<BR>
   JAVA_HOME="C:\Programme\Java\jdk1.6.0_20"
 
   <H2>Cannot run program "xsltproc": CreateProcess error=2, Das System kann die angegebene Datei nicht
@@ -672,5 +673,13 @@ Application:PleoCommandTCPIPTask matrix Fields= { DataType a)Channel%20Nr b)Fixe
   been selected, which is broken and can't correctly read Makefiles.<BR>
   Please make sure that GNU Make's directory comes before the Architect Builder's one in the PATH environment, so a
   string like "C:\Programme\Embarcadero\RAD Studio\7.0\bin" is the last on the PATH.
+
+  <H2>Der Befehl "C:\..." ist entweder falsch geschrieben oder konnte nicht gefunden werden.</H2>Make is known to have
+  problems with special characters like "(" in the TEMP path, so maybe explicitly setting TEMP to some sane value like
+  "C:\Temp" solves the problem.
+
+  <H2>echo "... needs manual rebuilding: Select Project - Compile All Projects"</H2>If Borland Builder Architect
+  doesn't start automatically, start it manually and open "bin\BCI2000Source\src\contrib\Application\PleoCommandTCPIP"
+  or "bin\BCI2000Source\src\contrib\SignalSource\NexusSource" respectively. Then choose "Compile - Make".
 </BODY>
 </HTML>
