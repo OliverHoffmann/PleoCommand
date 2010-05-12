@@ -333,6 +333,11 @@ public final class PleoCommunication implements SerialPortEventListener {
 		}
 
 		@Override
+		public void configurationRead() {
+			// nothing to do
+		}
+
+		@Override
 		public void configurationChanged(final Group group) {
 			// nothing to do
 		}

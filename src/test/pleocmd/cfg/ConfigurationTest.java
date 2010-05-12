@@ -43,6 +43,11 @@ public final class ConfigurationTest extends Testcases {
 		}
 
 		@Override
+		public void configurationRead() {
+			// nothing to do
+		}
+
+		@Override
 		public void configurationChanged(final Group changedGroup) {
 			// nothing to do
 		}

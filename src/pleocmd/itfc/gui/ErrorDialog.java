@@ -261,6 +261,11 @@ public final class ErrorDialog extends JDialog implements
 		// nothing to do
 	}
 
+	@Override
+	public void configurationRead() {
+		// nothing to do
+	}
+
 	public void configurationChanged(final Group group) {
 		// nothing to do
 	}

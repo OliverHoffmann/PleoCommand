@@ -209,6 +209,11 @@ public final class PipeConfigDialog extends JDialog implements
 	}
 
 	@Override
+	public void configurationRead() {
+		// nothing to do
+	}
+
+	@Override
 	public void configurationChanged(final Group group) {
 		cfgBounds.assignContent(this);
 	}

@@ -291,6 +291,11 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 	}
 
 	@Override
+	public void configurationRead() {
+		// nothing to do
+	}
+
+	@Override
 	public void configurationChanged(final Group group) {
 		cfgBounds.assignContent(this);
 		splitPane.setDividerLocation(cfgSplitterPos.getContent());

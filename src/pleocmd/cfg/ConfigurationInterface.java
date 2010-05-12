@@ -23,6 +23,14 @@ public interface ConfigurationInterface {
 	 */
 	Group getSkeleton(String groupName) throws ConfigurationException;
 
+	/**
+	 * Invoked before the configuration will be completely (re)read from a file
+	 * or some other source.
+	 * 
+	 * @throws ConfigurationException
+	 *             if something is wrong which prevents the configuration from
+	 *             being read.
+	 */
 	void configurationAboutToBeChanged() throws ConfigurationException;
 
 	/**
@@ -55,5 +63,15 @@ public interface ConfigurationInterface {
 	 *             {@link Group}s fails
 	 */
 	List<Group> configurationWriteback() throws ConfigurationException;
+
+	/**
+	 * Invoked after the configuration has been completely (re)read from a file
+	 * or some other source.
+	 * 
+	 * @throws ConfigurationException
+	 *             if something in the just read configuration is wrong (like a
+	 *             specific group seems to be missing, ...)
+	 */
+	void configurationRead() throws ConfigurationException;
 
 }

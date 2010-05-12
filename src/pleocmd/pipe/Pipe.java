@@ -132,6 +132,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private boolean initPhaseInterrupted;
 
+	private final Configuration config;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 * 
@@ -140,6 +142,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 *            PipeParts to.
 	 */
 	public Pipe(final Configuration config) {
+		this.config = config;
 		feedback = new PipeFeedback();
 		final Set<String> groupNames = new HashSet<String>();
 		groupNames.add(getClass().getSimpleName());
@@ -1021,6 +1024,15 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			throw new ConfigurationException(e,
 					"Cannot write back configuration");
 		}
+	}
+
+	@Override
+	public void configurationRead() {
+		final String prefix = getClass().getSimpleName() + ":";
+		for (final Group g : config.getGroupsUnassigned())
+			if (g.getName().startsWith(prefix))
+				Log.error("Unknown PipePart which could not be "
+						+ "read from configuration: '%s'", g);
 	}
 
 	@Override

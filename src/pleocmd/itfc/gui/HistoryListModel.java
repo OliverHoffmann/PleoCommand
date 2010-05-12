@@ -67,6 +67,11 @@ public final class HistoryListModel extends AbstractListModel implements
 	}
 
 	@Override
+	public void configurationRead() {
+		// nothing to do
+	}
+
+	@Override
 	public void configurationChanged(final Group group) {
 		clear();
 		history.addAll(cfgHistory.getContentList());

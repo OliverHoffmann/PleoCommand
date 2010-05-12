@@ -168,6 +168,7 @@ public final class Configuration {
 				co.configurationChanged(skelGroup);
 			}
 		}
+		co.configurationRead();
 	}
 
 	/**
@@ -276,6 +277,9 @@ public final class Configuration {
 			line = readGroup(in, nr, line.substring(1, line.length() - 1)
 					.trim(), coOnly);
 		}
+		if (coOnly == null)
+			for (final ConfigurationInterface co : configObjects)
+				co.configurationRead();
 		Log.detail("Done reading %d configuration line(s)", nr[0]);
 	}
 
