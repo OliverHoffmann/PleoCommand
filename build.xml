@@ -1,4 +1,4 @@
-<project name="PleoCommand" default="build" basedir=".">
+<project name="PleoCommand" default="dist" basedir=".">
 
 	<property name="verb" value="no" />
 
@@ -14,15 +14,15 @@
 	<property name="extRT" location="${ext}/rt" />
 	<property name="extDev" location="${ext}/dev" />
 
-	<property name="srcBCI" location="${src}/BCI2000Source" />
-	<property name="binBCI" location="${bin}/BCI2000Source" />
-	<property name="subNexus" value="src/contrib/SignalSource/NexusSource" />
-	<property name="subTCPIP"
-	          value="src/contrib/Application/PleoCommandTCPIP" />
-	<property name="srcBCINexus" location="${srcBCI}/${subNexus}" />
-	<property name="binBCINexus" location="${binBCI}/${subNexus}" />
-	<property name="srcBCIPleo" location="${srcBCI}/${subTCPIP}" />
-	<property name="binBCIPleo" location="${binBCI}/${subTCPIP}" />
+	<property name="srcBCISub" value="BCI2000Source" />
+	<property name="srcBCI" location="${src}/${srcBCISub}" />
+	<property name="binBCI" location="${bin}/${srcBCISub}" />
+	<property name="subNexus" value="SignalSource/NexusSource" />
+	<property name="subTCPIP" value="Application/PleoCommandTCPIP" />
+	<property name="srcBCINexus" location="${srcBCI}/src/contrib/${subNexus}" />
+	<property name="binBCINexus" location="${binBCI}/src/contrib/${subNexus}" />
+	<property name="srcBCIPleo" location="${srcBCI}/src/contrib/${subTCPIP}" />
+	<property name="binBCIPleo" location="${binBCI}/src/contrib/${subTCPIP}" />
 
 	<property name="mainclass" value="pleocmd.Main" />
 	<property name="classpath" value="${lib}/RXTXcomm.jar:${lib}/junit.jar" />
@@ -309,8 +309,8 @@
 		<antcall target="_unzipBCISource" />
 	</target>
 
-	<!-- Cleans bin/ and dist/ diretory but keep downloads -->
-	<target name="clean">
+	<target name="clean"
+	        description="Cleans all build files but keeps downloads (removes bin/ and dist/)">
 		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${dist}" />
@@ -319,8 +319,8 @@
 		<echo message="Downloaded external files are not deleted. 'ant mrproper' cleans all." />
 	</target>
 
-	<!-- Cleans bin/ and dist/ diretory completely -->
-	<target name="mrproper">
+	<target name="mrproper"
+	        description="Cleans all build and downloaded files (removes bin/, dist/ and ext/)">
 		<delete includeEmptyDirs="true" failonerror="false" verbose="${verb}">
 			<fileset dir="${bin}" />
 			<fileset dir="${ext}" />
@@ -328,14 +328,12 @@
 		</delete>
 	</target>
 
-	<!-- Downloads all external files needed from URLs -->
-	<target name="fetch" depends="_download-build, _download-ext">
+	<target name="fetch"
+	        depends="_download-build, _download-ext"
+	        description="Downloads files needed for building and during runtime (creates files in ext/)">
 	</target>
 
-	<!-- Compiles Java, C and C++ files, checks for errors and dumps GIT log -->
-	<target name="build" depends="_prepare-build">
-		<mkdir dir="${bin}" />
-
+	<target name="_buildCopy">
 		<copy todir="${bin}"
 		      overwrite="true"
 		      preservelastmodified="true"
@@ -348,16 +346,22 @@
 				<include name="**/help/*.html" />
 				<include name="**/icons/*.png" />
 			</fileset>
-			<fileset dir="${srcBCI}/.." />
+			<fileset dir="${srcBCI}/.." includes="${srcBCISub}/**" />
 		</copy>
+	</target>
 
+	<target name="_buildJava">
 		<javac srcdir="${src}"
 		       destdir="${bin}"
 		       verbose="${verb}"
 		       listfiles="true"
 		       classpath="${classpath}"
-		       includeantruntime="false" />
+		       includeantruntime="false"
+		       updatedProperty="javaCodeWasCompiled" />
+		<antcall target="_buildCheckstyle" />
+	</target>
 
+	<target name="_buildCheckstyle" if="javaCodeWasCompiled">
 		<taskdef resource="checkstyletask.properties"
 		         classpath="${lib}/checkstyle-all-5.1.jar" />
 		<checkstyle config="${src}/checkstyle.xml" failonviolation="false">
@@ -367,7 +371,9 @@
 				<pathelement path="${bin}" />
 			</classpath>
 		</checkstyle>
+	</target>
 
+	<target name="_buildCAndCPP">
 		<echo message="Building ExpressionParser" />
 		<exec executable="make"
 		      dir="${bin}/ExpressionParser"
@@ -421,7 +427,9 @@
 		      failonerror="true"
 		      osfamily="windows">
 		</exec>
+	</target>
 
+	<target name="_buildChangelog">
 		<echo message="Creating GIT changelog" />
 		<exec executable="git"
 		      output="${bin}/changelog.git"
@@ -475,13 +483,20 @@
 			<arg value="${src}/changelog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
-
 	</target>
 
-	<!-- Creates Java JAR archive and Windows executable in dist/ -->
-	<target name="dist" depends="build, _download-ext">
-		<mkdir dir="${dist}" />
+	<!-- Compiles Java, C and C++ files, checks for errors and dumps GIT log -->
+	<target name="build"
+	        depends="_prepare-build"
+	        description="Builds Java, C and C++ sourcecode from src/ (creates bin/)">
+		<mkdir dir="${bin}" />
+		<antcall target="_buildCopy" />
+		<antcall target="_buildJava" />
+		<antcall target="_buildCAndCPP" />
+		<antcall target="_buildChangelog" />
+	</target>
 
+	<target name="_distTidyHTML">
 		<exec executable="${src}/tidy-all-html.sh"
 		      dir="${basedir}"
 		      failonerror="true"
@@ -489,7 +504,6 @@
 			<arg value="${bin}/pleocmd/itfc/gui/help" />
 			<arg value="${bin}/changelog.html" />
 		</exec>
-
 		<exec executable="${src}/tidy-all-html.bat"
 		      dir="${basedir}"
 		      failonerror="true"
@@ -499,13 +513,9 @@
 			<arg value="${bin}/pleocmd/itfc/gui/help" />
 			<arg value="${bin}/changelog.html" />
 		</exec>
+	</target>
 
-		<taskdef name="jsmoothgen"
-		         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
-		         classpath="${lib}/jsmoothgen-ant.jar" />
-		<property name="jarloc" location="${dist}/${ant.project.name}.jar" />
-		<property name="exefile" value="${ant.project.name}.exe" />
-
+	<target name="_distCreateJAR">
 		<delete file="${jarloc}" failonerror="true" verbose="${verb}" />
 		<jar jarfile="${jarloc}" duplicate="fail" strict="warn">
 			<zipfileset dir="${bin}/pleocmd" prefix="pleocmd" />
@@ -521,7 +531,9 @@
 				<attribute name="Class-Path" value="." />
 			</manifest>
 		</jar>
+	</target>
 
+	<target name="_distCreateEXE">
 		<property name="jsloc" value="${bin}/${ant.project.name}.jsmooth" />
 		<echoxml file="${jsloc}">
 			<jsmoothproject>
@@ -546,10 +558,15 @@
 				<value>0</value>
 			</jsmoothproject>
 		</echoxml>
+		<taskdef name="jsmoothgen"
+		         classname="net.charabia.jsmoothgen.ant.JSmoothGen"
+		         classpath="${lib}/jsmoothgen-ant.jar" />
 		<jsmoothgen skeletonroot="${lib}/skeletons"
 		            verbose="${verb}"
 		            project="${jsloc}" />
+	</target>
 
+	<target name="_distCopy">
 		<copy todir="${dist}"
 		      overwrite="true"
 		      preservelastmodified="true"
@@ -585,7 +602,9 @@
 			<fileset file="${dist}/librxtxSerial.so" />
 			<fileset file="${dist}/libExprParser.so" />
 		</chmod>
+	</target>
 
+	<target name="_distOSCheck">
 		<uptodate property="buildok.linux"
 		          targetfile="${dist}/libExprParser.so">
 			<srcfiles dir="${src}/ExpressionParser" includes="*" />
@@ -612,11 +631,26 @@
 		      unless="buildok.linux" />
 		<fail message="This script has be run again under Windows because some missing files have to be created under Windows."
 		      unless="buildok.win" />
+	</target>
 
+	<!-- Creates Java JAR archive and Windows executable in dist/ -->
+	<target name="dist"
+	        depends="build, _download-ext"
+	        description="Finally prepares distribution for runtime (creates dist/)">
+		<mkdir dir="${dist}" />
+		<property name="jarloc" location="${dist}/${ant.project.name}.jar" />
+		<property name="exefile" value="${ant.project.name}.exe" />
+		<antcall target="_distTidyHTML" />
+		<antcall target="_distCreateJAR" />
+		<antcall target="_distCreateEXE" />
+		<antcall target="_distCopy" />
+		<antcall target="_distOSCheck" />
 	</target>
 
 	<!-- Executes all JUnit test cases -->
-	<target name="test" depends="dist">
+	<target name="test"
+	        depends="dist"
+	        description="Does internal testing via JUnit">
 		<junit showoutput="true" failureproperty="testfailed">
 			<classpath>
 				<pathelement path="${lib}/junit.jar" />
@@ -631,7 +665,9 @@
 		<fail message="At least one JUnit test failed" if="testfailed" />
 	</target>
 
-	<target name="rebuild" depends="clean, dist">
+	<target name="rebuild"
+	        depends="clean, dist"
+	        description="Forces a rebuild (removes and recreates bin/ and dist/)">
 	</target>
 
 </project>
