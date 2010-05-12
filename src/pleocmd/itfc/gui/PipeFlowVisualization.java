@@ -62,8 +62,8 @@ public final class PipeFlowVisualization extends Thread {
 			this.theta = theta;
 		}
 
-		public void setDelta(final double delta) {
-			this.delta = delta;
+		public void setParams(final double len) {
+			delta = (len - FLOW_LEN) / STEPS;
 			offset = (STEPS - steps) * delta;
 		}
 
@@ -137,7 +137,7 @@ public final class PipeFlowVisualization extends Thread {
 		pf.setTheta(Math.atan2(sp.y - dp.y, sp.x - dp.x));
 		final int xd = sp.x - dp.x;
 		final int yd = sp.y - dp.y;
-		pf.setDelta((Math.sqrt(xd * xd + yd * yd) * scale - FLOW_LEN) / STEPS);
+		pf.setParams(Math.sqrt(xd * xd + yd * yd) * scale);
 	}
 
 	public synchronized void modified() {
