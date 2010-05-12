@@ -22,6 +22,7 @@ import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.RGBImageFilter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -129,6 +130,8 @@ public final class PipeConfigBoard extends JPanel {
 
 	private boolean closed;
 
+	private Collection<PipeFlow> pipeflow;
+
 	public PipeConfigBoard(final Pipe pipe) {
 		this.pipe = pipe;
 		painter = new BoardPainter();
@@ -221,7 +224,7 @@ public final class PipeConfigBoard extends JPanel {
 		painter.paint(g, currentPart, underCursor,
 				currentConnection == null ? null : new ImmutableRectangle(
 						currentConnection), currentConnectionsTarget,
-				currentConnectionValid, layouter, modifyable);
+				currentConnectionValid, layouter, modifyable, pipeflow);
 	}
 
 	private JPopupMenu createMenu(final String name,
@@ -1111,6 +1114,14 @@ public final class PipeConfigBoard extends JPanel {
 
 	public PipePart getCurrentPart() {
 		return currentPart;
+	}
+
+	void setPipeflow(final Collection<PipeFlow> pipeflow) {
+		this.pipeflow = pipeflow;
+	}
+
+	Collection<PipeFlow> getPipeflow() {
+		return pipeflow;
 	}
 
 }

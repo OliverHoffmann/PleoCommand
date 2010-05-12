@@ -67,7 +67,7 @@ public class PipePreviewLabel extends JLabel {
 			painter.setBounds(width, height, false);
 			final Graphics g = img.getGraphics();
 			g.setClip(0, 0, width, height);
-			painter.paint(g, null, null, null, null, false, null, true);
+			painter.paint(g, null, null, null, null, false, null, true, null);
 			setIcon(new ImageIcon(img));
 		}
 	}

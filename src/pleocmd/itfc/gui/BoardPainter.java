@@ -15,6 +15,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -284,6 +285,24 @@ public final class BoardPainter {
 	 */
 	private static final double PREFSIZE_FREE = 4;
 
+	// Drawing of PipeFlow symbols
+
+	/**
+	 * Color of the Pipe-Flow symbols
+	 */
+	private static final Color FLOW_COLOR = Color.BLUE;
+
+	/**
+	 * Width of one Pipe-Flow symbol
+	 */
+	private static final float FLOW_WIDTH = 3;
+
+	/**
+	 * The Stroke used to print one Pipe-Flow symbol
+	 */
+	private static final BasicStroke FLOW_STROKE = new BasicStroke(FLOW_WIDTH,
+			BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 1);
+
 	// Miscellaneous
 
 	private final Set<PipePart> set;
@@ -312,7 +331,8 @@ public final class BoardPainter {
 			final ImmutableRectangle currentConnection,
 			final PipePart currentConnectionsTarget,
 			final boolean currentConnectionValid,
-			final BoardAutoLayouter layouter, final boolean modifyable) {
+			final BoardAutoLayouter layouter, final boolean modifyable,
+			final Collection<PipeFlow> pipeflow) {
 		if (pipe == null || scale <= Double.MIN_NORMAL) return;
 		final Rectangle clip = g.getClipBounds();
 		if (clip == null) return;
@@ -353,6 +373,7 @@ public final class BoardPainter {
 				currentConnectionValid);
 		final long time5 = System.currentTimeMillis();
 		drawAutoLayoutInfo(g2, layouter);
+		drawPipeFlow(g2, pipeflow);
 
 		if (PAINT_DEBUG) {
 			g2.translate(clip.x / scale, clip.y / scale);
@@ -723,6 +744,16 @@ public final class BoardPainter {
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 		g2.drawString(s, (int) ((bounds.width - sb.getWidth()) / 2), (int) (y
 				+ h - (h - sb.getHeight()) / 2));
+	}
+
+	private void drawPipeFlow(final Graphics2D g2,
+			final Collection<PipeFlow> pipeflow) {
+		if (pipeflow != null) synchronized (pipeflow) {
+			g2.setColor(FLOW_COLOR);
+			g2.setStroke(FLOW_STROKE);
+			for (final PipeFlow pf : pipeflow)
+				pf.draw(g2);
+		}
 	}
 
 	public static void calcConnectorPositions(final ImmutableRectangle srcRect,
