@@ -20,6 +20,7 @@ public final class CommandLine {
 
 	private CommandLine() {
 		commandLine = this;
+		Log.setGUIStatusKnown();
 		pipe = new Pipe(Configuration.getMain());
 	}
 
