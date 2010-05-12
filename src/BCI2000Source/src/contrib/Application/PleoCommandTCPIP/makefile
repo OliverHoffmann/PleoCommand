@@ -3,7 +3,7 @@ NAME := PleoCommandTCPIP
 all: $(NAME).exe
 
 $(NAME).exe: $(NAME).cbproj $(NAME).cpp $(NAME)Task.cpp $(NAME)Task.h
-	echo "$(NAME) needs manual rebuilding: Select Project - Compile All Projects"
-	rm -f $(NAME).exe
+	echo "$@ needs manual rebuilding: Select Project - Compile All Projects"
+	rm -f $@
 	bds -pCBuilder $< || :
-	[ -f $(NAME).exe ] || exit 1
+	[ -f $@ ] || exit 1
