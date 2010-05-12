@@ -527,4 +527,17 @@ public final class Configuration {
 		return Collections.unmodifiableSet(configObjects);
 	}
 
+	public boolean removeUnassignedGroup(final String name) {
+		for (final Group g : groupsUnassigned)
+			if (g.getName().equals(name)) {
+				groupsUnassigned.remove(g);
+				return true;
+			}
+		return false;
+	}
+
+	public boolean removeUnassignedGroup(final Group g) {
+		return groupsUnassigned.remove(g);
+	}
+
 }

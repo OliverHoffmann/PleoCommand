@@ -1030,9 +1030,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	public void configurationRead() {
 		final String prefix = getClass().getSimpleName() + ":";
 		for (final Group g : config.getGroupsUnassigned())
-			if (g.getName().startsWith(prefix))
+			if (g.getName().startsWith(prefix)) {
 				Log.error("Unknown PipePart which could not be "
 						+ "read from configuration: '%s'", g);
+				config.removeUnassignedGroup(g);
+				// need to recursively restart the loop because of modification
+				configurationRead();
+				break;
+			}
 	}
 
 	@Override
