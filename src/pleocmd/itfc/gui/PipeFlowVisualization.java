@@ -62,17 +62,16 @@ public final class PipeFlowVisualization extends Thread {
 	}
 
 	private void relayout(final PipeFlow pf) {
-		final double scale = board.getPainter().getScale();
 		final Point sp = new Point();
 		final Point dp = new Point();
 		BoardPainter.calcConnectorPositions(pf.getSrc().getGuiPosition(), pf
 				.getDst().getGuiPosition(), sp, dp);
-		pf.getOrigin().x = sp.x * scale;
-		pf.getOrigin().y = sp.y * scale;
+		pf.getOrigin().x = sp.x;
+		pf.getOrigin().y = sp.y;
 		pf.setTheta(Math.atan2(sp.y - dp.y, sp.x - dp.x));
 		final int xd = sp.x - dp.x;
 		final int yd = sp.y - dp.y;
-		pf.setParams(Math.sqrt(xd * xd + yd * yd) * scale);
+		pf.setParams(Math.sqrt(xd * xd + yd * yd));
 	}
 
 	public void modified() {
