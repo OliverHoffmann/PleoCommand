@@ -1120,8 +1120,4 @@ public final class PipeConfigBoard extends JPanel {
 		this.pipeflow = pipeflow;
 	}
 
-	Collection<PipeFlow> getPipeflow() {
-		return pipeflow;
-	}
-
 }
