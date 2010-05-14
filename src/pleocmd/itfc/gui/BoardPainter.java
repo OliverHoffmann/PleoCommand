@@ -288,11 +288,6 @@ final class BoardPainter {
 	// Drawing of PipeFlow symbols
 
 	/**
-	 * Color of the Pipe-Flow symbols
-	 */
-	private static final Color FLOW_COLOR = Color.BLUE;
-
-	/**
 	 * Width of one Pipe-Flow symbol
 	 */
 	private static final float FLOW_WIDTH = 3;
@@ -749,7 +744,6 @@ final class BoardPainter {
 	private void drawPipeFlow(final Graphics2D g2,
 			final Collection<PipeFlow> pipeflow) {
 		if (pipeflow != null) synchronized (pipeflow) {
-			g2.setColor(FLOW_COLOR);
 			g2.setStroke(FLOW_STROKE);
 			for (final PipeFlow pf : pipeflow)
 				pf.draw(g2);
