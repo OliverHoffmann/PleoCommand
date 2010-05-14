@@ -33,8 +33,8 @@ public final class ImmutableRectangle {
 		return new Rectangle(r);
 	}
 
-	public boolean equalsRect(final Rectangle r) {
-		return this.r.equals(r);
+	public boolean equalsRect(final Rectangle rect) {
+		return r.equals(rect);
 	}
 
 	public boolean contains(final Point p) {

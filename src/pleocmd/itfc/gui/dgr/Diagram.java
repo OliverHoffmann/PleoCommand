@@ -27,11 +27,11 @@ import javax.swing.ToolTipManager;
 
 public final class Diagram extends JPanel {
 
+	static final double MIN_GRID_DELTA = 2.0;
+
 	private static final double SCALE_SPEED_MOUSE = 0.01;
 
 	private static final double MOVE_SPEED_MOUSE = 0.05;
-
-	static final double MIN_GRID_DELTA = 2.0;
 
 	private static final long serialVersionUID = -8245547025738665255L;
 

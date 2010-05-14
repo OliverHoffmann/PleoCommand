@@ -274,7 +274,7 @@ public final class ErrorDialog extends JDialog implements
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
-	static protected class MessageCount {
+	protected static final class MessageCount {
 		private int count;
 		private JLabel mostRecent;
 

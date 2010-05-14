@@ -91,7 +91,7 @@ public final class Configuration {
 		configObjects = new HashSet<ConfigurationInterface>();
 	}
 
-	public synchronized static Configuration getMain() {
+	public static synchronized Configuration getMain() {
 		if (mainConfig == null) {
 			final Configuration cfg = new Configuration();
 			try {
