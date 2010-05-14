@@ -40,11 +40,9 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 
 	private final JButton btnLoad;
 
-	private final JButton btnOk;
+	private final JButton btnClose;
 
-	private final JButton btnApply;
-
-	private final JButton btnCancel;
+	private final JButton btnRevert;
 
 	private final PipeConfigBoard board;
 
@@ -102,24 +100,18 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 								.readPipeConfigFromFile();
 					}
 				});
-		btnOk = lay.addButton(Button.Ok, new Runnable() {
+		btnClose = lay.addButton(Button.Close, new Runnable() {
 			@Override
 			public void run() {
 				applyChanges();
 				close(false);
 			}
 		});
-		getRootPane().setDefaultButton(btnOk);
-		btnApply = lay.addButton(Button.Apply, new Runnable() {
+		getRootPane().setDefaultButton(btnClose);
+		btnRevert = lay.addButton(Button.Revert, new Runnable() {
 			@Override
 			public void run() {
-				applyChanges();
-			}
-		});
-		btnCancel = lay.addButton(Button.Cancel, new Runnable() {
-			@Override
-			public void run() {
-				Log.detail("Canceled Config-Frame");
+				Log.detail("Reverted Config-Frame");
 				close(true);
 			}
 		});
@@ -233,9 +225,8 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 				|| !board.getPipe().getConverterList().isEmpty()
 				|| !board.getPipe().getOutputList().isEmpty());
 		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
-		btnOk.setEnabled(true);
-		btnApply.setEnabled(true);
-		btnCancel.setEnabled(!MainFrame.the().isPipeRunning());
+		btnClose.setEnabled(true);
+		btnRevert.setEnabled(!MainFrame.the().isPipeRunning());
 		board.updateState();
 	}
 

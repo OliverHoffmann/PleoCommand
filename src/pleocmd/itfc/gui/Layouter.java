@@ -20,7 +20,7 @@ import pleocmd.itfc.gui.icons.IconLoader;
 public final class Layouter {
 
 	public enum Button {
-		Ok, Apply, Cancel, Help, Add, Remove, Clear, Modify, Up, Down, Undo, Redo, Browse, SaveTo, LoadFrom
+		Ok, Apply, Cancel, Close, Revert, Help, Add, Remove, Clear, Modify, Up, Down, Undo, Redo, Browse, SaveTo, LoadFrom
 	}
 
 	private static final class ButtonText {
@@ -57,6 +57,10 @@ public final class Layouter {
 				"Accept the modifications"));
 		DEFAULT.put(Button.Cancel, new ButtonText("Cancel", "dialog-cancel",
 				"Close this dialog without accepting any modifications"));
+		DEFAULT.put(Button.Close, new ButtonText("Close", "dialog-ok",
+				"Close this dialog while keeping any modifications"));
+		DEFAULT.put(Button.Revert, new ButtonText("Revert", "dialog-cancel",
+				"Close this dialog and revert any modifications"));
 		DEFAULT.put(Button.Help, new ButtonText("Help", "help-contents",
 				"Display context sensitive help"));
 
