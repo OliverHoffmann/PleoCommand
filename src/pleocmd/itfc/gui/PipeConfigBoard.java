@@ -805,7 +805,7 @@ final class PipeConfigBoard extends JPanel {
 		if (warnIfNeeded != null && !warnIfNeeded.isEmpty())
 			Log.warn(warnIfNeeded);
 
-		if (!modifyable) {
+		if (!ensureModifyable()) {
 			Log.detail("Pipe ordering has changed, reordering will be delayed");
 			// delay until pipe has finished ...
 			delayedReordering = true;
