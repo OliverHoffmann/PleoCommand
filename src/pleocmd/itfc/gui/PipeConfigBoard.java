@@ -570,14 +570,15 @@ final class PipeConfigBoard extends JPanel {
 		final Point p = getOriginal(ps);
 		if (currentConnection == null) {
 			// move pipe-part
-			final ImmutableRectangle orgPos = currentPart.getGuiPosition();
-			final Rectangle newPos = orgPos.createCopy();
-			Rectangle clip = orgPos.createCopy();
+			final Rectangle orgPos = currentPart.getGuiPosition().createCopy();
+			final Rectangle newPos = new Rectangle(orgPos);
+			Rectangle clip = new Rectangle(orgPos);
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
 			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
 			painter.check(newPos, currentPart);
-			if (checkPipeOrdering(null)) currentPart.setGuiPosition(newPos);
+			currentPart.setGuiPosition(newPos);
+			if (!checkPipeOrdering(null)) currentPart.setGuiPosition(orgPos);
 			clip = clip.union(newPos);
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
@@ -796,17 +797,22 @@ final class PipeConfigBoard extends JPanel {
 		final List<Output> orderOutput = getSortedParts(Output.class);
 		if (getPipe().getInputList().equals(orderInput)
 				&& getPipe().getConverterList().equals(orderConverter)
-				&& getPipe().getOutputList().equals(orderOutput)) return true;
+				&& getPipe().getOutputList().equals(orderOutput)) {
+			Log.detail("Pipe ordering has not changed");
+			return true;
+		}
 
 		if (warnIfNeeded != null && !warnIfNeeded.isEmpty())
 			Log.warn(warnIfNeeded);
 
-		if (!ensureModifyable()) {
+		if (!modifyable) {
+			Log.detail("Pipe ordering has changed, reordering will be delayed");
 			// delay until pipe has finished ...
 			delayedReordering = true;
 			// ... and stop drag&drop operation (if any)
 			return false;
 		}
+		Log.detail("Pipe ordering has changed and will be reordered");
 
 		// reorder
 		try {
