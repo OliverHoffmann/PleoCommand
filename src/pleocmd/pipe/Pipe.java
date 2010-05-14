@@ -491,7 +491,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			return;
 		}
 		dataQueue.resetCache();
-		thrInput = new Thread() {
+		thrInput = new Thread("Pipe-Input-Thread") {
 			@Override
 			public void run() {
 				try {
@@ -502,7 +502,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				}
 			}
 		};
-		thrOutput = new Thread() {
+		thrOutput = new Thread("Pipe-Output-Thread") {
 			@Override
 			public void run() {
 				try {
