@@ -163,7 +163,9 @@ public final class MainPipePanel extends JPanel {
 	}
 
 	void configDialogDisposed() {
+		Log.detail("Config Dialog disposed, cleaning up resources");
 		cfgDialog = null;
+		pipeFlowVisualization.cancel();
 		pipeFlowVisualization = null;
 	}
 
@@ -177,6 +179,7 @@ public final class MainPipePanel extends JPanel {
 				updatePipeLabel();
 			}
 		};
+		Log.detail("Scheduling a thumbnail update in 1000 ms");
 		updateTimer.schedule(updateTimerTask, 1000);
 	}
 

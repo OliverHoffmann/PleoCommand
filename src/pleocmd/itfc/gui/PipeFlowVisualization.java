@@ -16,6 +16,8 @@ public final class PipeFlowVisualization extends Thread {
 
 	private boolean modified;
 
+	private boolean cancelled;
+
 	PipeFlowVisualization(final PipeConfigBoard board) {
 		super("PipeFlow-Visualization-Thread");
 		this.board = board;
@@ -41,6 +43,7 @@ public final class PipeFlowVisualization extends Thread {
 				break;
 			}
 			synchronized (queue) {
+				if (cancelled) break;
 				if (modified) {
 					modified = false;
 					for (final PipeFlow pf : queue)
@@ -77,6 +80,12 @@ public final class PipeFlowVisualization extends Thread {
 	public void modified() {
 		synchronized (queue) {
 			modified = true;
+		}
+	}
+
+	public void cancel() {
+		synchronized (queue) {
+			cancelled = true;
 		}
 	}
 

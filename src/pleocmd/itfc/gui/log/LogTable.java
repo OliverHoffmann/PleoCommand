@@ -74,6 +74,7 @@ public final class LogTable extends JTable {
 				});
 			}
 		};
+		Log.detail("Scheduling a LogTable update in 200 ms");
 		timer.schedule(updateTask, 200);
 	}
 
