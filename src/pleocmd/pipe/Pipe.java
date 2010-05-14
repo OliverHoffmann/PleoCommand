@@ -1029,8 +1029,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		try {
 			reset();
 		} catch (final PipeException e) {
-			throw new ConfigurationException(e,
-					"Cannot write back configuration");
+			throw new ConfigurationException(e, "Cannot change configuration");
 		}
 	}
 
@@ -1086,12 +1085,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	@Override
 	public List<Group> configurationWriteback() throws ConfigurationException {
-		try {
-			ensureNoLongerInitialized();
-		} catch (final StateException e) {
-			throw new ConfigurationException(e,
-					"Cannot write back configuration");
-		}
 		final List<Group> res = new ArrayList<Group>();
 		res.add(getSkeleton(getClass().getSimpleName()));
 		for (final PipePart pp : inputList) {

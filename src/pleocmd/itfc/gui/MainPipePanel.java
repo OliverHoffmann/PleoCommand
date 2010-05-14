@@ -154,7 +154,7 @@ public final class MainPipePanel extends JPanel {
 	}
 
 	protected void updateState() {
-		btnModify.setEnabled(!MainFrame.the().isPipeRunning());
+		btnModify.setEnabled(true);
 		btnSave.setEnabled(MainFrame.the().getPipe().getInputList().isEmpty()
 				|| !MainFrame.the().getPipe().getConverterList().isEmpty()
 				|| !MainFrame.the().getPipe().getOutputList().isEmpty());

@@ -44,6 +44,8 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 
 	private final JButton btnApply;
 
+	private final JButton btnCancel;
+
 	private final PipeConfigBoard board;
 
 	private char[] originalPipe;
@@ -114,7 +116,7 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 				applyChanges();
 			}
 		});
-		lay.addButton(Button.Cancel, new Runnable() {
+		btnCancel = lay.addButton(Button.Cancel, new Runnable() {
 			@Override
 			public void run() {
 				Log.detail("Canceled Config-Frame");
@@ -135,6 +137,7 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 		MainFrame.the().addKnownWindow(this);
 		// setModal(true);
 		HelpDialog.closeHelpIfOpen();
+		updateState();
 		setVisible(true);
 	}
 
@@ -230,8 +233,9 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 				|| !board.getPipe().getConverterList().isEmpty()
 				|| !board.getPipe().getOutputList().isEmpty());
 		btnLoad.setEnabled(!MainFrame.the().isPipeRunning());
-		btnOk.setEnabled(!MainFrame.the().isPipeRunning());
-		btnApply.setEnabled(!MainFrame.the().isPipeRunning());
+		btnOk.setEnabled(true);
+		btnApply.setEnabled(true);
+		btnCancel.setEnabled(!MainFrame.the().isPipeRunning());
 		board.updateState();
 	}
 
