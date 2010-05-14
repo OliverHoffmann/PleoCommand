@@ -6,11 +6,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 
-public final class BinaryValue extends Value {
+final class BinaryValue extends Value {
 
-	public static final char TYPE_CHAR = 'B';
+	static final char TYPE_CHAR = 'B';
 
-	public static final ValueType RECOMMENDED_TYPE = ValueType.Data;
+	static final ValueType RECOMMENDED_TYPE = ValueType.Data;
 
 	private byte[] val;
 

@@ -9,7 +9,7 @@ import pleocmd.itfc.gui.dgr.Diagram;
 import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.itfc.gui.dgr.DiagramAxis.AxisScale;
 
-public final class PipePartVisualizationConfig {
+final class PipePartVisualizationConfig {
 
 	private final PipePart part;
 

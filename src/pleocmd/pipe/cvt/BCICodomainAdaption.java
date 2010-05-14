@@ -10,13 +10,13 @@ import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class BCICodomainAdaption extends Converter {
+public final class BCICodomainAdaption extends Converter { // NO_UCD
 
-	enum OutOfRangeBehavior {
+	private enum OutOfRangeBehavior {
 		CutOff, FitToRange
 	}
 
-	enum Transformation {
+	private enum Transformation {
 		Linear
 	}
 

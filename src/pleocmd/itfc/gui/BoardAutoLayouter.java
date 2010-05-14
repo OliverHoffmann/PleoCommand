@@ -20,9 +20,9 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public final class BoardAutoLayouter {
+final class BoardAutoLayouter {
 
-	public static final int MAX_SPREADING = 1000000;
+	private static final int MAX_SPREADING = 1000000;
 
 	private static final int STEPS_WO_CHANGE_1 = 10000;
 
@@ -172,7 +172,7 @@ public final class BoardAutoLayouter {
 		return res;
 	}
 
-	protected static final class Layout {
+	private static final class Layout {
 
 		private static final int MIN_STEP = 5;
 
@@ -194,13 +194,14 @@ public final class BoardAutoLayouter {
 
 		private int spreading = -1;
 
-		Layout(final Layout org, final Map<PipePart, ImmutableRectangle> parts) {
+		protected Layout(final Layout org,
+				final Map<PipePart, ImmutableRectangle> parts) {
 			this.parts = parts;
 			candidateValues = new HashMap<PipePart, Double>();
 			depth = org == null ? 0 : org.depth + 1;
 		}
 
-		public void accept() {
+		protected void accept() {
 			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet())
 				e.getKey().setGuiPosition(e.getValue().createCopy());
 		}
@@ -231,7 +232,7 @@ public final class BoardAutoLayouter {
 			check(r, pp);
 
 			// quick-check if later found.contains() would return true anyway
-			if (r.equals(rect)) return;
+			if (rect.equalsRect(r)) return;
 
 			// clone list but modify pp's value
 			final Map<PipePart, ImmutableRectangle> copy;
@@ -242,7 +243,7 @@ public final class BoardAutoLayouter {
 			bal.insertInFringe(new Layout(this, copy), c * Math.random());
 		}
 
-		public void expand(final BoardAutoLayouter bal) {
+		protected void expand(final BoardAutoLayouter bal) {
 			for (final Entry<PipePart, ImmutableRectangle> e : parts.entrySet()) {
 				// Parts which are involved in many intersections will
 				// get a slightly higher priority
@@ -256,7 +257,7 @@ public final class BoardAutoLayouter {
 			}
 		}
 
-		public int getDepth() {
+		protected int getDepth() {
 			return depth;
 		}
 
@@ -290,7 +291,7 @@ public final class BoardAutoLayouter {
 			}
 		}
 
-		public int getIntersections() {
+		protected int getIntersections() {
 			if (intersections != -1) return intersections;
 			// intersection of connections with PipeParts and other ones is bad
 			int its = 0;

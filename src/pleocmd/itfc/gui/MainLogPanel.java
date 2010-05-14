@@ -20,7 +20,7 @@ import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.itfc.gui.log.LogTable;
 import pleocmd.itfc.gui.log.LogTableModel;
 
-public final class MainLogPanel extends JPanel {
+final class MainLogPanel extends JPanel {
 
 	private static final long serialVersionUID = -6921879308383765734L;
 

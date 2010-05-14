@@ -309,7 +309,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 		}
 	}
 
-	static class PleoCommunicationConfig implements ConfigurationInterface {
+	private static class PleoCommunicationConfig implements
+			ConfigurationInterface {
 
 		PleoCommunicationConfig() {
 			try {

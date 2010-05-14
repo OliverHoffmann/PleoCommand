@@ -13,7 +13,7 @@ import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 
-public final class HistoryListModel extends AbstractListModel implements
+final class HistoryListModel extends AbstractListModel implements
 		ConfigurationInterface {
 
 	private static final long serialVersionUID = 4510015901086617192L;

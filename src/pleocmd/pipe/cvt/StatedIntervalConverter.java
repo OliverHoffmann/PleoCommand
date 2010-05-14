@@ -11,7 +11,7 @@ import pleocmd.itfc.gui.dgr.DiagramDataSet.DiagramType;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class StatedIntervalConverter extends Converter {
+public final class StatedIntervalConverter extends Converter { // NO_UCD
 
 	private final ConfigString cfgCommand1;
 	private final ConfigString cfgCommand2;

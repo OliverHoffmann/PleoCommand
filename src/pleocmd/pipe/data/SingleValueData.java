@@ -8,7 +8,7 @@ import pleocmd.pipe.val.StringValue;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
-public class SingleValueData extends Data {
+class SingleValueData extends Data {
 
 	private static List<Value> l;
 

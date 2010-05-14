@@ -69,7 +69,7 @@ public final class LogTableModel extends AbstractTableModel {
 		return null;
 	}
 
-	public void addLog(final Log log) {
+	protected void addLog(final Log log) {
 		list.add(log);
 		fireTableRowsInserted(list.size() - 1, list.size() - 1);
 	}
@@ -95,14 +95,17 @@ public final class LogTableModel extends AbstractTableModel {
 
 	public void writeToFile(final File file) throws IOException {
 		final FileWriter out = new FileWriter(file);
-		for (final Log log : list) {
-			out.write(log.toString());
-			out.write("\n");
+		try {
+			for (final Log log : list) {
+				out.write(log.toString());
+				out.write("\n");
+			}
+		} finally {
+			out.close();
 		}
-		out.close();
 	}
 
-	public Log getLogAt(final int index) {
+	protected Log getLogAt(final int index) {
 		return list.get(index);
 	}
 

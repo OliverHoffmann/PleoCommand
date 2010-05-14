@@ -34,7 +34,7 @@ public class PipePreviewLabel extends JLabel {
 		});
 	}
 
-	public final void update(final File pipeConfig) {
+	protected final void update(final File pipeConfig) {
 		if (pipeConfig == null || !pipeConfig.canRead()) {
 			update((Pipe) null);
 			return;
@@ -50,7 +50,7 @@ public class PipePreviewLabel extends JLabel {
 		}
 	}
 
-	public final void update(final Pipe pipe) {
+	protected final void update(final Pipe pipe) {
 		lastPipe = pipe;
 		final int width = getWidth();
 		final int height = getHeight();

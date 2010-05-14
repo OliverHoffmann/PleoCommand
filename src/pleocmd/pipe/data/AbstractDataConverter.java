@@ -88,7 +88,7 @@ public abstract class AbstractDataConverter {
 	 * @return new {@link Data}
 	 * @see Data#Data(List, Data, byte, long)
 	 */
-	public final Data createDataFromFields() {
+	protected final Data createDataFromFields() {
 		return new Data(values, null, priority, time);
 	}
 

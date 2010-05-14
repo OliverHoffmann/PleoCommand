@@ -59,7 +59,7 @@ public final class ExpressionParser {
 	}
 
 	@Override
-	public void finalize() throws Throwable {
+	protected void finalize() throws Throwable {
 		freeHandle(instrHandle);
 		instrHandle = 0;
 		super.finalize();

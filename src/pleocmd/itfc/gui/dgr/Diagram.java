@@ -27,9 +27,9 @@ import javax.swing.ToolTipManager;
 
 public final class Diagram extends JPanel {
 
-	static final double SCALE_SPEED_MOUSE = 0.01;
+	private static final double SCALE_SPEED_MOUSE = 0.01;
 
-	static final double MOVE_SPEED_MOUSE = 0.05;
+	private static final double MOVE_SPEED_MOUSE = 0.05;
 
 	static final double MIN_GRID_DELTA = 2.0;
 
@@ -128,7 +128,7 @@ public final class Diagram extends JPanel {
 		return Collections.unmodifiableList(dataSets);
 	}
 
-	public Color getBackgroundColor() {
+	public synchronized Color getBackgroundColor() {
 		return backgroundColor;
 	}
 
@@ -136,7 +136,7 @@ public final class Diagram extends JPanel {
 		this.backgroundColor = backgroundColor;
 	}
 
-	public Pen getAxisPen() {
+	public synchronized Pen getAxisPen() {
 		return axisPen;
 	}
 
@@ -144,7 +144,7 @@ public final class Diagram extends JPanel {
 		this.axisPen = axisPen;
 	}
 
-	public Pen getUnitPen() {
+	public synchronized Pen getUnitPen() {
 		return unitPen;
 	}
 
@@ -152,7 +152,7 @@ public final class Diagram extends JPanel {
 		this.unitPen = unitPen;
 	}
 
-	public Pen getSubUnitPen() {
+	public synchronized Pen getSubUnitPen() {
 		return subUnitPen;
 	}
 
@@ -168,7 +168,7 @@ public final class Diagram extends JPanel {
 		return yAxis;
 	}
 
-	public double getZoom() {
+	public synchronized double getZoom() {
 		return zoom;
 	}
 

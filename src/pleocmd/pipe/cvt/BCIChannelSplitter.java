@@ -9,7 +9,7 @@ import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.MultiFloatData;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class BCIChannelSplitter extends Converter {
+public final class BCIChannelSplitter extends Converter { // NO_UCD
 
 	private static final int MAX_VIS = 8;
 

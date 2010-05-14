@@ -115,7 +115,7 @@ public final class LogTable extends JTable {
 				"&lt;").replace("\n", "<br>"));
 	}
 
-	public void updateRowHeights() {
+	protected void updateRowHeights() {
 		if (getRowCount() == 0) return;
 		final TableCellRenderer tcr = getCellRenderer(0, 3);
 		minRowHeight = prepareRenderer(getCellRenderer(0, 0), 0, 0)

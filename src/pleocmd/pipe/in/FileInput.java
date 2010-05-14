@@ -21,7 +21,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.DataFileEditFrame;
 import pleocmd.pipe.data.Data;
 
-public final class FileInput extends Input {
+public final class FileInput extends Input { // NO_UCD
 
 	private final ConfigPath cfgFile;
 

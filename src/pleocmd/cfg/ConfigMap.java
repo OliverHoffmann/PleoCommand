@@ -9,16 +9,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.swing.JLabel;
-
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 
 public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	private final Map<K, List<V>> content;
-
-	private JLabel shortDescription;
 
 	public ConfigMap(final String label) {
 		super(label);
@@ -39,8 +35,8 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	public final List<V> getContent(final K key) {
 		final List<V> list = content.get(key);
-		return Collections.unmodifiableList(list != null ? list
-				: new ArrayList<V>(0));
+		return Collections.unmodifiableList(list == null ? new ArrayList<V>(0)
+				: list);
 	}
 
 	public final boolean hasContent(final K key) {
@@ -181,10 +177,6 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	@Override
 	final boolean isSingleLined() {
 		return false;
-	}
-
-	public final JLabel getShortDescription() {
-		return shortDescription;
 	}
 
 }

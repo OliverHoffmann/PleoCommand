@@ -6,7 +6,7 @@ import java.awt.geom.Point2D.Double;
 
 import pleocmd.pipe.PipePart;
 
-public final class PipeFlow {
+final class PipeFlow {
 
 	private static final int STEPS = 10;
 

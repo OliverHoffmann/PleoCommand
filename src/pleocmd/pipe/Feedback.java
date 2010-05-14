@@ -6,7 +6,7 @@ import java.util.List;
 
 import pleocmd.pipe.data.Data;
 
-public abstract class Feedback {
+abstract class Feedback {
 
 	private long startTime;
 

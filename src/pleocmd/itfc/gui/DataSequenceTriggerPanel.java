@@ -194,7 +194,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 		}
 	}
 
-	public void updateState() {
+	protected void updateState() {
 		btnAddTrigger.setEnabled(true);
 		btnRenameTrigger.setEnabled(trigger != null);
 		btnRemoveTrigger.setEnabled(trigger != null);

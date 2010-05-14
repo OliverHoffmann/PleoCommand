@@ -1,6 +1,6 @@
 package pleocmd.pipe.in;
 
-public enum ReadType {
+enum ReadType {
 
 	Ascii, Binary
 

@@ -20,7 +20,7 @@ public abstract class StateHandling {
 	/**
 	 * All valid states an object can be in.
 	 */
-	public enum State {
+	protected enum State {
 		/**
 		 * This object is currently being constructor (i.e. the constructor has
 		 * not yet be finished)
@@ -114,6 +114,15 @@ public abstract class StateHandling {
 		}
 	}
 
+	/**
+	 * Can contain special code which should be invoked in sub-classes during
+	 * configuration.
+	 * 
+	 * @throws PipeException
+	 *             if configuration fails
+	 * @throws IOException
+	 *             if configuration fails
+	 */
 	protected void configure0() throws PipeException, IOException {
 		// do nothing by default
 	}
@@ -129,6 +138,15 @@ public abstract class StateHandling {
 		}
 	}
 
+	/**
+	 * Can contain special code which should be invoked in sub-classes during
+	 * initialization.
+	 * 
+	 * @throws PipeException
+	 *             if initialization fails
+	 * @throws IOException
+	 *             if initialization fails
+	 */
 	protected void init0() throws PipeException, IOException {
 		// do nothing by default
 	}
@@ -144,6 +162,15 @@ public abstract class StateHandling {
 		}
 	}
 
+	/**
+	 * Can contain special code which should be invoked in sub-classes during
+	 * closing.
+	 * 
+	 * @throws PipeException
+	 *             if closing fails
+	 * @throws IOException
+	 *             if closing fails
+	 */
 	protected void close0() throws PipeException, IOException {
 		// do nothing by default
 	}

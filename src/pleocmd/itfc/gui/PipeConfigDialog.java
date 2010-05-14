@@ -27,8 +27,8 @@ import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.Pipe;
 
-public final class PipeConfigDialog extends JDialog implements
-		ConfigurationInterface, AutoDisposableWindow {
+final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
+		AutoDisposableWindow {
 
 	private static final long serialVersionUID = 145574241927303337L;
 

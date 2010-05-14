@@ -51,7 +51,7 @@ public final class DiagramAxis {
 
 	private double cachedPixelPerSubGrid;
 
-	public DiagramAxis(final Diagram diagram, final String axisName) {
+	protected DiagramAxis(final Diagram diagram, final String axisName) {
 		this.diagram = diagram;
 		this.axisName = axisName;
 	}
@@ -229,7 +229,7 @@ public final class DiagramAxis {
 		return cachedPixelPerSubGrid;
 	}
 
-	public void createMenu(final JPopupMenu parent) {
+	protected void createMenu(final JPopupMenu parent) {
 		final JMenu menu = new JMenu(getAxisName() + "-Axis");
 		parent.add(menu);
 		JMenuItem item = new JMenuItem("Set Minimum");

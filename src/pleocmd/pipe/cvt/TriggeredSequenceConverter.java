@@ -8,7 +8,7 @@ import pleocmd.exc.ConverterException;
 import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
-public final class TriggeredSequenceConverter extends Converter {
+public final class TriggeredSequenceConverter extends Converter { // NO_UCD
 
 	private final ConfigString cfgTriggerPrefix;
 

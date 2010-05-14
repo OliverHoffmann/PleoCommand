@@ -54,7 +54,7 @@ public final class ConsoleInput extends Input {
 		}
 	}
 
-	public static String help(final HelpKind kind) {
+	public static String help(final HelpKind kind) { // NO_UCD
 		switch (kind) {
 		case Name:
 			return "Console Input";

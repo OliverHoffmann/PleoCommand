@@ -24,7 +24,7 @@ import test.pleocmd.Testcases;
 
 public final class ConfigurationTest extends Testcases {
 
-	class DummyObject implements ConfigurationInterface {
+	static class DummyObject implements ConfigurationInterface {
 
 		private final Group group;
 
@@ -76,10 +76,13 @@ public final class ConfigurationTest extends Testcases {
 		// print file
 		Log.consoleOut("Resulting configuration file:");
 		final BufferedReader in = new BufferedReader(new FileReader(file));
-		String line;
-		while ((line = in.readLine()) != null)
-			Log.consoleOut("$" + line);
-		in.close();
+		try {
+			String line;
+			while ((line = in.readLine()) != null)
+				Log.consoleOut("$" + line);
+		} finally {
+			in.close();
+		}
 		Log.consoleOut("End of configuration file");
 
 		// read from file
@@ -126,11 +129,14 @@ public final class ConfigurationTest extends Testcases {
 		final File file = File.createTempFile("PleoCommand-ConfigTest", null);
 		file.deleteOnExit();
 		final FileWriter out = new FileWriter(file);
-		for (final String s : content) {
-			out.write(s);
-			out.write('\n');
+		try {
+			for (final String s : content) {
+				out.write(s);
+				out.write('\n');
+			}
+		} finally {
+			out.close();
 		}
-		out.close();
 
 		// read from file
 		config.readFromFile(file);

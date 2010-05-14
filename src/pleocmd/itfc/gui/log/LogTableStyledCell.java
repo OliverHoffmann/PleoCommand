@@ -2,7 +2,7 @@ package pleocmd.itfc.gui.log;
 
 import java.awt.Color;
 
-public final class LogTableStyledCell {
+final class LogTableStyledCell {
 
 	private final String text;
 

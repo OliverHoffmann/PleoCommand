@@ -62,7 +62,7 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public final class PipeConfigBoard extends JPanel {
+final class PipeConfigBoard extends JPanel {
 
 	private static final long serialVersionUID = -4525676341777864359L;
 
@@ -568,7 +568,25 @@ public final class PipeConfigBoard extends JPanel {
 	protected void mouseDragged(final Point ps) {
 		if (!hasCurrentPart() || handlePoint == null) return;
 		final Point p = getOriginal(ps);
-		if (currentConnection != null) {
+		if (currentConnection == null) {
+			// move pipe-part
+			final ImmutableRectangle orgPos = currentPart.getGuiPosition();
+			final Rectangle newPos = orgPos.createCopy();
+			Rectangle clip = orgPos.createCopy();
+			unionConnectionTargets(clip);
+			unionConnectionSources(clip);
+			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
+			painter.check(newPos, currentPart);
+			if (checkPipeOrdering(null)) currentPart.setGuiPosition(newPos);
+			clip = clip.union(newPos);
+			unionConnectionTargets(clip);
+			unionConnectionSources(clip);
+			// need to take care of labels
+			clip.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
+			scaleRect(clip);
+			repaint(clip);
+			updatePrefBounds();
+		} else {
 			// move connector instead of pipe-part
 			if (!ensureModifyable()) return;
 			if (currentConnectionsTarget != null) {
@@ -604,24 +622,6 @@ public final class PipeConfigBoard extends JPanel {
 			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
 			scaleRect(r);
 			repaint(r);
-		} else {
-			// move pipe-part
-			final ImmutableRectangle orgPos = currentPart.getGuiPosition();
-			final Rectangle newPos = orgPos.createCopy();
-			Rectangle clip = orgPos.createCopy();
-			unionConnectionTargets(clip);
-			unionConnectionSources(clip);
-			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
-			painter.check(newPos, currentPart);
-			if (checkPipeOrdering(null)) currentPart.setGuiPosition(newPos);
-			clip = clip.union(newPos);
-			unionConnectionTargets(clip);
-			unionConnectionSources(clip);
-			// need to take care of labels
-			clip.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
-			scaleRect(clip);
-			repaint(clip);
-			updatePrefBounds();
 		}
 	}
 

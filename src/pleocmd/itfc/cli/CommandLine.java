@@ -64,7 +64,7 @@ public final class CommandLine {
 					"Cannot recognize argument '%s'", arg));
 	}
 
-	public void executePipe(final File pcaFile) {
+	private void executePipe(final File pcaFile) {
 		try {
 			Configuration.getMain().readFromFile(pcaFile);
 			pipe.configure();

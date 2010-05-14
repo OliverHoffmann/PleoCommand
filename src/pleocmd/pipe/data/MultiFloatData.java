@@ -18,7 +18,7 @@ public final class MultiFloatData extends MultiValueData {
 	}
 
 	public MultiFloatData(final Data parent) {
-		super(IDENT, parent.toArray(new Value[0]), parent);
+		super(IDENT, parent.toArray(new Value[parent.size()]), parent);
 	}
 
 	private static Value[] asValue(final double[] values) {

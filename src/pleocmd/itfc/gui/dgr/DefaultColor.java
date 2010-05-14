@@ -2,7 +2,7 @@ package pleocmd.itfc.gui.dgr;
 
 import java.awt.Color;
 
-public final class DefaultColor extends Color {
+final class DefaultColor extends Color {
 
 	private static final long serialVersionUID = -3241104615913127514L;
 
@@ -23,6 +23,16 @@ public final class DefaultColor extends Color {
 		return new Color((int) (getRed() / MAKE_DARKER),
 				(int) (getGreen() / MAKE_DARKER),
 				(int) (getBlue() / MAKE_DARKER));
+	}
+
+	@Override
+	public boolean equals(final Object obj) {
+		return super.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return super.hashCode();
 	}
 
 }

@@ -9,7 +9,7 @@ import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 
-public final class InternalCommandOutput extends Output {
+public final class InternalCommandOutput extends Output { // NO_UCD
 
 	public InternalCommandOutput() {
 		constructed();
@@ -77,7 +77,7 @@ public final class InternalCommandOutput extends Output {
 		Log.consoleOut("");
 	}
 
-	public static String help(final HelpKind kind) {
+	public static String help(final HelpKind kind) { // NO_UCD
 		switch (kind) {
 		case Name:
 			return "Internal Commands Output";

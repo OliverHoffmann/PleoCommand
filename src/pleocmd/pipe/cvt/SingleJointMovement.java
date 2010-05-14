@@ -9,15 +9,7 @@ import pleocmd.pipe.data.CommandData;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class SingleJointMovement extends Converter {
-
-	enum OutOfRangeBehavior {
-		CutOff, FitToRange
-	}
-
-	enum Transformation {
-		Linear
-	}
+public final class SingleJointMovement extends Converter { // NO_UCD
 
 	private static final int ANGLE_UNDEFINED = 1000000;
 

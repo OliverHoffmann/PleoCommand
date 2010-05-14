@@ -9,7 +9,7 @@ import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleBoolData;
 
-public final class SingleCommandConverter extends Converter {
+public final class SingleCommandConverter extends Converter { // NO_UCD
 
 	private final ConfigString cfgCommand;
 

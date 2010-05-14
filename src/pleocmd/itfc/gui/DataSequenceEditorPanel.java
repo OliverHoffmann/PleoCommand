@@ -156,7 +156,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		});
 	}
 
-	public void addFromInputHistory() {
+	protected void addFromInputHistory() {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
@@ -169,7 +169,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void addFromFile() {
+	protected void addFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileFilter() {
@@ -188,20 +188,23 @@ public final class DataSequenceEditorPanel extends JPanel {
 			addSequenceFromFile(fc.getSelectedFile());
 	}
 
-	public void addSequenceFromFile(final File fileToAdd) {
+	protected void addSequenceFromFile(final File fileToAdd) {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			int offset = doc.getParagraphElement(
 					tpDataSequence.getCaretPosition()).getEndOffset();
 			final BufferedReader in = new BufferedReader(new FileReader(
 					fileToAdd));
-			String line;
-			while ((line = in.readLine()) != null) {
-				line = line.trim() + "\n";
-				doc.insertString(offset, line, null);
-				offset += line.length();
+			try {
+				String line;
+				while ((line = in.readLine()) != null) {
+					line = line.trim() + "\n";
+					doc.insertString(offset, line, null);
+					offset += line.length();
+				}
+			} finally {
+				in.close();
 			}
-			in.close();
 		} catch (final IOException e) {
 			Log.error(e);
 		} catch (final BadLocationException e) {
@@ -209,7 +212,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void clear() {
+	protected void clear() {
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
 		try {
 			doc.remove(0, doc.getLength());
@@ -218,7 +221,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void playSelected() {
+	protected void playSelected() {
 		final String sel = tpDataSequence.getSelectedText();
 		if (sel != null) for (final String line : sel.split("\n"))
 			try {
@@ -230,7 +233,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 			}
 	}
 
-	public void playAll() {
+	protected void playAll() {
 		final String text = tpDataSequence.getText();
 		if (text != null) for (final String line : text.split("\n"))
 			try {
@@ -242,7 +245,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 			}
 	}
 
-	public void play(final Data data) {
+	protected void play(final Data data) {
 		if (playOutputList == null)
 			try {
 				String device = null;
@@ -278,7 +281,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void freeResources() {
+	protected void freeResources() {
 		try {
 			if (playOutputList != null) for (final Output out : playOutputList)
 				out.close();
@@ -294,7 +297,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void undo() {
+	protected void undo() {
 		try {
 			tpUndoManager.undo();
 		} catch (final CannotUndoException e) {
@@ -302,7 +305,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public void redo() {
+	protected void redo() {
 		try {
 			tpUndoManager.redo();
 		} catch (final CannotRedoException e) {
@@ -310,7 +313,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	public List<Data> writeTextPaneToList() throws IOException, FormatException {
+	protected List<Data> writeTextPaneToList() throws IOException,
+			FormatException {
 		final List<Data> res = new ArrayList<Data>();
 		final BufferedReader in = new BufferedReader(new StringReader(
 				tpDataSequence.getText()));
@@ -336,7 +340,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		out.flush();
 	}
 
-	public void updateTextPaneFromList(final List<Data> dataList) {
+	protected void updateTextPaneFromList(final List<Data> dataList) {
 		clear();
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
 		if (dataList != null)
@@ -379,7 +383,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
 	}
 
-	public void updateState() {
+	protected void updateState() {
 		tpDataSequence.setEnabled(true);
 		btnCopyInput.setEnabled(MainFrame.the().getMainInputPanel()
 				.getHistoryListModel().getSize() > 0);

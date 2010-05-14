@@ -17,7 +17,7 @@ import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Syntax;
 import pleocmd.pipe.val.Syntax.Type;
 
-public final class DataSequenceView extends PlainView {
+final class DataSequenceView extends PlainView {
 
 	private final DataSequenceEditorPanel panel;
 

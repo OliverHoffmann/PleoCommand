@@ -99,7 +99,7 @@ public final class Log {
 		switch (type) {
 		case Error:
 			if (MainFrame.hasGUI()) {
-				MainFrame.the().getMainLogPanel().addLog(this);
+				MainFrame.the().addLog(this);
 				ErrorDialog.show(this);
 			} else if (quiStatusKnown)
 				System.err.println(toString()); // CS_IGNORE
@@ -109,7 +109,7 @@ public final class Log {
 		case Console:
 			System.out.println(msg); // CS_IGNORE
 			if (MainFrame.hasGUI())
-				MainFrame.the().getMainLogPanel().addLog(this);
+				MainFrame.the().addLog(this);
 			else if (!quiStatusKnown) queuedLogs.add(this);
 			break;
 		default:
@@ -118,7 +118,7 @@ public final class Log {
 				// we currently don't now, if we really have to output this log
 				queuedLogs.add(this);
 			else if (MainFrame.hasGUI())
-				MainFrame.the().getMainLogPanel().addLog(this);
+				MainFrame.the().addLog(this);
 			else if (quiStatusKnown)
 				System.err.println(toString()); // CS_IGNORE
 			else
@@ -456,7 +456,7 @@ public final class Log {
 		if (MainFrame.hasGUI()) {
 			for (final Log log : queuedLogs)
 				if (Log.canLog(log.getType())) {
-					MainFrame.the().getMainLogPanel().addLog(log);
+					MainFrame.the().addLog(log);
 					if (log.getType() == Type.Error) ErrorDialog.show(log);
 				}
 		} else
@@ -511,7 +511,7 @@ public final class Log {
 		return Type.Error.ordinal() >= cfgMinLogType.getEnum().ordinal();
 	}
 
-	static class LogConfig implements ConfigurationInterface {
+	private static class LogConfig implements ConfigurationInterface {
 
 		LogConfig() {
 			try {
@@ -542,8 +542,7 @@ public final class Log {
 		@SuppressWarnings("synthetic-access")
 		public void configurationChanged(final Group group) {
 			DATE_FORMATTER.applyPattern(CFG_TIMEFORMAT.getContent());
-			if (MainFrame.hasGUI())
-				MainFrame.the().getMainLogPanel().updateState();
+			if (MainFrame.hasGUI()) MainFrame.the().updateState();
 			setMinLogType(getMinLogType());
 		}
 

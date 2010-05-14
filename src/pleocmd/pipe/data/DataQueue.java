@@ -27,7 +27,7 @@ public final class DataQueue {
 	 * waiting to indicate that the queue is currently accepting everything
 	 * without any side effects.
 	 */
-	public static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
+	private static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
 
 	/**
 	 * Initial ringbuffer size after {@link #resetCache()}.

@@ -9,9 +9,9 @@ import pleocmd.exc.InternalException;
 
 public final class StringValue extends Value {
 
-	public static final char TYPE_CHAR = 'S';
+	static final char TYPE_CHAR = 'S';
 
-	public static final ValueType RECOMMENDED_TYPE = ValueType.NullTermString;
+	static final ValueType RECOMMENDED_TYPE = ValueType.NullTermString;
 
 	private static final int[] ASCII_TABLE = { // 
 	/**//**/0, 0, 0, 0, 0, 0, 0, 0, // 00 - 07

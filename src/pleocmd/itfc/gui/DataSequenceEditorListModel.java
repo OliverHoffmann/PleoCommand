@@ -6,7 +6,7 @@ import java.util.List;
 
 import javax.swing.AbstractListModel;
 
-public final class DataSequenceEditorListModel extends AbstractListModel {
+final class DataSequenceEditorListModel extends AbstractListModel {
 
 	private static final long serialVersionUID = 5162824240598187154L;
 

@@ -10,7 +10,7 @@ import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.MultiFloatData;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class DataBlockSplitter extends Converter {
+public final class DataBlockSplitter extends Converter { // NO_UCD
 
 	private static final int MAX_VIS = 8;
 

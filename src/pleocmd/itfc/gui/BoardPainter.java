@@ -34,7 +34,7 @@ import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
 
-public final class BoardPainter {
+final class BoardPainter {
 
 	private static final boolean PAINT_DEBUG = false;
 
@@ -833,7 +833,7 @@ public final class BoardPainter {
 	 *            [ 1 2 3 ..... -2 -1 0 ]
 	 * @return the bounding rectangle
 	 */
-	public static Rectangle getIconBounds(final ImmutableRectangle rect,
+	private static Rectangle getIconBounds(final ImmutableRectangle rect,
 			final Icon icon, final int pos) {
 		final boolean alignRight = pos <= 0;
 		final Rectangle b = new Rectangle();

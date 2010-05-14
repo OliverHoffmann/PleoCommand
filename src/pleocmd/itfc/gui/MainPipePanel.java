@@ -75,7 +75,7 @@ public final class MainPipePanel extends JPanel {
 				});
 	}
 
-	public void updatePipeLabel() {
+	protected void updatePipeLabel() {
 		String fn = MainFrame.the().getPipe().getLastSaveFile().getName();
 		if (fn.contains("."))
 			fn = ": \"" + fn.substring(0, fn.lastIndexOf('.')) + "\"";
@@ -92,7 +92,7 @@ public final class MainPipePanel extends JPanel {
 		if (cfgDialog != null) cfgDialog.updatePipeLabel();
 	}
 
-	public void changeConfig() {
+	protected void changeConfig() {
 		Log.detail("GUI-Frame starts configuration");
 		if (cfgDialog == null) {
 			cfgDialog = new PipeConfigDialog(MainFrame.the().getPipe());
@@ -102,7 +102,7 @@ public final class MainPipePanel extends JPanel {
 			cfgDialog.toFront();
 	}
 
-	public void writePipeConfigToFile() {
+	protected void writePipeConfigToFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
@@ -117,7 +117,7 @@ public final class MainPipePanel extends JPanel {
 		}
 	}
 
-	public void writePipeConfigToFile(final File file) {
+	protected void writePipeConfigToFile(final File file) {
 		try {
 			Configuration.getMain()
 					.writeToFile(file, MainFrame.the().getPipe());
@@ -128,7 +128,7 @@ public final class MainPipePanel extends JPanel {
 		}
 	}
 
-	public void readPipeConfigFromFile() {
+	protected void readPipeConfigFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
@@ -139,7 +139,7 @@ public final class MainPipePanel extends JPanel {
 			readPipeConfigFromFile(fc.getSelectedFile());
 	}
 
-	public void readPipeConfigFromFile(final File file) {
+	protected void readPipeConfigFromFile(final File file) {
 		try {
 			Configuration.getMain().readFromFile(file,
 					MainFrame.the().getPipe());
@@ -153,7 +153,7 @@ public final class MainPipePanel extends JPanel {
 		}
 	}
 
-	public void updateState() {
+	protected void updateState() {
 		btnModify.setEnabled(!MainFrame.the().isPipeRunning());
 		btnSave.setEnabled(MainFrame.the().getPipe().getInputList().isEmpty()
 				|| !MainFrame.the().getPipe().getConverterList().isEmpty()

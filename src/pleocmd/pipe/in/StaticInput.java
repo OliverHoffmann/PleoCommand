@@ -16,7 +16,7 @@ import pleocmd.itfc.gui.DataSequenceEditorPanel;
 import pleocmd.itfc.gui.Layouter;
 import pleocmd.pipe.data.Data;
 
-public final class StaticInput extends Input {
+public final class StaticInput extends Input { // NO_UCD
 
 	private final ConfigString cfgInput;
 

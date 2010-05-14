@@ -10,7 +10,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.text.JTextComponent;
 
-public final class LogTableCellRenderer implements TableCellRenderer {
+final class LogTableCellRenderer implements TableCellRenderer {
 
 	private final DefaultTableCellRenderer def = new DefaultTableCellRenderer();
 

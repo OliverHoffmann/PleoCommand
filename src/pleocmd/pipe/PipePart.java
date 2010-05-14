@@ -157,7 +157,7 @@ public abstract class PipePart extends StateHandling {
 		addConfig(value, true);
 	}
 
-	public final void addConfig(final ConfigValue value,
+	protected final void addConfig(final ConfigValue value,
 			final boolean visibleInGUI) {
 		try {
 			ensureConstructing();
@@ -194,7 +194,7 @@ public abstract class PipePart extends StateHandling {
 	 * 
 	 * @return true if configuring was successful
 	 */
-	public final boolean tryConfigure() {
+	protected final boolean tryConfigure() {
 		try {
 			feedback.incConfiguredCount();
 			configure();
@@ -213,7 +213,7 @@ public abstract class PipePart extends StateHandling {
 	 * 
 	 * @return true if initializing was successful
 	 */
-	public final boolean tryInit() {
+	protected final boolean tryInit() {
 		try {
 			init();
 			feedback.incInitializedCount();
@@ -234,7 +234,7 @@ public abstract class PipePart extends StateHandling {
 	 * 
 	 * @return true if closing was successful
 	 */
-	public final boolean tryClose() {
+	protected final boolean tryClose() {
 		try {
 			feedback.stopped();
 			feedback.incClosedCount();
@@ -255,6 +255,15 @@ public abstract class PipePart extends StateHandling {
 		configure1();
 	}
 
+	/**
+	 * Can contain special code which should be invoked in sub-classes during
+	 * configuration.
+	 * 
+	 * @throws PipeException
+	 *             if configuration fails
+	 * @throws IOException
+	 *             if configuration fails
+	 */
 	protected void configure1() throws PipeException, IOException {
 		// do nothing by default
 	}
@@ -383,7 +392,7 @@ public abstract class PipePart extends StateHandling {
 	 * @throws PipeException
 	 *             an exception containing the list of unresolved connections.
 	 */
-	public final void assertAllConnectionUIDsResolved() throws PipeException {
+	protected final void assertAllConnectionUIDsResolved() throws PipeException {
 		if (cfgConnectedUIDs.getContent().size() != connected.size()) {
 			final Set<Long> goodUIDs = new HashSet<Long>();
 			final Set<Long> badUIDs = new HashSet<Long>();
@@ -421,7 +430,7 @@ public abstract class PipePart extends StateHandling {
 	 *             if the {@link PipePart} is being constructed or already
 	 *             initialized
 	 */
-	public final void resolveConnectionUIDs(final Map<Long, PipePart> map)
+	protected final void resolveConnectionUIDs(final Map<Long, PipePart> map)
 			throws StateException {
 		ensureConstructed();
 		connected.clear();
@@ -438,7 +447,7 @@ public abstract class PipePart extends StateHandling {
 		return immutableGUIPosition;
 	}
 
-	public final void groupWriteback() throws ConfigurationException {
+	protected final void groupWriteback() throws ConfigurationException {
 		visualizationConfig.writeback();
 		groupWriteback0();
 	}

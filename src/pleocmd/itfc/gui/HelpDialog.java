@@ -14,7 +14,7 @@ import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.itfc.gui.help.HelpLoader;
 
-public final class HelpDialog extends JDialog {
+final class HelpDialog extends JDialog {
 
 	private static final long serialVersionUID = 2506240487807329597L;
 

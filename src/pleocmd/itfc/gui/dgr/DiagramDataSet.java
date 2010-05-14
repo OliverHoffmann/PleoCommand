@@ -46,7 +46,7 @@ public final class DiagramDataSet {
 
 	private double cachedValueToPixYFactor;
 
-	public DiagramDataSet(final Diagram diagram, final String label) {
+	protected DiagramDataSet(final Diagram diagram, final String label) {
 		this.diagram = diagram;
 		this.label = label;
 		diagram.addDataSet(this);
@@ -212,23 +212,7 @@ public final class DiagramDataSet {
 				* cachedValueToPixYFactor;
 	}
 
-	double getCachedValueToPixXIncr() {
-		return cachedValueToPixXIncr;
-	}
-
-	double getCachedValueToPixYIncr() {
-		return cachedValueToPixYIncr;
-	}
-
-	double getCachedValueToPixXFactor() {
-		return cachedValueToPixXFactor;
-	}
-
-	double getCachedValueToPixYFactor() {
-		return cachedValueToPixYFactor;
-	}
-
-	public void createMenu(final JPopupMenu parent) {
+	protected void createMenu(final JPopupMenu parent) {
 		final JMenu menu = new JMenu("DataSet " + getLabel());
 		parent.add(menu);
 		JMenuItem item = new JMenuItem("Set Default Pen");

@@ -8,7 +8,7 @@ import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class ThresholdConverter extends Converter {
+public final class ThresholdConverter extends Converter { // NO_UCD
 
 	private final ConfigDouble cfgTheshold;
 

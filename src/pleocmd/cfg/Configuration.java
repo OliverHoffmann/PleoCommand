@@ -91,14 +91,15 @@ public final class Configuration {
 		configObjects = new HashSet<ConfigurationInterface>();
 	}
 
-	public static Configuration getMain() {
+	public synchronized static Configuration getMain() {
 		if (mainConfig == null) {
-			mainConfig = new Configuration();
+			final Configuration cfg = new Configuration();
 			try {
-				mainConfig.readFromDefaultFile();
+				cfg.readFromDefaultFile();
 			} catch (final ConfigurationException e) {
 				Log.error(e);
 			}
+			mainConfig = cfg;
 		}
 		return mainConfig;
 	}
@@ -240,8 +241,11 @@ public final class Configuration {
 			final ConfigurationInterface coOnly) throws ConfigurationException {
 		try {
 			final BufferedReader in = new BufferedReader(new FileReader(file));
-			readFromReader(in, coOnly);
-			in.close();
+			try {
+				readFromReader(in, coOnly);
+			} finally {
+				in.close();
+			}
 		} catch (final IOException e) {
 			throw new ConfigurationException(e, "Cannot read from '%s'", file);
 		}
@@ -397,7 +401,7 @@ public final class Configuration {
 			items.add(line);
 		}
 		++nr[0];
-		throw new ConfigurationException(nr[0], line,
+		throw new ConfigurationException(nr[0], "",
 				"Missing line with '}' for end of value list");
 	}
 
@@ -413,8 +417,11 @@ public final class Configuration {
 			throws ConfigurationException {
 		try {
 			final FileWriter out = new FileWriter(file);
-			writeToWriter(out, coOnly);
-			out.close();
+			try {
+				writeToWriter(out, coOnly);
+			} finally {
+				out.close();
+			}
 		} catch (final IOException e) {
 			throw new ConfigurationException(e, "Cannot write to '%s'", file);
 		}

@@ -115,7 +115,7 @@ public final class ErrorDialog extends JDialog implements
 		}
 	}
 
-	public static ErrorDialog the() {
+	protected static ErrorDialog the() {
 		if (errorDialog == null) new ErrorDialog();
 		return errorDialog;
 	}
@@ -209,9 +209,9 @@ public final class ErrorDialog extends JDialog implements
 					.getComponents();
 			for (final Component comp : comps)
 				if (comp instanceof AbstractButton
-						&& map.get(comp).equals(caller))
-					if (((AbstractButton) comp).isSelected() ^ add)
-						((AbstractButton) comp).doClick();
+						&& map.get(comp).equals(caller)
+						&& ((AbstractButton) comp).isSelected() ^ add)
+					((AbstractButton) comp).doClick();
 		} finally {
 			ignoreChange = false;
 		}
@@ -224,9 +224,9 @@ public final class ErrorDialog extends JDialog implements
 			final Component[] comps = layErrorPanel.getContainer()
 					.getComponents();
 			for (final Component comp : comps)
-				if (comp instanceof AbstractButton)
-					if (((AbstractButton) comp).isSelected())
-						((AbstractButton) comp).doClick();
+				if (comp instanceof AbstractButton
+						&& ((AbstractButton) comp).isSelected())
+					((AbstractButton) comp).doClick();
 		} finally {
 			ignoreChange = false;
 		}
@@ -246,7 +246,7 @@ public final class ErrorDialog extends JDialog implements
 			setVisible(false);
 	}
 
-	public static void canDisposeIfHidden() {
+	protected static void canDisposeIfHidden() {
 		if (errorDialog != null) {
 			errorDialog.canDisposeIfHidden = true;
 			if (!errorDialog.isVisible()) errorDialog.dispose();
@@ -274,7 +274,7 @@ public final class ErrorDialog extends JDialog implements
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
-	class MessageCount {
+	static protected class MessageCount {
 		private int count;
 		private JLabel mostRecent;
 

@@ -1011,10 +1011,13 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					return pp.newInstance().getGroup();
 			throw new ConfigurationException("Cannot find any PipePart "
 					+ "with class-name '%s'", name);
-		} catch (final Exception e) { // CS_IGNORE shortcut for the following:
-			// ConfigurationException,
-			// InstantiationException,
-			// IllegalAccessException
+		} catch (final ConfigurationException e) {
+			Log.error(e, "Skipped reading '%s' from config:", groupName);
+			return null;
+		} catch (final InstantiationException e) {
+			Log.error(e, "Skipped reading '%s' from config:", groupName);
+			return null;
+		} catch (final IllegalAccessException e) {
 			Log.error(e, "Skipped reading '%s' from config:", groupName);
 			return null;
 		}

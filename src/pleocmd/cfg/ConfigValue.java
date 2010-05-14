@@ -37,7 +37,7 @@ public abstract class ConfigValue {
 
 	private final String label;
 
-	public ConfigValue(final String label) {
+	protected ConfigValue(final String label) {
 		this.label = label;
 	}
 
@@ -94,12 +94,12 @@ public abstract class ConfigValue {
 			throw new ConfigurationException("Cannot save this string "
 					+ "in a configuration file - must not contain "
 					+ "line-feed: '%s'", str);
-		if (allowLineFeed)
-			if (trimmed.contains("\n}\n") || trimmed.startsWith("}\n")
-					|| trimmed.endsWith("\n}"))
-				throw new ConfigurationException(
-						"Cannot save this string in a configuration file - "
-								+ "no line must equal '}': '%s'", str);
+		if (allowLineFeed
+				&& (trimmed.contains("\n}\n") || trimmed.startsWith("}\n") || trimmed
+						.endsWith("\n}")))
+			throw new ConfigurationException(
+					"Cannot save this string in a configuration file - "
+							+ "no line must equal '}': '%s'", str);
 	}
 
 	// CS_IGNORE_NEXT NPath complexity - just a listing

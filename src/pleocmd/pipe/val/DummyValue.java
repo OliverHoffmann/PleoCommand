@@ -46,7 +46,7 @@ public final class DummyValue extends Value {
 
 	@Override
 	public String toString() {
-		return null;
+		return "";
 	}
 
 	@Override

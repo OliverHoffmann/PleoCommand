@@ -52,10 +52,6 @@ public final class DataFileEditFrame extends JDialog implements
 		setVisible(true);
 	}
 
-	protected void saveChanges() {
-		writeTextPaneToFile();
-	}
-
 	protected void close() {
 		try {
 			Configuration.getMain().unregisterConfigurableObject(this);
@@ -70,8 +66,11 @@ public final class DataFileEditFrame extends JDialog implements
 		Log.detail("Writing TextPane to file '%s'", file);
 		try {
 			final BufferedWriter out = new BufferedWriter(new FileWriter(file));
-			dsePanel.writeTextPaneToWriter(out);
-			out.close();
+			try {
+				dsePanel.writeTextPaneToWriter(out);
+			} finally {
+				out.close();
+			}
 		} catch (final IOException e) {
 			Log.error(e);
 		}
@@ -83,8 +82,11 @@ public final class DataFileEditFrame extends JDialog implements
 			if (file.exists()) {
 				final BufferedReader in = new BufferedReader(new FileReader(
 						file));
-				dsePanel.updateTextPaneFromReader(in);
-				in.close();
+				try {
+					dsePanel.updateTextPaneFromReader(in);
+				} finally {
+					in.close();
+				}
 			} else
 				dsePanel.updateTextPaneFromReader(null);
 		} catch (final IOException e) {

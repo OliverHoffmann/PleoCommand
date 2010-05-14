@@ -26,7 +26,7 @@ import pleocmd.StandardInput;
 import pleocmd.pipe.in.ConsoleInput;
 import pleocmd.pipe.in.Input;
 
-public final class MainInputPanel extends JPanel {
+final class MainInputPanel extends JPanel {
 
 	private static final long serialVersionUID = 8130292678723649962L;
 
@@ -276,12 +276,15 @@ public final class MainInputPanel extends JPanel {
 	public void readConsoleInputFromFile(final File file) {
 		try {
 			final BufferedReader in = new BufferedReader(new FileReader(file));
-			String line;
-			while ((line = in.readLine()) != null) {
-				setConsoleInput(line);
-				sendConsoleInput();
+			try {
+				String line;
+				while ((line = in.readLine()) != null) {
+					setConsoleInput(line);
+					sendConsoleInput();
+				}
+			} finally {
+				in.close();
 			}
-			in.close();
 		} catch (final IOException exc) {
 			Log.error(exc);
 		}

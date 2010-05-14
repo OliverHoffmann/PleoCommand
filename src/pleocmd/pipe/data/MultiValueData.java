@@ -7,7 +7,7 @@ import pleocmd.pipe.val.StringValue;
 import pleocmd.pipe.val.Value;
 import pleocmd.pipe.val.ValueType;
 
-public class MultiValueData extends Data {
+class MultiValueData extends Data {
 
 	private static List<Value> l;
 

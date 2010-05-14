@@ -18,7 +18,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.data.Data;
 
-public final class FileOutput extends Output {
+public final class FileOutput extends Output { // NO_UCD
 
 	private final ConfigPath cfgFile;
 
@@ -103,7 +103,7 @@ public final class FileOutput extends Output {
 		return true;
 	}
 
-	public static String help(final HelpKind kind) {
+	public static String help(final HelpKind kind) { // NO_UCD
 		switch (kind) {
 		case Name:
 			return "File Output";

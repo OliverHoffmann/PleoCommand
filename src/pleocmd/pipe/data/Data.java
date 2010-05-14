@@ -363,7 +363,7 @@ public class Data extends AbstractList<Value> {
 			return out.toString("ISO-8859-1");
 		} catch (final IOException e) {
 			Log.error(e);
-			return String.format("S:%1", e.getMessage());
+			return String.format("S:%s", e.getMessage());
 		}
 	}
 

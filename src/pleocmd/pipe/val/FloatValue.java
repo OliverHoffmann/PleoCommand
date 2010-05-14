@@ -6,9 +6,9 @@ import java.io.IOException;
 
 public final class FloatValue extends Value {
 
-	public static final char TYPE_CHAR = 'F';
+	static final char TYPE_CHAR = 'F';
 
-	public static final ValueType RECOMMENDED_TYPE = ValueType.Float64;
+	static final ValueType RECOMMENDED_TYPE = ValueType.Float64;
 
 	private double val;
 

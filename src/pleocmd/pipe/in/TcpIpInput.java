@@ -11,7 +11,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.MultiFloatData;
 
-public final class TcpIpInput extends Input {
+public final class TcpIpInput extends Input { // NO_UCD
 
 	private final ConfigInt cfgTimeoutConn;
 

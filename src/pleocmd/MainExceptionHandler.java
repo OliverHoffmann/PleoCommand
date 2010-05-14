@@ -1,6 +1,6 @@
 package pleocmd;
 
-public final class MainExceptionHandler {
+final class MainExceptionHandler {
 
 	public void handle(final Throwable thrown) {
 		// we need to print the Exception additionally to

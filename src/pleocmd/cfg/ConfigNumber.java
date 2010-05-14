@@ -11,7 +11,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.Layouter;
 
-public abstract class ConfigNumber<E extends Number> extends ConfigValue {
+abstract class ConfigNumber<E extends Number> extends ConfigValue {
 
 	private E content;
 

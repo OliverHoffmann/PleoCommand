@@ -6,9 +6,9 @@ import java.io.IOException;
 
 public final class IntValue extends Value {
 
-	public static final char TYPE_CHAR = 'I';
+	static final char TYPE_CHAR = 'I';
 
-	public static final ValueType RECOMMENDED_TYPE = ValueType.Int64;
+	static final ValueType RECOMMENDED_TYPE = ValueType.Int64;
 
 	private long val;
 

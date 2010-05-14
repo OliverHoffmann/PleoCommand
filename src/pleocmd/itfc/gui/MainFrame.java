@@ -161,7 +161,11 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		return mainInputPanel;
 	}
 
-	public void exit() {
+	public void addLog(final Log log) {
+		mainLogPanel.addLog(log);
+	}
+
+	protected void exit() {
 		if (isPipeRunning()) {
 			if (JOptionPane.showOptionDialog(this,
 					"The pipe is still running. Exiting "
@@ -214,7 +218,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		thr.start();
 	}
 
-	public synchronized void startPipeThread() {
+	protected synchronized void startPipeThread() {
 		if (isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread already running");
 		pipeThread = new Thread("Pipe-Thread") {
@@ -240,7 +244,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		pipeThread.start();
 	}
 
-	public synchronized void abortPipeThread() {
+	protected synchronized void abortPipeThread() {
 		if (!isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread not running");
 		try {

@@ -11,7 +11,7 @@ import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.MultiFloatData;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class ExpressionConverter extends Converter {
+public final class ExpressionConverter extends Converter { // NO_UCD
 
 	private final ConfigString cfgExpression;
 

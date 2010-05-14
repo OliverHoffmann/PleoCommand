@@ -1,6 +1,7 @@
 package pleocmd.pipe.in;
 
 import java.io.IOException;
+import java.util.Random;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigDouble;
@@ -10,7 +11,7 @@ import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.SingleFloatData;
 
-public final class RandomGeneratorInput extends Input {
+public final class RandomGeneratorInput extends Input { // NO_UCD
 
 	private final ConfigInt cfgUserData;
 	private final ConfigInt cfgSamplerate;
@@ -105,11 +106,14 @@ public final class RandomGeneratorInput extends Input {
 				peakPos = PeakPos.Grad0;
 				amp = rand11() * cfgMaxAmplitude.getContent();
 				final double samplesPerMS = cfgSamplerate.getContent() / 1000.0;
-				peakLen = Math.max(1, rand0N(cfgMaxPeakLength.getContent()
+				peakLen = Math.max(1, (int) rand0N(cfgMaxPeakLength
+						.getContent()
 						* samplesPerMS));
-				grad0Len = Math.max(1, rand0N(cfgMaxGrad0Length.getContent()
+				grad0Len = Math.max(1, (int) rand0N(cfgMaxGrad0Length
+						.getContent()
 						* samplesPerMS));
-				grad1Len = Math.max(1, rand0N(cfgMaxGrad1Length.getContent()
+				grad1Len = Math.max(1, (int) rand0N(cfgMaxGrad1Length
+						.getContent()
 						* samplesPerMS));
 				grad0Inc = amp / grad0Len;
 				grad1Inc = amp / grad1Len;
@@ -156,12 +160,14 @@ public final class RandomGeneratorInput extends Input {
 		return new SingleFloatData(val, cfgUserData.getContent(), null);
 	}
 
+	private static Random rand = new Random();
+
 	private static double rand11() {
-		return 1 - 2 * Math.random();
+		return 1 - 2 * rand.nextDouble();
 	}
 
-	private static int rand0N(final double max) {
-		return (int) (Math.random() * max);
+	private static double rand0N(final double max) {
+		return rand.nextDouble() * max;
 	}
 
 	public static String help(final HelpKind kind) {

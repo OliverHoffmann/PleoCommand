@@ -5,7 +5,7 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-public final class DataSequenceEditorKit extends StyledEditorKit implements
+final class DataSequenceEditorKit extends StyledEditorKit implements
 		ViewFactory {
 
 	private static final long serialVersionUID = -7824068672374046824L;
