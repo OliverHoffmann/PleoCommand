@@ -246,6 +246,10 @@ public final class ErrorDialog extends JDialog implements
 			setVisible(false);
 	}
 
+	protected static boolean hasVisibleDialog() {
+		return errorDialog != null && errorDialog.isVisible();
+	}
+
 	protected static void canDisposeIfHidden() {
 		if (errorDialog != null) {
 			errorDialog.canDisposeIfHidden = true;

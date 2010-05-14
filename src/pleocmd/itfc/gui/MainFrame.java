@@ -197,8 +197,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		final Thread thr = new Thread("Fallback Exit Thread") {
 			@Override
 			public void run() {
-				ErrorDialog dlg;
-				while ((dlg = ErrorDialog.the()) != null && dlg.isVisible())
+				while (ErrorDialog.hasVisibleDialog())
 					try {
 						Thread.sleep(100);
 					} catch (final InterruptedException e) {
@@ -210,7 +209,22 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 					// just ignore
 				}
 				System.err.println("Application has not been shut down "
-						+ "normally but has to be exited forcefully.");
+						+ "normally but has to be exited forcefully."
+						+ "Remaining threads are:");
+				ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
+				ThreadGroup parentGroup;
+				while ((parentGroup = rootGroup.getParent()) != null)
+					rootGroup = parentGroup;
+				Thread[] threads = new Thread[rootGroup.activeCount()];
+				while (rootGroup.enumerate(threads, true) == threads.length)
+					threads = new Thread[threads.length * 2];
+				for (final Thread t : threads)
+					if (t != null)
+						System.err.println(String.format("'%40s' daemon:%-5s "
+								+ "alive:%-5s interrupted:%-5s priority:%2d "
+								+ "state:%s", t.getName(), t.isDaemon(), t
+								.isAlive(), t.isInterrupted(), t.getPriority(),
+								t.getState()));
 				System.exit(0);
 			}
 		};
