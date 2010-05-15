@@ -1,19 +1,13 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.dse;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
@@ -22,16 +16,20 @@ import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.itfc.gui.AutoDisposableWindow;
+import pleocmd.itfc.gui.HelpDialog;
+import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.itfc.gui.Layouter.Button;
 
-public final class DataFileEditDialog extends JDialog implements
+public final class DataFileBinaryDialog extends JDialog implements
 		ConfigurationInterface, AutoDisposableWindow {
 
-	private static final long serialVersionUID = 7860184232803195768L;
+	private static final long serialVersionUID = 7106692123051074764L;
 
 	private final ConfigBounds cfgBounds = new ConfigBounds("Bounds");
 
-	private final DataSequenceEditorPanel dsePanel;
+	private final DataSequenceBinaryPanel dsbPanel;
 
 	private final JButton btnHelp;
 
@@ -45,8 +43,8 @@ public final class DataFileEditDialog extends JDialog implements
 
 	private final JButton btnCancel;
 
-	public DataFileEditDialog(final File file) {
-		setTitle("TextEditor - " + file.getPath());
+	public DataFileBinaryDialog(final File file) {
+		setTitle("Binary Editor - " + file.getPath());
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 		addWindowListener(new WindowAdapter() {
 			@Override
@@ -57,9 +55,9 @@ public final class DataFileEditDialog extends JDialog implements
 
 		// Add components
 		final Layouter lay = new Layouter(this);
-		dsePanel = new DataSequenceEditorPanel() {
+		dsbPanel = new DataSequenceBinaryPanel() {
 
-			private static final long serialVersionUID = 4031934645004418741L;
+			private static final long serialVersionUID = -1868980685873882750L;
 
 			@Override
 			protected void stateChanged() {
@@ -67,7 +65,7 @@ public final class DataFileEditDialog extends JDialog implements
 			}
 
 		};
-		lay.addWholeLine(dsePanel, true);
+		lay.addWholeLine(dsbPanel, true);
 
 		btnHelp = lay.addButton(Button.Help, Layouter.help(this, getClass()
 				.getSimpleName()));
@@ -98,8 +96,7 @@ public final class DataFileEditDialog extends JDialog implements
 			@Override
 			public void run() {
 				writeTextPaneToFile(file);
-				dsePanel.getTpUndoManager().discardAllEdits();
-				dsePanel.updateState();
+				dsbPanel.updateState();
 			}
 		});
 		btnCancel = lay.addButton(Button.Cancel, new Runnable() {
@@ -120,29 +117,20 @@ public final class DataFileEditDialog extends JDialog implements
 			Log.error(e);
 		}
 
-		Log.detail("DataFileEditFrame created");
+		Log.detail("DataFileBinaryDialog created");
 		updateStatus();
 		MainFrame.the().addKnownWindow(this);
 		setModal(true);
 		HelpDialog.closeHelpIfOpen();
 		setVisible(true);
+		dsbPanel.freeResources();
 	}
 
 	protected void loadFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
-		fc.addChoosableFileFilter(new FileFilter() {
-			@Override
-			public boolean accept(final File f) {
-				final String name = f.getName();
-				return !name.endsWith(".pbd") && !name.endsWith(".pca");
-			}
-
-			@Override
-			public String getDescription() {
-				return "Ascii-Textfile containing Data-List";
-			}
-		});
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Binary file containing Data-List", "pbd"));
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
 			updateTextPaneFromFile(fc.getSelectedFile());
 	}
@@ -151,11 +139,11 @@ public final class DataFileEditDialog extends JDialog implements
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(true);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
-				"Ascii-Textfile containing Data-List", "pad"));
+				"Binary file containing Data-List", "pbd"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			if (!file.getName().contains("."))
-				file = new File(file.getPath() + ".pad");
+				file = new File(file.getPath() + ".pbd");
 			writeTextPaneToFile(file);
 		}
 	}
@@ -177,36 +165,36 @@ public final class DataFileEditDialog extends JDialog implements
 	}
 
 	protected void writeTextPaneToFile(final File file) {
-		Log.detail("Writing TextPane to file '%s'", file);
-		try {
-			final BufferedWriter out = new BufferedWriter(new FileWriter(file));
-			try {
-				dsePanel.writeTextPaneToWriter(out);
-			} finally {
-				out.close();
-			}
-		} catch (final IOException e) {
-			Log.error(e);
-		}
+		// Log.detail("Writing TextPane to file '%s'", file);
+		// try {
+		// final BufferedWriter out = new BufferedWriter(new FileWriter(file));
+		// try {
+		// dsbPanel.writeTextPaneToWriter(out);
+		// } finally {
+		// out.close();
+		// }
+		// } catch (final IOException e) {
+		// Log.error(e);
+		// }
 	}
 
 	private void updateTextPaneFromFile(final File file) {
-		Log.detail("Updating TextPane from file '%s'", file);
-		try {
-			if (file.exists()) {
-				final BufferedReader in = new BufferedReader(new FileReader(
-						file));
-				try {
-					dsePanel.updateTextPaneFromReader(in);
-				} finally {
-					in.close();
-				}
-			} else
-				dsePanel.updateTextPaneFromReader(null);
-		} catch (final IOException e) {
-			Log.error(e);
-		}
-		dsePanel.updateState();
+		// Log.detail("Updating TextPane from file '%s'", file);
+		// try {
+		// if (file.exists()) {
+		// final BufferedReader in = new BufferedReader(new FileReader(
+		// file));
+		// try {
+		// dsbPanel.updateTextPaneFromReader(in);
+		// } finally {
+		// in.close();
+		// }
+		// } else
+		// dsbPanel.updateTextPaneFromReader(null);
+		// } catch (final IOException e) {
+		// Log.error(e);
+		// }
+		// dsbPanel.updateState();
 	}
 
 	@Override
@@ -235,17 +223,13 @@ public final class DataFileEditDialog extends JDialog implements
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
 
-	public void freeResources() {
-		dsePanel.freeResources();
-	}
-
 	public void updateStatus() {
 		btnHelp.setEnabled(true);
-		btnSave.setEnabled(dsePanel.getTpDataSequence().getDocument()
-				.getLength() > 0);
+		// btnSave.setEnabled(dsbPanel.getTpDataSequence().getDocument()
+		// .getLength() > 0);
 		btnLoad.setEnabled(true);
 		btnOk.setEnabled(true);
-		btnApply.setEnabled(dsePanel.getTpUndoManager().canUndo());
+		// btnApply.setEnabled(dsbPanel.getTpUndoManager().canUndo());
 		btnCancel.setEnabled(true);
 
 	}

@@ -12,8 +12,8 @@ import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
-import pleocmd.itfc.gui.DataSequenceEditorPanel;
 import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.dse.DataSequenceEditorPanel;
 import pleocmd.pipe.data.Data;
 
 public final class StaticInput extends Input { // NO_UCD

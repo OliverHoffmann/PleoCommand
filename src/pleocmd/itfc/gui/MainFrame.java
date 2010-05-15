@@ -338,4 +338,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		return pipe;
 	}
 
+	public List<String> getHistory() {
+		return mainInputPanel.getHistoryListModel().getAll();
+	}
+
 }

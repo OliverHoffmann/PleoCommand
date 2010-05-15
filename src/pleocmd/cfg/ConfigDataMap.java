@@ -7,8 +7,8 @@ import java.util.List;
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
-import pleocmd.itfc.gui.DataSequenceTriggerPanel;
 import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.dse.DataSequenceTriggerPanel;
 import pleocmd.pipe.data.Data;
 
 public final class ConfigDataMap extends ConfigMap<String, Data> {

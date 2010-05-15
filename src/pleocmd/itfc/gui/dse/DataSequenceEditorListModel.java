@@ -1,4 +1,4 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.dse;
 
 import java.util.ArrayList;
 import java.util.Collection;

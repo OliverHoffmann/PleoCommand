@@ -1,4 +1,4 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.dse;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -39,6 +39,8 @@ import pleocmd.cfg.ConfigItem;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
+import pleocmd.itfc.gui.Layouter;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.out.ConsoleOutput;
@@ -163,8 +165,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
 					tpDataSequence.getCaretPosition()).getEndOffset();
-			for (final String data : MainFrame.the().getMainInputPanel()
-					.getHistoryListModel().getAll())
+			for (final String data : MainFrame.the().getHistory())
 				doc.insertString(offset, data + "\n", null);
 		} catch (final BadLocationException e) {
 			Log.error(e);
@@ -389,8 +390,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 
 	protected void updateState() {
 		tpDataSequence.setEnabled(true);
-		btnCopyInput.setEnabled(MainFrame.the().getMainInputPanel()
-				.getHistoryListModel().getSize() > 0);
+		btnCopyInput.setEnabled(MainFrame.the().getHistory().size() > 0);
 		btnAddFile.setEnabled(true);
 		btnPlaySel.setEnabled(tpDataSequence.getSelectedText() != null);
 		btnPlayAll.setEnabled(tpDataSequence.getDocument().getLength() > 0);

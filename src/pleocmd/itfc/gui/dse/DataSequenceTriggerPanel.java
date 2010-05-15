@@ -1,4 +1,4 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.dse;
 
 import java.io.IOException;
 import java.util.Comparator;
@@ -19,6 +19,7 @@ import pleocmd.Log;
 import pleocmd.cfg.ConfigDataMap;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
+import pleocmd.itfc.gui.Layouter;
 import pleocmd.pipe.data.Data;
 
 public final class DataSequenceTriggerPanel extends JPanel {

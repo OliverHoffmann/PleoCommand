@@ -1,4 +1,4 @@
-package pleocmd.itfc.gui;
+package pleocmd.itfc.gui.dse;
 
 import javax.swing.text.Element;
 import javax.swing.text.StyledEditorKit;
