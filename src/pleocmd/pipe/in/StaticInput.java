@@ -29,7 +29,16 @@ public final class StaticInput extends Input { // NO_UCD
 
 			@Override
 			public boolean insertGUIComponents(final Layouter lay) {
-				dse = new DataSequenceEditorPanel();
+				dse = new DataSequenceEditorPanel() {
+
+					private static final long serialVersionUID = 6973128265186613390L;
+
+					@Override
+					protected void stateChanged() {
+						// nothing to do here
+					}
+
+				};
 				try {
 					dse.updateTextPaneFromReader(new BufferedReader(
 							new StringReader(getContent())));

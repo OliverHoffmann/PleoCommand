@@ -18,7 +18,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
-import pleocmd.itfc.gui.DataFileEditFrame;
+import pleocmd.itfc.gui.DataFileEditDialog;
 import pleocmd.pipe.data.Data;
 
 public final class FileInput extends Input { // NO_UCD
@@ -39,7 +39,7 @@ public final class FileInput extends Input { // NO_UCD
 		cfgFile.setModifyFile(new RunnableWithArgument() {
 			@Override
 			public Object run(final Object... args) {
-				new DataFileEditFrame(new File((String) args[0]))
+				new DataFileEditDialog(new File((String) args[0]))
 						.freeResources();
 				return null;
 			}

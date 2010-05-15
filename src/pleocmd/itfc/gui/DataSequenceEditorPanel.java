@@ -46,7 +46,7 @@ import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 import pleocmd.pipe.out.PrintType;
 
-public final class DataSequenceEditorPanel extends JPanel {
+public abstract class DataSequenceEditorPanel extends JPanel {
 
 	private static final long serialVersionUID = -3019900508373635307L;
 
@@ -71,6 +71,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 	private final JLabel lblErrorFeedback;
 
 	private final Timer errorLabelTimer = new Timer("ErrorLabelTimer", true);
+
 	private TimerTask errorLabelTimerTask;
 
 	public DataSequenceEditorPanel() {
@@ -86,6 +87,10 @@ public final class DataSequenceEditorPanel extends JPanel {
 				updateState();
 			}
 		});
+		final DataSequenceEditorKit kit = new DataSequenceEditorKit(this);
+		tpDataSequence.setEditorKitForContentType("text/datasequence", kit);
+		tpDataSequence.setContentType("text/datasequence");
+		tpDataSequence.setFont(tpDataSequence.getFont().deriveFont(Font.BOLD));
 		tpDataSequence.getDocument().addUndoableEditListener(
 				new UndoableEditListener() {
 					@Override
@@ -93,10 +98,6 @@ public final class DataSequenceEditorPanel extends JPanel {
 						addUndo(e.getEdit());
 					}
 				});
-		final DataSequenceEditorKit kit = new DataSequenceEditorKit(this);
-		tpDataSequence.setEditorKitForContentType("text/datasequence", kit);
-		tpDataSequence.setContentType("text/datasequence");
-		tpDataSequence.setFont(tpDataSequence.getFont().deriveFont(Font.BOLD));
 
 		lay.addWholeLine(new JScrollPane(tpDataSequence), true);
 
@@ -142,6 +143,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 						playAll();
 					}
 				});
+		lay.addSpacer();
 		btnUndo = lay.addButton(Button.Undo, new Runnable() {
 			@Override
 			public void run() {
@@ -352,7 +354,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 				throw new InternalException(e);
 			}
 		tpUndoManager.discardAllEdits();
-		updateState(); // TODO SPEED needed?
+		updateState();
 	}
 
 	public void updateTextPaneFromReader(final BufferedReader in)
@@ -367,7 +369,7 @@ public final class DataSequenceEditorPanel extends JPanel {
 			throw new InternalException(e);
 		}
 		tpUndoManager.discardAllEdits();
-		updateState(); // TODO SPEED needed?
+		updateState();
 	}
 
 	void updateErrorLabel(final String text) {
@@ -383,6 +385,8 @@ public final class DataSequenceEditorPanel extends JPanel {
 		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
 	}
 
+	protected abstract void stateChanged();
+
 	protected void updateState() {
 		tpDataSequence.setEnabled(true);
 		btnCopyInput.setEnabled(MainFrame.the().getMainInputPanel()
@@ -392,10 +396,19 @@ public final class DataSequenceEditorPanel extends JPanel {
 		btnPlayAll.setEnabled(tpDataSequence.getDocument().getLength() > 0);
 		btnUndo.setEnabled(tpUndoManager.canUndo());
 		btnRedo.setEnabled(tpUndoManager.canRedo());
+		stateChanged();
 	}
 
 	protected JLabel getLblErrorFeedback() {
 		return lblErrorFeedback;
+	}
+
+	public UndoManager getTpUndoManager() {
+		return tpUndoManager;
+	}
+
+	public JTextPane getTpDataSequence() {
+		return tpDataSequence;
 	}
 
 	private class FadeTimerTask extends TimerTask {

@@ -92,7 +92,16 @@ public final class DataSequenceTriggerPanel extends JPanel {
 
 				});
 
-		dsePanel = new DataSequenceEditorPanel();
+		dsePanel = new DataSequenceEditorPanel() {
+
+			private static final long serialVersionUID = -4279793671317418153L;
+
+			@Override
+			protected void stateChanged() {
+				// nothing to do here
+			}
+
+		};
 		splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, true, panel,
 				dsePanel);
 		splitPane.setResizeWeight(0.25);
