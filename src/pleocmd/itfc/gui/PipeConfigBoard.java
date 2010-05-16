@@ -155,8 +155,7 @@ final class PipeConfigBoard extends JPanel {
 			}
 
 			@Override
-			public void mouseClicked(final MouseEvent e) {
-				updateCurrent(e.getPoint());
+			public void mouseReleased(final MouseEvent e) {
 				if (e.getModifiers() == InputEvent.BUTTON1_MASK)
 					switch (e.getClickCount()) {
 					case 1:
@@ -166,10 +165,6 @@ final class PipeConfigBoard extends JPanel {
 						configureCurrentPart(true);
 						break;
 					}
-			}
-
-			@Override
-			public void mouseReleased(final MouseEvent e) {
 				releaseCurrent();
 			}
 
