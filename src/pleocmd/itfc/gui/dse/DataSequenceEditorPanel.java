@@ -389,7 +389,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 	protected abstract void stateChanged();
 
 	protected void updateState() {
-		tpDataSequence.setEnabled(true);
+		tpDataSequence.setEnabled(isEnabled());
 		btnCopyInput.setEnabled(MainFrame.the().getHistory().size() > 0);
 		btnAddFile.setEnabled(true);
 		btnPlaySel.setEnabled(tpDataSequence.getSelectedText() != null);

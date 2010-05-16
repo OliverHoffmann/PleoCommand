@@ -159,7 +159,6 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			}
 		}));
 		triggerList.setSelectedValue(lastSelected, true);
-		updateState(); // TODO SPEED needed?
 	}
 
 	protected void addNewTrigger() {
@@ -191,6 +190,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 				trigger = name;
 				updateTriggerModel();
 				triggerList.setSelectedValue(name, true);
+				updateState();
 			}
 		}
 	}
@@ -201,6 +201,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			dsePanel.clear();
 			trigger = null;
 			updateTriggerModel();
+			updateState();
 		}
 	}
 
