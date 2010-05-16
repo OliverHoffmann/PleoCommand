@@ -251,9 +251,4 @@ public class PipeTest extends Testcases {
 		return fb;
 	}
 
-	@Test
-	public final void testReadWriteFiles() {
-		// TODO ENH fail("Not yet implemented");
-	}
-
 }

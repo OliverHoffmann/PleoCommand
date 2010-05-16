@@ -42,7 +42,7 @@ public abstract class Output extends PipePart {
 			ensureInitialized();
 			getFeedback().incDataReceivedCount();
 			final boolean res = write0(data);
-			if (res) getFeedback().incDataSentCount(1); // TODO not correct
+			if (res) getFeedback().incDataSentCount(1);
 			return res;
 		} catch (final IOException e) {
 			throw new OutputException(this, false, e,

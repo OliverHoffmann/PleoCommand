@@ -1055,8 +1055,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		} catch (final StateException e) {
 			throw new ConfigurationException(e, "Cannot change configuration");
 		}
-		// TODO FIX if config loaded before register...() getUser() returns null
-		// because getSkeleton() has never been executed
 		if (group.getUser() instanceof PipePart) {
 			final PipePart pp = (PipePart) group.getUser();
 			if (pp instanceof Input)
@@ -1076,11 +1074,11 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				throw new ConfigurationException(e,
 						"Cannot configure PipePart with group '%s'", group);
 			}
-		} else if (!group.getName().equals(getClass().getSimpleName())) {
-			// this may occur if getSkeleton() returned null due to an error
-			// silently ignore here because getSkeleton() should have already
-			// printed something
-		}
+		} else if (!group.getName().equals(getClass().getSimpleName()))
+		// this may occur if getSkeleton() returned null due to an error
+			// only detail here because getSkeleton() should have already
+			// printed some warning or error
+			Log.detail("Cannot handle unknown group '%s'", group.getName());
 	}
 
 	@Override

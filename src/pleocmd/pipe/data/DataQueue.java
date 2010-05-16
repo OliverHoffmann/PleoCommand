@@ -195,7 +195,7 @@ public final class DataQueue {
 			// fast-clearing of the queue
 			sizeBeforeClear = (writePos - readPos) % buffer.length;
 			if (sizeBeforeClear < 0) sizeBeforeClear += buffer.length;
-			// TODO invoke getOrigin().getFeedback().incDropCount() on all
+			// TODO FIX invoke getOrigin().getFeedback().incDropCount() on all
 			readPos = writePos;
 			Log.detail("Cleared '%s' because of '%s'", this, data);
 			hasBeenCleared = true;
