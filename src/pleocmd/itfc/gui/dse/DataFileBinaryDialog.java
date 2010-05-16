@@ -3,6 +3,9 @@ package pleocmd.itfc.gui.dse;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -87,7 +90,7 @@ public final class DataFileBinaryDialog extends JDialog implements
 		btnOk = lay.addButton(Button.Ok, new Runnable() {
 			@Override
 			public void run() {
-				writeTextPaneToFile(file);
+				writeHexTableToFile(file);
 				close();
 			}
 		});
@@ -95,8 +98,8 @@ public final class DataFileBinaryDialog extends JDialog implements
 		btnApply = lay.addButton(Button.Apply, new Runnable() {
 			@Override
 			public void run() {
-				writeTextPaneToFile(file);
-				dsbPanel.updateState();
+				writeHexTableToFile(file);
+				getDsbPanel().updateState();
 			}
 		});
 		btnCancel = lay.addButton(Button.Cancel, new Runnable() {
@@ -106,7 +109,7 @@ public final class DataFileBinaryDialog extends JDialog implements
 			}
 		});
 
-		updateTextPaneFromFile(file);
+		updateHexTableFromFile(file);
 
 		pack();
 		setLocationRelativeTo(null);
@@ -132,7 +135,7 @@ public final class DataFileBinaryDialog extends JDialog implements
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
 				"Binary file containing Data-List", "pbd"));
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-			updateTextPaneFromFile(fc.getSelectedFile());
+			updateHexTableFromFile(fc.getSelectedFile());
 	}
 
 	protected void saveToFile() {
@@ -144,7 +147,7 @@ public final class DataFileBinaryDialog extends JDialog implements
 			File file = fc.getSelectedFile();
 			if (!file.getName().contains("."))
 				file = new File(file.getPath() + ".pbd");
-			writeTextPaneToFile(file);
+			writeHexTableToFile(file);
 		}
 	}
 
@@ -164,37 +167,39 @@ public final class DataFileBinaryDialog extends JDialog implements
 		close();
 	}
 
-	protected void writeTextPaneToFile(final File file) {
-		// Log.detail("Writing TextPane to file '%s'", file);
-		// try {
-		// final BufferedWriter out = new BufferedWriter(new FileWriter(file));
-		// try {
-		// dsbPanel.writeTextPaneToWriter(out);
-		// } finally {
-		// out.close();
-		// }
-		// } catch (final IOException e) {
-		// Log.error(e);
-		// }
+	protected void writeHexTableToFile(final File file) {
+		Log.detail("Writing HexTable to file '%s'", file);
+		try {
+			final RandomAccess stream = dsbPanel.getTableStream();
+			final byte[] buf = new byte[(int) stream.length()];
+			stream.seek(0);
+			stream.getDataInput().readFully(buf);
+			final FileOutputStream out = new FileOutputStream(file);
+			try {
+				out.write(buf);
+			} finally {
+				out.close();
+			}
+			dsbPanel.resetModification();
+		} catch (final IOException e) {
+			Log.error(e);
+		}
 	}
 
-	private void updateTextPaneFromFile(final File file) {
-		// Log.detail("Updating TextPane from file '%s'", file);
-		// try {
-		// if (file.exists()) {
-		// final BufferedReader in = new BufferedReader(new FileReader(
-		// file));
-		// try {
-		// dsbPanel.updateTextPaneFromReader(in);
-		// } finally {
-		// in.close();
-		// }
-		// } else
-		// dsbPanel.updateTextPaneFromReader(null);
-		// } catch (final IOException e) {
-		// Log.error(e);
-		// }
-		// dsbPanel.updateState();
+	private void updateHexTableFromFile(final File file) {
+		Log.detail("Updating HexTable from file '%s'", file);
+		try {
+			if (file.exists()) {
+				final FileInputStream in = new FileInputStream(file);
+				dsbPanel.setTableToStream(new RandomAccessArray(in, file
+						.length()));
+				in.close();
+			} else
+				dsbPanel.setTableToStream(new RandomAccessArray(null, 0));
+		} catch (final IOException e) {
+			Log.error(e);
+		}
+		dsbPanel.updateState();
 	}
 
 	@Override
@@ -225,13 +230,22 @@ public final class DataFileBinaryDialog extends JDialog implements
 
 	public void updateStatus() {
 		btnHelp.setEnabled(true);
-		// btnSave.setEnabled(dsbPanel.getTpDataSequence().getDocument()
-		// .getLength() > 0);
+		try {
+			btnSave.setEnabled(dsbPanel.getTableStream() != null
+					&& dsbPanel.getTableStream().length() > 0);
+		} catch (final IOException e) {
+			btnSave.setEnabled(false);
+			Log.error(e);
+		}
 		btnLoad.setEnabled(true);
 		btnOk.setEnabled(true);
-		// btnApply.setEnabled(dsbPanel.getTpUndoManager().canUndo());
+		btnApply.setEnabled(dsbPanel.isModified());
 		btnCancel.setEnabled(true);
 
+	}
+
+	protected DataSequenceBinaryPanel getDsbPanel() {
+		return dsbPanel;
 	}
 
 }

@@ -18,6 +18,7 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
+import pleocmd.itfc.gui.dse.DataFileBinaryDialog;
 import pleocmd.itfc.gui.dse.DataFileEditDialog;
 import pleocmd.pipe.data.Data;
 
@@ -39,7 +40,11 @@ public final class FileInput extends Input { // NO_UCD
 		cfgFile.setModifyFile(new RunnableWithArgument() {
 			@Override
 			public Object run(final Object... args) {
-				new DataFileEditDialog(new File((String) args[0]));
+				final String fileName = (String) args[0];
+				if (fileName.endsWith(".pbd"))
+					new DataFileBinaryDialog(new File(fileName));
+				else
+					new DataFileEditDialog(new File(fileName));
 				return null;
 			}
 
@@ -89,7 +94,12 @@ public final class FileInput extends Input { // NO_UCD
 						"Cannot read from file");
 			}
 		case Binary:
-			return Data.createFromBinary(in);
+			try {
+				return Data.createFromBinary(in);
+			} catch (final FormatException e) {
+				throw new InputException(this, false, e,
+						"Cannot read from file");
+			}
 		default:
 			throw new InternalException(cfgType.getEnum());
 		}

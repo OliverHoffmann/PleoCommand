@@ -249,12 +249,36 @@ public class Data extends AbstractList<Value> {
 	 *            Input Stream with binary data
 	 * @return new {@link Data} with a list of {@link Value}s read from stream
 	 * @throws IOException
-	 *             if data could not be read from {@link DataInput}, is of an
-	 *             invalid type or is of an invalid format for its type
+	 *             if data could not be read from {@link DataInput}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
 	 * @see DataBinaryConverter
 	 */
-	public static Data createFromBinary(final DataInput in) throws IOException {
-		return new DataBinaryConverter(in).createDataFromFields();
+	public static Data createFromBinary(final DataInput in) throws IOException,
+			FormatException {
+		return new DataBinaryConverter(in, null).createDataFromFields();
+	}
+
+	/**
+	 * Creates a new {@link Data} object from a {@link DataInput}.
+	 * 
+	 * @param in
+	 *            Input Stream with binary data
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements found during
+	 *            parsing - may be <b>null</b>
+	 * @return new {@link Data} with a list of {@link Value}s read from stream
+	 * @throws IOException
+	 *             if data could not be read from {@link DataInput}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
+	 * @see DataBinaryConverter
+	 */
+	public static Data createFromBinary(final DataInput in,
+			final List<Syntax> syntaxList) throws IOException, FormatException {
+		return new DataBinaryConverter(in, syntaxList).createDataFromFields();
 	}
 
 	/**

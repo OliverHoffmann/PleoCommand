@@ -106,7 +106,8 @@ public final class DataTest extends Testcases {
 		Log.consoleOut("Data testing done");
 	}
 
-	private void testBinaryConversion(final Data data) throws IOException {
+	private void testBinaryConversion(final Data data) throws IOException,
+			FormatException {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data.writeToBinary(new DataOutputStream(out));
 

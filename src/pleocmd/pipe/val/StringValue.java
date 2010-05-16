@@ -1,6 +1,8 @@
 package pleocmd.pipe.val;
 
+import java.io.ByteArrayInputStream;
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,11 +58,15 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	void readFromBinary(final DataInput in) throws IOException {
+	int readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
-		case UTFString:
-			val = in.readUTF();
-			break;
+		case UTFString: {
+			final int len = in.readUnsignedShort();
+			final byte[] ba = new byte[len];
+			in.readFully(ba);
+			val = new DataInputStream(new ByteArrayInputStream(ba)).readUTF();
+			return len + 2;
+		}
 		case NullTermString:
 			int cap = 32;
 			int len = 0;
@@ -77,7 +83,7 @@ public final class StringValue extends Value {
 				buf[len++] = b;
 			}
 			val = new String(buf, 0, len, "ISO-8859-1");
-			break;
+			return len + 1;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

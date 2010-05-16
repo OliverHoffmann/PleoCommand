@@ -102,8 +102,8 @@ public final class DataFileEditDialog extends JDialog implements
 			@Override
 			public void run() {
 				writeTextPaneToFile(file);
-				dsePanel.getTpUndoManager().discardAllEdits();
-				dsePanel.updateState();
+				getDsePanel().getTpUndoManager().discardAllEdits();
+				getDsePanel().updateState();
 			}
 		});
 		btnCancel = lay.addButton(Button.Cancel, new Runnable() {
@@ -249,6 +249,10 @@ public final class DataFileEditDialog extends JDialog implements
 		btnApply.setEnabled(dsePanel.getTpUndoManager().canUndo());
 		btnCancel.setEnabled(true);
 
+	}
+
+	protected DataSequenceEditorPanel getDsePanel() {
+		return dsePanel;
 	}
 
 }

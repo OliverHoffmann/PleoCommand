@@ -20,7 +20,7 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	void readFromBinary(final DataInput in) {
+	int readFromBinary(final DataInput in) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 

@@ -47,8 +47,13 @@ public final class ConsoleInput extends Input {
 						"Cannot read from console");
 			}
 		case Binary:
-			return Data.createFromBinary(new DataInputStream(StandardInput
-					.the()));
+			try {
+				return Data.createFromBinary(new DataInputStream(StandardInput
+						.the()));
+			} catch (final FormatException e) {
+				throw new InputException(this, false, e,
+						"Cannot read from console");
+			}
 		default:
 			throw new InternalException(cfgType.getEnum());
 		}

@@ -19,17 +19,17 @@ public final class IntValue extends Value {
 	}
 
 	@Override
-	void readFromBinary(final DataInput in) throws IOException {
+	int readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
 		case Int8:
 			val = in.readByte();
-			break;
+			return 1;
 		case Int32:
 			val = in.readInt();
-			break;
+			return 4;
 		case Int64:
 			val = in.readLong();
-			break;
+			return 8;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

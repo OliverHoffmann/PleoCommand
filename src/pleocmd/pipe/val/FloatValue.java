@@ -20,23 +20,23 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	void readFromBinary(final DataInput in) throws IOException {
+	int readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
 		case Int8:
 			val = in.readByte();
-			break;
+			return 1;
 		case Int32:
 			val = in.readInt();
-			break;
+			return 4;
 		case Int64:
 			val = in.readLong();
-			break;
+			return 8;
 		case Float32:
 			val = in.readFloat();
-			break;
+			return 4;
 		case Float64:
 			val = in.readDouble();
-			break;
+			return 8;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

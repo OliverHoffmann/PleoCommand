@@ -135,10 +135,11 @@ public abstract class Value {
 	 * 
 	 * @param in
 	 *            from which to read the {@link Value} in binary form.
+	 * @return number of bytes read from {@link DataInput}
 	 * @throws IOException
 	 *             if reading failed
 	 */
-	abstract void readFromBinary(final DataInput in) throws IOException;
+	abstract int readFromBinary(final DataInput in) throws IOException;
 
 	abstract void writeToBinary(final DataOutput out) throws IOException;
 

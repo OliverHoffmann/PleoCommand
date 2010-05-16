@@ -20,13 +20,18 @@ final class BinaryValue extends Value {
 	}
 
 	@Override
-	public void readFromBinary(final DataInput in) throws IOException {
+	public int readFromBinary(final DataInput in) throws IOException {
 		switch (getType()) {
 		case Data:
 			final int len = in.readInt();
-			val = new byte[len];
+			try {
+				val = new byte[len];
+			} catch (final OutOfMemoryError e) {
+				throw new IOException("Possibly invalid binary data size: "
+						+ len, e);
+			}
 			in.readFully(val);
-			break;
+			return len;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

@@ -8,6 +8,8 @@ import java.net.Socket;
 
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.exc.FormatException;
+import pleocmd.exc.InputException;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.MultiFloatData;
 
@@ -82,9 +84,13 @@ public final class TcpIpInput extends Input { // NO_UCD
 	}
 
 	@Override
-	protected Data readData0() throws IOException {
+	protected Data readData0() throws IOException, InputException {
 		if (!socket.isConnected() || socket.isInputShutdown()) return null;
-		return new MultiFloatData(Data.createFromBinary(in));
+		try {
+			return new MultiFloatData(Data.createFromBinary(in));
+		} catch (final FormatException e) {
+			throw new InputException(this, false, e, "Cannot read from TCP/IP");
+		}
 	}
 
 	public static String help(final HelpKind kind) {

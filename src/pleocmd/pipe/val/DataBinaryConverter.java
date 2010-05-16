@@ -3,10 +3,13 @@ package pleocmd.pipe.val;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.AbstractDataConverter;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Syntax.Type;
 
 /**
  * Helper class for converting {@link Data} objects from and to binary.
@@ -150,44 +153,82 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 	 * 
 	 * @param in
 	 *            Input Stream with binary data
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements found during
+	 *            parsing - may be <b>null</b>
 	 * @throws IOException
-	 *             if data could not be read from {@link DataInput}, is of an
-	 *             invalid type or is of an invalid format for its type
+	 *             if data could not be read from {@link DataInput}
+	 * @throws FormatException
+	 *             if data is of an invalid type or is of an invalid format for
+	 *             its type
 	 */
-	public DataBinaryConverter(final DataInput in) throws IOException {
+	public DataBinaryConverter(final DataInput in, final List<Syntax> syntaxList)
+			throws IOException, FormatException {
 		Log.detail("Started parsing a binary Data object");
+		int pos = 0;
 		final int hdr = in.readInt();
 		final int flags = hdr >> 27 & 0x1F;
 		final int cnt = (hdr >> 24 & 0x07) + 1;
+		if ((flags & FLAG_RESERVED_MASK) != 0)
+			throw new FormatException(syntaxList, pos,
+					"Reserved flags have been set: 0x%02X", flags);
+		if (syntaxList != null) {
+			syntaxList.add(new Syntax(Type.Flags, pos));
+			syntaxList.add(new Syntax(Type.TypeIdent, pos + 1));
+		}
+		pos += 4;
 		if ((flags & FLAG_PRIORITY) != 0) {
-			setPriority(in.readByte());
-			if (getPriority() < Data.PRIO_LOWEST
-					|| getPriority() > Data.PRIO_HIGHEST)
-				throw new IOException(String.format(
-						"Priority is out of range: %d not between "
-								+ "%d and %d", getPriority(), Data.PRIO_LOWEST,
-						Data.PRIO_HIGHEST));
+			final byte prio = in.readByte();
+			if (prio < Data.PRIO_LOWEST || prio > Data.PRIO_HIGHEST)
+				throw new FormatException(syntaxList, pos,
+						"Priority is out of range: %d not between %d and %d",
+						prio, Data.PRIO_LOWEST, Data.PRIO_HIGHEST);
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagPrio, pos));
+			++pos;
+			setPriority(prio);
 		}
 		if ((flags & FLAG_TIME) != 0) {
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagTime, pos));
 			final long ms = in.readInt() & 0xFFFFFFFFL;
 			assert ms >= 0 : ms;
+			pos += 4;
 			setTime(ms);
 		}
-		if ((flags & FLAG_RESERVED_MASK) != 0)
-			throw new IOException(String.format(
-					"Reserved flags have been set: 0x%02X", flags));
 		Log.detail("Header is 0x%08X => flags: 0x%02X count: %d", hdr, flags,
 				cnt);
 		assert cnt <= 8 : cnt;
 		for (int i = 0; i < cnt; ++i) {
 			final ValueType type = ValueType.values()[hdr >> i * 3 & 0x07];
 			assert type.getID() == (hdr >> i * 3 & 0x07);
+			if (syntaxList != null) switch (type) {
+			case Float32:
+			case Float64:
+				syntaxList.add(new Syntax(Type.FloatField, pos));
+				break;
+			case Int8:
+			case Int32:
+			case Int64:
+				syntaxList.add(new Syntax(Type.IntField, pos));
+				break;
+			case NullTermString:
+			case UTFString:
+				syntaxList.add(new Syntax(Type.StringField, pos));
+				break;
+			case Data:
+				syntaxList.add(new Syntax(Type.DataField, pos));
+				break;
+			default:
+				syntaxList.add(new Syntax(Type.Error, pos));
+			}
 			final Value val = Value.createForType(type);
 			Log.detail("Reading value of type '%s' from binary", type);
-			val.readFromBinary(in);
+			pos += val.readFromBinary(in);
 			getValues().add(val);
 		}
 		trimValues();
+		if (syntaxList != null) syntaxList.add(new Syntax(Type.Error, pos));
 		Log.detail("Finished parsing a binary Data object");
 	}
 
