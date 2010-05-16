@@ -70,9 +70,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * If too small, very short delays for timed {@link Data} may occur.<br>
 	 * If too large, timed {@link Data}s may be executed too early.<br>
 	 * Typical values are in [0, 10].<br>
-	 * Should not be larger than {@link #cfgOverheadReductionTime}<br>
-	 * Note that if {@link #cfgOutputThreadSleepTime} is too large, a delay may
-	 * already have occurred which can't be compensated here.
+	 * Should not be larger than {@link #cfgOverheadReductionTime}.
 	 */
 	private final ConfigInt cfgOutputInitOverhead = new ConfigInt(
 			"Output Init Overhead", 2, 0, 1000);
@@ -87,19 +85,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 */
 	private final ConfigInt cfgMaxBehind = new ConfigInt("Max Behind", 300, 0,
 			60000);
-
-	// TODO ENH use a notify on the Output-Thread everytime a DataBlock is
-	// available - avoids need for sleeping in DataQueue if currently empty?
-	/**
-	 * Number of milliseconds to wait until data is available in
-	 * {@link DataQueue#get(long)}.
-	 * <p>
-	 * If too small, cpu usage may increase during idle times.<br>
-	 * If too large, short delays for timed {@link Data} may occur.<br>
-	 * Typical values are in [5, 30].
-	 */
-	private final ConfigInt cfgOutputThreadSleepTime = new ConfigInt(
-			"Output-Thread Sleep Time", 10, 0, 300);
 
 	private final ConfigPath cfgLastSaveFile = new ConfigPath("Last Save-File",
 			PathType.FileForWriting);
@@ -622,7 +607,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				// fetch next data block ...
 				final Data data;
 				try {
-					data = dataQueue.get(cfgOutputThreadSleepTime.getContent());
+					data = dataQueue.get();
 				} catch (final InterruptedException e1) {
 					Log.detail("Reading next data has been interrupted");
 					feedback.incInterruptionCount();
@@ -998,7 +983,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (groupName.equals(getClass().getSimpleName()))
 			return new Group(groupName).add(cfgMaxBehind).add(
 					cfgOutputInitOverhead).add(cfgOverheadReductionTime).add(
-					cfgOutputThreadSleepTime).add(cfgLastSaveFile);
+					cfgLastSaveFile);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
 			throw new InternalException("Wrong groupName for "

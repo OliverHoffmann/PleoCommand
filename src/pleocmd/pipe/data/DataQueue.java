@@ -23,9 +23,9 @@ import pleocmd.pipe.out.Output;
 public final class DataQueue {
 
 	/**
-	 * Will be used if the queue is empty and there is a {@link #get(long)}
-	 * waiting to indicate that the queue is currently accepting everything
-	 * without any side effects.
+	 * Will be used if the queue is empty and there is a {@link #get()} waiting
+	 * to indicate that the queue is currently accepting everything without any
+	 * side effects.
 	 */
 	private static final int PRIO_UNDEFINED = Byte.MAX_VALUE;
 
@@ -52,9 +52,9 @@ public final class DataQueue {
 	/**
 	 * The priority of all the {@link Data}s in the queue.<br>
 	 * This is {@link #PRIO_UNDEFINED} if the queue is empty and there is a
-	 * {@link #get(long)} waiting or there never was any {@link #get(long)}
-	 * (since the last {@link #resetCache()}).<br>
-	 * So it's defined for an empty queue only if the last {@link #get(long)} is
+	 * {@link #get()} waiting or there never was any {@link #get()} (since the
+	 * last {@link #resetCache()}).<br>
+	 * So it's defined for an empty queue only if the last {@link #get()} is
 	 * still being processed by the Output-Thread.
 	 */
 	private byte priority;
@@ -63,7 +63,7 @@ public final class DataQueue {
 	 * Only true if the cache has been closed, i.e. the remaining data in
 	 * {@link #buffer} can still be read, but no new data can be put into the
 	 * {@link #buffer} and if {@link #readPos} catches up {@link #writePos}
-	 * {@link #get(long)} throws an {@link IOException}.
+	 * {@link #get()} throws an {@link IOException}.
 	 */
 	private boolean closed;
 
@@ -78,9 +78,9 @@ public final class DataQueue {
 
 	/**
 	 * Appends a "close" to the ring buffer.<br>
-	 * The remaining Data in the ring buffer can still be {@link #get(long)} but
-	 * no new data can be {@link #put(Data)} into it. After no more data is
-	 * available {@link #get(long)} throws an {@link IOException}.<br>
+	 * The remaining Data in the ring buffer can still be {@link #get()} but no
+	 * new data can be {@link #put(Data)} into it. After no more data is
+	 * available {@link #get()} throws an {@link IOException}.<br>
 	 * Has no effect if the {@link DataQueue} is already closed.
 	 */
 	public synchronized void close() {
@@ -110,20 +110,17 @@ public final class DataQueue {
 	 * Blocks until the {@link Data} is available.<br>
 	 * Should only be called from the Output thread.
 	 * 
-	 * @param sleepTime
-	 *            time to wait before retrying to read a {@link Data} if there's
-	 *            currently none available.
 	 * @return the next {@link Data} or <b>null</b> if no more {@link Data} is
 	 *         available and the {@link DataQueue} has been {@link #close()}d
 	 * @throws InterruptedException
 	 *             if waiting for the next data block has been interrupted
 	 */
-	public Data get(final long sleepTime) throws InterruptedException {
+	public Data get() throws InterruptedException {
 		Log.detail("Trying to read in '%s'", this);
 		boolean first = true;
-		while (true) {
-			// check if read catches up write?
-			synchronized (this) {
+		synchronized (this) {
+			while (true) {
+				// check if read catches up write?
 				if (readPos != writePos) break;
 				if (first) {
 					// queue empty and waiting in get(), so:
@@ -131,12 +128,12 @@ public final class DataQueue {
 					Log.detail("Queue empty and waiting => "
 							+ "undefined priority in '%s'", this);
 				}
-				// if queue closed, were return null to signal end of pipe
+				// if queue closed, we return null to signal end of pipe
 				if (closed) return null;
 				first = false;
+				// block until data available
+				wait();
 			}
-			// block until data available
-			Thread.sleep(sleepTime);
 		}
 		synchronized (this) {
 			final Data res = buffer[readPos];
@@ -169,7 +166,7 @@ public final class DataQueue {
 
 	/**
 	 * Puts one {@link Data} into the ringbuffer, so it can be read by
-	 * {@link #get(long)}.<br>
+	 * {@link #get()}.<br>
 	 * If {@link Data}'s priority is lower than the one of the current elements
 	 * in the queue, the new {@link Data} will silently be dropped. <br>
 	 * If {@link Data}'s priority is higher than the one of the current elements
@@ -219,6 +216,7 @@ public final class DataQueue {
 			Log.detail("Increased buffer in '%s'", this);
 		}
 
+		notify();
 		return hasBeenCleared ? PutResult.ClearedAndPut : PutResult.Put;
 	}
 
