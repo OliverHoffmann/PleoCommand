@@ -10,6 +10,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
+import pleocmd.RunnableWithArgument;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.ConfigPath.PathType;
@@ -35,6 +36,44 @@ public final class FileOutput extends Output { // NO_UCD
 				new FileNameExtensionFilter("Ascii-Textfiles", "txt"),
 				new FileNameExtensionFilter("Pleo Ascii Data", "pad"),
 				new FileNameExtensionFilter("Pleo Binary Data", "pbd") }));
+		cfgFile.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final String path = (String) args[0];
+				switch (getCfgType().getEnumGUI()) {
+				case Ascii:
+				case AsciiOriginal:
+				case PleoMonitorCommands:
+					if (path.endsWith(".pbd"))
+						getCfgType().setEnumGUI(PrintType.Binary);
+					break;
+				case Binary:
+				case BinaryOriginal:
+					if (!path.endsWith(".pbd"))
+						getCfgType().setEnumGUI(PrintType.Ascii);
+					break;
+				}
+				return null;
+			}
+		});
+		cfgType.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final String path = getCfgFile().getContentGUI().getPath();
+				switch (PrintType.valueOf((String) args[0])) {
+				case Ascii:
+				case AsciiOriginal:
+				case PleoMonitorCommands:
+					if (path.endsWith(".pbd")) getCfgFile().clearContentGUI();
+					break;
+				case Binary:
+				case BinaryOriginal:
+					if (!path.endsWith(".pbd")) getCfgFile().clearContentGUI();
+					break;
+				}
+				return null;
+			}
+		});
 		constructed();
 	}
 
@@ -75,19 +114,19 @@ public final class FileOutput extends Output { // NO_UCD
 			IOException {
 		Data root;
 		switch (cfgType.getEnum()) {
-		case DataAscii:
+		case Ascii:
 			data.writeToAscii(out, true);
 			break;
-		case DataBinary:
+		case Binary:
 			data.writeToBinary(out);
 			break;
-		case DataAsciiOriginal:
+		case AsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				root.writeToAscii(out, true);
 			}
 			break;
-		case DataBinaryOriginal:
+		case BinaryOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				data.getRoot().writeToBinary(out);
@@ -134,6 +173,14 @@ public final class FileOutput extends Output { // NO_UCD
 	@Override
 	protected int getVisualizeDataSetCount() {
 		return 0;
+	}
+
+	protected ConfigPath getCfgFile() {
+		return cfgFile;
+	}
+
+	protected ConfigEnum<PrintType> getCfgType() {
+		return cfgType;
 	}
 
 }

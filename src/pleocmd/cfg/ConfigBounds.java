@@ -15,6 +15,8 @@ public final class ConfigBounds extends ConfigValue {
 
 	private final Rectangle content = new Rectangle();
 
+	private JLabel lbl;
+
 	public ConfigBounds(final String label) {
 		super(label);
 		clearContent();
@@ -32,6 +34,7 @@ public final class ConfigBounds extends ConfigValue {
 	public void setContent(final Rectangle content) {
 		if (content == null) throw new NullPointerException();
 		this.content.setBounds(content);
+		if (lbl != null) lbl.setText(asString());
 	}
 
 	public void assignContent(final Component comp) {
@@ -102,7 +105,7 @@ public final class ConfigBounds extends ConfigValue {
 
 	@Override
 	public boolean insertGUIComponents(final Layouter lay) {
-		lay.add(new JLabel(asString()), true);
+		lay.add(lbl = new JLabel(asString()), true);
 		return false;
 	}
 

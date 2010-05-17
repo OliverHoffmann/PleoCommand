@@ -49,6 +49,38 @@ public final class FileInput extends Input { // NO_UCD
 			}
 
 		});
+		cfgFile.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final String path = (String) args[0];
+				switch (getCfgType().getEnumGUI()) {
+				case Ascii:
+					if (path.endsWith(".pbd"))
+						getCfgType().setEnumGUI(ReadType.Binary);
+					break;
+				case Binary:
+					if (!path.endsWith(".pbd"))
+						getCfgType().setEnumGUI(ReadType.Ascii);
+					break;
+				}
+				return null;
+			}
+		});
+		cfgType.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final String path = getCfgFile().getContentGUI().getPath();
+				switch (ReadType.valueOf((String) args[0])) {
+				case Ascii:
+					if (path.endsWith(".pbd")) getCfgFile().clearContentGUI();
+					break;
+				case Binary:
+					if (!path.endsWith(".pbd")) getCfgFile().clearContentGUI();
+					break;
+				}
+				return null;
+			}
+		});
 		constructed();
 	}
 
@@ -131,6 +163,14 @@ public final class FileInput extends Input { // NO_UCD
 	@Override
 	protected int getVisualizeDataSetCount() {
 		return 0;
+	}
+
+	protected ConfigPath getCfgFile() {
+		return cfgFile;
+	}
+
+	protected ConfigEnum<ReadType> getCfgType() {
+		return cfgType;
 	}
 
 }

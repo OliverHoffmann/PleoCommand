@@ -3,6 +3,7 @@ package pleocmd.cfg;
 import java.util.List;
 
 import pleocmd.Log;
+import pleocmd.RunnableWithArgument;
 import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
@@ -36,6 +37,8 @@ import pleocmd.pipe.PipePart;
 public abstract class ConfigValue {
 
 	private final String label;
+
+	private RunnableWithArgument changingContent;
 
 	protected ConfigValue(final String label) {
 		this.label = label;
@@ -146,6 +149,54 @@ public abstract class ConfigValue {
 			Log.warn("Ignoring unknown identifier '%s' and "
 					+ "parsing value as simple string", identifier);
 		return new ConfigString(label, !singleLined);
+	}
+
+	/**
+	 * Sets a method which is invoked during every modification of the GUI's
+	 * copy of the content of this {@link ConfigValue}, before the content has
+	 * been applied to the {@link ConfigValue} itself by clicking "OK" in the
+	 * GUI.<br>
+	 * The method <b>must not</b> modify content of other {@link ConfigValue}s
+	 * directly, but use methods like setContentGUI(...) instead, otherwise
+	 * clicking "Cancel" can no longer reset the changes made while the GUI has
+	 * been visible.<br>
+	 * The method always gets one argument (it's type depends on the
+	 * {@link ConfigValue}'s subclass) and the return value may be one of:
+	 * <ul>
+	 * <li>null</li>
+	 * <li>a String, {@link #setFromString(String)} will be called</li>
+	 * <li>a List&lt;String&gt;, {@link #setFromStrings(List)} will be called</li>
+	 * </ul>
+	 * 
+	 * @param changingContent
+	 *            a {@link RunnableWithArgument} which is invoked on every GUI
+	 *            driven change of the content.
+	 */
+	public void setChangingContent(final RunnableWithArgument changingContent) {
+		this.changingContent = changingContent;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected void invokeChangingContent(final Object... args) {
+		if (changingContent != null) {
+			final Object res = changingContent.run(args);
+			if (res instanceof String)
+				try {
+					setFromString((String) res);
+				} catch (final ConfigurationException e) {
+					Log.error(e);
+				}
+			else if (res instanceof List<?>) {
+				final List<?> l = (List<?>) res;
+				if (!l.isEmpty() && l.get(0) instanceof String) try {
+					setFromStrings((List<String>) l);
+				} catch (final ConfigurationException e) {
+					Log.error(e);
+				}
+			} else if (res != null)
+				Log.error("invokeChangingContent() can only handle null, "
+						+ "a String or a List of Strings as return value");
+		}
 	}
 
 }

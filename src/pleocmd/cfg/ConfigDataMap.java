@@ -13,7 +13,8 @@ import pleocmd.pipe.data.Data;
 
 public final class ConfigDataMap extends ConfigMap<String, Data> {
 
-	private DataSequenceTriggerPanel dataEditor;
+	private DataSequenceTriggerPanel dp;
+	private boolean internalMod;
 
 	public ConfigDataMap(final String label) {
 		super(label);
@@ -47,15 +48,33 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 	}
 
 	@Override
+	protected void contentChanged() {
+		if (dp != null) dp.externalChanged(this);
+	}
+
+	public ConfigDataMap getContentGUI() {
+		return dp == null ? null : dp.getMap();
+	}
+
+	public void setContentGUI(final ConfigDataMap other) {
+		internalMod = true;
+		try {
+			if (dp != null) dp.externalChanged(other);
+		} finally {
+			internalMod = false;
+		}
+	}
+
+	@Override
 	public boolean insertGUIComponents(final Layouter lay) {
-		dataEditor = new DataSequenceTriggerPanel(this);
-		lay.addWholeLine(dataEditor, true);
+		dp = new DataSequenceTriggerPanel(this);
+		lay.addWholeLine(dp, true);
 		return true;
 	}
 
 	@Override
 	public void setFromGUIComponents() {
-		dataEditor.saveChanges();
+		dp.saveChanges();
 	}
 
 	/**
@@ -76,6 +95,10 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 		for (final Data data : org)
 			res.add(new Data(data, parent));
 		return res;
+	}
+
+	public void dstpModified(final ConfigDataMap map) {
+		if (!internalMod) invokeChangingContent(map);
 	}
 
 }

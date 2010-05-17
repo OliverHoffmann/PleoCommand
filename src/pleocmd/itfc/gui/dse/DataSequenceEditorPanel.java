@@ -263,7 +263,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 							PleoCommunication.getHighestPort().getName());
 				if (device == null) return;
 				playOutputList = new ArrayList<Output>(2);
-				final Output outC = new ConsoleOutput(PrintType.DataAscii);
+				final Output outC = new ConsoleOutput(PrintType.Ascii);
 				outC.configure();
 				outC.init();
 				playOutputList.add(outC);

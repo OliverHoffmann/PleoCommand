@@ -69,6 +69,11 @@ public final class ConfigValueTest extends Testcases {
 		}
 
 		@Override
+		protected void contentChanged() {
+			// nothing to do, we have no GUI here
+		}
+
+		@Override
 		public boolean insertGUIComponents(final Layouter lay) {
 			// nothing to do, we have no GUI here
 			return true;

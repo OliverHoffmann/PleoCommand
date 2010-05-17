@@ -9,6 +9,8 @@ import java.util.StringTokenizer;
 
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -25,7 +27,9 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 
 	private final Collection<E> content;
 
-	private JTextArea tc;
+	private JTextArea ta;
+
+	private boolean internalMod;
 
 	public ConfigCollection(final String label, final Type type) {
 		super(label);
@@ -71,6 +75,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 			throws ConfigurationException {
 		checkValidString(item.toString(), false);
 		content.add(item);
+		if (ta != null) ta.setText(asString());
 	}
 
 	public final void addContent(final Collection<? extends E> contentToAdd)
@@ -78,11 +83,14 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 		for (final Object o : contentToAdd)
 			checkValidString(o.toString(), false);
 		content.addAll(contentToAdd);
+		if (ta != null) ta.setText(asString());
 	}
 
 	public final <F extends E> boolean removeContent(final F item) {
 		if (item == null) throw new NullPointerException();
-		return content.remove(item);
+		final boolean res = content.remove(item);
+		if (ta != null) ta.setText(asString());
+		return res;
 	}
 
 	public final <F extends E> boolean contains(final F item) {
@@ -92,6 +100,39 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 
 	public final void clearContent() {
 		content.clear();
+		if (ta != null) ta.setText(asString());
+	}
+
+	public final Collection<E> getContentGUI() {
+		if (ta == null) return null;
+		final List<E> list = new ArrayList<E>();
+		final StringTokenizer st = new StringTokenizer(ta.getText(), "\n");
+		try {
+			while (st.hasMoreTokens())
+				list.add(createItem(st.nextToken()));
+		} catch (final ConfigurationException e) {
+			return null;
+		}
+		return list;
+	}
+
+	public final void setContentGUI(final Collection<? extends E> content) {
+		internalMod = true;
+		try {
+			if (ta != null) ta.setText(content.toString());
+			// FIXME same as below
+		} finally {
+			internalMod = false;
+		}
+	}
+
+	public final void clearContentGUI() {
+		internalMod = true;
+		try {
+			if (ta != null) ta.setText("");
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	@Override
@@ -147,18 +188,32 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 
 	@Override
 	public final boolean insertGUIComponents(final Layouter lay) {
-		tc = new JTextArea(asString(), 5, 20);
-		lay.addWholeLine(new JScrollPane(tc), true);
+		ta = new JTextArea(asString(), 5, 20); // FIXME should be asStrings()
+		ta.getDocument().addUndoableEditListener(new UndoableEditListener() {
+			@Override
+			public void undoableEditHappened(final UndoableEditEvent e) {
+				if (!isInternalMod()) invokeChangingContent(getTa().getText());
+			}
+		});
+		lay.addWholeLine(new JScrollPane(ta), true);
 		return true;
 	}
 
 	@Override
 	public final void setFromGUIComponents() {
 		try {
-			setFromString(tc.getText());
+			setFromString(ta.getText());
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	protected JTextArea getTa() {
+		return ta;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
 	}
 
 }

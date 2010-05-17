@@ -49,16 +49,20 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		for (final V v : list)
 			checkValidString(convertValue(v), false);
 		content.put(key, list);
+		contentChanged();
 	}
 
 	public final void renameContent(final K key, final K newKey)
 			throws ConfigurationException {
 		checkValidString(convertKey(newKey), false);
 		final List<V> list = content.remove(key);
-		if (list == null)
+		if (list == null) {
+			contentChanged();
 			throw new IllegalArgumentException(String.format(
 					"Key '%s' was not in the map", key));
+		}
 		content.put(newKey, list);
+		contentChanged();
 	}
 
 	public final void addContent(final K key, final V value)
@@ -71,26 +75,31 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		}
 		checkValidString(convertValue(value), false);
 		list.add(value);
+		contentChanged();
 	}
 
 	public final void createContent(final K key) throws ConfigurationException {
 		if (!content.containsKey(key)) {
 			checkValidString(convertKey(key), false);
 			content.put(key, new ArrayList<V>());
+			contentChanged();
 		}
 	}
 
 	public final void removeContent(final K key) {
 		content.remove(key);
+		contentChanged();
 	}
 
 	public final void clearContent(final K key) {
 		final List<V> list = content.get(key);
 		if (list != null) list.clear();
+		contentChanged();
 	}
 
 	public final void clearContent() {
 		content.clear();
+		contentChanged();
 	}
 
 	public final <F extends K, W extends V> void assignFrom(
@@ -168,6 +177,8 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	protected abstract String convertKey(K key);
 
 	protected abstract String convertValue(V value);
+
+	protected abstract void contentChanged();
 
 	@Override
 	public final String getIdentifier() {

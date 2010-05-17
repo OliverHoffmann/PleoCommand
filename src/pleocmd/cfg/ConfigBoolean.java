@@ -3,6 +3,8 @@ package pleocmd.cfg;
 import java.util.List;
 
 import javax.swing.JCheckBox;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
@@ -11,7 +13,9 @@ public final class ConfigBoolean extends ConfigValue {
 
 	private boolean content;
 
-	private JCheckBox checkBox;
+	private JCheckBox cb;
+
+	private boolean internalMod;
 
 	public ConfigBoolean(final String label) {
 		super(label);
@@ -29,6 +33,20 @@ public final class ConfigBoolean extends ConfigValue {
 
 	public void setContent(final boolean content) {
 		this.content = content;
+		if (cb != null) cb.setSelected(content);
+	}
+
+	public Boolean getContentGUI() {
+		return cb == null ? null : cb.isSelected();
+	}
+
+	public void setContentGUI(final boolean content) {
+		internalMod = true;
+		try {
+			if (cb != null) cb.setSelected(content);
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	@Override
@@ -70,14 +88,29 @@ public final class ConfigBoolean extends ConfigValue {
 
 	@Override
 	public boolean insertGUIComponents(final Layouter lay) {
-		checkBox = new JCheckBox("", content);
-		lay.add(checkBox, false);
+		cb = new JCheckBox("", content);
+		cb.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(final ChangeEvent e) {
+				if (!isInternalMod())
+					invokeChangingContent(getCb().isSelected());
+			}
+		});
+		lay.add(cb, false);
 		return false;
 	}
 
 	@Override
 	public void setFromGUIComponents() {
-		setContent(checkBox.isSelected());
+		setContent(cb.isSelected());
+	}
+
+	protected JCheckBox getCb() {
+		return cb;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
 	}
 
 }

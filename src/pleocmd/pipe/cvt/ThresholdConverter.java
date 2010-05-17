@@ -2,6 +2,7 @@ package pleocmd.pipe.cvt;
 
 import java.util.List;
 
+import pleocmd.RunnableWithArgument;
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
@@ -10,7 +11,7 @@ import pleocmd.pipe.data.SingleFloatData;
 
 public final class ThresholdConverter extends Converter { // NO_UCD
 
-	private final ConfigDouble cfgTheshold;
+	private final ConfigDouble cfgThreshold;
 
 	private final ConfigDouble cfgMarginalArea;
 
@@ -33,7 +34,7 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 	private double lastVal;
 
 	public ThresholdConverter() {
-		addConfig(cfgTheshold = new ConfigDouble("Threshold", 10, 0,
+		addConfig(cfgThreshold = new ConfigDouble("Threshold", 10, 0,
 				Double.MAX_VALUE));
 		addConfig(cfgMarginalArea = new ConfigDouble("Marginal Area", 3, 0,
 				Double.MAX_VALUE));
@@ -41,13 +42,93 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 				Double.MAX_VALUE));
 		addConfig(cfgValueAbove = new ConfigDouble(
 				"Value For Above (0 == current)", 0, 0, Double.MAX_VALUE));
+		cfgThreshold.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final double thres = (Double) args[0];
+				double margin = getCfgMarginalArea().getContentGUI();
+				final double below = getCfgValueBelow().getContentGUI();
+				final double above = getCfgValueAbove().getContentGUI();
+				if (2 * margin > thres) {
+					getCfgMarginalArea().setContentGUI(thres / 2);
+					margin = thres / 2;
+				}
+				if (below > thres - margin / 2)
+					getCfgValueBelow().setContentGUI(
+							Math.max(0, thres - margin / 2));
+				if (above != 0 && above < thres + margin / 2)
+					getCfgValueAbove().setContentGUI(thres + margin / 2);
+				return null;
+			}
+		});
+		cfgMarginalArea.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				double thres = getCfgThreshold().getContentGUI();
+				final double margin = (Double) args[0];
+				final double below = getCfgValueBelow().getContentGUI();
+				final double above = getCfgValueAbove().getContentGUI();
+				if (2 * margin > thres) {
+					getCfgThreshold().setContentGUI(margin * 2);
+					thres = margin * 2;
+				}
+				if (below > thres - margin / 2)
+					getCfgValueBelow().setContentGUI(
+							Math.max(0, thres - margin / 2));
+				if (above != 0 && above < thres + margin / 2)
+					getCfgValueAbove().setContentGUI(thres + margin / 2);
+				return null;
+			}
+		});
+		cfgValueBelow.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				double thres = getCfgThreshold().getContentGUI();
+				double margin = getCfgMarginalArea().getContentGUI();
+				final double below = (Double) args[0];
+				final double above = getCfgValueAbove().getContentGUI();
+				if (below > thres - margin / 2) {
+					thres = below + margin / 2;
+					getCfgThreshold().setContentGUI(thres);
+					if (2 * margin > thres) {
+						getCfgMarginalArea().setContentGUI(thres / 2);
+						margin = thres / 2;
+					}
+				}
+				if (above != 0
+						&& (above <= below || above < thres + margin / 2))
+					getCfgValueAbove().setContentGUI(thres + margin / 2);
+				return null;
+			}
+		});
+		cfgValueAbove.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				double thres = getCfgThreshold().getContentGUI();
+				double margin = getCfgMarginalArea().getContentGUI();
+				final double below = getCfgValueBelow().getContentGUI();
+				final double above = (Double) args[0];
+				if (above != 0 && above < thres + margin / 2) {
+					thres = Math.max(0, above - margin / 2);
+					getCfgThreshold().setContentGUI(thres);
+					if (2 * margin > thres) {
+						getCfgMarginalArea().setContentGUI(thres / 2);
+						margin = thres / 2;
+					}
+				}
+				if (above != 0 && above <= below || below > thres - margin / 2)
+					getCfgValueBelow().setContentGUI(
+							Math.max(0, thres - margin / 2));
+				return null;
+			}
+		});
 		constructed();
 	}
 
 	@Override
 	protected void init0() {
-		upper = cfgTheshold.getContent() + cfgMarginalArea.getContent() / 2;
-		lower = cfgTheshold.getContent() - cfgMarginalArea.getContent() / 2;
+		upper = cfgThreshold.getContent() + cfgMarginalArea.getContent() / 2;
+		lower = cfgThreshold.getContent() - cfgMarginalArea.getContent() / 2;
 		lastHit = Hit.Undef;
 		value = Val.Undef;
 		lastVal = .0;
@@ -77,7 +158,7 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 
 	@Override
 	protected String getShortConfigDescr0() {
-		return String.format("|>%s±%s| => %s : %s", cfgTheshold.asString(),
+		return String.format("|>%s±%s| => %s : %s", cfgThreshold.asString(),
 				String.valueOf(cfgMarginalArea.getContent() / 2), cfgValueBelow
 						.asString(),
 				cfgValueAbove.getContent() > 0 ? cfgValueAbove.asString()
@@ -96,7 +177,7 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 		if (lastVal > upper && val <= upper) lastHit = Hit.Upper;
 
 		// check if we just hit the threshold
-		final double thrs = cfgTheshold.getContent();
+		final double thrs = cfgThreshold.getContent();
 		if (lastVal < thrs && val >= thrs || lastVal > thrs && val <= thrs)
 			switch (lastHit) {
 			case Lower:
@@ -164,18 +245,20 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 
 	@Override
 	public String isConfigurationSane() {
-		if (2 * cfgMarginalArea.getContent() > cfgTheshold.getContent())
+		final double thres = cfgThreshold.getContent();
+		final double margin = cfgMarginalArea.getContent();
+		final double below = cfgValueBelow.getContent();
+		final double above = cfgValueAbove.getContent();
+		if (2 * margin > thres)
 			return "Marginal Area must be at most half of threshold";
-		if (cfgValueBelow.getContent() > cfgTheshold.getContent()
-				- cfgMarginalArea.getContent() / 2)
+		if (below > thres - margin / 2)
 			return "Value for Below must not be larger than the "
 					+ "lower marginal area bound";
-		if (cfgValueAbove.getContent() != 0) {
-			if (cfgValueAbove.getContent() < cfgTheshold.getContent()
-					+ cfgMarginalArea.getContent() / 2)
+		if (above != 0) {
+			if (above < thres + margin / 2)
 				return "Value for Above must not be smaller than the "
 						+ "higher marginal area bound";
-			if (cfgValueAbove.getContent() <= cfgValueBelow.getContent())
+			if (above <= below)
 				return "Value for Above must be larger than Value for Below";
 		}
 		return null;
@@ -184,6 +267,22 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 	@Override
 	protected int getVisualizeDataSetCount() {
 		return 4;
+	}
+
+	protected ConfigDouble getCfgThreshold() {
+		return cfgThreshold;
+	}
+
+	protected ConfigDouble getCfgMarginalArea() {
+		return cfgMarginalArea;
+	}
+
+	protected ConfigDouble getCfgValueBelow() {
+		return cfgValueBelow;
+	}
+
+	protected ConfigDouble getCfgValueAbove() {
+		return cfgValueAbove;
 	}
 
 }

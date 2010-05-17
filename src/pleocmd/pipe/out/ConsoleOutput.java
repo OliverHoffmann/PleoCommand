@@ -46,10 +46,10 @@ public final class ConsoleOutput extends Output {
 			IOException {
 		Data root;
 		switch (cfgType.getEnum()) {
-		case DataAscii:
+		case Ascii:
 			Log.consoleOut(data.asString());
 			break;
-		case DataBinary:
+		case Binary:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				final ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -57,13 +57,13 @@ public final class ConsoleOutput extends Output {
 				Log.consoleOut(out.toString("ISO-8859-1"));
 			}
 			break;
-		case DataAsciiOriginal:
+		case AsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				Log.consoleOut(data.getRoot().asString());
 			}
 			break;
-		case DataBinaryOriginal:
+		case BinaryOriginal:
 			final ByteArrayOutputStream out = new ByteArrayOutputStream();
 			data.getRoot().writeToBinary(new DataOutputStream(out));
 			Log.consoleOut(out.toString("ISO-8859-1"));

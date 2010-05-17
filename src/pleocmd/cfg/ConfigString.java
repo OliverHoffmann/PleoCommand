@@ -7,6 +7,8 @@ import java.util.StringTokenizer;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.text.JTextComponent;
 
 import pleocmd.Log;
@@ -21,6 +23,8 @@ public class ConfigString extends ConfigValue {
 	private String content;
 
 	private JTextComponent tc;
+
+	private boolean internalMod;
 
 	public ConfigString(final String label, final boolean multiLine) {
 		super(label);
@@ -69,6 +73,7 @@ public class ConfigString extends ConfigValue {
 			throw new ConfigurationException("content contains line-feeds");
 		checkValidString(content, multiLine);
 		this.content = content;
+		if (tc != null) tc.setText(content);
 	}
 
 	public final void setContent(final List<String> content)
@@ -91,6 +96,38 @@ public class ConfigString extends ConfigValue {
 
 	public final void clearContent() {
 		content = "";
+		if (tc != null) tc.setText("");
+	}
+
+	public final String getContentGUI() {
+		return tc == null ? null : tc.getText();
+	}
+
+	public final List<String> getContentListGUI() {
+		if (tc == null) return null;
+		final List<String> res = new ArrayList<String>();
+		final StringTokenizer st = new StringTokenizer(tc.getText(), "\n");
+		while (st.hasMoreTokens())
+			res.add(st.nextToken());
+		return res;
+	}
+
+	public void setContentGUI(final String content) {
+		internalMod = true;
+		try {
+			if (tc != null) tc.setText(content);
+		} finally {
+			internalMod = false;
+		}
+	}
+
+	public void clearContentGUI() {
+		internalMod = true;
+		try {
+			if (tc != null) tc.setText("");
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	@Override
@@ -129,6 +166,12 @@ public class ConfigString extends ConfigValue {
 	public boolean insertGUIComponents(final Layouter lay) {
 		tc = multiLine ? new JTextArea(content, 5, 20) : new JTextField(
 				content, 20);
+		tc.getDocument().addUndoableEditListener(new UndoableEditListener() {
+			@Override
+			public void undoableEditHappened(final UndoableEditEvent e) {
+				if (!isInternalMod()) invokeChangingContent(getTc().getText());
+			}
+		});
 		if (multiLine) {
 			final JScrollPane sp = new JScrollPane(tc);
 			lay.addWholeLine(sp, true);
@@ -145,6 +188,14 @@ public class ConfigString extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	protected JTextComponent getTc() {
+		return tc;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
 	}
 
 }

@@ -79,4 +79,13 @@ public final class ConfigEnum<E extends Enum<E>> extends ConfigItem<E> {
 					"Name of enum not recognized !? ('%s')", exc);
 		}
 	}
+
+	public void setEnumGUI(final E e) {
+		setContentGUI(e.toString());
+	}
+
+	public E getEnumGUI() {
+		return Enum.valueOf(enumClass, getContentGUI());
+	}
+
 }

@@ -166,7 +166,7 @@ public class PipeTest extends Testcases {
 		final File tmpFile = File.createTempFile("PipeTest", null);
 		p.reset();
 		p.addInput(in1 = new StaticInput("[T1s]\n[T8sP10]\n"));
-		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.DataAscii));
+		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.Ascii));
 		in1.connectToPipePart(out1);
 		tmpFile.delete();
 		tmpFile.mkdir();
@@ -176,7 +176,7 @@ public class PipeTest extends Testcases {
 		Log.consoleOut("Test error handling (two outputs, first one fails)");
 		p.reset();
 		p.addInput(in1 = new StaticInput("SC|ECHO|Second is working\n"));
-		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.DataAscii));
+		p.addOutput(out1 = new FileOutput(tmpFile, PrintType.Ascii));
 		p.addOutput(out2 = new InternalCommandOutput());
 		in1.connectToPipePart(out1);
 		in1.connectToPipePart(out2);

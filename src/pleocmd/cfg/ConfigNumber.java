@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -22,6 +24,8 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	private final E step;
 
 	private JSpinner sp;
+
+	private boolean internalMod;
 
 	public ConfigNumber(final String label, final E min, final E max,
 			final E step) {
@@ -52,6 +56,24 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 			throw new ConfigurationException("%s not between %s and %s",
 					content, min, max);
 		this.content = content;
+		if (sp != null) sp.setValue(content);
+	}
+
+	public final E getContentGUI() {
+		try {
+			return sp == null ? null : valueOf(sp.getValue().toString());
+		} catch (final ConfigurationException e) {
+			return null;
+		}
+	}
+
+	public final void setContentGUI(final E content) {
+		internalMod = true;
+		try {
+			if (sp != null) sp.setValue(content);
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	public final E getMin() {
@@ -98,6 +120,13 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	public final boolean insertGUIComponents(final Layouter lay) {
 		sp = new JSpinner(new SpinnerNumberModel(content, (Comparable<E>) min,
 				(Comparable<E>) max, step));
+		sp.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(final ChangeEvent e) {
+				if (!isInternalMod())
+					invokeChangingContent(getSp().getValue());
+			}
+		});
 		sp.setPreferredSize(new Dimension(150, sp.getMinimumSize().height));
 		lay.add(sp, true);
 		return false;
@@ -111,4 +140,13 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
 	}
+
+	protected JSpinner getSp() {
+		return sp;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
+	}
+
 }

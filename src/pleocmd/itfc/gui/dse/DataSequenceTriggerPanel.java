@@ -133,8 +133,10 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			if (trigger == null) {
 				if (!list.isEmpty())
 					throw new IOException("No name selected in JList");
-			} else
+			} else {
 				map.setContent(trigger, list);
+				modified();
+			}
 		} catch (final ConfigurationException e) {
 			Log.error(e);
 		} catch (final IOException e) {
@@ -168,6 +170,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 		if (name != null) {
 			try {
 				map.createContent(name);
+				modified();
 			} catch (final ConfigurationException e) {
 				Log.error(e);
 			}
@@ -184,6 +187,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			if (name != null) {
 				try {
 					map.renameContent(trigger, name);
+					modified();
 				} catch (final ConfigurationException e) {
 					Log.error(e);
 				}
@@ -202,7 +206,12 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			trigger = null;
 			updateTriggerModel();
 			updateState();
+			modified();
 		}
+	}
+
+	public void modified() {
+		mapOrg.dstpModified(map);
 	}
 
 	protected void updateState() {
@@ -211,6 +220,17 @@ public final class DataSequenceTriggerPanel extends JPanel {
 		btnRemoveTrigger.setEnabled(trigger != null);
 		dsePanel.setEnabled(trigger != null);
 		dsePanel.updateState();
+	}
+
+	public void externalChanged(final ConfigDataMap other) {
+		map.assignFrom(other);
+		updateTriggerModel();
+		updateState();
+		modified();
+	}
+
+	public ConfigDataMap getMap() {
+		return map;
 	}
 
 }

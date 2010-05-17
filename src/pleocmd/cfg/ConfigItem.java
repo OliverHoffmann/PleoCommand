@@ -1,5 +1,7 @@
 package pleocmd.cfg;
 
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,6 +23,8 @@ public class ConfigItem<E> extends ConfigValue {
 	private String content;
 
 	private JComboBox cb;
+
+	private boolean internalMod;
 
 	/**
 	 * Creates a new {@link ConfigItem}.
@@ -86,6 +90,7 @@ public class ConfigItem<E> extends ConfigValue {
 					content, Arrays.toString(identifiers.toArray()));
 		checkValidString(content, false);
 		this.content = content;
+		if (cb != null) cb.setSelectedItem(content);
 	}
 
 	public final void setContentIndex(final int content) {
@@ -96,6 +101,29 @@ public class ConfigItem<E> extends ConfigValue {
 					identifiers.size() - 1, Arrays.toString(identifiers
 							.toArray())));
 		this.content = identifiers.get(content);
+		if (cb != null) cb.setSelectedIndex(content);
+	}
+
+	public String getContentGUI() {
+		return cb == null ? null : (String) cb.getSelectedItem();
+	}
+
+	public void setContentGUI(final String content) {
+		internalMod = true;
+		try {
+			if (cb != null) cb.setSelectedItem(content);
+		} finally {
+			internalMod = false;
+		}
+	}
+
+	public void setContentIndexGUI(final int content) {
+		internalMod = true;
+		try {
+			if (cb != null) cb.setSelectedIndex(content);
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	public final List<String> getIdentifiers() {
@@ -135,6 +163,13 @@ public class ConfigItem<E> extends ConfigValue {
 	@Override
 	public final boolean insertGUIComponents(final Layouter lay) {
 		cb = new JComboBox(identifiers.toArray());
+		cb.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(final ItemEvent e) {
+				if (!isInternalMod())
+					invokeChangingContent(getCb().getSelectedItem());
+			}
+		});
 		cb.setEditable(freeAssign);
 		cb.setSelectedItem(content);
 		lay.add(cb, true);
@@ -148,6 +183,14 @@ public class ConfigItem<E> extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	protected JComboBox getCb() {
+		return cb;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
 	}
 
 }

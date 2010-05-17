@@ -10,6 +10,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -38,10 +40,12 @@ public final class ConfigPath extends ConfigValue {
 
 	private final List<FileFilter> filters = new ArrayList<FileFilter>();
 
+	private boolean internalMod;
+
 	public ConfigPath(final String label, final PathType type) {
 		super(label);
 		this.type = type;
-		content = new File("");
+		clearContent();
 	}
 
 	public ConfigPath(final String label, final File content,
@@ -89,6 +93,34 @@ public final class ConfigPath extends ConfigValue {
 		}
 		checkValidString(content.getPath(), false);
 		this.content = content;
+		if (tf != null) tf.setText(content.getPath());
+	}
+
+	public void clearContent() {
+		content = new File("");
+		if (tf != null) tf.setText("");
+	}
+
+	public File getContentGUI() {
+		return tf == null ? null : new File(tf.getText());
+	}
+
+	public void setContentGUI(final File file) {
+		internalMod = true;
+		try {
+			if (tf != null) tf.setText(file.getPath());
+		} finally {
+			internalMod = false;
+		}
+	}
+
+	public void clearContentGUI() {
+		internalMod = true;
+		try {
+			if (tf != null) tf.setText("");
+		} finally {
+			internalMod = false;
+		}
 	}
 
 	public PathType getType() {
@@ -137,6 +169,12 @@ public final class ConfigPath extends ConfigValue {
 	@Override
 	public boolean insertGUIComponents(final Layouter lay) {
 		tf = new JTextField(content.getPath(), 50);
+		tf.getDocument().addUndoableEditListener(new UndoableEditListener() {
+			@Override
+			public void undoableEditHappened(final UndoableEditEvent e) {
+				if (!isInternalMod()) invokeChangingContent(getTf().getText());
+			}
+		});
 		lay.add(tf, true);
 		lay.addButton(Button.Browse, new Runnable() {
 			@Override
@@ -255,6 +293,14 @@ public final class ConfigPath extends ConfigValue {
 	 */
 	public boolean isAcceptAllFileFilter() {
 		return acceptAllFileFilter;
+	}
+
+	protected JTextField getTf() {
+		return tf;
+	}
+
+	protected boolean isInternalMod() {
+		return internalMod;
 	}
 
 }
