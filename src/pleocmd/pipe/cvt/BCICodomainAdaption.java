@@ -3,8 +3,9 @@ package pleocmd.pipe.cvt;
 import java.util.ArrayList;
 import java.util.List;
 
+import pleocmd.RunnableWithArgument;
+import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigEnum;
-import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
@@ -20,26 +21,62 @@ public final class BCICodomainAdaption extends Converter { // NO_UCD
 		Linear
 	}
 
-	private final ConfigInt cfgSourceMin;
-	private final ConfigInt cfgSourceMax;
-	private final ConfigInt cfgTargetMin;
-	private final ConfigInt cfgTargetMax;
+	private final ConfigDouble cfgSourceMin;
+	private final ConfigDouble cfgSourceMax;
+	private final ConfigDouble cfgTargetMin;
+	private final ConfigDouble cfgTargetMax;
 	private final ConfigEnum<OutOfRangeBehavior> cfgOutOfRange;
 	private final ConfigEnum<Transformation> cfgTransformation;
 
-	private int dec;
-	private int inc;
+	private double dec;
+	private double inc;
 	private double fl; // factor for linear transformation
 
 	public BCICodomainAdaption() {
-		addConfig(cfgSourceMin = new ConfigInt("Source-Minimum", -1000));
-		addConfig(cfgSourceMax = new ConfigInt("Source-Maximum", 1000));
-		addConfig(cfgTargetMin = new ConfigInt("Target-Minimum", -64));
-		addConfig(cfgTargetMax = new ConfigInt("Target-Maximum", 64));
+		addConfig(cfgSourceMin = new ConfigDouble("Source-Minimum", -1000));
+		addConfig(cfgSourceMax = new ConfigDouble("Source-Maximum", 1000));
+		addConfig(cfgTargetMin = new ConfigDouble("Target-Minimum", -64));
+		addConfig(cfgTargetMax = new ConfigDouble("Target-Maximum", 64));
 		addConfig(cfgOutOfRange = new ConfigEnum<OutOfRangeBehavior>(
 				"OutOfRange-Behavior", OutOfRangeBehavior.class));
 		addConfig(cfgTransformation = new ConfigEnum<Transformation>(
 				"Transformation-Type", Transformation.class));
+		cfgSourceMin.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final double min = (Double) args[0];
+				final double max = getCfgSourceMax().getContentGUI();
+				if (min >= max) getCfgSourceMax().setContentGUI(min + 1);
+				return null;
+			}
+		});
+		cfgSourceMax.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final double min = getCfgSourceMin().getContentGUI();
+				final double max = (Double) args[0];
+				if (min >= max) getCfgSourceMin().setContentGUI(max - 1);
+				return null;
+			}
+		});
+		cfgTargetMin.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final double min = (Double) args[0];
+				final double max = getCfgTargetMax().getContentGUI();
+				if (min >= max) getCfgTargetMax().setContentGUI(min + 1);
+				return null;
+			}
+		});
+		cfgTargetMax.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final double min = getCfgTargetMin().getContentGUI();
+				final double max = (Double) args[0];
+				if (min >= max) getCfgTargetMin().setContentGUI(max - 1);
+				return null;
+			}
+		});
 		constructed();
 	}
 
@@ -47,9 +84,8 @@ public final class BCICodomainAdaption extends Converter { // NO_UCD
 	protected void configure1() {
 		dec = cfgSourceMin.getContent();
 		inc = cfgTargetMin.getContent();
-		fl = (double) (cfgTargetMax.getContent() - cfgTargetMin.getContent())
-				/ (double) (cfgSourceMax.getContent() - cfgSourceMin
-						.getContent());
+		fl = (cfgTargetMax.getContent() - cfgTargetMin.getContent())
+				/ (cfgSourceMax.getContent() - cfgSourceMin.getContent());
 	}
 
 	@Override
@@ -142,4 +178,21 @@ public final class BCICodomainAdaption extends Converter { // NO_UCD
 	protected int getVisualizeDataSetCount() {
 		return 1;
 	}
+
+	protected ConfigDouble getCfgSourceMin() {
+		return cfgSourceMin;
+	}
+
+	protected ConfigDouble getCfgSourceMax() {
+		return cfgSourceMax;
+	}
+
+	protected ConfigDouble getCfgTargetMin() {
+		return cfgTargetMin;
+	}
+
+	protected ConfigDouble getCfgTargetMax() {
+		return cfgTargetMax;
+	}
+
 }
