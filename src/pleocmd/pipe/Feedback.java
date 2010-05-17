@@ -135,7 +135,7 @@ abstract class Feedback {
 		++interruptionCount;
 	}
 
-	final synchronized void incDropCount() {
+	public final synchronized void incDropCount() {
 		++dropCount;
 	}
 

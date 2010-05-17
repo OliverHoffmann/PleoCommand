@@ -192,7 +192,11 @@ public final class DataQueue {
 			// fast-clearing of the queue
 			sizeBeforeClear = (writePos - readPos) % buffer.length;
 			if (sizeBeforeClear < 0) sizeBeforeClear += buffer.length;
-			// TODO FIX invoke getOrigin().getFeedback().incDropCount() on all
+			int i = readPos;
+			while (i != writePos) {
+				buffer[i].getOrigin().getFeedback().incDropCount();
+				i = (i + 1) % buffer.length;
+			}
 			readPos = writePos;
 			Log.detail("Cleared '%s' because of '%s'", this, data);
 			hasBeenCleared = true;
@@ -240,11 +244,11 @@ public final class DataQueue {
 
 	public synchronized List<Data> getAll() {
 		final List<Data> res = new ArrayList<Data>();
-		if (readPos == writePos) return res;
-		for (int i = readPos; i <= writePos && i < buffer.length; ++i)
-			res.add(buffer[i]);
-		for (int i = 0; i <= writePos; ++i)
-			res.add(buffer[i]);
+		int i = readPos;
+		while (i != writePos) {
+			System.err.println(buffer[i]);
+			i = (i + 1) % buffer.length;
+		}
 		if (closed) try {
 			res.add(Data.createFromAscii("QUEUE CLOSED"));
 		} catch (final IOException e) {
