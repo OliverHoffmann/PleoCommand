@@ -108,6 +108,10 @@
 		          dest="${extBuild}/BCI2000-source.zip"
 		          md5="be3875e3f21eeb58a5f082b6042f9a93" />
 
+		<download src="${dlprefix}/tidy-bin.zip"
+		          dest="${extBuild}/tidy-bin.zip"
+		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
+
 		<mkdir dir="${extBuild}/xsltproc/temp" />
 		<download src="${dlprefix}/icon.zip"
 		          dest="${extBuild}/xsltproc/temp/icon.zip"
@@ -213,10 +217,6 @@
 		          dest="${extDev}/PleoDevelopmentKit.zip"
 		          md5="443033eff235a141842a46cee8847a14" />
 
-		<download src="${dlprefix}/tidy-bin.zip"
-		          dest="${extDev}/tidy-bin.zip"
-		          md5="e18dcf00e7b79aa53f7bab51f9e75026" />
-
 		<copy todir="${extDev}"
 		      overwrite="true"
 		      preservelastmodified="true"
@@ -296,7 +296,7 @@
 		      failonerror="true"
 		      verbose="{verb}" />
 
-		<unzip src="${extDev}/tidy-bin.zip" dest="${bin}" />
+		<unzip src="${extBuild}/tidy-bin.zip" dest="${bin}" />
 
 		<uptodate property="uptodateBCISource"
 		          srcfile="${extBuild}/BCI2000-source.zip"
