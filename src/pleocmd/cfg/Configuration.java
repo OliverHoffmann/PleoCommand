@@ -383,8 +383,8 @@ public final class Configuration {
 					.getName(), e.getMessage());
 		}
 		if (isUnknown)
-			Log.error("Ignoring value '%s' of group '%s' "
-					+ "because of unknown label", value, group.getName());
+			Log.error("Ignoring unknown value '%s' of group '%s'", value, group
+					.getName());
 		else
 			group.set(value);
 	}

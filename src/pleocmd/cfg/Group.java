@@ -147,8 +147,9 @@ public final class Group {
 		}
 		for (final ConfigValue vs : src.valueMap.values())
 			if (!valueMap.containsKey(vs.getLabel()))
-				Log.error("Ignoring value '%s' of group '%s' "
-						+ "because of unknown label", vs, name);
+				Log
+						.error("Ignoring unknown value '%s' of group '%s'", vs,
+								name);
 	}
 
 	@Override
