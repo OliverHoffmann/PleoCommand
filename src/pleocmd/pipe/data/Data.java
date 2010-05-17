@@ -393,7 +393,8 @@ public class Data extends AbstractList<Value> {
 
 	@Override
 	public final String toString() {
-		return String.format("%s from %s", asString(), origin);
+		return String.format("%s from %s", asString(),
+				origin == null ? "unknown origin" : origin);
 	}
 
 	/**
