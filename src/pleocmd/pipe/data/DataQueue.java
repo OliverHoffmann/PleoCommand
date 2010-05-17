@@ -86,6 +86,7 @@ public final class DataQueue {
 	public synchronized void close() {
 		Log.detail("Sending close to ring-buffer '%s'", this);
 		closed = true;
+		notify();
 	}
 
 	/**
@@ -102,6 +103,7 @@ public final class DataQueue {
 			priority = PRIO_UNDEFINED;
 			sizeBeforeClear = 0;
 			Log.detail("Reset ring-buffer '%s'", this);
+			notify();
 		}
 	}
 
