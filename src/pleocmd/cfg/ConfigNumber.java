@@ -1,12 +1,16 @@
 package pleocmd.cfg;
 
 import java.awt.Dimension;
+import java.text.ParseException;
 import java.util.List;
 
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -127,6 +131,18 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 					invokeChangingContent(getSp().getValue());
 			}
 		});
+		((DefaultEditor) sp.getEditor()).getTextField().getDocument()
+				.addUndoableEditListener(new UndoableEditListener() {
+					@Override
+					public void undoableEditHappened(final UndoableEditEvent e) {
+						if (!isInternalMod()) try {
+							getSp().commitEdit();
+							invokeChangingContent(getSp().getValue());
+						} catch (final ParseException exc) {
+							// silently ignore invalid content here
+						}
+					}
+				});
 		sp.setPreferredSize(new Dimension(150, sp.getMinimumSize().height));
 		lay.add(sp, true);
 		return false;
@@ -135,8 +151,11 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	@Override
 	public final void setFromGUIComponents() {
 		try {
+			sp.commitEdit();
 			setContent(valueOf(sp.getValue().toString()));
 		} catch (final ConfigurationException e) {
+			Log.error(e, "Cannot set value '%s'", getLabel());
+		} catch (final ParseException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
 	}
