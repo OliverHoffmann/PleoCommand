@@ -570,12 +570,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				final Data data = getFromInput();
 				if (data == null) break; // marks end of all inputs
 
-				// ... convert it ...
-				final List<Data> dataList = convertDataToDataList(data);
-
-				// ... and put it into the queue for Output classes
-				for (final Data d : dataList)
-					putIntoOutputQueue(d);
+				// ... and convert it
+				convertDataToDataList(data);
 			}
 		} finally {
 			Log.info("Input-Thread finished");
