@@ -93,18 +93,16 @@ public final class DataQueue {
 	 * Clears and (if currently closed) reopens the queue.<br>
 	 * All data in the ring buffer not yet read will be lost.
 	 */
-	public void resetCache() {
-		synchronized (this) {
-			Log.detail("Resetting ring-buffer '%s'", this);
-			buffer = new Data[RB_DEFAULT];
-			readPos = 0;
-			writePos = 0;
-			closed = false;
-			priority = PRIO_UNDEFINED;
-			sizeBeforeClear = 0;
-			Log.detail("Reset ring-buffer '%s'", this);
-			notify();
-		}
+	public synchronized void resetCache() {
+		Log.detail("Resetting ring-buffer '%s'", this);
+		buffer = new Data[RB_DEFAULT];
+		readPos = 0;
+		writePos = 0;
+		closed = false;
+		priority = PRIO_UNDEFINED;
+		sizeBeforeClear = 0;
+		Log.detail("Reset ring-buffer '%s'", this);
+		notify();
 	}
 
 	/**
@@ -136,8 +134,6 @@ public final class DataQueue {
 				// block until data available
 				wait();
 			}
-		}
-		synchronized (this) {
 			final Data res = buffer[readPos];
 			Log.detail("Read from %03d '%s' in '%s'", readPos, res, this);
 			readPos = (readPos + 1) % buffer.length;
