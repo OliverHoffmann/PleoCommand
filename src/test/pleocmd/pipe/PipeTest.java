@@ -170,7 +170,7 @@ public class PipeTest extends Testcases {
 		in1.connectToPipePart(out1);
 		tmpFile.delete();
 		tmpFile.mkdir();
-		fb = testSimplePipe(p, 1000, 7000, 2, 0, 0, 0, 1, 0, 0, 0);
+		fb = testSimplePipe(p, 0, 900, 2, 0, 0, 0, 1, 0, 0, 0);
 		tmpFile.delete();
 
 		Log.consoleOut("Test error handling (two outputs, first one fails)");
