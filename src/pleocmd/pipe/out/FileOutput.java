@@ -129,7 +129,7 @@ public final class FileOutput extends Output { // NO_UCD
 		case BinaryOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
-				data.getRoot().writeToBinary(out);
+				root.writeToBinary(out);
 			}
 			break;
 		case PleoMonitorCommands:

@@ -8,6 +8,7 @@ import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
+import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.data.Data;
 
 public final class ConsoleOutput extends Output {
@@ -49,24 +50,35 @@ public final class ConsoleOutput extends Output {
 		case Ascii:
 			Log.consoleOut(data.asString());
 			break;
-		case Binary:
-			if (lastRoot != (root = data.getRoot())) {
-				lastRoot = root;
-				final ByteArrayOutputStream out = new ByteArrayOutputStream();
-				data.writeToBinary(new DataOutputStream(out));
+		case Binary: {
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			data.writeToBinary(new DataOutputStream(out));
+			if (MainFrame.hasGUI()) {
+				final StringBuilder sb = new StringBuilder();
+				data.writeToBinary(sb);
+				Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
+			} else
 				Log.consoleOut(out.toString("ISO-8859-1"));
-			}
 			break;
+		}
 		case AsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
-				Log.consoleOut(data.getRoot().asString());
+				Log.consoleOut(root.asString());
 			}
 			break;
 		case BinaryOriginal:
-			final ByteArrayOutputStream out = new ByteArrayOutputStream();
-			data.getRoot().writeToBinary(new DataOutputStream(out));
-			Log.consoleOut(out.toString("ISO-8859-1"));
+			if (lastRoot != (root = data.getRoot())) {
+				lastRoot = root;
+				final ByteArrayOutputStream out = new ByteArrayOutputStream();
+				root.writeToBinary(new DataOutputStream(out));
+				if (MainFrame.hasGUI()) {
+					final StringBuilder sb = new StringBuilder();
+					root.writeToBinary(sb);
+					Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
+				} else
+					Log.consoleOut(out.toString("ISO-8859-1"));
+			}
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))
