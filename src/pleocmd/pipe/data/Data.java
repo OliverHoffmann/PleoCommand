@@ -7,6 +7,7 @@ import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +62,9 @@ public class Data extends AbstractList<Value> {
 	public static final long TIME_NOTIME = -1;
 
 	protected static final long CTOR_DIRECT = 8297464393242L;
+
+	protected static final char[] HEX_TABLE = new char[] { '0', '1', '2', '3',
+			'4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
 
 	private final List<Value> values;
 
@@ -360,6 +364,30 @@ public class Data extends AbstractList<Value> {
 	 * @see DataBinaryConverter
 	 */
 	public final void writeToBinary(final DataOutput out) throws IOException {
+		new DataBinaryConverter(this).writeToBinary(out);
+	}
+
+	/**
+	 * Writes this {@link Data} to a {@link DataOutput}.
+	 * 
+	 * @param append
+	 *            an {@link Appendable} like a {@link StringBuilder} to which
+	 *            this {@link Data} will be written in a binary form,
+	 *            represented with hexadecimal values
+	 * @throws IOException
+	 *             if writing to {@link DataOutput} failed or this {@link Data}
+	 *             's fields cannot be put into binary representation (for
+	 *             example more than eight values associated)
+	 * @see DataBinaryConverter
+	 */
+	public final void writeToBinary(final Appendable append) throws IOException {
+		final DataOutputStream out = new DataOutputStream(new OutputStream() {
+			@Override
+			public void write(final int b) throws IOException {
+				append.append(HEX_TABLE[b >> 4 & 0x0F]);
+				append.append(HEX_TABLE[b & 0x0F]);
+			}
+		});
 		new DataBinaryConverter(this).writeToBinary(out);
 	}
 
