@@ -90,10 +90,10 @@ public final class Log {
 	private final long time;
 
 	private Log(final Type type, final StackTraceElement caller,
-			final String msg, final Throwable backtrace) {
+			final String msg, final String msgAlt, final Throwable backtrace) {
 		this.type = type;
 		this.caller = caller;
-		this.msg = msg;
+		this.msg = msgAlt == null ? msg : msgAlt;
 		this.backtrace = backtrace;
 		time = System.currentTimeMillis();
 		switch (type) {
@@ -251,6 +251,10 @@ public final class Log {
 	 *            the message - interpreted as a format string (like in
 	 *            {@link String#format(String, Object...)}) if any arguments are
 	 *            given or just used as is otherwise.
+	 * @param msgAlt
+	 *            if not <b>null</b>, this is the message which will be
+	 *            displayed in the GUI, while "msg" will only be used for the
+	 *            standard-output
 	 * @param caller
 	 *            the name of the creator of this message
 	 * @param args
@@ -259,11 +263,13 @@ public final class Log {
 	 */
 	private static void msg(final Type type, final Throwable throwable,
 			final StackTraceElement caller, final String msg,
-			final Object... args) {
+			final String msgAlt, final Object... args) {
 		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
 			final String msgStr = args.length == 0 ? msg : String.format(msg,
 					args);
-			new Log(type, caller, msgStr, throwable);
+			final String msgAltStr = msgAlt == null || args.length == 0 ? msgAlt
+					: String.format(msgAlt, args);
+			new Log(type, caller, msgStr, msgAltStr, throwable);
 		}
 	}
 
@@ -280,7 +286,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void detail(final String msg, final Object... args) {
-		msg(Type.Detail, null, getCallerSTE(2), msg, args);
+		msg(Type.Detail, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
@@ -296,7 +302,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void info(final String msg, final Object... args) {
-		msg(Type.Info, null, getCallerSTE(2), msg, args);
+		msg(Type.Info, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
@@ -312,7 +318,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void warn(final String msg, final Object... args) {
-		msg(Type.Warn, null, getCallerSTE(2), msg, args);
+		msg(Type.Warn, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
@@ -328,7 +334,7 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void error(final String msg, final Object... args) {
-		msg(Type.Error, null, getCallerSTE(2), msg, args);
+		msg(Type.Error, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
@@ -344,7 +350,30 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void consoleOut(final String msg, final Object... args) {
-		msg(Type.Console, null, getCallerSTE(2), msg, args);
+		msg(Type.Console, null, getCallerSTE(2), msg, null, args);
+	}
+
+	/**
+	 * Creates a new message of {@link Type#Console} which will be printed to
+	 * standard output <b>and</b> send to the GUI.
+	 * 
+	 * @param msgStdOut
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise. This one will be printed
+	 *            to the standard output.
+	 * @param msgGUI
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise. This one will be added to
+	 *            the GUI's log if GUI is currently available.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
+	public static void consoleOut2(final String msgStdOut, final String msgGUI,
+			final Object... args) {
+		msg(Type.Console, null, getCallerSTE(2), msgStdOut, msgGUI, args);
 	}
 
 	/**
@@ -397,7 +426,7 @@ public final class Log {
 			sb.append(" caused by ");
 		}
 
-		msg(Type.Error, throwable, t.getStackTrace()[0], sb.toString());
+		msg(Type.Error, throwable, t.getStackTrace()[0], null, sb.toString());
 	}
 
 	/**
