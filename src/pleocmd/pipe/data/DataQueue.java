@@ -8,6 +8,7 @@ import pleocmd.Log;
 import pleocmd.StandardInput;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InternalException;
+import pleocmd.pipe.PipePart;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -192,7 +193,8 @@ public final class DataQueue {
 			if (sizeBeforeClear < 0) sizeBeforeClear += buffer.length;
 			int i = readPos;
 			while (i != writePos) {
-				buffer[i].getOrigin().getFeedback().incDropCount();
+				final PipePart org = buffer[i].getOrigin();
+				if (org != null) org.getFeedback().incDropCount();
 				i = (i + 1) % buffer.length;
 			}
 			readPos = writePos;
