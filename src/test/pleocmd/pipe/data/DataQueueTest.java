@@ -12,6 +12,7 @@ import org.junit.Test;
 import pleocmd.Log;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataQueue;
+import pleocmd.pipe.data.SingleFloatData;
 import pleocmd.pipe.val.Value;
 import test.pleocmd.Testcases;
 
@@ -21,8 +22,6 @@ public final class DataQueueTest extends Testcases {
 
 	@Test(timeout = 60000)
 	public void testPutAndGet() throws IOException, InterruptedException {
-		// no need for detailed output
-
 		// prepare
 		final Data[] buf0 = new Data[BUF_SIZE];
 		final Data[] buf1 = new Data[BUF_SIZE];
@@ -74,8 +73,7 @@ public final class DataQueueTest extends Testcases {
 	}
 
 	private Data createData(final int prioDelta) {
-		return new Data(new ArrayList<Value>(0), null,
+		return new SingleFloatData(0.3, 5, null,
 				(byte) (Data.PRIO_DEFAULT + prioDelta), Data.TIME_NOTIME);
 	}
-
 }
