@@ -141,7 +141,7 @@ public abstract class Value {
 	 */
 	abstract int readFromBinary(final DataInput in) throws IOException;
 
-	abstract void writeToBinary(final DataOutput out) throws IOException;
+	abstract int writeToBinary(final DataOutput out) throws IOException;
 
 	/**
 	 * Should only be called from {@link DataAsciiConverter}.

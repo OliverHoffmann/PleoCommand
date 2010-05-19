@@ -43,23 +43,23 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	void writeToBinary(final DataOutput out) throws IOException {
+	int writeToBinary(final DataOutput out) throws IOException {
 		switch (getType()) {
 		case Int8:
 			out.writeByte((int) val);
-			break;
+			return 1;
 		case Int32:
 			out.writeInt((int) val);
-			break;
+			return 4;
 		case Int64:
 			out.writeLong((long) val);
-			break;
+			return 8;
 		case Float32:
 			out.writeFloat((float) val);
-			break;
+			return 4;
 		case Float64:
 			out.writeDouble(val);
-			break;
+			return 8;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

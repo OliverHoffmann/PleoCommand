@@ -31,19 +31,19 @@ final class BinaryValue extends Value {
 						+ len, e);
 			}
 			in.readFully(val);
-			return len;
+			return len + 4;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}
 	}
 
 	@Override
-	public void writeToBinary(final DataOutput out) throws IOException {
+	public int writeToBinary(final DataOutput out) throws IOException {
 		switch (getType()) {
 		case Data:
 			out.writeInt(val.length);
 			out.write(val);
-			break;
+			return val.length + 4;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

@@ -364,7 +364,27 @@ public class Data extends AbstractList<Value> {
 	 * @see DataBinaryConverter
 	 */
 	public final void writeToBinary(final DataOutput out) throws IOException {
-		new DataBinaryConverter(this).writeToBinary(out);
+		new DataBinaryConverter(this).writeToBinary(out, null);
+	}
+
+	/**
+	 * Writes this {@link Data} to a {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            the {@link DataOutput} to which this {@link Data} will be
+	 *            written in a binary form
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements created during
+	 *            printing - may be <b>null</b>
+	 * @throws IOException
+	 *             if writing to {@link DataOutput} failed or this {@link Data}
+	 *             's fields cannot be put into binary representation (for
+	 *             example more than eight values associated)
+	 * @see DataBinaryConverter
+	 */
+	public final void writeToBinary(final DataOutput out,
+			final List<Syntax> syntaxList) throws IOException {
+		new DataBinaryConverter(this).writeToBinary(out, syntaxList);
 	}
 
 	/**
@@ -374,13 +394,17 @@ public class Data extends AbstractList<Value> {
 	 *            an {@link Appendable} like a {@link StringBuilder} to which
 	 *            this {@link Data} will be written in a binary form,
 	 *            represented with hexadecimal values
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements created during
+	 *            printing - may be <b>null</b>
 	 * @throws IOException
 	 *             if writing to {@link DataOutput} failed or this {@link Data}
 	 *             's fields cannot be put into binary representation (for
 	 *             example more than eight values associated)
 	 * @see DataBinaryConverter
 	 */
-	public final void writeToBinary(final Appendable append) throws IOException {
+	public final void writeToBinary(final Appendable append,
+			final List<Syntax> syntaxList) throws IOException {
 		final DataOutputStream out = new DataOutputStream(new OutputStream() {
 			@Override
 			public void write(final int b) throws IOException {
@@ -388,7 +412,9 @@ public class Data extends AbstractList<Value> {
 				append.append(HEX_TABLE[b & 0x0F]);
 			}
 		});
-		new DataBinaryConverter(this).writeToBinary(out);
+		new DataBinaryConverter(this).writeToBinary(out, syntaxList);
+		if (syntaxList != null) for (final Syntax sy : syntaxList)
+			sy.duplicatePosition();
 	}
 
 	/**

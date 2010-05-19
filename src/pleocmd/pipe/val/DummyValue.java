@@ -25,7 +25,7 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	void writeToBinary(final DataOutput out) {
+	int writeToBinary(final DataOutput out) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 

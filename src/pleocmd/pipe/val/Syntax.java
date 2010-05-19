@@ -37,7 +37,7 @@ public final class Syntax {
 
 	private final Type type;
 
-	private final int position;
+	private int position;
 
 	public Syntax(final Type type, final int position) {
 		this.type = type;
@@ -55,6 +55,10 @@ public final class Syntax {
 	@Override
 	public String toString() {
 		return String.format("%03d: %s", position, type);
+	}
+
+	public void duplicatePosition() {
+		position *= 2;
 	}
 
 }

@@ -36,17 +36,17 @@ public final class IntValue extends Value {
 	}
 
 	@Override
-	void writeToBinary(final DataOutput out) throws IOException {
+	int writeToBinary(final DataOutput out) throws IOException {
 		switch (getType()) {
 		case Int8:
 			out.writeByte((int) val);
-			break;
+			return 1;
 		case Int32:
 			out.writeInt((int) val);
-			break;
+			return 4;
 		case Int64:
 			out.writeLong(val);
-			break;
+			return 8;
 		default:
 			throw new RuntimeException("Invalid type for this class");
 		}

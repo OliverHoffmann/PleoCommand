@@ -232,7 +232,8 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 		Log.detail("Finished parsing a binary Data object");
 	}
 
-	public void writeToBinary(final DataOutput out) throws IOException {
+	public void writeToBinary(final DataOutput out,
+			final List<Syntax> syntaxList) throws IOException {
 		Log.detail("Writing Data to binary output stream");
 		if (getValues().isEmpty())
 			throw new IOException(
@@ -249,17 +250,52 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 		for (int i = 0; i < getValues().size(); ++i)
 			hdr |= (getValues().get(i).getType().getID() & 0x07) << i * 3;
 		out.writeInt(hdr);
+		int pos = 0;
+		if (syntaxList != null) {
+			syntaxList.add(new Syntax(Type.Flags, pos));
+			syntaxList.add(new Syntax(Type.TypeIdent, pos + 1));
+		}
+		pos += 4;
 
 		// write optional data
-		if (getPriority() != Data.PRIO_DEFAULT) out.write(getPriority());
+		if (getPriority() != Data.PRIO_DEFAULT) {
+			out.write(getPriority());
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagPrio, pos));
+			++pos;
+		}
 		if (getTime() != Data.TIME_NOTIME) {
 			assert getTime() >= 0 && getTime() <= 0xFFFFFFFFL : getTime();
 			out.writeInt((int) getTime());
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagTime, pos));
+			pos += 4;
 		}
 
 		// write the field content
-		for (final Value value : getValues())
-			value.writeToBinary(out);
+		for (final Value value : getValues()) {
+			if (syntaxList != null) switch (value.getType()) {
+			case Float32:
+			case Float64:
+				syntaxList.add(new Syntax(Type.FloatField, pos));
+				break;
+			case Int8:
+			case Int32:
+			case Int64:
+				syntaxList.add(new Syntax(Type.IntField, pos));
+				break;
+			case NullTermString:
+			case UTFString:
+				syntaxList.add(new Syntax(Type.StringField, pos));
+				break;
+			case Data:
+				syntaxList.add(new Syntax(Type.DataField, pos));
+				break;
+			default:
+				syntaxList.add(new Syntax(Type.Error, pos));
+			}
+			pos += value.writeToBinary(out);
+		}
 	}
 
 }
