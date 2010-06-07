@@ -1,8 +1,11 @@
 package pleocmd.pipe.out;
 
+import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigEnum;
@@ -10,6 +13,7 @@ import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.itfc.gui.MainFrame;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Syntax;
 
 public final class ConsoleOutput extends Output {
 
@@ -51,14 +55,7 @@ public final class ConsoleOutput extends Output {
 			Log.consoleOut(data.asString());
 			break;
 		case Binary: {
-			final ByteArrayOutputStream out = new ByteArrayOutputStream();
-			data.writeToBinary(new DataOutputStream(out));
-			if (MainFrame.hasGUI()) {
-				final StringBuilder sb = new StringBuilder();
-				data.writeToBinary(sb);
-				Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
-			} else
-				Log.consoleOut(out.toString("ISO-8859-1"));
+			printBinary(data);
 			break;
 		}
 		case AsciiOriginal:
@@ -68,17 +65,8 @@ public final class ConsoleOutput extends Output {
 			}
 			break;
 		case BinaryOriginal:
-			if (lastRoot != (root = data.getRoot())) {
-				lastRoot = root;
-				final ByteArrayOutputStream out = new ByteArrayOutputStream();
-				root.writeToBinary(new DataOutputStream(out));
-				if (MainFrame.hasGUI()) {
-					final StringBuilder sb = new StringBuilder();
-					root.writeToBinary(sb);
-					Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
-				} else
-					Log.consoleOut(out.toString("ISO-8859-1"));
-			}
+			if (lastRoot != (root = data.getRoot()))
+				printBinary(lastRoot = root);
 			break;
 		case PleoMonitorCommands:
 			if ("PMC".equals(data.getSafe(0).asString()))
@@ -88,6 +76,28 @@ public final class ConsoleOutput extends Output {
 			throw new InternalException(cfgType.getEnum());
 		}
 		return true;
+	}
+
+	private static void printBinary(final Data data) throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		data.writeToBinary(new DataOutputStream(out));
+		if (MainFrame.hasGUI()) {
+			final StringBuilder sb = new StringBuilder();
+			final List<Syntax> syntaxList = new ArrayList<Syntax>();
+			data.writeToBinary(sb, syntaxList);
+			// html like formatting, no real xml code here
+			sb.insert(0, "<html>");
+			int o = 6;
+			for (final Syntax sy : syntaxList) {
+				final Color c = sy.getType().getColor();
+				sb.insert(sy.getPosition() + o, String.format(
+						"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(),
+						c.getBlue()));
+				o += 20;
+			}
+			Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
+		} else
+			Log.consoleOut(out.toString("ISO-8859-1"));
 	}
 
 	public static String help(final HelpKind kind) { // NO_UCD
