@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Stated Interval Converter</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Stated Interval Converter</H1>Sendet ein oder (alternierend) zwei Kommandos mit einer auf Basis der eingehenden
+  Daten berechneten Frequenz. Es werden Single-Float Datenpakete erwartet, deren Kehrwert die zu verwendende Frequenz
+  ergeben: Ergibt oder übersteigt die Summe der Kehrwerte der gesammelten Datenpakete eins, dann wird ein Kommando
+  ausgegeben und die Summierung beginnt von vorne.<BR>
+  Beispiele( "C" steht für ein gesendetes Kommando, "-" bedeutet, dass keine Ausgabe erfolgt:<BR>
+  [1, 1, 1, 1] erzeugt [C1, C2, C1, C2]<BR>
+  [3, 3, 3, 3, 3, 3] erzeugt [-, -, C1, -, -, C2]<BR>
+  [2, 2, 2, 2, 1, 1] erzeugt [-, C1, -, C2, C1, C2]<BR>
+  [1, 3, 3, 4, 4, 1000] erzeugt [C1, -, -, -, -, C2, -]<BR>
+  <BR>
+  Ist das zweite Kommando nicht definiert (leerer String), so wird immer C1 verwendet.<BR>
+  <BR>
+  Eine Übersicht über alle möglichen Befehle bietet das Dokument "Ugobe Pleo Monitor", welches Bestandteil des
+  PleoDevelopmentKits ist (dieses befindet sich im Ordner "ext/dev" von PleoCommand).<BR>
+  Durch Eingabe von "PMC|help" kann auch direkt eine Liste aller möglichen Kommandos abgefragt werden.<BR>
+</BODY>
+</HTML>

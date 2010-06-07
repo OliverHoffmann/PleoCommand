@@ -1,0 +1,70 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Internal Commands</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Internal Commands</H1>Führt bestimmte Reaktionen aus, wenn Datenpakete mit "SC" als erstes Feld empfangen werden:
+
+  <TABLE summary="Übersicht über die Dateiformate">
+    <TBODY>
+      <TR>
+        <TD valign="top">SLEEP</TD>
+
+        <TD>Blockiert die Ausgabe nachfolgender Datenpakete (egal welchen Formats) um eine bestimmte Zeit (in ms),
+        gegeben durch ein weiteres Feld</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">HELP</TD>
+
+        <TD>Gibt die integrierte Kurzhilfe aller vorhandenen Inputs, Converter und Outputs aus oder, bei Vorhandensein
+        weiterer Felder nur der aufgelisteten Komponenten</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">ECHO</TD>
+
+        <TD>
+          Gibt den im folgenden Feld enthaltenen Text auf der Konsole aus, wobei bestimmte Zeichenfolgen eine besondere
+          Bedeutung besitzen und bei Vorkommen innerhalb des Textes ersetzt werden:
+
+          <TABLE summary="Erlaubte Parameter für ECHO">
+            <TBODY>
+              <TR>
+                <TD valign="top">$ELAPSED</TD>
+
+                <TD>Zeit in ms seit Start der Pipe</TD>
+              </TR>
+
+              <TR>
+                <TD valign="top">$PACKETS</TD>
+
+                <TD>Anzahl der eingelesenen Datenpakete</TD>
+              </TR>
+
+              <TR>
+                <TD valign="top">$STATS</TD>
+
+                <TD>Allgemeine Statistik</TD>
+              </TR>
+            </TBODY>
+          </TABLE>
+        </TD>
+      </TR>
+    </TBODY>
+  </TABLE>
+
+  <H2>Beispiele:</H2>SC|SLEEP|500<BR>
+  SC|HELP<BR>
+  SC|HELP|FileInput|StaticInput<BR>
+  ECHO|Pipe is running since $elapsed ms
+</BODY>
+</HTML>

@@ -1,0 +1,35 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Pleo RXTX Output</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Pleo RXTX Output</H1>Baut eine Verbindung über einen COM Port zu Pleo auf und sendet Anweisungen an Pleo.<BR>
+  Erwartet Datenpakete welche mit "PMC" beginnen, zum Beispiel "PMC|motion play happy".<BR>
+  Eine Übersicht über alle möglichen Befehle bietet das Dokument "Ugobe Pleo Monitor", welches Bestandteil des
+  PleoDevelopmentKits ist (dieses befindet sich im Ordner "ext/dev" von PleoCommand).<BR>
+  Durch Eingabe von "PMC|help" kann auch direkt eine Liste aller möglichen Kommandos abgefragt werden.<BR>
+  <BR>
+  Solange eine Pipe aktiv ist, welche diese Komponente enthält, wird in der Statusanzeige des Hauptfensters der Zustand
+  der Batterie des angeschlossenen Pleo angezeigt.<BR>
+  <BR>
+  Die Firmware von Pleo sollte mindestens auf dem Stand von Version 1.1 sein.<BR>
+  Unter Windows muss zum Zugriff auf Pleo der Pleo-USB-Treiber installiert sind.<BR>
+  Eine passende Kopie des Treibers und der Firmware befindet sich im Ordner "ext/rt" von PleoCommand.<BR>
+  <BR>
+  Unter Linux muss lediglich im Kernel das Modul "USB Abstract Control Model driver for USB modems and ISDN adapters"
+  verfügbar sein.<BR>
+  Um einen für die von PleoCommand verwendete Bibliothek passenden Symbolnamen zu erstellen, sollte eine Datei mit dem
+  Namen "/etc/udev/rules.d/10-pleo.rules" und folgendem Inhalt:
+  <PRE>
+KERNEL=="ttyACM*", SUBSYSTEM=="tty", ATTRS{idVendor}=="6962", SYMLINK+="ttyS9"
+</PRE>erstellt werden.<BR>
+</BODY>
+</HTML>

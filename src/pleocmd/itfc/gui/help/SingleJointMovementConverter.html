@@ -1,0 +1,247 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Single Joint Movement</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Single Joint Movement</H1>Erwartet Daten vom Typ Single-Float und sendet einen "JOINT MOVE" Befehl, mit welchem
+  genau ein Motor des Pleo bewegt werden kann. Der ganzzahlig gerundete Wert des Datenpakets entspricht dem Ziel-Winkel
+  des Motors.<BR>
+  Bewegungen unterhalb eines einstellbaren Wertes werden ignoriert, um die Anzahl der an Pleo zu übermittelnden Befehle
+  zu reduzieren.<BR>
+  Folgende Nummern für Pleo's Motoren sind aktuell (Stand Firmware 1.1) definiert:
+
+  <TABLE>
+    <TR>
+      <TH>ID</TH>
+
+      <TH>Name</TH>
+
+      <TH>°Min</TH>
+
+      <TH>°Max</TH>
+
+      <TH>°Fein</TH>
+
+      <TH>°/Sek</TH>
+    </TR>
+
+    <TR>
+      <TD>0</TD>
+
+      <TD>Rechte Schulter</TD>
+
+      <TD>-30</TD>
+
+      <TD>55</TD>
+
+      <TD>1</TD>
+
+      <TD>30</TD>
+    </TR>
+
+    <TR>
+      <TD>1</TD>
+
+      <TD>Rechter Ellenbogen</TD>
+
+      <TD>0</TD>
+
+      <TD>90</TD>
+
+      <TD>1</TD>
+
+      <TD>70</TD>
+    </TR>
+
+    <TR>
+      <TD>2</TD>
+
+      <TD>Linke Schulter</TD>
+
+      <TD>-30</TD>
+
+      <TD>55</TD>
+
+      <TD>1</TD>
+
+      <TD>30</TD>
+    </TR>
+
+    <TR>
+      <TD>3</TD>
+
+      <TD>Linker Ellenbogen</TD>
+
+      <TD>0</TD>
+
+      <TD>90</TD>
+
+      <TD>1</TD>
+
+      <TD>70</TD>
+    </TR>
+
+    <TR>
+      <TD>4</TD>
+
+      <TD>Linke Hüfte</TD>
+
+      <TD>-45</TD>
+
+      <TD>40</TD>
+
+      <TD>10</TD>
+
+      <TD>?</TD>
+    </TR>
+
+    <TR>
+      <TD>5</TD>
+
+      <TD>Linkes Knie</TD>
+
+      <TD>-70</TD>
+
+      <TD>0</TD>
+
+      <TD>2</TD>
+
+      <TD>50</TD>
+    </TR>
+
+    <TR>
+      <TD>6</TD>
+
+      <TD>Rechte Hüfte</TD>
+
+      <TD>-45</TD>
+
+      <TD>40</TD>
+
+      <TD>10</TD>
+
+      <TD>?</TD>
+    </TR>
+
+    <TR>
+      <TD>7</TD>
+
+      <TD>Rechtes Knie</TD>
+
+      <TD>-70</TD>
+
+      <TD>0</TD>
+
+      <TD>2</TD>
+
+      <TD>50</TD>
+    </TR>
+
+    <TR>
+      <TD>8</TD>
+
+      <TD>Torso</TD>
+
+      <TD>-15</TD>
+
+      <TD>15</TD>
+
+      <TD>2</TD>
+
+      <TD>20</TD>
+    </TR>
+
+    <TR>
+      <TD>9</TD>
+
+      <TD>Schwanz vertikal</TD>
+
+      <TD>-90</TD>
+
+      <TD>90</TD>
+
+      <TD>1</TD>
+
+      <TD>200</TD>
+    </TR>
+
+    <TR>
+      <TD>10</TD>
+
+      <TD>Schwanz horizontal</TD>
+
+      <TD>-90</TD>
+
+      <TD>90</TD>
+
+      <TD>1</TD>
+
+      <TD>200</TD>
+    </TR>
+
+    <TR>
+      <TD>11</TD>
+
+      <TD>Nacken horizontal</TD>
+
+      <TD>-65</TD>
+
+      <TD>55</TD>
+
+      <TD>1</TD>
+
+      <TD>?</TD>
+    </TR>
+
+    <TR>
+      <TD>12</TD>
+
+      <TD>Nacken vertikal</TD>
+
+      <TD>-75</TD>
+
+      <TD>75</TD>
+
+      <TD>1</TD>
+
+      <TD>40</TD>
+    </TR>
+
+    <TR>
+      <TD>13</TD>
+
+      <TD>Augen</TD>
+
+      <TD>25</TD>
+
+      <TD>85</TD>
+
+      <TD>1</TD>
+
+      <TD>220</TD>
+    </TR>
+
+    <TR>
+      <TD>13</TD>
+
+      <TD>Mund</TD>
+
+      <TD>-80</TD>
+
+      <TD>-30</TD>
+
+      <TD>20</TD>
+
+      <TD>220</TD>
+    </TR>
+  </TABLE>
+</BODY>
+</HTML>
