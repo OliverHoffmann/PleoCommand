@@ -37,15 +37,31 @@ public final class InternalCommandOutput extends Output { // NO_UCD
 				throw new OutputException(this, false, e,
 						"Executing '%s' failed", data);
 			}
-		else if ("HELP".equals(arg))
-			printHelp();
-		else if ("ECHO".equals(arg))
-			Log.consoleOut(data.getSafe(2).asString().replace("$ELAPSED",
-					String.valueOf(getPipe().getFeedback().getElapsed())));
-		else
+		else if ("HELP".equals(arg)) {
+			if (data.size() == 2)
+				printHelp();
+			else
+				for (int i = 2; i < data.size(); ++i)
+					printHelp(data.getSafe(i).asString());
+		} else if ("ECHO".equals(arg)) {
+			String s = data.getSafe(2).asString();
+			s = repl(s, "$ELAPSED", getPipe().getFeedback().getElapsed());
+			s = repl(s, "$PACKETS", getPipe().getFeedback().getDataInputCount());
+			s = repl(s, "$STATS", getPipe().getFeedback().toString());
+			Log.consoleOut(s);
+		} else
 			throw new OutputException(this, false,
 					"Unknown internal command: '%s' in '%s'", arg, data);
 		return true;
+	}
+
+	private static String repl(final String s, final String id, final long value) {
+		return s.replace(id, String.valueOf(value));
+	}
+
+	private static String repl(final String s, final String id,
+			final String value) {
+		return s.replace(id, value);
 	}
 
 	private void printHelp() {
@@ -65,6 +81,15 @@ public final class InternalCommandOutput extends Output { // NO_UCD
 			printHelp(cpp);
 	}
 
+	private void printHelp(final String cppName) {
+		for (final Class<? extends PipePart> cpp : PipePartDetection.ALL_INPUT)
+			if (cpp.getSimpleName().equals(cppName)) printHelp(cpp);
+		for (final Class<? extends PipePart> cpp : PipePartDetection.ALL_CONVERTER)
+			if (cpp.getSimpleName().equals(cppName)) printHelp(cpp);
+		for (final Class<? extends PipePart> cpp : PipePartDetection.ALL_OUTPUT)
+			if (cpp.getSimpleName().equals(cppName)) printHelp(cpp);
+	}
+
 	private void printHelp(final Class<? extends PipePart> cpp) {
 		// CS_IGNORE_NEXT format is correct in this context
 		Log.consoleOut("%s:", PipePart.getName(cpp));
@@ -80,7 +105,7 @@ public final class InternalCommandOutput extends Output { // NO_UCD
 	public static String help(final HelpKind kind) { // NO_UCD
 		switch (kind) {
 		case Name:
-			return "Internal Commands Output";
+			return "Internal Commands";
 		case Description:
 			return "Processes special commands like SLEEP or HELP";
 		default:
