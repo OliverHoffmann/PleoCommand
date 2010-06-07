@@ -16,7 +16,7 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 	private final ConfigInt cfgJointNumber;
 	private final ConfigInt cfgMinAngleMovement;
 
-	private double currentAngle;
+	private long currentAngle;
 
 	public SingleJointMovement() {
 		addConfig(cfgJointNumber = new ConfigInt("Joint-Number", 9, 0, 13));
@@ -57,13 +57,13 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 	@Override
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
-		final double val = SingleFloatData.getValue(data);
+		final long val = Math.round(SingleFloatData.getValue(data));
 		if (Math.abs(currentAngle - val) < cfgMinAngleMovement.getContent())
 			return emptyList(); // ignore small movements
 		currentAngle = val;
 		if (isVisualize()) plot(0, val);
 		return asList(new CommandData("PMC", String.format("JOINT MOVE %d %d",
-				cfgJointNumber.getContent(), (int) val), data));
+				cfgJointNumber.getContent(), val), data));
 	}
 
 	public static String help(final HelpKind kind) {
