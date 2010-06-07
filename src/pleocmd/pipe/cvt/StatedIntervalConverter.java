@@ -102,7 +102,7 @@ public final class StatedIntervalConverter extends Converter { // NO_UCD
 		case Name:
 			return "Stated Interval Converter";
 		case Description:
-			return "Sends one or two commands at a interval specified by "
+			return "Sends one or two commands at an interval specified by "
 					+ "the source values, i.e. if input is [2, 2, 2, 2, 1, 1]"
 					+ "output would be [-, C, -, C, C, C] where C is command "
 					+ "and - marks a dropped data packet";
