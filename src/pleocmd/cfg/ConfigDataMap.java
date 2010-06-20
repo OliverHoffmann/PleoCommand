@@ -49,7 +49,7 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 
 	@Override
 	protected void contentChanged() {
-		if (dp != null) dp.externalChanged(this);
+		if (!internalMod && dp != null) dp.externalChanged(this);
 	}
 
 	public ConfigDataMap getContentGUI() {
@@ -99,6 +99,17 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 
 	public void dstpModified(final ConfigDataMap map) {
 		if (!internalMod) invokeChangingContent(map);
+	}
+
+	/**
+	 * Should only be used from {@link DataSequenceTriggerPanel}.
+	 * 
+	 * @param internalMod
+	 *            true if invocations of {@link #contentChanged()} should be
+	 *            ignored
+	 */
+	public void setInternalMod(final boolean internalMod) {
+		this.internalMod = internalMod;
 	}
 
 }
