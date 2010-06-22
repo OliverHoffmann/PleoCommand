@@ -54,6 +54,7 @@ public class ConfigString extends ConfigValue {
 		}
 	}
 
+	@Override
 	public final String getContent() {
 		return content;
 	}
@@ -100,7 +101,7 @@ public class ConfigString extends ConfigValue {
 	}
 
 	public final String getContentGUI() {
-		return tc == null ? null : tc.getText();
+		return tc == null ? content : tc.getText();
 	}
 
 	public final List<String> getContentListGUI() {
@@ -177,6 +178,7 @@ public class ConfigString extends ConfigValue {
 			lay.addWholeLine(sp, true);
 		} else
 			lay.add(tc, true);
+		invokeChangingContent(tc.getText());
 		return multiLine;
 	}
 
@@ -188,6 +190,11 @@ public class ConfigString extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (tc != null) tc.setEnabled(enabled);
 	}
 
 	protected JTextComponent getTc() {

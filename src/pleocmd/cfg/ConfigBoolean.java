@@ -27,7 +27,8 @@ public final class ConfigBoolean extends ConfigValue {
 		setContent(content);
 	}
 
-	public boolean getContent() {
+	@Override
+	public Boolean getContent() {
 		return content;
 	}
 
@@ -37,7 +38,7 @@ public final class ConfigBoolean extends ConfigValue {
 	}
 
 	public Boolean getContentGUI() {
-		return cb == null ? null : cb.isSelected();
+		return cb == null ? content : cb.isSelected();
 	}
 
 	public void setContentGUI(final boolean content) {
@@ -97,12 +98,18 @@ public final class ConfigBoolean extends ConfigValue {
 			}
 		});
 		lay.add(cb, false);
+		invokeChangingContent(cb.isSelected());
 		return false;
 	}
 
 	@Override
 	public void setFromGUIComponents() {
 		setContent(cb.isSelected());
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (cb != null) cb.setEnabled(enabled);
 	}
 
 	protected JCheckBox getCb() {

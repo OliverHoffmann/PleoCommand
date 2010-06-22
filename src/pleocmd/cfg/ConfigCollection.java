@@ -61,6 +61,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 		return type;
 	}
 
+	@Override
 	public final Collection<E> getContent() {
 		return Collections.unmodifiableCollection(content);
 	}
@@ -104,7 +105,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	public final Collection<E> getContentGUI() {
-		if (ta == null) return null;
+		if (ta == null) return getContent();
 		final List<E> list = new ArrayList<E>();
 		final StringTokenizer st = new StringTokenizer(ta.getText(), "\n");
 		try {
@@ -196,6 +197,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 			}
 		});
 		lay.addWholeLine(new JScrollPane(ta), true);
+		invokeChangingContent(ta.getText());
 		return true;
 	}
 
@@ -206,6 +208,11 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (ta != null) ta.setEnabled(enabled);
 	}
 
 	protected JTextArea getTa() {

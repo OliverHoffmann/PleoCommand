@@ -84,6 +84,11 @@ public final class ConfigValueTest extends Testcases {
 			// nothing to do, we have no GUI here
 		}
 
+		@Override
+		public void setGUIEnabled(final boolean enabled) {
+			// nothing to do, we have no GUI here
+		}
+
 	};
 
 	private final ConfigItem<String> cfgItem = new ConfigItem<String>(

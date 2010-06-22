@@ -59,6 +59,7 @@ public final class ConfigPath extends ConfigValue {
 		}
 	}
 
+	@Override
 	public File getContent() {
 		return content;
 	}
@@ -102,7 +103,7 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	public File getContentGUI() {
-		return tf == null ? null : new File(tf.getText());
+		return tf == null ? content : new File(tf.getText());
 	}
 
 	public void setContentGUI(final File file) {
@@ -201,6 +202,7 @@ public final class ConfigPath extends ConfigValue {
 				}
 			});
 		}
+		invokeChangingContent(tf.getText());
 		return false;
 	}
 
@@ -244,6 +246,11 @@ public final class ConfigPath extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (tf != null) tf.setEnabled(enabled);
 	}
 
 	/**

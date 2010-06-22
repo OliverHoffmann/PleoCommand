@@ -27,6 +27,7 @@ public final class ConfigBounds extends ConfigValue {
 		setContent(content);
 	}
 
+	@Override
 	public Rectangle getContent() {
 		return content;
 	}
@@ -111,6 +112,11 @@ public final class ConfigBounds extends ConfigValue {
 
 	@Override
 	public void setFromGUIComponents() {
+		// GUI support is read-only
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
 		// GUI support is read-only
 	}
 

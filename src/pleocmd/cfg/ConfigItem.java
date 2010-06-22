@@ -77,6 +77,7 @@ public class ConfigItem<E> extends ConfigValue {
 		setContentIndex(contentIndex);
 	}
 
+	@Override
 	public final String getContent() {
 		return content;
 	}
@@ -105,7 +106,7 @@ public class ConfigItem<E> extends ConfigValue {
 	}
 
 	public String getContentGUI() {
-		return cb == null ? null : (String) cb.getSelectedItem();
+		return cb == null ? content : (String) cb.getSelectedItem();
 	}
 
 	public void setContentGUI(final String content) {
@@ -173,6 +174,7 @@ public class ConfigItem<E> extends ConfigValue {
 		cb.setEditable(freeAssign);
 		cb.setSelectedItem(content);
 		lay.add(cb, true);
+		invokeChangingContent(cb.getSelectedItem());
 		return false;
 	}
 
@@ -183,6 +185,11 @@ public class ConfigItem<E> extends ConfigValue {
 		} catch (final ConfigurationException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (cb != null) cb.setEnabled(enabled);
 	}
 
 	protected JComboBox getCb() {

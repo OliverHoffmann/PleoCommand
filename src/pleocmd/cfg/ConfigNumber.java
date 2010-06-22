@@ -51,6 +51,7 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 
 	protected abstract E valueOf(String str) throws ConfigurationException;
 
+	@Override
 	public final E getContent() {
 		return content;
 	}
@@ -65,7 +66,7 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 
 	public final E getContentGUI() {
 		try {
-			return sp == null ? null : valueOf(sp.getValue().toString());
+			return sp == null ? content : valueOf(sp.getValue().toString());
 		} catch (final ConfigurationException e) {
 			return null;
 		}
@@ -145,6 +146,7 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 				});
 		sp.setPreferredSize(new Dimension(150, sp.getMinimumSize().height));
 		lay.add(sp, true);
+		invokeChangingContent(sp.getValue());
 		return false;
 	}
 
@@ -158,6 +160,11 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 		} catch (final ParseException e) {
 			Log.error(e, "Cannot set value '%s'", getLabel());
 		}
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (sp != null) sp.setEnabled(enabled);
 	}
 
 	protected JSpinner getSp() {

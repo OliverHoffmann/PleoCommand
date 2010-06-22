@@ -3,6 +3,7 @@ package pleocmd.cfg;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -52,8 +53,8 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 		if (!internalMod && dp != null) dp.externalChanged(this);
 	}
 
-	public ConfigDataMap getContentGUI() {
-		return dp == null ? null : dp.getMap();
+	public Map<String, List<Data>> getContentGUI() {
+		return dp == null ? getContent() : dp.getMap().getContent();
 	}
 
 	public void setContentGUI(final ConfigDataMap other) {
@@ -69,12 +70,18 @@ public final class ConfigDataMap extends ConfigMap<String, Data> {
 	public boolean insertGUIComponents(final Layouter lay) {
 		dp = new DataSequenceTriggerPanel(this);
 		lay.addWholeLine(dp, true);
+		invokeChangingContent(this);
 		return true;
 	}
 
 	@Override
 	public void setFromGUIComponents() {
 		dp.saveChanges();
+	}
+
+	@Override
+	public void setGUIEnabled(final boolean enabled) {
+		if (dp != null) dp.setEnabled(enabled);
 	}
 
 	/**

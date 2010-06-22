@@ -33,6 +33,11 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		return list;
 	}
 
+	@Override
+	public Map<K, List<V>> getContent() {
+		return Collections.unmodifiableMap(content);
+	}
+
 	public final List<V> getContent(final K key) {
 		final List<V> list = content.get(key);
 		return Collections.unmodifiableList(list == null ? new ArrayList<V>(0)

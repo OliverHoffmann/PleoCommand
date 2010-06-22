@@ -72,6 +72,10 @@ public abstract class ConfigValue {
 
 	public abstract void setFromGUIComponents();
 
+	public abstract void setGUIEnabled(final boolean enabled);
+
+	public abstract Object getContent();
+
 	public final void assign(final ConfigValue src)
 			throws ConfigurationException {
 		if (isSingleLined())
@@ -160,8 +164,10 @@ public abstract class ConfigValue {
 	 * directly, but use methods like setContentGUI(...) instead, otherwise
 	 * clicking "Cancel" can no longer reset the changes made while the GUI has
 	 * been visible.<br>
-	 * The method always gets one argument (it's type depends on the
-	 * {@link ConfigValue}'s subclass) and the return value may be one of:
+	 * The method is always called with one argument (it's type depends on the
+	 * {@link ConfigValue}'s subclass) for every GUI modification and once
+	 * during GUI creation.<br>
+	 * The return value may be one of:
 	 * <ul>
 	 * <li>null</li>
 	 * <li>a String, {@link #setFromString(String)} will be called</li>
