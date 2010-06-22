@@ -55,7 +55,7 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				close(true);
+				close(false);
 			}
 		});
 		board = new PipeConfigBoard(pipe);
