@@ -81,9 +81,9 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		mainPipePanel = new MainPipePanel();
 		// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-		ToolTipManager.sharedInstance().setInitialDelay(50);
+		ToolTipManager.sharedInstance().setInitialDelay(500);
 		ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
-		ToolTipManager.sharedInstance().setReshowDelay(Integer.MAX_VALUE);
+		ToolTipManager.sharedInstance().setReshowDelay(0);
 
 		Log.detail("Creating GUI-Frame");
 		setTitle("PleoCommand");
