@@ -6,7 +6,7 @@ import pleocmd.pipe.val.ValueType;
 
 public final class MultiFloatData extends MultiValueData {
 
-	public static final String IDENT = "float[ ]";
+	public static final String IDENT = "list of float";
 
 	public MultiFloatData(final double[] values, final Data parent,
 			final byte priority, final long time) {
