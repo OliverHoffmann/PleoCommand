@@ -3,10 +3,12 @@ package pleocmd.pipe.cvt;
 import java.util.List;
 
 import pleocmd.RunnableWithArgument;
+import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.data.SingleBoolData;
 import pleocmd.pipe.data.SingleFloatData;
 
 public final class ThresholdConverter extends Converter { // NO_UCD
@@ -18,6 +20,8 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 	private final ConfigDouble cfgValueBelow;
 
 	private final ConfigDouble cfgValueAbove;
+
+	private final ConfigBoolean cfgReturnBool;
 
 	private enum Hit {
 		Undef, Lower, Upper
@@ -42,6 +46,8 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 				Double.MAX_VALUE));
 		addConfig(cfgValueAbove = new ConfigDouble(
 				"Value For Above (0 == current)", 0, 0, Double.MAX_VALUE));
+		addConfig(cfgReturnBool = new ConfigBoolean("Return Boolean As Value",
+				false));
 		cfgThreshold.setChangingContent(new RunnableWithArgument() {
 			@Override
 			public Object run(final Object... args) {
@@ -122,6 +128,15 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 				return null;
 			}
 		});
+		cfgReturnBool.setChangingContent(new RunnableWithArgument() {
+			@Override
+			public Object run(final Object... args) {
+				final boolean retBool = (Boolean) args[0];
+				getCfgValueBelow().setGUIEnabled(!retBool);
+				getCfgValueAbove().setGUIEnabled(!retBool);
+				return null;
+			}
+		});
 		constructed();
 	}
 
@@ -153,16 +168,17 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 
 	@Override
 	public String getOutputDescription() {
-		return SingleFloatData.IDENT;
+		return cfgReturnBool.getContent() ? SingleBoolData.IDENT
+				: SingleFloatData.IDENT;
 	}
 
 	@Override
 	protected String getShortConfigDescr0() {
 		return String.format("|>%s±%s| => %s : %s", cfgThreshold.asString(),
-				String.valueOf(cfgMarginalArea.getContent() / 2), cfgValueBelow
-						.asString(),
-				cfgValueAbove.getContent() > 0 ? cfgValueAbove.asString()
-						: "<cur>");
+				String.valueOf(cfgMarginalArea.getContent() / 2), cfgReturnBool
+						.getContent() ? "false" : cfgValueBelow.asString(),
+				cfgReturnBool.getContent() ? "true" : cfgValueAbove
+						.getContent() > 0 ? cfgValueAbove.asString() : "<cur>");
 	}
 
 	@Override
@@ -196,26 +212,37 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 		lastVal = val;
 
 		// set correct output depending on our current state
+		if (cfgReturnBool.getContent()) {
+			final boolean out = value == Val.Above;
+			if (isVisualize()) {
+				plot(0, out ? 1 : 0);
+				plot(1, lower);
+				plot(2, upper);
+				plot(3, thrs);
+			}
+			return asList(SingleBoolData.create(out, data));
+		}
+		final double out;
 		switch (value) {
 		case Below:
-			val = cfgValueBelow.getContent();
+			out = cfgValueBelow.getContent();
 			break;
 		case Above:
-			val = cfgValueAbove.getContent() > 0 ? cfgValueAbove.getContent()
+			out = cfgValueAbove.getContent() > 0 ? cfgValueAbove.getContent()
 					: val;
 			break;
 		default:
-			val = .0;
+			out = .0;
 			break;
 		}
 
 		if (isVisualize()) {
-			plot(0, val);
+			plot(0, out);
 			plot(1, lower);
 			plot(2, upper);
 			plot(3, thrs);
 		}
-		return asList(SingleFloatData.create(val, data));
+		return asList(SingleFloatData.create(out, data));
 	}
 
 	public static String help(final HelpKind kind) {
@@ -283,6 +310,10 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 
 	protected ConfigDouble getCfgValueAbove() {
 		return cfgValueAbove;
+	}
+
+	public ConfigBoolean getCfgReturnBool() {
+		return cfgReturnBool;
 	}
 
 }
