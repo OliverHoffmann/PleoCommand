@@ -10,6 +10,7 @@ import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.AbstractDataConverter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.val.Syntax.Type;
+import sun.security.util.BitArray;
 
 /**
  * Helper class for converting {@link Data} objects from and to binary.
@@ -21,38 +22,40 @@ import pleocmd.pipe.val.Syntax.Type;
  * <th align=left>Size</th>
  * </tr>
  * <tr>
- * <td>Flags</td>
+ * <td>Flags (see below)</td>
  * <td>5 Bits</td>
  * </tr>
  * <tr>
- * <td>Number of Fields (N-1)</td>
+ * <td>Number of Fields<br>
+ * 0 .. 7 for 1 .. 8 fields.<br>
+ * Must be 7 if "Very Long Data-Block" flag is set.</td>
  * <td>3 Bits</td>
  * </tr>
  * <tr>
- * <td>Type of Field 1</td>
+ * <td>Type of Field #0</td>
  * <td>3 Bits</td>
  * </tr>
  * <tr>
  * <td>...</td>
  * </tr>
  * <tr>
- * <td>Type of Field 8</td>
+ * <td>Type of Field #7</td>
  * <td>3 Bits</td>
  * </tr>
  * <tr>
  * <td>Additional Header Data</td>
- * <td>Depends on Flags (may be 0)</td>
+ * <td>Depends on Flags</td>
  * </tr>
  * <tr>
- * <td>Content of Field 1</td>
- * <td>Depends on Type 1</td>
+ * <td>Content of Field #0</td>
+ * <td>Depends on Type #0</td>
  * </tr>
  * <tr>
  * <td>...</td>
  * </tr>
  * <tr>
- * <td>Content of Field N</td>
- * <td>Depends on Type N</td>
+ * <td>Content of Field #N</td>
+ * <td>Depends on Type #N</td>
  * </tr>
  * </table>
  * <table>
@@ -108,11 +111,15 @@ import pleocmd.pipe.val.Syntax.Type;
  * <td>1</td>
  * <td>Time-Bytes appended:<br>
  * 4 Bytes with time since the first Data block in milliseconds is appended
- * after the 4 Header-Bytes (and the Priority Byte)</td>
+ * after the 4 Header-Bytes (and after the Priority Byte if any)</td>
  * </tr>
  * <tr>
  * <td>2</td>
- * <td>reserved, must be 0</td>
+ * <td>Very Long Data-Block:<br>
+ * 10 Bytes with number and type of 24 additional fields is appended after the 4
+ * Header-Bytes (and after the Time-Bytes if any)<br>
+ * Format is: 5 Bits for Field-Count (0 .. 31 for 1 .. 32 fields) plus 24 * 3
+ * Bits for Type of Field #8 .. #31</td>
  * </tr>
  * <tr>
  * <td>3</td>
@@ -123,6 +130,9 @@ import pleocmd.pipe.val.Syntax.Type;
  * <td>reserved, must be 0</td>
  * </tr>
  * </table>
+ * Example:<br>
+ * Two field both of type 32-bit int with the values 0x12345678 and 0x9AB<br>
+ * 00000 001 001 001 000 000 000 000 000 000 0x12345678 0x9AB
  * 
  * @author oliver
  */
@@ -130,10 +140,10 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 
 	public static final int FLAG_PRIORITY = 0x01;
 	public static final int FLAG_TIME = 0x02;
-	public static final int FLAG_RESERVED_2 = 0x04;
+	public static final int FLAG_VERYLONG = 0x04;
 	public static final int FLAG_RESERVED_3 = 0x08;
 	public static final int FLAG_RESERVED_4 = 0x10;
-	private static final int FLAG_RESERVED_MASK = 0x1C;
+	private static final int FLAG_RESERVED_MASK = 0x18;
 
 	/**
 	 * Creates a new {@link DataBinaryConverter} that wraps an existing
@@ -167,8 +177,13 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 		Log.detail("Started parsing a binary Data object");
 		int pos = 0;
 		final int hdr = in.readInt();
-		final int flags = hdr >> 27 & 0x1F;
-		final int cnt = (hdr >> 24 & 0x07) + 1;
+		final int flags = hdr >> 27 & 0x1F; // first 5 bits
+		int cnt = (hdr >> 24 & 0x07) + 1; // next 3 bits
+
+		final ValueType[] types = new ValueType[32];
+		for (int i = 0; i < cnt; ++i)
+			types[i] = ValueType.values()[hdr >> i * 3 & 0x07];
+
 		if ((flags & FLAG_RESERVED_MASK) != 0)
 			throw new FormatException(syntaxList, pos,
 					"Reserved flags have been set: 0x%02X", flags);
@@ -196,13 +211,27 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			pos += 4;
 			setTime(ms);
 		}
+		if ((flags & FLAG_VERYLONG) != 0) {
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagVeryLong, pos));
+			if (cnt < 8)
+				throw new FormatException(syntaxList, pos, "VeryLong-Flag set "
+						+ "but field-count in header %d instead of 8", cnt);
+			final byte[] ba = new byte[10];
+			in.readFully(ba);
+			cnt = (ba[0] >> 3 & 0x1F) + 1; // first 5 bits (MSB)
+			// 24 * 3 bits following
+			final BitArray bits = new BitArray(80, ba);
+			int bp = 4;
+			for (int i = 8; i < cnt; ++i)
+				types[i] = ValueType.values()[bits.get(++bp) ? 4 : 0
+						| (bits.get(++bp) ? 2 : 0) | (bits.get(++bp) ? 1 : 0)];
+			pos += 10;
+		}
 		Log.detail("Header is 0x%08X => flags: 0x%02X count: %d", hdr, flags,
 				cnt);
-		assert cnt <= 8 : cnt;
 		for (int i = 0; i < cnt; ++i) {
-			final ValueType type = ValueType.values()[hdr >> i * 3 & 0x07];
-			assert type.getID() == (hdr >> i * 3 & 0x07);
-			if (syntaxList != null) switch (type) {
+			if (syntaxList != null) switch (types[i]) {
 			case Float32:
 			case Float64:
 				syntaxList.add(new Syntax(Type.FloatField, pos));
@@ -222,8 +251,8 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			default:
 				syntaxList.add(new Syntax(Type.Error, pos));
 			}
-			final Value val = Value.createForType(type);
-			Log.detail("Reading value of type '%s' from binary", type);
+			final Value val = Value.createForType(types[i]);
+			Log.detail("Reading value of type '%s' from binary", types[i]);
 			pos += val.readFromBinary(in);
 			getValues().add(val);
 		}
@@ -235,19 +264,22 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 	public void writeToBinary(final DataOutput out,
 			final List<Syntax> syntaxList) throws IOException {
 		Log.detail("Writing Data to binary output stream");
-		if (getValues().isEmpty())
+		final int cnt = getValues().size();
+		final int cnt1 = Math.min(8, cnt);
+		if (cnt == 0)
 			throw new IOException(
 					"Cannot write binary data without any values assigned to it");
-		if (getValues().size() > 8)
+		if (cnt > 32)
 			throw new IOException(
-					"Cannot handle more than 8 values for binary data");
+					"Cannot handle more than 32 values for binary data");
 
 		// write header
 		int flags = 0;
 		if (getPriority() != Data.PRIO_DEFAULT) flags |= FLAG_PRIORITY;
 		if (getTime() != Data.TIME_NOTIME) flags |= FLAG_TIME;
-		int hdr = (flags & 0x1F) << 27 | (getValues().size() - 1 & 0x07) << 24;
-		for (int i = 0; i < getValues().size(); ++i)
+		if (cnt > 8) flags |= FLAG_VERYLONG;
+		int hdr = (flags & 0x1F) << 27 | (cnt1 - 1 & 0x07) << 24;
+		for (int i = 0; i < cnt1; ++i)
 			hdr |= (getValues().get(i).getType().getID() & 0x07) << i * 3;
 		out.writeInt(hdr);
 		int pos = 0;
@@ -270,6 +302,27 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			if (syntaxList != null)
 				syntaxList.add(new Syntax(Type.FlagTime, pos));
 			pos += 4;
+		}
+		if (cnt > 8) {
+			// 10 bytes: 5 bits for count, then 24 * 3 bits for type
+			// (last 3 bits ignored)
+			final BitArray bits = new BitArray(80);
+			bits.set(0, (cnt - 1 & 0x10) != 0);
+			bits.set(1, (cnt - 1 & 0x08) != 0);
+			bits.set(2, (cnt - 1 & 0x04) != 0);
+			bits.set(3, (cnt - 1 & 0x02) != 0);
+			bits.set(4, (cnt - 1 & 0x01) != 0);
+			int bp = 4;
+			for (int i = 8; i < cnt; ++i) {
+				final int id = getValues().get(i).getType().getID() & 0x07;
+				bits.set(++bp, (id & 0x04) != 0);
+				bits.set(++bp, (id & 0x02) != 0);
+				bits.set(++bp, (id & 0x01) != 0);
+			}
+			out.write(bits.toByteArray());
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagVeryLong, pos));
+			pos += 10;
 		}
 
 		// write the field content

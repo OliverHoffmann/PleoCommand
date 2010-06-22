@@ -10,6 +10,7 @@ public final class Syntax {
 		Flags(250, 140, 0), // dark orange
 		FlagPrio(255, 99, 71), // tomato
 		FlagTime(255, 215, 0), // gold
+		FlagVeryLong(255, 0, 255), // magenta
 		FieldDelim(70, 130, 180), // steel blue
 		IntField(0, 100, 0), // dark green
 		FloatField(46, 139, 87), // sea green
