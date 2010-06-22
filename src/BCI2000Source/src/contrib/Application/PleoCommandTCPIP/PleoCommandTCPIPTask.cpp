@@ -67,19 +67,15 @@ PleoCommandTCPIPTask::PleoCommandTCPIPTask() :
 		strcat(matrix, buf);
 	}
 	strcat(matrix, "] ");
-	for (int i = 0; i < MAX_FIELDS; ++i) {
+	for (int i = 0; i < MAX_FIELDS; ++i)
 		strcat(matrix, "{ matrix [ int8 int32 int64 float32 float64 utfString "
-			"ansiString hexData <omitted> ] [ Choose ] ");
-		strcat(matrix, i ? "% % % % x % % % % } " : "% % % % % % x % % } ");
-	}
-	strcat(matrix, "% ");
-	for (int i = 0; i < MAX_FIELDS - 1; ++i) {
+			"ansiString hexData <omitted> ] [ Choose ] % % % % x % % % % }");
+	for (int i = 0; i < MAX_FIELDS; ++i) {
 		char buf[5];
 		snprintf(buf, 5, "%d ", i);
 		strcat(matrix, buf);
 	}
-	strcat(matrix, "FromBCI ");
-	for (int i = 0; i < MAX_FIELDS - 1; ++i)
+	for (int i = 0; i < MAX_FIELDS; ++i)
 		strcat(matrix, "% ");
 	strcat(matrix, "% % % // Type and number of channel or "
 		"fixed value for each field");
@@ -241,7 +237,7 @@ void PleoCommandTCPIPTask::Preflight(
 		if (strlen(chnr) > 0) {
 			long long ch = strToInt(chnr, "Invalid channel number", i);
 			if (ch < 0 || ch >= inSignalProperties.Channels())
-				bcierr << "channel number " << ch << " out of range for field "
+				bciout << "channel number " << ch << " out of range for field "
 				        << (i + 1) << ": " << ", not between 0 and "
 				        << (inSignalProperties.Channels() - 1) << endl;
 		}
@@ -360,9 +356,9 @@ bool PleoCommandTCPIPTask::SafeSend(const void *data, int len) {
 	return false;
 }
 
-bool PleoCommandTCPIPTask::SendDataHeader(prio_t prio, time_t time) {
-	if (m_fieldCount < 1 || m_fieldCount > MAX_FIELDS) {
-		bcierr << "Invalid number of fields: " << m_fieldCount << endl;
+bool PleoCommandTCPIPTask::SendDataHeader(int fieldCount, prio_t prio, time_t time) {
+	if (fieldCount < 1 || fieldCount > MAX_FIELDS) {
+		bcierr << "Invalid number of fields: " << fieldCount << endl;
 		return false;
 	}
 
@@ -371,9 +367,9 @@ bool PleoCommandTCPIPTask::SendDataHeader(prio_t prio, time_t time) {
 		flags |= FLAG_PRIORITY;
 	if (time != TIME_NOTIME)
 		flags |= FLAG_TIMESTAMP;
-	unsigned int header = (flags & 0x1F) << 27 | (m_fieldCount - 1 & 0x07)
+	unsigned int header = (flags & 0x1F) << 27 | (fieldCount - 1 & 0x07)
 	        << 24;
-	for (int i = 0; i < m_fieldCount; ++i)
+	for (int i = 0; i < fieldCount; ++i)
 		header |= (m_fields[i].type & 0x07) << i * 3;
 	header = htonl(header);
 
@@ -489,25 +485,25 @@ void PleoCommandTCPIPTask::Process(const GenericSignal& input, GenericSignal&) {
 
 	int cntS = input.Elements(), cntC = input.Channels();
 	for (int s = 0; s < cntS; ++s) {
-		bool hasDataToSend = false;
-		for (int i = 0; i < m_fieldCount; ++i) {
+		int numberOfFieldsToSend = 0;
+		for (int i = m_fieldCount - 1; i >= 0; --i) {
 			int ch = m_fields[i].channel;
 			if (ch >= 0 && ch < cntC && input(ch, s)) {
-				hasDataToSend = true;
+				// we have data waiting in a channel connected to this field
+				// so i is the last field with valid data
+				numberOfFieldsToSend = i + 1;
 				break;
 			}
 		}
-		if (!hasDataToSend)
-			continue; // skip this sample
-		if (!SendDataHeader())
+		if (!numberOfFieldsToSend)
+			continue; // skip this sample as we have no channel-data to send
+		if (!SendDataHeader(numberOfFieldsToSend))
 			return;
-		for (int i = 0; i < m_fieldCount; ++i) {
+		for (int i = 0; i < numberOfFieldsToSend; ++i) {
 			Field *field = &m_fields[i];
 			int ch = field->channel;
-			if (ch >= cntC) {
-				bcierr << "Invalid channel number: " << ch << endl;
-				return;
-			}
+			if (ch >= cntC)
+				ch = -1; // use the fixed value if channel is out of range
 			switch (field->type) {
 			case TYPE_INT8:
 			case TYPE_INT32:

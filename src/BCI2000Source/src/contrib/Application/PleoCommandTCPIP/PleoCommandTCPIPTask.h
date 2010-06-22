@@ -60,7 +60,8 @@ public:
 private:
 	bool Connect();
 	bool SafeSend(const void *data, int len);
-	bool SendDataHeader(prio_t prio = PRIO_DEFAULT, time_t time = TIME_NOTIME);
+	bool SendDataHeader(int fieldCount, prio_t prio = PRIO_DEFAULT,
+	        time_t time = TIME_NOTIME);
 	bool SendDataField(type_t type, double data);
 	bool SendDataField(type_t type, long long data);
 	bool SendDataField(type_t type, const char *data);
