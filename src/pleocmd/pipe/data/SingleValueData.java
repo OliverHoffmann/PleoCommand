@@ -41,7 +41,7 @@ class SingleValueData extends Data {
 	}
 
 	public static long getUser(final Data data) {
-		return data.get(2).asLong();
+		return data.size() < 3 ? 0 : data.get(2).asLong();
 	}
 
 }
