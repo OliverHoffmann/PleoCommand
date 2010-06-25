@@ -1,5 +1,6 @@
 package pleocmd.pipe.cvt;
 
+import java.io.IOException;
 import java.util.List;
 
 import pleocmd.cfg.ConfigDouble;
@@ -37,10 +38,17 @@ public final class BoolConverter extends Converter { // NO_UCD
 
 	private final ConfigDouble cfgConstant;
 
+	private boolean lastRes;
+
 	public BoolConverter() {
 		addConfig(cfgComparator = new ConfigEnum<Comparator>(Comparator.class));
 		addConfig(cfgConstant = new ConfigDouble("Constant", 0));
 		constructed();
+	}
+
+	@Override
+	protected void init0() throws ConverterException, IOException {
+		lastRes = false;
 	}
 
 	@Override
@@ -84,8 +92,10 @@ public final class BoolConverter extends Converter { // NO_UCD
 			throw new ConverterException(this, true,
 					"Invalid comparator: '%s'", cfgComparator.getContent());
 		}
-		if (isVisualize()) plot(0, res ? 1 : 0);
-		return asList(SingleBoolData.create(res, data));
+		final boolean changed = res && !lastRes;
+		lastRes = res;
+		if (isVisualize()) plot(0, changed ? 1 : 0);
+		return asList(SingleBoolData.create(changed, data));
 	}
 
 	public static String help(final HelpKind kind) {

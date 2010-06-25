@@ -13,9 +13,12 @@
 <BODY>
   <H1>Bool Converter</H1>Sendet für jedes empfangene Datenpaket vom Typ Single-Float ein Datenpaket vom Typ
   Single-Boolean.<BR>
-  Der enthaltene Wert ist wahr(1), falls die festgelegte Vergleichsoperation gültig ist, ansonsten falsch(0).<BR>
-  <BR>
-  Dies ist lediglich ein sehr einfacher Converter:<BR>
+  Der enthaltene Wert ist wahr(1), falls die festgelegte Vergleichsoperation gültig wird, ansonsten falsch(0).<BR>
+  Beispiel für &gt;= 4:
+  <PRE>
+  Eingabe: 2 1 3 5 0 6 5 4 3 2
+  Ausgabe: 0 0 0 1 0 1 0 0 0 0
+</PRE>Dies ist lediglich ein sehr einfacher Converter:<BR>
   Komplexere Ausdrücke als einfache Vergleiche lassen sich mit Hilfe des Expression Converter durchführen.<BR>
   Eine Bereichsprüfung kann auf flexiblere Weise mit Hilfe des Threshold Converter erreicht werden.
 </BODY>
