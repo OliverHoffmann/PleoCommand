@@ -506,6 +506,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		while (thrOutput.isAlive())
 			Thread.sleep(100);
 		Log.detail("Output Thread no longer alive");
+		for (int i = 0; i < 30 && thrInput.isAlive(); ++i)
+			Thread.sleep(100); // wait 3 seconds
 		if (thrInput.isAlive()) {
 			Log.error("Input-Thread still alive but Output-Thread died");
 			inputThreadInterruped = true;
