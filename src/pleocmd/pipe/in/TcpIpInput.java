@@ -6,6 +6,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
@@ -52,17 +53,8 @@ public final class TcpIpInput extends Input { // NO_UCD
 		serverSocket.setReuseAddress(true);
 		serverSocket.setSoTimeout(3000);
 		serverSocket.bind(new InetSocketAddress(cfgPort.getContent()));
-		final int cnt = Math.max(1, cfgTimeoutConn.getContent() / 3);
-		for (int i = 1;; ++i)
-			try {
-				socket = serverSocket.accept();
-				break;
-			} catch (final IOException e) {
-				if (getPipe().isInitPhaseInterrupted()) return;
-				if (i == cnt) throw e;
-			}
-		socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
-		in = new DataInputStream(socket.getInputStream());
+		socket = null;
+		in = null;
 	}
 
 	@Override
@@ -85,10 +77,30 @@ public final class TcpIpInput extends Input { // NO_UCD
 
 	@Override
 	protected Data readData0() throws IOException, InputException {
-		if (!socket.isConnected() || socket.isInputShutdown()) return null;
+		if (socket == null || !socket.isConnected() || socket.isInputShutdown()) {
+			if (in != null) in.close();
+			if (socket != null) socket.close();
+			final int cnt = Math.max(1, cfgTimeoutConn.getContent() / 3);
+			for (int i = 1;; ++i)
+				try {
+					Log.info("Waiting for TCP/IP connection ...");
+					socket = serverSocket.accept();
+					break;
+				} catch (final IOException e) {
+					if (getPipe().isInitPhaseInterrupted()) return null;
+					if (i == cnt) throw e;
+				}
+			socket.setSoTimeout(cfgTimeoutRead.getContent() * 1000);
+			in = new DataInputStream(socket.getInputStream());
+		}
 		try {
 			return new MultiFloatData(Data.createFromBinary(in));
 		} catch (final FormatException e) {
+			throw new InputException(this, false, e, "Cannot read from TCP/IP");
+		} catch (final IOException e) {
+			in.close();
+			socket.close();
+			socket = null;
 			throw new InputException(this, false, e, "Cannot read from TCP/IP");
 		}
 	}
