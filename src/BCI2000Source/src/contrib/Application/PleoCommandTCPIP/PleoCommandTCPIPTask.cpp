@@ -45,6 +45,10 @@ static unsigned char HEXTOCHAR[] = { // hexadecimal converter table
 	bcierr << msg << ": " << strerror(WSAGetLastError()) << "["         \
 			<< WSAGetLastError() << "]" << endl
 
+#define printOut(msg)													\
+	bciout << msg << ": " << strerror(WSAGetLastError()) << "["         \
+			<< WSAGetLastError() << "]" << endl
+
 // atoll() not defined for Borland Compiler
 #define atoll(str)	strtoll(str, NULL, 10)
 
@@ -309,21 +313,26 @@ void PleoCommandTCPIPTask::Initialize(const SignalProperties&,
 
 	m_host = AnsiString(Parameter("Host").c_str());
 	m_port = Parameter("Port");
-
-	Connect();
+	CloseSocket();
 }
 
-bool PleoCommandTCPIPTask::Connect() {
+void PleoCommandTCPIPTask::CloseSocket() {
 	if (m_socket != INVALID_SOCKET)
 		closesocket(m_socket);
 	m_socket = INVALID_SOCKET;
+}
 
+bool PleoCommandTCPIPTask::Connect() {
+	CloseSocket();
+
+	bciout << "Resolving host name..." << endl;
 	struct hostent *he = gethostbyname(m_host.c_str());
 	if (!he) {
 		bcierr << "Cannot resolve host name: " << m_host.c_str() << endl;
 		return false;
 	}
 
+	bciout << "Creating socket ..." << endl;
 	SOCKET lsd = socket(PF_INET, SOCK_STREAM, 0);
 	if (lsd == INVALID_SOCKET) {
 		printErr("Cannot create socket");
@@ -335,46 +344,58 @@ bool PleoCommandTCPIPTask::Connect() {
 	sa.sin_family = AF_INET;
 	sa.sin_port = htons(m_port);
 	memcpy(&sa.sin_addr, he->h_addr_list[0], he->h_length);
-	if (connect(lsd, (struct sockaddr*) &sa, sizeof(sa)))
-		printErr("Cannot connect to " << m_host.c_str() << " at port "
+	bciout << "Connecting socket..." << endl;
+	if (connect(lsd, (struct sockaddr*) &sa, sizeof(sa))) {
+		closesocket(lsd);
+		printOut("Cannot connect to " << m_host.c_str() << " at port "
 				<< m_port);
-	else
-		m_socket = lsd;
+		return false;
+	}
+	m_socket = lsd;
+	bciout << "Connected" << endl;
 	return true;
 }
 
-bool PleoCommandTCPIPTask::SafeSend(const void *data, int len) {
-	for (int i = 0; i < 10; ++i) {
-		if (send(m_socket, (const char*) data, len, 0) == len)
-			return true;
-		bciout << "Could not send data - retrying" << endl;
-		Sleep(3000);
+bool PleoCommandTCPIPTask::SafeSend(const void *data, int len, bool reconnect) {
+	if (m_socket == INVALID_SOCKET) {
+		if (!reconnect) {
+			bciout << "Not connected - skipping this data block" << endl;
+			return false;
+		}
 		if (!Connect())
 			return false;
 	}
-	printErr("Cannot write to socket within 30 seconds");
+
+	if (send(m_socket, (const char*) data, len, 0) == len)
+		return true;
+	bciout << "Could not send data - skipping this data block" << endl;
+	CloseSocket();
+	Sleep(1000);
 	return false;
 }
 
-bool PleoCommandTCPIPTask::SendDataHeader(int fieldCount, prio_t prio, time_t time) {
+bool PleoCommandTCPIPTask::SendDataHeader(int fieldCount, prio_t prio,
+        time_t time) {
 	if (fieldCount < 1 || fieldCount > MAX_FIELDS) {
 		bcierr << "Invalid number of fields: " << fieldCount << endl;
 		return false;
 	}
+	int cnt1 = fieldCount > 8 ? 8 : fieldCount;
 
 	unsigned int flags = 0;
 	if (prio != PRIO_DEFAULT)
 		flags |= FLAG_PRIORITY;
 	if (time != TIME_NOTIME)
 		flags |= FLAG_TIMESTAMP;
-	unsigned int header = (flags & 0x1F) << 27 | (fieldCount - 1 & 0x07)
-	        << 24;
-	for (int i = 0; i < fieldCount; ++i)
+	if (fieldCount > 8)
+		flags |= FLAG_VERYLONG;
+	unsigned int header = (flags & 0x1F) << 27 | (cnt1 - 1 & 0x07) << 24;
+	for (int i = 0; i < cnt1; ++i)
 		header |= (m_fields[i].type & 0x07) << i * 3;
 	header = htonl(header);
 
 	// send header
-	if (!SafeSend(&header, 4)) // no sizeof here
+	if (!SafeSend(&header, 4, true)) // no sizeof here
 		return false;
 	if (prio != PRIO_DEFAULT) {
 		if (prio < PRIO_LOWEST || prio > PRIO_HIGHEST) {
@@ -497,8 +518,9 @@ void PleoCommandTCPIPTask::Process(const GenericSignal& input, GenericSignal&) {
 		}
 		if (!numberOfFieldsToSend)
 			continue; // skip this sample as we have no channel-data to send
+
 		if (!SendDataHeader(numberOfFieldsToSend))
-			return;
+			return; // try again on the next data sequence
 		for (int i = 0; i < numberOfFieldsToSend; ++i) {
 			Field *field = &m_fields[i];
 			int ch = field->channel;
@@ -544,9 +566,7 @@ void PleoCommandTCPIPTask::Process(const GenericSignal& input, GenericSignal&) {
 }
 
 void PleoCommandTCPIPTask::Halt() {
-	if (m_socket != INVALID_SOCKET)
-		closesocket(m_socket);
-	m_socket = INVALID_SOCKET;
+	CloseSocket();
 
 	for (int i = 0; i < MAX_FIELDS; ++i) {
 		Field *field = &m_fields[i];
@@ -556,4 +576,3 @@ void PleoCommandTCPIPTask::Halt() {
 	memset(m_fields, 0, sizeof(m_fields));
 
 }
-

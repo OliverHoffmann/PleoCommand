@@ -9,8 +9,8 @@ typedef signed long long time_t;
 typedef int type_t;
 
 // if this is increased, the syntax of binary data has to be changed, too !!!
-// currently we use 3 bits for number of channels
-static const int MAX_FIELDS = 8;
+// currently we use 3 bits for number of channels, with 2 additional possible
+static const int MAX_FIELDS = 32;
 
 static const prio_t PRIO_DEFAULT = 0;
 static const prio_t PRIO_LOWEST = -99;
@@ -19,7 +19,7 @@ static const time_t TIME_NOTIME = -1;
 
 static const int FLAG_PRIORITY = 0x01;
 static const int FLAG_TIMESTAMP = 0x02;
-static const int FLAG_FLAG_RESERVED_2 = 0x04;
+static const int FLAG_VERYLONG = 0x04;
 static const int FLAG_FLAG_RESERVED_3 = 0x08;
 static const int FLAG_FLAG_RESERVED_4 = 0x10;
 
@@ -58,8 +58,9 @@ public:
 	virtual void Halt();
 
 private:
+	void CloseSocket();
 	bool Connect();
-	bool SafeSend(const void *data, int len);
+	bool SafeSend(const void *data, int len, bool reconnect = false);
 	bool SendDataHeader(int fieldCount, prio_t prio = PRIO_DEFAULT,
 	        time_t time = TIME_NOTIME);
 	bool SendDataField(type_t type, double data);
