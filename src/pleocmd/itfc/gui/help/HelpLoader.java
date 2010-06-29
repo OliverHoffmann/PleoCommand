@@ -2,6 +2,8 @@ package pleocmd.itfc.gui.help;
 
 import java.net.URL;
 
+import pleocmd.Log;
+
 public final class HelpLoader {
 
 	private HelpLoader() {
@@ -19,9 +21,12 @@ public final class HelpLoader {
 	 */
 	public static URL getHelp(final String name) {
 		if (name == null) return getMissingHelp();
-		final URL url = HelpLoader.class.getResource(name.contains(".") ? name
-				: name + ".html");
-		if (url == null) return getMissingHelp();
+		final String fullName = name.contains(".") ? name : name + ".html";
+		final URL url = HelpLoader.class.getResource(fullName);
+		if (url == null) {
+			Log.error("Cannot find help file: %s", fullName);
+			return getMissingHelp();
+		}
 		return url;
 	}
 
