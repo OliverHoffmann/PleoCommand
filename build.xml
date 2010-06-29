@@ -339,6 +339,7 @@
 				<include name="GitLogHTML/**" />
 				<include name="TCPIP-Simulator/**" />
 				<include name="**/help/*.html" />
+				<include name="**/help/*.png" />
 				<include name="**/icons/*.png" />
 			</fileset>
 			<fileset dir="${srcBCI}/.." includes="${srcBCISub}/**" />
