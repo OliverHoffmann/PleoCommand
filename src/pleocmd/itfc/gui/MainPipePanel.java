@@ -76,9 +76,8 @@ public final class MainPipePanel extends JPanel {
 	}
 
 	protected void updatePipeLabel() {
-		String fn = MainFrame.the().getPipe().getLastSaveFile().getName();
-		if (fn.contains("."))
-			fn = ": \"" + fn.substring(0, fn.lastIndexOf('.')) + "\"";
+		String title = MainFrame.the().getPipe().getTitle();
+		if (!title.isEmpty()) title = ": \"" + title + "\"";
 		pipeLabel.setText(String.format(
 				"Pipe has %d input%s, %d converter and %d output%s%s",
 				MainFrame.the().getPipe().getInputList().size(), MainFrame
@@ -86,7 +85,7 @@ public final class MainPipePanel extends JPanel {
 				MainFrame.the().getPipe().getConverterList().size(), MainFrame
 						.the().getPipe().getOutputList().size(),
 				MainFrame.the().getPipe().getOutputList().size() == 1 ? ""
-						: "s", fn));
+						: "s", title));
 
 		thumbnailLabel.update(MainFrame.the().getPipe());
 		if (cfgDialog != null) cfgDialog.updatePipeLabel();

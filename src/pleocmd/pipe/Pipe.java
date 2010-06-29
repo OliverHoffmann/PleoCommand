@@ -14,6 +14,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import pleocmd.Log;
+import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.Configuration;
@@ -88,6 +89,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private final ConfigPath cfgLastSaveFile = new ConfigPath("Last Save-File",
 			PathType.FileForWriting);
+
+	private final ConfigBoolean cfgModifiedSinceSave = new ConfigBoolean(
+			"Modified Since Save", false);
 
 	private final List<Input> inputList = new ArrayList<Input>();
 
@@ -981,7 +985,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (groupName.equals(getClass().getSimpleName()))
 			return new Group(groupName).add(cfgMaxBehind).add(
 					cfgOutputInitOverhead).add(cfgOverheadReductionTime).add(
-					cfgLastSaveFile);
+					cfgLastSaveFile).add(cfgModifiedSinceSave);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
 			throw new InternalException("Wrong groupName for "
@@ -1093,6 +1097,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	public void setLastSaveFile(final File file) throws ConfigurationException {
 		cfgLastSaveFile.setContent(file);
+		cfgModifiedSinceSave.setContent(false);
 	}
 
 	@Override
@@ -1117,6 +1122,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				if (pfv != null) pfv.modified();
 			}
 		}
+		cfgModifiedSinceSave.setContent(true);
 	}
 
 	private void visualizePipeFlow(final PipePart src, final PipePart dst) {
@@ -1125,5 +1131,12 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					.getMainPipePanel().getPipeFlowVisualization();
 			if (pfv != null) pfv.addPipeFlow(src, dst);
 		}
+	}
+
+	public String getTitle() {
+		String res = getLastSaveFile().getName();
+		if (res.contains(".")) res = res.substring(0, res.lastIndexOf('.'));
+		if (cfgModifiedSinceSave.getContent()) res += " [modified]";
+		return res;
 	}
 }
