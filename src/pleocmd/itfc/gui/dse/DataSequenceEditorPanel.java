@@ -258,9 +258,13 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 						device = ((ConfigItem<?>) out.getGroup().get("Device"))
 								.getContent();
 				if (device == null)
-					device = JOptionPane.showInputDialog(this,
-							"Set Pleo device name for playback:",
-							PleoCommunication.getHighestPort().getName());
+					try {
+						device = JOptionPane.showInputDialog(this,
+								"Set Pleo device name for playback:",
+								PleoCommunication.getHighestPort().getName());
+					} catch (final NoClassDefFoundError e) {
+						Log.error(e, "RXTX not available");
+					}
 				if (device == null) return;
 				playOutputList = new ArrayList<Output>(2);
 				final Output outC = new ConsoleOutput(PrintType.Ascii);

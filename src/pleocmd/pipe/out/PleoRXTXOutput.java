@@ -46,19 +46,27 @@ public final class PleoRXTXOutput extends Output {
 
 	private static List<String> getAllDeviceNames() {
 		final List<String> names = new ArrayList<String>();
-		final List<CommPortIdentifier> ports = PleoCommunication
-				.getAvailableSerialPorts();
-		for (final CommPortIdentifier port : ports)
-			names.add(port.getName());
+		try {
+			final List<CommPortIdentifier> ports = PleoCommunication
+					.getAvailableSerialPorts();
+			for (final CommPortIdentifier port : ports)
+				names.add(port.getName());
+		} catch (final NoClassDefFoundError e) {
+			Log.error(e, "RXTX not available");
+		}
 		return names;
 	}
 
 	@Override
-	protected void init0() throws IOException {
+	protected void init0() throws IOException, OutputException {
 		Log.detail("Initializing PleoRXTXOutput for device '%s'", cfgDevice
 				.getContent());
-		pc = new PleoCommunication(PleoCommunication.getPort(cfgDevice
-				.getContent()));
+		try {
+			pc = new PleoCommunication(PleoCommunication.getPort(cfgDevice
+					.getContent()));
+		} catch (final NoClassDefFoundError e) {
+			throw new OutputException(this, true, e, "RXTX not available");
+		}
 		pc.init();
 		thrUpdateStatusLabel = new Thread() {
 			@Override
@@ -187,6 +195,8 @@ public final class PleoRXTXOutput extends Output {
 	public String isConfigurationSane() {
 		try {
 			PleoCommunication.getPort(cfgDevice.getContent());
+		} catch (final NoClassDefFoundError e) {
+			return "RXTX not available";
 		} catch (final IOException e) {
 			return String.format("Device %s does not exist", cfgDevice
 					.getContent());
