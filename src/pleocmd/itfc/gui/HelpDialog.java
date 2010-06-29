@@ -52,8 +52,6 @@ public final class HelpDialog extends JDialog {
 		setLocation(0, 0);
 
 		setAlwaysOnTop(true);
-
-		display("Welcome");
 	}
 
 	public static HelpDialog the(final Window owner) {
