@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE></TITLE>
+  <STYLE type="text/css">
+span.conn {color: green;}
+  span.inner {color: blue;}
+  span.outer {color: #808000;}
+  span.button {color: red;}
+  </STYLE>
+</HEAD>
+
+<BODY>
+  <H1>Pipe Konfiguration</H1>
+
+  <H2>Bereiche</H2>Die Pipe-Konfiguration basiert auf einem Zeichenbrett (Board), welches vertikal in drei Bereiche
+  unterteilt ist:<BR>
+  Links ist der Bereich für Eingabe-Komponenten. Sie werden bei Ausführen der Pipe von oben nach unten der Reihe nach
+  abgearbeitet. Wurde der letzte ausgeführt, wird die Pipe beendet.<BR>
+  Im mittleren Bereich befinden sich die Konverter und im rechten Bereich die Ausgabe-Komponenten.
+
+  <H2>Interaktion mit der Maus</H2><IMG src="PipeComponent.png" alt="Bild einer Pipe-Komponente"><BR>
+  Komponenten haben einen <SPAN class="inner">inneren</SPAN> und <SPAN class="outer">äußeren</SPAN> Bereich, außerdem
+  können sie <SPAN class="button">Buttons</SPAN> enthalten. Zwischen Komponenten können <SPAN class=
+  "conn">Verbindungen</SPAN> erstellt werden.<BR>
+  Durch Verweilen mit der Maus auf einer Komponente wird eine Übersicht über die Konfiguration der Komponente sowie
+  statistische Informationen angezeigt.<BR>
+  Durch Links-Klicken auf den <SPAN class="inner">inneren Bereich</SPAN> und Ziehen der Maus kann eine Komponente
+  verschoben werden. Der dunkelgrün hervorgehobene Bereich auf dem Board signalisiert den Bereich, in welchem eine
+  Komponente verschoben werden kann, ohne die interne Ordnung bei Ausführung der Pipe zu verändern.<BR>
+  Durch Links-Klicken auf den <SPAN class="outer">äußeren Bereich</SPAN> und Ziehen der Maus kann eine (weitere)
+  Verbindung von dieser Komponente zu einer anderen erstellt werden. Die neue Verbindung wird erst bei Loslassen der
+  Maus über der gewünschten Zielkomponente erstellt und nur unter der Voraussetzung, das eine Verbindung zwischen
+  diesen Komponenten erlaubt ist und nicht bereits existiert.<BR>
+  Durch Links-Klicken auf eine <SPAN class="conn">Verbindung</SPAN> und Ziehen der Maus kann die Verbindung zu einem
+  anderen Ziel verschoben werden. Durch Loslassen der Verbindung über einem ungültigen Ziel wird die Verbindung
+  entfernt.<BR>
+  Durch einfaches Links-Klicken auf einen <SPAN class="button">Button</SPAN> kann der Konfigurationsdialog aufgerufen
+  oder die Darstellung eines Diagramms aktiviert werden.
+
+  <H2>Kontextmenü</H2>Das Kontextmenü wird durch Klicken mit der rechten Maustaste auf das Bord oder eine Komponente
+  bzw. Verbindung auf dem Board aufgerufen:<BR>
+  Mit "<STRONG>Add ...</STRONG>" können zu diesem Bereich passende Komponenten zum Board hinzugefügt werden.<BR>
+  Mit "<STRONG>Replace ...</STRONG>" kann die aktuell markierte Komponente durch eine andere ersetzt werden.<BR>
+  Mit "<STRONG>Configure This PipePart</STRONG>" wird der Konfigurationsdialog der Komponente aufgerufen (kann auch
+  durch Doppelklick auf eine Komponente erreicht werden).<BR>
+  Mit "<STRONG>Delete This PipePart</STRONG>" wird die Komponente vom Board entfernt.<BR>
+  Mit "<STRONG>Delete Connections ...</STRONG>" werden alle ausgehenden Verbindungen der Komponente vom Board
+  entfernt.<BR>
+  Mit "<STRONG>Delete This Connection</STRONG>" bei Klick auf eine einzelne Verbindung kann diese entfernt werden (kann
+  auch durch Ziehen der Verbindung mit der Maus <EM>ins Nichts</EM> erreicht werden).<BR>
+  Mit "<STRONG>Clear The Board</STRONG>" werden alle Komponenten und deren Verbindungen vom Board entfernt.<BR>
+  Mit "<STRONG>Auto-Layout The Board</STRONG>" werden alle Komponenten und deren Verbindungen so umsortiert, dass
+  möglichst wenig Überkreuzungen entstehen.<BR>
+</BODY>
+</HTML>

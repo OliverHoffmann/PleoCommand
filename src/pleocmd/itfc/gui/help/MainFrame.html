@@ -3,7 +3,7 @@
 
 <HTML>
 <HEAD>
-  <META name="generator" content="HTML Tidy for Linux/x86 (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
   <META name="generator" content="Bluefish 2.0.0">
   <META content="text/html; charset=utf-8" http-equiv="Content-Type">
 
@@ -11,6 +11,34 @@
 </HEAD>
 
 <BODY>
-  <H1>Main Dialog</H1>
+  <H1>Haupt-Dialog</H1>Der Haupt-Dialog ist vertikal in drei Bereiche unterteilt. Die Größe des Aus- und
+  Eingabebereichs kann beliebig angepasst werden.
+
+  <H2>Pipe Übersicht</H2>Eine verkleinerte Übersicht über die aktuell gültige Pipe.<BR>
+  Kann durch Klicken auf "<STRONG>Modify</STRONG>" bearbeitet werden, außerdem können Pipe-Konfigurationen in externe
+  Dateien gespeichert und von dort wieder geladen werden. Durch Speichern einer Pipe in eine Datei wird der verwendete
+  Dateiname automatisch zum Namen der Pipe. Die aktuell gültige Pipe wird bei Beenden des Programms automatisch in
+  einer separaten (nicht in der zuletzt verwendeten) Datei gesichert und bei erneutem Programmstart wiederhergestellt.
+
+  <H2>Ausgabe</H2>Hier erscheinen sämtliche Hinweise und Fehlermeldungen. Außerdem werden sämtliche von der
+  ConsoleOutput-Komponente empfangenen Datenpakete hier ausgegeben.<BR>
+  Durch Klicken auf "<STRONG>Show detailed Log</STRONG>" werden zusätzlich Debug-Meldungen angezeigt. Dies kann die
+  Ausführungsgeschwindigkeit des Programms jedoch stark reduzieren. Mit dem "<STRONG>Start</STRONG>"-Button wird die
+  Pipe gestartet, mit dem "<STRONG>Abort</STRONG>"-Button kann sie gestoppt werden.
+
+  <H2>Eingabe</H2>Die Eingabe ist mit der ConsoleInput-Komponente verbunden. Existiert keine solche Komponente in der
+  aktuellen Pipe, so ist auch keine Eingabe möglich.<BR>
+  Alle jemals eingegebenen Kommandos werden in der History gespeichert und können durch einfaches Klicken in die
+  Eingabezeile geholt oder durch doppeltes Klicken direkt ausgeführt werden. Liegt der Fokus auf der Eingabezeile, kann
+  die History durch Cursor hoch und runter ebenfalls durchlaufen werden.<BR>
+  Durch Drücken von Strg+R wird der erste Eintrag in der History, welcher die aktuelle Eingabe enthält, gesucht und in
+  die Eingabezeile übernommen.<BR>
+  "<STRONG>Send</STRONG>" sendet die aktuelle Eingabe an die ConsoleInput-Komponente und entspricht dem Drücken von
+  Return oder Doppelklicken in die History.<BR>
+  Mit "<STRONG>SendEOS</STRONG>" wird die Eingabe terminiert. Befindet sich in der Pipe nach dem ConsoleInput noch eine
+  weitere Input-Komponente, so wird diese nun ausgeführt. Existiert keine weitere Komponente, wird die Pipe
+  beendet.<BR>
+  Durch Klicken auf "<STRONG>Read From...</STRONG>" kann eine externe Datei eingelesen und deren Inhalt ausgeführt
+  werden, als ob er Zeile für Zeile eingegeben worden wäre.
 </BODY>
 </HTML>
