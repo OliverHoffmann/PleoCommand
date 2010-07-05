@@ -356,6 +356,9 @@ bool PleoCommandTCPIPTask::Connect() {
 	return true;
 }
 
+static const char TOHEX[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+        'A', 'B', 'C', 'D', 'E', 'F'};
+
 bool PleoCommandTCPIPTask::SafeSend(const void *data, int len, bool reconnect) {
 	if (m_socket == INVALID_SOCKET) {
 		if (!reconnect) {
@@ -366,6 +369,12 @@ bool PleoCommandTCPIPTask::SafeSend(const void *data, int len, bool reconnect) {
 			return false;
 	}
 
+//	const char* pc = (const char*) data;
+//	for (int i = 0; i < len; ++i) {
+//		bciout << TOHEX[(pc[i] >> 4) & 0x0F];
+//		bciout << TOHEX[pc[i] & 0x0F];
+//	}
+//	bciout << endl;
 	if (send(m_socket, (const char*) data, len, 0) == len)
 		return true;
 	bciout << "Could not send data - skipping this data block" << endl;
@@ -413,6 +422,27 @@ bool PleoCommandTCPIPTask::SendDataHeader(int fieldCount, prio_t prio,
 		unsigned int timeUI = htonl(time);
 		if (!SafeSend(&timeUI, 4))
 			return false;
+	}
+	if (fieldCount > 8) {
+		// 10 bytes: 5 bits for count, then 24 * 3 bits for type
+		// (last 3 bits ignored)
+		unsigned char b = ((fieldCount - 1) << 3) | (m_fields[8].type & 0x07);
+		if (!SafeSend(&b, 1))
+			return false;
+		// send in blocks of 3 bytes (for 8 types)
+		int n = 8;
+		for (int j = 0; j < 3; ++j) {
+			unsigned int b4 = 0;
+			for (int i = 0; i < 8; ++i) {
+				b4 <<= 3;
+				if (++n < fieldCount)
+					b4 |= m_fields[n].type & 0x07;
+			}
+			b4 <<= 8; // only first 3 bytes used
+			b4 = htonl(b4);
+			if (!SafeSend(&b4, 3))
+				return false;
+		}
 	}
 
 	return true;
@@ -560,6 +590,9 @@ void PleoCommandTCPIPTask::Process(const GenericSignal& input, GenericSignal&) {
 				        field->fixedDataLen))
 					return;
 				break;
+			default:
+				bcierr << "Invalid field type: " << field->type << endl;
+				return;
 			}
 		}
 	}

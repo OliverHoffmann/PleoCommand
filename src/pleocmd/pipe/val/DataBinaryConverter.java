@@ -221,11 +221,15 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			in.readFully(ba);
 			cnt = (ba[0] >> 3 & 0x1F) + 1; // first 5 bits (MSB)
 			// 24 * 3 bits following
-			final BitArray bits = new BitArray(80, ba);
+			Log.detail("VeryLong-Bytes are '%s'", DataAsciiConverter
+					.toHexString(ba, 10));
 			int bp = 4;
-			for (int i = 8; i < cnt; ++i)
-				types[i] = ValueType.values()[bits.get(++bp) ? 4 : 0
-						| (bits.get(++bp) ? 2 : 0) | (bits.get(++bp) ? 1 : 0)];
+			for (int i = 8; i < cnt; ++i) {
+				final int b0 = getBit(ba, ++bp) ? 4 : 0;
+				final int b1 = getBit(ba, ++bp) ? 2 : 0;
+				final int b2 = getBit(ba, ++bp) ? 1 : 0;
+				types[i] = ValueType.values()[b0 | b1 | b2];
+			}
 			pos += 10;
 		}
 		Log.detail("Header is 0x%08X => flags: 0x%02X count: %d", hdr, flags,
@@ -259,6 +263,10 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 		trimValues();
 		if (syntaxList != null) syntaxList.add(new Syntax(Type.Error, pos));
 		Log.detail("Finished parsing a binary Data object");
+	}
+
+	private static boolean getBit(final byte[] ba, final int idx) {
+		return (ba[idx / 8] & 1 << 7 - idx % 8) != 0;
 	}
 
 	public void writeToBinary(final DataOutput out,

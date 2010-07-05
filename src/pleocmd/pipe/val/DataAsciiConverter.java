@@ -507,7 +507,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		}
 	}
 
-	protected static String toHexString(final byte[] a, final int len) {
+	public static String toHexString(final byte[] a, final int len) {
 		final StringBuilder sb = new StringBuilder("[");
 		for (int i = 0; i < len; ++i)
 			sb.append(String.format("%02X", a[i]));
