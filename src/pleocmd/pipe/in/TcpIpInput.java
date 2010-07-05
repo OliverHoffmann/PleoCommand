@@ -61,7 +61,7 @@ public final class TcpIpInput extends Input { // NO_UCD
 	protected void close0() throws IOException {
 		if (in != null) in.close();
 		if (socket != null) socket.close();
-		serverSocket.close();
+		if (serverSocket != null) serverSocket.close();
 	}
 
 	@Override
