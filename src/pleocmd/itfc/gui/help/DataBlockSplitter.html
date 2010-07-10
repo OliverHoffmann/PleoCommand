@@ -11,16 +11,16 @@
 </HEAD>
 
 <BODY>
-  <H1>Data Block Splitter<BR></H1>Sendet für jedes empfangene Datenpaket vom Typ Multi-Float eines oder mehrere
-  Datenpakete vom Typ Single-Float mit dem Inhalt der einzelnen Felder.<BR>
-  Alle erstellten Single-Value Datenpakete erhalten dieselbe Kanalnummer zugewiesen.<BR>
-  Optional kann eine Verzögerung zwischen den einzelnen Datenpaketen erzwungen werden.<BR>
+  <H1>Data Block Splitter<BR></H1>Sendet für jedes empfangene Datenblock vom Typ Multi-Float eines oder mehrere
+  Datenblöcke vom Typ Single-Float mit dem Inhalt der einzelnen Felder.<BR>
+  Alle erstellten Single-Value Datenblöcke erhalten dieselbe Kanalnummer zugewiesen.<BR>
+  Optional kann eine Verzögerung zwischen den einzelnen Datenblöcken erzwungen werden.<BR>
   Beispiel:<BR>
-  Multi|2.5|7|0.01 erzeugt bei eingesteller Kanalnummer 1 als Ausgabe die folgenden 3 Pakete:<BR>
+  Multi|2.5|7|0.01 erzeugt bei eingesteller Kanalnummer 1 als Ausgabe die folgenden 3 Datenblöcke:<BR>
   Single|2.5|1<BR>
   Single|7|1<BR>
   Single|0.01|1<BR>
-  Bei zusätzlich aktivierter Verzögerung von 200 ms würden stattdessen folgende Pakete erstellt werden:<BR>
+  Bei zusätzlich aktivierter Verzögerung von 200 ms würden stattdessen folgende Datenblöcke erstellt werden:<BR>
   Single|2.5|1<BR>
   [T10200ms]Single|7|1<BR>
   [T10400ms]Single|0.01|1<BR>
