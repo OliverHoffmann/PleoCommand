@@ -145,7 +145,7 @@ public final class DataFileEditDialog extends JDialog implements
 
 			@Override
 			public String getDescription() {
-				return "Ascii-Textfile containing Data-List";
+				return "ASCII-Textfile containing Data-List";
 			}
 		});
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
@@ -156,7 +156,7 @@ public final class DataFileEditDialog extends JDialog implements
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(true);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter(
-				"Ascii-Textfile containing Data-List", "pad"));
+				"ASCII-Textfile containing Data-List", "pad"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			if (!file.getName().contains("."))

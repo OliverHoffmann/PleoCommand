@@ -109,9 +109,9 @@ public final class StaticInput extends Input { // NO_UCD
 		case Name:
 			return "Static Input";
 		case Description:
-			return "Returns Ascii Data blocks directly from configuration";
+			return "Returns ASCII Data blocks directly from configuration";
 		case Config1:
-			return "A new-line delimited list of Data blocks in Ascii form";
+			return "A new-line delimited list of Data blocks in ASCII form";
 		default:
 			return null;
 		}

@@ -35,8 +35,8 @@ public final class FileOutput extends Output { // NO_UCD
 		addConfig(cfgFile = new ConfigPath("File", PathType.FileForWriting));
 		addConfig(cfgType = new ConfigEnum<PrintType>(PrintType.class));
 		cfgFile.setFileFilter(Arrays.asList(new FileFilter[] {
-				new FileNameExtensionFilter("Ascii-Textfiles", "txt"),
-				new FileNameExtensionFilter("Pleo Ascii Data", "pad"),
+				new FileNameExtensionFilter("ASCII-Textfiles", "txt"),
+				new FileNameExtensionFilter("Pleo ASCII Data", "pad"),
 				new FileNameExtensionFilter("Pleo Binary Data", "pbd") }));
 		cfgFile.setChangingContent(new RunnableWithArgument() {
 			@Override
@@ -152,9 +152,9 @@ public final class FileOutput extends Output { // NO_UCD
 			return "Writes Data blocks to external files";
 		case Config1:
 			return "Path to an external file to which commands should "
-					+ "be written in either Ascii or binary form";
+					+ "be written in either ASCII or binary form";
 		case Config2:
-			return "'Ascii' if Data blocks will be in Ascii format or\n"
+			return "'Ascii' if Data blocks will be in ASCII format or\n"
 					+ "   'Binary' if Data blocks will be written as binary";
 		default:
 			return null;

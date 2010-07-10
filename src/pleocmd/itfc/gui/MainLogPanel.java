@@ -99,7 +99,7 @@ final class MainLogPanel extends JPanel {
 	public void writeLogToFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
-		fc.addChoosableFileFilter(new FileNameExtensionFilter("Ascii-Logfile",
+		fc.addChoosableFileFilter(new FileNameExtensionFilter("ASCII Logfile",
 				"log"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
 			try {

@@ -36,8 +36,8 @@ public final class FileInput extends Input { // NO_UCD
 		addConfig(cfgFile = new ConfigPath("File", PathType.FileForReading));
 		addConfig(cfgType = new ConfigEnum<ReadType>(ReadType.class));
 		cfgFile.setFileFilter(Arrays.asList(new FileFilter[] {
-				new FileNameExtensionFilter("Ascii-Textfiles", "txt"),
-				new FileNameExtensionFilter("Pleo Ascii Data", "pad"),
+				new FileNameExtensionFilter("ASCII-Textfiles", "txt"),
+				new FileNameExtensionFilter("Pleo ASCII Data", "pad"),
 				new FileNameExtensionFilter("Pleo Binary Data", "pbd") }));
 		cfgFile.setModifyFile(new RunnableWithArgument() {
 			@Override
@@ -147,9 +147,9 @@ public final class FileInput extends Input { // NO_UCD
 			return "Reads Data blocks from external files";
 		case Config1:
 			return "Path to an external file from which commands should "
-					+ "be read in either Ascii or binary form";
+					+ "be read in either ASCII or binary form";
 		case Config2:
-			return "'Ascii' if Data blocks are in Ascii format or\n"
+			return "'Ascii' if Data blocks are in ASCII format or\n"
 					+ "   'Binary' if Data blocks should be treated as binary";
 		default:
 			return null;

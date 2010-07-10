@@ -107,7 +107,7 @@ public final class ConsoleOutput extends Output {
 		case Description:
 			return "Writes Data blocks to the standard output";
 		case Config1:
-			return "'Ascii' if Data blocks will be in Ascii format or\n"
+			return "'Ascii' if Data blocks will be in ASCII format or\n"
 					+ "   'Binary' if Data blocks will be written as binary";
 		default:
 			return null;

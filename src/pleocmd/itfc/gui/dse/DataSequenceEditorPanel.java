@@ -184,7 +184,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 
 			@Override
 			public String getDescription() {
-				return "Ascii-Textfile containing Data-List";
+				return "ASCII-Textfile containing Data-List";
 			}
 		});
 		if (fc.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)

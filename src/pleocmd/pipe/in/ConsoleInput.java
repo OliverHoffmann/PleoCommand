@@ -66,7 +66,7 @@ public final class ConsoleInput extends Input {
 		case Description:
 			return "Reads Data blocks from the standard input";
 		case Config1:
-			return "'Ascii' if Data blocks are in Ascii format or\n"
+			return "'Ascii' if Data blocks are in ASCII format or\n"
 					+ "   'Binary' if Data blocks should be treated as binary";
 		default:
 			return null;
