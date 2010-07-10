@@ -94,7 +94,7 @@ final class MainInputPanel extends JPanel {
 					}
 				});
 		btnRead = lay.addButton("Read From ...", "document-import",
-				"Uses the whole contents of a file as it was "
+				"Use the whole contents of a file as it was "
 						+ "entered in the input field", new Runnable() {
 					@Override
 					public void run() {
@@ -103,7 +103,7 @@ final class MainInputPanel extends JPanel {
 				});
 		lay.addSpacer();
 		btnClear = lay.addButton("Clear History", "archive-remove",
-				"Clears the history list of recently entered input",
+				"Clear the history list of recently entered input",
 				new Runnable() {
 					@Override
 					public void run() {

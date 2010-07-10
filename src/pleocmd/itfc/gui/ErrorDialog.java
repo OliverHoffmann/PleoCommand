@@ -88,7 +88,7 @@ public final class ErrorDialog extends JDialog implements
 		spErrorPanel.setBorder(null);
 
 		lay.addButton("Reset", "",
-				"Clears the list of suppressed error messages", new Runnable() {
+				"Clear the list of suppressed error messages", new Runnable() {
 					@Override
 					public void run() {
 						reset();

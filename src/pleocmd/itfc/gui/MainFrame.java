@@ -111,7 +111,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		lblStatus = new JLabel("...", SwingConstants.CENTER);
 		lay.add(lblStatus, true);
 		btnExit = lay.addButton("Exit", "application-exit",
-				"Cancels running pipe (if any) and exits the application",
+				"Cancel running pipe (if any) and exit the application",
 				new Runnable() {
 					@Override
 					public void run() {

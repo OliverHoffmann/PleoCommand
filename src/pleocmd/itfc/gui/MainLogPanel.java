@@ -53,14 +53,14 @@ final class MainLogPanel extends JPanel {
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED), true);
 
 		btnStart = lay.addButton("Start", "arrow-right",
-				"Starts the currently configured pipe", new Runnable() {
+				"Start the currently configured pipe", new Runnable() {
 					@Override
 					public void run() {
 						MainFrame.the().startPipeThread();
 					}
 				});
 		btnAbort = lay.addButton("Abort", "dialog-close",
-				"Forcefully aborts the currently running pipe", new Runnable() {
+				"Forcefully abort the currently running pipe", new Runnable() {
 					@Override
 					public void run() {
 						MainFrame.the().abortPipeThread();
@@ -77,13 +77,13 @@ final class MainLogPanel extends JPanel {
 		});
 		lay.add(cbShowDetail, false);
 		btnSave = lay.addButton(Button.SaveTo,
-				"Saves the whole log to a text file", new Runnable() {
+				"Save the whole log to a text file", new Runnable() {
 					@Override
 					public void run() {
 						writeLogToFile();
 					}
 				});
-		btnClear = lay.addButton(Button.Clear, "Empties the whole log list",
+		btnClear = lay.addButton(Button.Clear, "Empty the whole log list",
 				new Runnable() {
 					@Override
 					public void run() {
