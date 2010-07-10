@@ -571,6 +571,8 @@ final class PipeConfigBoard extends JPanel {
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
 			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
+			newPos.x = newPos.x / 10 * 10;
+			newPos.y = newPos.y / 10 * 10;
 			painter.check(newPos, currentPart);
 			currentPart.setGuiPosition(newPos);
 			if (!checkPipeOrdering(null)) currentPart.setGuiPosition(orgPos);
