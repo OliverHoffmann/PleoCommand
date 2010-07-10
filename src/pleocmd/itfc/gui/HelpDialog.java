@@ -4,11 +4,15 @@ import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent.EventType;
 
 import pleocmd.Log;
 import pleocmd.itfc.gui.Layouter.Button;
@@ -38,6 +42,13 @@ public final class HelpDialog extends JDialog {
 
 		tpHelp = new JTextPane();
 		tpHelp.setEditable(false);
+		tpHelp.addHyperlinkListener(new HyperlinkListener() {
+			@Override
+			public void hyperlinkUpdate(final HyperlinkEvent e) {
+				if (e.getEventType() == EventType.ACTIVATED)
+					display(new File(e.getURL().getPath()).getName());
+			}
+		});
 		lay.addWholeLine(new JScrollPane(tpHelp), true);
 
 		lay.addSpacer();
