@@ -10,6 +10,7 @@ import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.jar.JarEntry;
@@ -40,6 +41,17 @@ public final class PipePartDetection {
 			LIST_PIPEPART.add(ppc);
 		for (final Class<Output> ppc : LIST_OUT)
 			LIST_PIPEPART.add(ppc);
+		final Comparator<Class<? extends PipePart>> cmp = new Comparator<Class<? extends PipePart>>() {
+			@Override
+			public int compare(final Class<? extends PipePart> c1,
+					final Class<? extends PipePart> c2) {
+				return PipePart.getName(c1).compareTo(PipePart.getName(c2));
+			}
+		};
+		Collections.sort(LIST_IN, cmp);
+		Collections.sort(LIST_CVT, cmp);
+		Collections.sort(LIST_OUT, cmp);
+		Collections.sort(LIST_PIPEPART, cmp);
 	}
 
 	// CS_IGNORE_BEGIN need private before public here
@@ -248,7 +260,9 @@ public final class PipePartDetection {
 
 		if (!res.isEmpty()) {
 			final StringBuilder sb = new StringBuilder();
-			sb.append("Failed static checks for PipePart ");
+			sb.append("Failed static checks for PipePart \"");
+			sb.append(PipePart.getName(cpp));
+			sb.append("\" - ");
 			sb.append(cpp.getName());
 			sb.append(":");
 			for (final String s : res) {
