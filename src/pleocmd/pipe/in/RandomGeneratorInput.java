@@ -178,11 +178,11 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 			return "Generates noise with some random peaks";
 		case Config1:
 			return "Some integer which is sent as an additional argument in "
-					+ "the Data packets (mostly used for channel number)";
+					+ "the Data blocks (mostly used for channel number)";
 		case Config2:
-			return "Number of Data packets created per second";
+			return "Number of Data blocks created per second";
 		case Config3:
-			return "The probability to start a new peak on a Data packet "
+			return "The probability to start a new peak on a Data block "
 					+ "(if 0 there are no peaks at all, if 1 a peak is started "
 					+ "immediately after the last one)";
 		case Config4:
@@ -200,7 +200,7 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 					+ "with the current samplerate)";
 		case Config8:
 			return "The maximum possible random noise added to / subtracted from "
-					+ "each generated Data packet.";
+					+ "each generated Data block.";
 		default:
 			return null;
 		}

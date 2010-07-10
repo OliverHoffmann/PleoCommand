@@ -699,7 +699,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				final Data res = in.readData();
 				if (res != null) {
 					feedback.incDataInputCount();
-					// found a valid data packet
+					// found a valid data block
 					res.setOrigin(in);
 					return res;
 				}
@@ -713,14 +713,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					++inputPosition;
 				} else
 					Log.info("Skipping one data block from input '%s'", in);
-				// try next data packet / try from next input
+				// try next data block / try from next input
 				continue;
 			} catch (final Throwable e) { // CS_IGNORE catch any Input-problems
 				Log.error(e);
 				in.getFeedback().addError(e, false);
 				feedback.addError(e, false);
 				Log.info("Skipping one data block from input '%s'", in);
-				// try next data packet / try from next input
+				// try next data block / try from next input
 				continue;
 			}
 			// no more data available in this Input, so
@@ -728,7 +728,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			Log.info("Switching to next input");
 			in.tryClose();
 			++inputPosition;
-			// try data packet from next input
+			// try data block from next input
 		}
 	}
 

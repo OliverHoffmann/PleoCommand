@@ -57,7 +57,7 @@ public final class BCISingleChannel extends Converter { // NO_UCD
 			return "Single Channel";
 		case Description:
 			return "Lets only data from a single channel pass and "
-					+ "blocks all other data packets";
+					+ "blocks all other data blocks";
 		case Config1:
 			return "Number of channel that is allowed to pass";
 		default:

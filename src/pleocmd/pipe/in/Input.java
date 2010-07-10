@@ -41,7 +41,7 @@ public abstract class Input extends PipePart {
 		try {
 			ensureInitialized();
 			final Data res = readData0();
-			if (res != null) // got a valid data packet
+			if (res != null) // got a valid data block
 				getFeedback().incDataSentCount(1);
 			return res;
 		} catch (final IOException e) {

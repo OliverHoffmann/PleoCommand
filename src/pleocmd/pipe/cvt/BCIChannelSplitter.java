@@ -59,7 +59,7 @@ public final class BCIChannelSplitter extends Converter { // NO_UCD
 		case Name:
 			return "Channel Splitter";
 		case Description:
-			return "Splits a multi-channel data packet into its "
+			return "Splits a multi-channel data block into its "
 					+ "single channels, like 'Multi|2.5|7|0.01' to "
 					+ "'Single|2.5|1', 'Single|7|2' and 'Single|0.01|3'";
 		default:

@@ -155,7 +155,7 @@ public final class BCICodomainAdaption extends Converter { // NO_UCD
 			return "Maximum value of target range";
 		case Config5:
 			return "Whether to fit values out of the source range to min/max "
-					+ "or just drop the data packet";
+					+ "or just drop the data block";
 		case Config6:
 			return "Kind of transformation from source range to target range";
 		default:

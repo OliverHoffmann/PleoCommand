@@ -76,15 +76,15 @@ public final class DataBlockSplitter extends Converter { // NO_UCD
 		case Name:
 			return "Data Block Splitter";
 		case Description:
-			return "Splits a multi-value data packet into its "
+			return "Splits a multi-value data block into its "
 					+ "single values, like 'Multi|2.5|7|0.01' to "
 					+ "'Single|2.5|1', 'Single|7|1' and 'Single|0.01|1'";
 		case Config1:
 			return "The Channel-Number which should be used for the "
-					+ "newly created data packets";
+					+ "newly created data blocks";
 		case Config2:
-			return "The delay between consecutive data packets coming from the "
-					+ "same multi-value packet (in ms)";
+			return "The delay between consecutive data blocks coming from the "
+					+ "same multi-value block (in ms)";
 		default:
 			return null;
 		}

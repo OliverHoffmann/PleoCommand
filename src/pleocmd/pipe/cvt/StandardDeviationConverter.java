@@ -90,7 +90,7 @@ public final class StandardDeviationConverter extends Converter { // NO_UCD
 			return "Standard-Deviation Converter";
 		case Description:
 			return "Calculates the standard deviation of the Data based "
-					+ "on the most recent data packets";
+					+ "on the most recent data blocks";
 		case Config1:
 			return "Number of Data blocks to use for deviation calculation";
 		default:
