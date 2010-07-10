@@ -27,7 +27,8 @@
   Pipe gestartet, mit dem "<STRONG>Abort</STRONG>"-Button kann sie gestoppt werden.
 
   <H2>Eingabe</H2>Die Eingabe ist mit der ConsoleInput-Komponente verbunden. Existiert keine solche Komponente in der
-  aktuellen Pipe, so ist auch keine Eingabe möglich.<BR>
+  aktuellen Pipe, so ist auch keine Eingabe möglich. Für die direkte Eingabe wird der ASCII Modus des ConsoleInput
+  empfohlen.<BR>
   Alle jemals eingegebenen Kommandos werden in der History gespeichert und können durch einfaches Klicken in die
   Eingabezeile geholt oder durch doppeltes Klicken direkt ausgeführt werden. Liegt der Fokus auf der Eingabezeile, kann
   die History durch Cursor hoch und runter ebenfalls durchlaufen werden.<BR>
@@ -39,6 +40,10 @@
   weitere Input-Komponente, so wird diese nun ausgeführt. Existiert keine weitere Komponente, wird die Pipe
   beendet.<BR>
   Durch Klicken auf "<STRONG>Read From...</STRONG>" kann eine externe Datei eingelesen und deren Inhalt ausgeführt
-  werden, als ob er Zeile für Zeile eingegeben worden wäre.
+  werden, als ob er Zeile für Zeile eingegeben worden wäre. Ein Einlesen einer Datei in einen ConsoleInput auf diese
+  Weise ist identisch mit dem Verwenden eines FileInput auf dieselbe Datei.<BR>
+  <BR>
+  Siehe auch <A href="DataBlockBinary.html">Aufbau eines binären Datenblocks</A>.<BR>
+  Siehe auch <A href="DataBlockAscii.html">Aufbau eines ASCII Datenblocks</A>.
 </BODY>
 </HTML>

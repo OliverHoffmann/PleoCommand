@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Aufbau eines binären Datenblocks</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Aufbau eines binären Datenblocks</H1><IMG src="DataBlockBinary.png" alt=
+  "Graphische Darstellung des Datenformats"><BR>
+  Der Datenblock beginnt mit einem Header mit einer Gesamtlänge von vier Byte, welcher aus Flags, der Felderzahl sowie
+  den Feldertypen besteht.<BR>
+  Mögliche Flags sind:
+
+  <TABLE summary="Erlaubte Flags">
+    <TBODY>
+      <TR>
+        <TD valign="top">0x01</TD>
+
+        <TD>Priorität vorhanden</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x02</TD>
+
+        <TD>Zeitstempel vorhanden</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x04</TD>
+
+        <TD>Extra-Langer Datenblock</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x08</TD>
+
+        <TD>Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x10</TD>
+
+        <TD>Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  Die Anzahl der Felder geht von 0x00 bis 0x07 und bezeichnet 1 bis 8 Felder.<BR>
+  <BR>
+  Die Typen der Felder basieren auf folgender Tabelle (Typen von nicht verwendeten Feldern werden ignoriert):
+
+  <TABLE summary="Erlaubte Flags">
+    <TBODY>
+      <TR>
+        <TD valign="top">0x00</TD>
+
+        <TD>8 Bit Ganzzahl (mit Vorzeichen)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x01</TD>
+
+        <TD>32 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x02</TD>
+
+        <TD>64 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x03</TD>
+
+        <TD>32 Bit Fließkomma (*2)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x04</TD>
+
+        <TD>64 Bit Fließkomma (*2)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x05</TD>
+
+        <TD>UTF-8 kodierte Zeichenfolge (2 Byte (*1) (ohne Vorzeichen) für die Länge (in Byte), danach ein bis drei
+        Byte pro Zeichen)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x06</TD>
+
+        <TD>Nullterminierte ASCII kodierte Zeichenfolge (ein Byte pro Zeichen, beendet bei erstem Null-Byte, wird als
+        ISO-8859-1 in einen Java String konvertiert)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">0x07</TD>
+
+        <TD>Vier Byte (*1) Länge (kein Vorzeichen) + beliebige Daten (für Erweiterungen - es existiert kein Konverter,
+        welcher mit diesem Datentyp direkt arbeiten kann)</TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  Nach dem Header folgen optionale Zusatzinformationen, welche nur bei jeweils gesetztem Bit vorhanden sind:
+
+  <TABLE summary="Erlaubte Zusatzinformationen">
+    <TBODY>
+      <TR>
+        <TD valign="top">Priorität</TD>
+
+        <TD>Ein Byte mit Vorzeichen. Gültiger Wertebereich ist -99 bis 99.</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Zeitstempel</TD>
+
+        <TD>Vier Byte (*1) ohne Vorzeichen. Einheit ist in Millisekunden.</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Extra-Lang</TD>
+
+        <TD>Zehn Byte, die ersten fünf Bit enthalten die tatsächliche Anzahl an Feldern: 0x00 bis 0x1F für 1 bis 32
+        Felder (*3). Anschließend folgen 24 * drei Bit für die Typen der Felder Nummer 9 bis 32. Insgesamt werden 77
+        Bits ausgewertet, die letzten drei werden ignoriert.</TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  <BR>
+
+  <TABLE summary="Fußnoten">
+    <TBODY>
+      <TR>
+        <TD valign="top">(*1)</TD>
+
+        <TD>Das höchstwertigste Byte zuerst (big-endian)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">(*2)</TD>
+
+        <TD>Zahlen müssen der IEEE 754 Norm in big-endian entsprechen</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">(*3)</TD>
+
+        <TD>Die Felderanzahl im Header muss auf das Maximum 0x07 gesetzt sein. Datenblöcke mit Extra-Lang-Bit obwohl
+        nur 8 Felder oder weniger ist erlaubt (siehe zweites Beispiel).<BR></TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  <BR>
+  Beispiele:<BR>
+  Datenblock mit zwei 32 Bit Fließkomma Feldern ohne Priorität, Zeitstempel oder Extra-Lang-Bit:<BR>
+  5 Bit: 0x00, 3 Bit: 0x01, 3 Bit: 0x03, 3 Bit: 0x03, 6 * 3 Bit irgendwas<BR>
+  ergibt: 00000001011011000000000000000000 = 0x016C0000 (+ 2 * 4 Byte Daten)<BR>
+  <BR>
+  Datenblock mit zwei 32 Bit Fließkomma Feldern ohne Priorität oder Zeitstempel mit (unnötigem) Extra-Lang-Bit:<BR>
+  5 Bit: 0x04, 3 Bit: 0x07, 3 Bit: 0x03, 3 Bit: 0x03, 6 * 3 Bit irgendwas, 5 Bit: 0x01, 24 * 3 Bit irgendwas, 3 Bit
+  Füllung<BR>
+  ergibt: 01001111011011000000000000000000000010...0 = 0x4F6C000008000000000000000000 (+ 2 * 4 Byte Daten)<BR>
+  <BR>
+  Siehe auch <A href="DataBlockAscii.html">Aufbau eines ASCII Datenblocks</A>.
+</BODY>
+</HTML>

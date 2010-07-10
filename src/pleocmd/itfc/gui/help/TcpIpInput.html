@@ -13,11 +13,13 @@
 <BODY>
   <H1>TCP/IP Input</H1>Wartet auf eine TCP/IP Verbindung an einem definerbaren Port und gibt darüber erhaltene
   Datenblöcke aus.<BR>
-  Ein Abbruch der Verbindung wird als Ende der Datensequenz gewertet.<BR>
+  Bei einem Abbruch der Verbindung wird auf einen erneuten Verbindungsaufbau gewartet.<BR>
   Datenblöcke werden in Binärform erwartet und als Multi-Float-Datenblöcke ausgegeben.<BR>
   <BR>
   Als Quelle kann beispielsweise BCI 2000 verwendet werden:<BR>
   Hier zu muss als "Application" "PleoCommandTCPIP" gesetzt sein und neben korrekten Angaben für "Host" und "Port"
   sollte die Matrix auf numerische (Ganzzahl oder Fließkomma) Werte eingestellt werden.<BR>
+  <BR>
+  Siehe auch <A href="DataBlockBinary.html">Aufbau eines binären Datenblocks</A>.
 </BODY>
 </HTML>

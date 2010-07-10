@@ -1,0 +1,103 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Aufbau eines ASCII Datenblocks</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Aufbau eines ASCII Datenblocks</H1>Ein ASCII Datenblock besteht aus durch "|" getrennte Felder, Leerzeichen
+  dürfen jederzeit vor und nach Symbolen eingesetzt werden.<BR>
+  Der Typ der Felder wird automatisch erkannt, kann jedoch durch Voranstellen einer Identifizerung, gefolgt von einem
+  ":" auch erzwungen werden. Dabei sind folgende Identifizierer erlaubt:
+
+  <TABLE summary="Erlaubte Flags">
+    <TBODY>
+      <TR>
+        <TD valign="top">I</TD>
+
+        <TD>Ganzzahl</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">F</TD>
+
+        <TD>Fließkommazahl (mit "." als Trennzeichen)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">S</TD>
+
+        <TD>Zeichenfolge (nur ASCII Zeichen sind erlaubt, Zeichensatz ist ISO-8859-1)</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Ix</TD>
+
+        <TD>Ganzzahl in hexadezimaler Form</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Fx</TD>
+
+        <TD>Fließkommazahl in hexadezimaler Form</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Sx</TD>
+
+        <TD>Zeichenfolge in hexadezimaler Form - sinnvoll, falls Sonderzeichen wie "|" oder führende Leerstellen
+        enthalten sind</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">Bx</TD>
+
+        <TD>Binäre Daten beliebigen Inhalts in hexadezimaler Form (für Erweiterungen - es existiert kein Konverter,
+        welcher mit diesem Datentyp direkt arbeiten kann)</TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  Vor der Liste an Felder können durch "[" und "]" eingeschlossene Flags eingebunden werden:
+
+  <TABLE summary="Erlaubte Flags">
+    <TBODY>
+      <TR>
+        <TD valign="top">T</TD>
+
+        <TD>Zeitstempel: Eine oder mehrere Ziffern, gefolgt von "s" für Sekunden oder "ms" für Millisekunden</TD>
+      </TR>
+
+      <TR>
+        <TD valign="top">P</TD>
+
+        <TD>Priorität: genau zwei Ziffern, optional ein vorangestelltes "-". Der erlaubte Wertebereich ist somit -99
+        bis 99.</TD>
+      </TR>
+    </TBODY>
+  </TABLE><BR>
+  <BR>
+  Beispiele (alle mit identischen Datenfeldern):<BR>
+  25|0.3|Hallo<BR>
+  25 | 0.3 | Hallo<BR>
+  25 | 0.3 | S:Hallo<BR>
+  I:25 | F:0.3 | S:Hallo<BR>
+  Ix:3235 | Fx:302E33 | Hallo<BR>
+  <BR>
+  Beispiele für Flags:<BR>
+  [P99]25 | 0.3 | Hallo<BR>
+  [T150ms] 25 | 0.3 | Hallo<BR>
+  [T2sP-05] 25 | 0.3 | Hallo<BR>
+  [ P-05 T2s ] &nbsp;&nbsp;&nbsp;25 | 0.3 &nbsp;&nbsp;&nbsp;|Hallo<BR>
+  <BR>
+  <IMG src="DataBlockAscii.png" alt="Graphische Darstellung des Datenformats"><BR>
+  <BR>
+  <BR>
+  Siehe auch <A href="DataBlockBinary.html">Aufbau eines binären Datenblocks</A>.
+</BODY>
+</HTML>
