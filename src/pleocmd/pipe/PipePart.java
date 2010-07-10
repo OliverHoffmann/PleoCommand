@@ -303,6 +303,13 @@ public abstract class PipePart extends StateHandling {
 		return pipe;
 	}
 
+	/**
+	 * @return true if this {@link PipePart} is connected to a {@link Pipe}.
+	 */
+	public final boolean isConnected() {
+		return pipe != null;
+	}
+
 	final void connectedToPipe(final Pipe newPipe) {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())

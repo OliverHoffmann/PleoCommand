@@ -18,6 +18,8 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.OutputException;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.in.FileInput;
+import pleocmd.pipe.in.Input;
 
 public final class FileOutput extends Output { // NO_UCD
 
@@ -162,6 +164,15 @@ public final class FileOutput extends Output { // NO_UCD
 	@Override
 	public String isConfigurationSane() {
 		final File file = cfgFile.getContent();
+
+		if (isConnected())
+			for (final Input in : getPipe().getInputList())
+				if (in instanceof FileInput
+						&& ((FileInput) in).getCfgFile().getContent().equals(
+								file))
+					return String.format(
+							"Same file has already been specified by '%s'", in);
+
 		if (file.exists())
 			return file.canWrite() ? null : String.format(
 					"Cannot write to '%s'", file);
@@ -175,7 +186,7 @@ public final class FileOutput extends Output { // NO_UCD
 		return 0;
 	}
 
-	protected ConfigPath getCfgFile() {
+	public ConfigPath getCfgFile() {
 		return cfgFile;
 	}
 

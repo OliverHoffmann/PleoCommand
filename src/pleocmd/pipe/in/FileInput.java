@@ -21,6 +21,8 @@ import pleocmd.exc.InternalException;
 import pleocmd.itfc.gui.dse.DataFileBinaryDialog;
 import pleocmd.itfc.gui.dse.DataFileEditDialog;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.out.FileOutput;
+import pleocmd.pipe.out.Output;
 
 public final class FileInput extends Input { // NO_UCD
 
@@ -156,8 +158,20 @@ public final class FileInput extends Input { // NO_UCD
 
 	@Override
 	public String isConfigurationSane() {
-		return cfgFile.getContent().canRead() ? null : String.format(
-				"Cannot read from '%s'", cfgFile.getContent());
+		final File file = cfgFile.getContent();
+
+		if (isConnected())
+			for (final Output out : getPipe().getOutputList())
+				if (out instanceof FileOutput
+						&& ((FileOutput) out).getCfgFile().getContent().equals(
+								file))
+					return String
+							.format(
+									"Same file has already been specified by '%s'",
+									out);
+
+		return file.canRead() ? null : String.format("Cannot read from '%s'",
+				cfgFile.getContent());
 	}
 
 	@Override
@@ -165,7 +179,7 @@ public final class FileInput extends Input { // NO_UCD
 		return 0;
 	}
 
-	protected ConfigPath getCfgFile() {
+	public ConfigPath getCfgFile() {
 		return cfgFile;
 	}
 
