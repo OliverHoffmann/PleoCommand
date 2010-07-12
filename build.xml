@@ -479,6 +479,13 @@
 			<arg value="${src}/changelog.xsl" />
 			<arg value="${bin}/changelog.xml" />
 		</exec>
+		<copy todir="${bin}/pleocmd/itfc/gui/help"
+		      overwrite="true"
+		      preservelastmodified="true"
+		      failonerror="false"
+		      verbose="${verb}">
+			<fileset file="${bin}/changelog.html" />
+		</copy>
 	</target>
 
 	<!-- Compiles Java, C and C++ files, checks for errors and dumps GIT log -->
