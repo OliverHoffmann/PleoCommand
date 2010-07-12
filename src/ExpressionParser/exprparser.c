@@ -35,9 +35,25 @@ function functable[] = { //
                 {fDDD:&fmod, name:"mod"}, // math.h
                 {fDDD:&hypot, name:"hypot"}, // math.h
                 {fDID:&jn, name:"jn"}, // math.h
-                //{fDD:&, name:""}, // math.h
-
-                {fDD:0, 0, name:""}, //
+                {fDD:&lgamma, name:"lgamma"}, // math.h
+                {fDD:&log, name:"log"}, // math.h
+                {fDD:&log10, name:"log10"}, // math.h
+                {fDD:&log1p, name:"log1p"}, // math.h
+                {fDD:&log2, name:"log2"}, // math.h
+                {fDD:&logb, name:"logb"}, // math.h
+                {fDD:&nearbyint, name:"nearbyint"}, // math.h
+                {fDDD:&pow, name:"pow"}, // math.h, also "^" operator
+                {fDDD:&remainder, name:"remainder"}, // math.h
+                {fDD:&round, name:"round"}, // math.h
+                {fDD:&sin, name:"sin"}, // math.h
+                {fDD:&sinh, name:"sinh"}, // math.h
+                {fDD:&sqrt, name:"sqrt"}, // math.h
+                {fDD:&tan, name:"tan"}, // math.h
+                {fDD:&tanh, name:"tanh"}, // math.h
+                {fDD:&tgamma, name:"tgamma"}, // math.h
+                {fDD:&trunc, name:"trunc"}, // math.h
+                {fDID:&yn, name:"yn"}, // math.h
+                {fDD:0, 0, name:""}, // END MARKER
         };
 
 static const int MAX_SYMB = 240;
