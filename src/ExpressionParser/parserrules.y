@@ -24,7 +24,7 @@
 	} s;
 }
 
-%token <i> FNCT
+%token <i> FDD FDDD FDID
 %token <i> DIGIT
 %token <i> LTEQ GTEQ EQU NEQ AND OR
 %type <i> exp
@@ -59,8 +59,8 @@ exp:
 	nrint                      { int pos = nextfree(); $$ = pos; addInstrII(0, pos, $1.val); }
 	| nrdbl                    { int pos = nextfree(); $$ = pos; addInstrID(1, pos, $1); }
 	| '#' nrint                { int pos = nextfree(); $$ = pos; addInstrII(2, pos, $2.val); }
-	| FNCT '(' exp ')'         { int pos = nextfree(); $$ = pos; addInstrIII(3, pos, $1, $3); }
-	| FNCT '(' exp ',' exp ')' { int pos = nextfree(); $$ = pos; addInstrIIII(4, pos, $1, $3, $5); }
+	| FDD '(' exp ')'          { int pos = nextfree(); $$ = pos; addInstrIII(3, pos, $1, $3); }
+	| FDDD '(' exp ',' exp ')' { int pos = nextfree(); $$ = pos; addInstrIIII(4, pos, $1, $3, $5); }
 	| exp '+' exp              { int pos = nextfree(); $$ = pos; addInstrIII(5, pos, $1, $3); }
 	| exp '-' exp              { int pos = nextfree(); $$ = pos; addInstrIII(6, pos, $1, $3); }
 	| exp '*' exp              { int pos = nextfree(); $$ = pos; addInstrIII(7, pos, $1, $3); }
@@ -75,6 +75,7 @@ exp:
 	| exp OR exp               { int pos = nextfree(); $$ = pos; addInstrIII(17, pos, $1, $3); }
 	| exp EQU exp              { int pos = nextfree(); $$ = pos; addInstrIII(18, pos, $1, $3); }
 	| exp NEQ exp              { int pos = nextfree(); $$ = pos; addInstrIII(19, pos, $1, $3); }
+	| FDID '(' exp ',' exp ')' { int pos = nextfree(); $$ = pos; addInstrIIII(20, pos, $1, $3, $5); }
 	| '(' exp ')'              { $$ = $2; }
 	;
 

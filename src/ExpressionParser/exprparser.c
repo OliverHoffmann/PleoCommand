@@ -2,6 +2,8 @@
 
 #include "parserrules.h"
 
+#include <math.h>
+
 typedef int bool;
 #define TRUE 1
 #define FALSE  0
@@ -9,9 +11,33 @@ typedef int bool;
 #define MAX_VAL 64
 
 function functable[] = { //
-        { {fDD:&sin}, FUNC_DD, "sin"}, //
-                { {fDDD:&hypot}, FUNC_DDD, "hypot"}, //
-                { {fDD:0}, 0, ""}, //
+        {fDD:&acos, name:"acos"}, // math.h
+                {fDD:&acosh, name:"acosh"}, // math.h
+                {fDD:&asin, name:"asin"}, // math.h
+                {fDD:&asinh, name:"asinh"}, // math.h
+                {fDD:&atan, name:"atan"}, // math.h
+                {fDDD:&atan2, name:"atan2"}, // math.h
+                {fDD:&atanh, name:"atanh"}, // math.h
+                {fDD:&cbrt, name:"cbrt"}, // math.h
+                {fDD:&ceil, name:"ceil"}, // math.h
+                {fDD:&cos, name:"cos"}, // math.h
+                {fDD:&cosh, name:"cosh"}, // math.h
+                {fDD:&erf, name:"erf"}, // math.h
+                {fDD:&erfc, name:"erfc"}, // math.h
+                {fDD:&exp, name:"exp"}, // math.h
+                //{fDD:&exp10, name:"exp10"}, // math.h
+                {fDD:&exp2, name:"exp2"}, // math.h
+                {fDD:&fabs, name:"abs"}, // math.h
+                {fDDD:&fdim, name:"dim"}, // math.h
+                {fDD:&floor, name:"floor"}, // math.h
+                {fDDD:&fmax, name:"max"}, // math.h
+                {fDDD:&fmin, name:"min"}, // math.h
+                {fDDD:&fmod, name:"mod"}, // math.h
+                {fDDD:&hypot, name:"hypot"}, // math.h
+                {fDID:&jn, name:"jn"}, // math.h
+                //{fDD:&, name:""}, // math.h
+
+                {fDD:0, 0, name:""}, //
         };
 
 static const int MAX_SYMB = 240;
@@ -37,13 +63,18 @@ static void load(instrexec* ie) {
 	val[ie->args[0].i] = i < 0 || i > 31 ? 0 : channelData[i];
 }
 
-static void fn1(instrexec* ie) {
+static void fDD(instrexec* ie) {
 	val[ie->args[0].i] = (*functable[ie->args[1].i].fDD)(val[ie->args[2].i]);
 }
 
-static void fn2(instrexec* ie) {
+static void fDDD(instrexec* ie) {
 	val[ie->args[0].i] = (*functable[ie->args[1].i].fDDD)(val[ie->args[2].i],
 	        val[ie->args[3].i]);
+}
+
+static void fDID(instrexec* ie) {
+	val[ie->args[0].i] = (*functable[ie->args[1].i].fDID)(
+	        (int) val[ie->args[2].i], val[ie->args[3].i]);
 }
 
 static void addD(instrexec* ie) {
@@ -110,8 +141,8 @@ static instruction instrtable[] = { //
         {&setL, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "SETL"}, //           0
                 {&setD, {SIG_INT, SIG_DBL, SIG_NON, SIG_NON}, "SETD"}, //   1
                 {&load, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "LOAD"}, //   2
-                {&fn1, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "FN1"}, //     3
-                {&fn2, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "FN2"}, //     4
+                {&fDD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "D_D"}, //     3
+                {&fDDD, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "D_DD"}, //   4
                 {&addD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "ADD"}, //    5
                 {&subD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "SUB"}, //    6
                 {&mulD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "MUL"}, //    7
@@ -127,6 +158,7 @@ static instruction instrtable[] = { //
                 {&orD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "OR"}, //     17
                 {&equD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "EQU"}, //   18
                 {&neqD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "NEQ"}, //   19
+                {&fDID, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "D_ID"}, //  20
                 {0, {SIG_NON, SIG_NON, SIG_NON, SIG_NON}, ""} //
         };
 
@@ -240,14 +272,23 @@ int yylex(void) {
 
 		function *fp = functable;
 		yylval.i = 0;
-		while (*fp->fDD) {
-			if (!strcmp(fp->name, buf))
-				return FNCT;
+		while (fp->name[0]) {
+			if (!strcmp(fp->name, buf)) {
+				if (fp->fDD)
+					return FDD;
+				if (fp->fDDD)
+					return FDDD;
+				if (fp->fDID)
+					return FDID;
+				curInstrlist->lastError = ERROR_SYNTAX;
+				curInstrlist->lastErrorPos = 0;
+				return -1;
+			}
 			++yylval.i;
 			++fp;
 		}
 		curInstrlist->lastError = ERROR_FUNCTION_UNKNOWN;
-		curInstrlist->lastErrorPos = -(int) strlen(buf);
+		curInstrlist->lastErrorPos = 1 - (int) strlen(buf);
 		return -1;
 	}
 

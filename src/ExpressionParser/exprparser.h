@@ -44,17 +44,14 @@ struct instrlist {
 };
 typedef struct instrlist instrlist;
 
-#define FUNC_DD		1
-#define FUNC_DDD	2
-
 typedef double (*funcDD)(double v1);
 typedef double (*funcDDD)(double v1, double v2);
+typedef double (*funcDID)(int v1, double v2);
 struct function {
-	union {
-		funcDD fDD;
-		funcDDD fDDD;
-	};
-	int type;
+	// only one of the func... must be defined, all other must be 0
+	funcDD fDD;
+	funcDDD fDDD;
+	funcDID fDID;
 	char name[MAX_FUNC_NAME];
 };
 typedef struct function function;
