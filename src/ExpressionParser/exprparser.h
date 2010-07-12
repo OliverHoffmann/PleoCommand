@@ -73,7 +73,7 @@ void addInstrIIII(int idx, long long a1, long long a2, long long a3,
 
 instrlist *parse(const char *expr);
 void freeInstrList(instrlist *il);
-void printAll(instrlist *il);
+char *printAll(instrlist *il);
 double execute(instrlist *il, double *in, int inCount);
 
 #endif

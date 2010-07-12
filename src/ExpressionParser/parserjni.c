@@ -29,6 +29,14 @@ JNIEXPORT jint JNICALL Java_pleocmd_api_ExpressionParser_getLastErrorPos(
 	return ((instrlist *) handle)->lastErrorPos;
 }
 
+JNIEXPORT jstring JNICALL Java_pleocmd_api_ExpressionParser_getInstructions(
+        JNIEnv *env, jobject this __attribute__ ((unused)), jlong handle) {
+	char *pc = printAll((instrlist *) handle);
+	jstring res = (*env)->NewStringUTF(env, pc);
+	free(pc);
+	return res;
+}
+
 JNIEXPORT void JNICALL Java_pleocmd_api_ExpressionParser_freeHandle(JNIEnv *env __attribute__ ((unused)),
 		jobject this __attribute__ ((unused)), jlong handle) {
 	freeInstrList((instrlist *) handle);

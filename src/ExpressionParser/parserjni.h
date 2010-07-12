@@ -15,6 +15,9 @@ JNIEXPORT jint JNICALL Java_pleocmd_api_ExpressionParser_getLastError(JNIEnv *,
 JNIEXPORT jint JNICALL Java_pleocmd_api_ExpressionParser_getLastErrorPos(
         JNIEnv *, jobject, jlong);
 
+JNIEXPORT jstring JNICALL Java_pleocmd_api_ExpressionParser_getInstructions(JNIEnv *,
+        jobject, jlong);
+
 JNIEXPORT void JNICALL Java_pleocmd_api_ExpressionParser_freeHandle
 (JNIEnv *, jobject, jlong);
 

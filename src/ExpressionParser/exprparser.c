@@ -33,7 +33,8 @@ static void setD(instrexec* ie) {
 }
 
 static void load(instrexec* ie) {
-	val[ie->args[0].i] = channelData[ie->args[1].i];
+	long long i = ie->args[1].i;
+	val[ie->args[0].i] = i < 0 || i > 31 ? 0 : channelData[i];
 }
 
 static void fn1(instrexec* ie) {
@@ -73,11 +74,11 @@ static void retD(instrexec* ie) {
 	output = val[ie->args[0].i];
 }
 
-static void loetD(instrexec* ie) {
+static void lteqD(instrexec* ie) {
 	val[ie->args[0].i] = val[ie->args[1].i] <= val[ie->args[2].i];
 }
 
-static void goetD(instrexec* ie) {
+static void gteqD(instrexec* ie) {
 	val[ie->args[0].i] = val[ie->args[1].i] >= val[ie->args[2].i];
 }
 
@@ -118,8 +119,8 @@ static instruction instrtable[] = { //
                 {&powD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "POW"}, //    9
                 {&negD, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "NEG"}, //   10
                 {&retD, {SIG_INT, SIG_NON, SIG_NON, SIG_NON}, "RET"}, //   11
-                {&loetD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "LOET"}, // 12
-                {&goetD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "GOET"}, // 13
+                {&lteqD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "LTEQ"}, // 12
+                {&gteqD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "GTEQ"}, // 13
                 {&ltD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "LT"}, //     14
                 {&gtD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "GT"}, //     15
                 {&andD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "AND"}, //   16
@@ -296,28 +297,43 @@ int yylex(void) {
 	return c;
 }
 
-static void print(instrexec* ie) {
-	instruction *is = &instrtable[ie->idx];
-	fprintf(stderr, "%s", is->name);
-	size_t i;
-	for (i = 0; i < 4; ++i)
-		switch (is->sig[i]) {
-		case SIG_INT:
-			fprintf(stderr, " %Ld", ie->args[i].i);
-			break;
-		case SIG_DBL:
-			fprintf(stderr, " %f", ie->args[i].d);
-			break;
-		default:
-			break;
-		}
-	fprintf(stderr, "\n");
-}
+#define ADD(format, value) 							\
+	cnt = snprintf(pc, remain, format, value);		\
+	if (cnt > 0) {									\
+		if ((size_t) cnt > remain) {				\
+			*pc = 0;								\
+			return res;								\
+		} 											\
+		pc += cnt;									\
+		remain -= (size_t) cnt;						\
+	}
 
-void printAll(instrlist *il) {
+char *printAll(instrlist *il) {
+	size_t remain = il->cnt * 128;
+	char *res = malloc(remain + 1), *pc = res;
+	int cnt;
 	size_t i;
-	for (i = 0; i < il->cnt; ++i)
-		print(&il->p[i]);
+	for (i = 0; i < il->cnt; ++i) {
+		instrexec* ie = &il->p[i];
+		instruction *is = &instrtable[ie->idx];
+		ADD("%s", is->name)
+		size_t j;
+		for (j = 0; j < 4; ++j)
+			switch (is->sig[j]) {
+			case SIG_INT:
+				ADD(" %Ld", ie->args[j].i)
+				break;
+			case SIG_DBL:
+				ADD(" %f", ie->args[j].d)
+				break;
+			default:
+				break;
+			}
+		*pc++ = '\n';
+		--remain;
+	}
+	*pc = 0;
+	return res;
 }
 
 double execute(instrlist *il, double *in, int inCount) {
@@ -325,9 +341,10 @@ double execute(instrlist *il, double *in, int inCount) {
 		return .0;
 	}
 	executing = TRUE;
+	memset(channelData, 0, sizeof(channelData));
 	int i;
 	for (i = 0; i < inCount; ++i)
-		channelData[i] = *in++ ; //FIXME bounds in load() not checked
+		channelData[i] = *in++ ;
 	output = .0;
 	size_t j;
 	for (j = 0; j < il->cnt; ++j)

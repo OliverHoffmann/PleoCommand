@@ -29,6 +29,7 @@ public final class ExpressionParser {
 		final String msg;
 		switch (getLastError(instrHandle)) {
 		case ERROR_SUCCESS:
+			if (Log.canLogDetail()) Log.detail(getInstructions(instrHandle));
 			return;
 		case ERROR_SYNTAX:
 			msg = "Syntax Error";
@@ -50,6 +51,9 @@ public final class ExpressionParser {
 	}
 
 	public double execute(final double[] channelData) {
+		if (channelData.length > 32)
+			throw new IndexOutOfBoundsException(
+					"Maximum of 32 channels allowed");
 		return execute(instrHandle, channelData);
 	}
 
@@ -72,6 +76,8 @@ public final class ExpressionParser {
 	private native int getLastError(final long handle);
 
 	private native int getLastErrorPos(final long handle);
+
+	private native String getInstructions(final long handle);
 
 	private native void freeHandle(final long handle);
 
