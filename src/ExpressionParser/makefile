@@ -8,9 +8,9 @@ build:
 	echo "Use 'make unix' or 'make win'"
 	exit 1
 
-unix: clean exprparser libExprParser.so
+unix: smallclean exprparser libExprParser.so
 
-win: clean exprparser.exe ExprParser.dll
+win: smallclean exprparser.exe ExprParser.dll
 
 exprparser: test-unix.o parserrules-unix.o exprparser-unix.o parserjni-unix.o
 	gcc -lm -o $@ $^
@@ -51,6 +51,9 @@ parserjni-unix.o: parserjni.c parserjni.h exprparser.h
 parserjni-win.o: parserjni.c parserjni.h exprparser.h
 	gcc -c -o $@ $< $(FLAGS_WIN) $(WARNS) -I . -I ./win32
 
-clean:
-	rm -f exprparser exprparser.exe libExprParser.so ExprParser.dll {exprparser,parserrules,parserjni,test}-{unix,win}.o parserrules.{c,h,dot}
+smallclean:
+	rm -f {exprparser,parserrules,parserjni,test}-{unix,win}.o parserrules.{c,h,dot}
+
+clean: smallclean
+	rm -f exprparser exprparser.exe libExprParser.so ExprParser.dll
 

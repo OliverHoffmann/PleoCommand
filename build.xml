@@ -588,6 +588,8 @@
 		      verbose="${verb}">
 			<fileset file="${bin}/ExpressionParser/libExprParser.so" />
 			<fileset file="${bin}/ExpressionParser/ExprParser.dll" />
+			<fileset file="${bin}/ExpressionParser/exprparser" />
+			<fileset file="${bin}/ExpressionParser/exprparser.exe" />
 		</copy>
 		<copy todir="${extRT}/BCI2000-Prog/"
 		      overwrite="true"
@@ -604,6 +606,8 @@
 			<fileset file="${dist}/${exefile}" />
 			<fileset file="${dist}/librxtxSerial.so" />
 			<fileset file="${dist}/libExprParser.so" />
+			<fileset file="${dist}/exprparser" />
+			<fileset file="${dist}/exprparser.exe" />
 		</chmod>
 	</target>
 
