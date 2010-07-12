@@ -52,5 +52,5 @@ parserjni-win.o: parserjni.c parserjni.h exprparser.h
 	gcc -c -o $@ $< $(FLAGS_WIN) $(WARNS) -I . -I ./win32
 
 clean:
-	rm -rf exprparser *.so *.dll *.exe *.o parserrules.{c,h,dot}
+	rm -f exprparser exprparser.exe libExprParser.so ExprParser.dll {exprparser,parserrules,parserjni,test}-{unix,win}.o parserrules.{c,h,dot}
 
