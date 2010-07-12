@@ -3,12 +3,27 @@
 #include "parserrules.h"
 
 #include <math.h>
+#include <fenv.h>
+#include <unistd.h>
+#include <time.h>
 
 typedef int bool;
 #define TRUE 1
 #define FALSE  0
 
 #define MAX_VAL 64
+
+static double constE() {
+	return M_E;
+}
+
+static double constPi() {
+	return M_PI;
+}
+
+static double rand01() {
+	return (double) rand() / (double) RAND_MAX;
+}
 
 function functable[] = { //
         {fDD:&acos, name:"acos"}, // math.h
@@ -22,17 +37,16 @@ function functable[] = { //
                 {fDD:&ceil, name:"ceil"}, // math.h
                 {fDD:&cos, name:"cos"}, // math.h
                 {fDD:&cosh, name:"cosh"}, // math.h
+                {f_:&constE, name:"e"}, // exprparser.c
                 {fDD:&erf, name:"erf"}, // math.h
                 {fDD:&erfc, name:"erfc"}, // math.h
                 {fDD:&exp, name:"exp"}, // math.h
-                //{fDD:&exp10, name:"exp10"}, // math.h
-                {fDD:&exp2, name:"exp2"}, // math.h
                 {fDD:&fabs, name:"abs"}, // math.h
                 {fDDD:&fdim, name:"dim"}, // math.h
                 {fDD:&floor, name:"floor"}, // math.h
                 {fDDD:&fmax, name:"max"}, // math.h
                 {fDDD:&fmin, name:"min"}, // math.h
-                {fDDD:&fmod, name:"mod"}, // math.h
+                {fDDD:&fmod, name:"mod"}, // math.h, also '%' operator
                 {fDDD:&hypot, name:"hypot"}, // math.h
                 {fDID:&jn, name:"jn"}, // math.h
                 {fDD:&lgamma, name:"lgamma"}, // math.h
@@ -40,9 +54,10 @@ function functable[] = { //
                 {fDD:&log10, name:"log10"}, // math.h
                 {fDD:&log1p, name:"log1p"}, // math.h
                 {fDD:&log2, name:"log2"}, // math.h
-                {fDD:&logb, name:"logb"}, // math.h
                 {fDD:&nearbyint, name:"nearbyint"}, // math.h
-                {fDDD:&pow, name:"pow"}, // math.h, also "^" operator
+                {f_:&constPi, name:"pi"}, // exprparser.c
+                {fDDD:&pow, name:"pow"}, // math.h, also '^' operator
+                {fD:&rand01, name:"rand"}, // exprparser.c
                 {fDDD:&remainder, name:"remainder"}, // math.h
                 {fDD:&round, name:"round"}, // math.h
                 {fDD:&sin, name:"sin"}, // math.h
@@ -53,7 +68,7 @@ function functable[] = { //
                 {fDD:&tgamma, name:"tgamma"}, // math.h
                 {fDD:&trunc, name:"trunc"}, // math.h
                 {fDID:&yn, name:"yn"}, // math.h
-                {fDD:0, 0, name:""}, // END MARKER
+                {0, 0, name:""}, // END MARKER
         };
 
 static const int MAX_SYMB = 240;
@@ -77,6 +92,14 @@ static void setD(instrexec* ie) {
 static void load(instrexec* ie) {
 	long long i = ie->args[1].i;
 	val[ie->args[0].i] = i < 0 || i > 31 ? 0 : channelData[i];
+}
+
+static void constD(instrexec* ie) {
+	val[ie->args[0].i] = (*functable[ie->args[1].i].f_)();
+}
+
+static void fD(instrexec* ie) {
+	val[ie->args[0].i] = (*functable[ie->args[1].i].fD)();
 }
 
 static void fDD(instrexec* ie) {
@@ -153,6 +176,14 @@ static void neqD(instrexec* ie) {
 	val[ie->args[0].i] = val[ie->args[1].i] != val[ie->args[2].i];
 }
 
+static void modD(instrexec* ie) {
+	val[ie->args[0].i] = fmod(val[ie->args[1].i], val[ie->args[2].i]);
+}
+
+static void notD(instrexec* ie) {
+	val[ie->args[0].i] = !val[ie->args[1].i];
+}
+
 static instruction instrtable[] = { //
         {&setL, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "SETL"}, //           0
                 {&setD, {SIG_INT, SIG_DBL, SIG_NON, SIG_NON}, "SETD"}, //   1
@@ -175,6 +206,10 @@ static instruction instrtable[] = { //
                 {&equD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "EQU"}, //   18
                 {&neqD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "NEQ"}, //   19
                 {&fDID, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "D_ID"}, //  20
+                {&modD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "MOD"}, //   21
+                {&notD, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "NOT"}, //   22
+                {&fD, {SIG_INT, SIG_NON, SIG_NON, SIG_NON}, "D_"}, //      23
+                {&constD, {SIG_INT, SIG_NON, SIG_NON, SIG_NON}, "CONST"},//24
                 {0, {SIG_NON, SIG_NON, SIG_NON, SIG_NON}, ""} //
         };
 
@@ -226,9 +261,8 @@ void addInstrIIII(int idx, long long a1, long long a2, long long a3,
 }
 
 instrlist *parse(const char *expr) {
-	if (parsing) {
+	if (parsing)
 		return 0;
-	}
 	resetfree();
 	parsing = TRUE;
 	exprPos = expr;
@@ -248,6 +282,7 @@ instrlist *parse(const char *expr) {
 		il->lastErrorPos += (int) (exprPos - expr - 1);
 		il->cnt = 0;
 	}
+	srand((unsigned int) (getpid() * time(0)));
 	return il;
 }
 
@@ -290,6 +325,10 @@ int yylex(void) {
 		yylval.i = 0;
 		while (fp->name[0]) {
 			if (!strcmp(fp->name, buf)) {
+				if (fp->f_)
+					return CONST;
+				if (fp->fD)
+					return FD;
 				if (fp->fDD)
 					return FDD;
 				if (fp->fDDD)
@@ -394,18 +433,23 @@ char *printAll(instrlist *il) {
 }
 
 double execute(instrlist *il, double *in, int inCount) {
-	if (executing) {
+	if (executing)
 		return .0;
-	}
 	executing = TRUE;
+
+	fesetround(2);
+
 	memset(channelData, 0, sizeof(channelData));
 	int i;
 	for (i = 0; i < inCount; ++i)
 		channelData[i] = *in++ ;
+
 	output = .0;
+
 	size_t j;
 	for (j = 0; j < il->cnt; ++j)
 		(*instrtable[il->p[j].idx].f)(&il->p[j]);
+
 	executing = FALSE;
 	return output;
 }

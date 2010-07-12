@@ -44,11 +44,15 @@ struct instrlist {
 };
 typedef struct instrlist instrlist;
 
+typedef double (*func_)();
+typedef double (*funcD)();
 typedef double (*funcDD)(double v1);
 typedef double (*funcDDD)(double v1, double v2);
 typedef double (*funcDID)(int v1, double v2);
 struct function {
 	// only one of the func... must be defined, all other must be 0
+	func_ f_; // for constants, type is always double
+	funcD fD;
 	funcDD fDD;
 	funcDDD fDDD;
 	funcDID fDID;
