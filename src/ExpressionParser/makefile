@@ -8,9 +8,9 @@ build:
 	echo "Use 'make unix' or 'make win'"
 	exit 1
 
-unix: exprparser libExprParser.so
+unix: clean exprparser libExprParser.so
 
-win: exprparser.exe ExprParser.dll
+win: clean exprparser.exe ExprParser.dll
 
 exprparser: test-unix.o parserrules-unix.o exprparser-unix.o parserjni-unix.o
 	gcc -lm -o $@ $^
