@@ -1,30 +1,38 @@
 #include "exprparser.h"
 
-int main(void) {
-	double in[3];
-	in[0] = 20;
-	in[1] = 4;
-	in[2] = 14;
-	instrlist *il;
-
-	il = parse("(5 + #1) / hypot(sin(-283754 * 7.035 + #2), 12)");
-	if (!il)
+int main(int argc, char ** argv) {
+	if (argc == 1) {
+		fprintf(stderr,
+		        "Syntax: %s [-v] <Expression> [<Channel 1> <Channel 2> ...]\n",
+		        argv[0]);
+		fprintf(stderr, "Example: %s \"25 * sin(10)\"\n", argv[0]);
+		fprintf(stderr, "Example: %s \"3 + (#0 * 2)\" 100\n", argv[0]);
+		fprintf(stderr, "Set -v as first argument for verbose output\n");
 		return 1;
-	printAll(il);
-	fprintf(stderr, "execute(): %f\n", execute(il, in, 3));
-	fprintf(stderr, "execute(): %f\n", execute(il, in, 3));
-	freeInstrList(il);
+	}
 
-	il = parse("(4 + #0) / 8");
-	if (!il)
+	int verbose = 0, idx = 1;
+	if (!strcmp(argv[1], "-v") || !strcmp(argv[1], "--verbose")) {
+		verbose = 1;
+		++idx;
+	}
+	instrlist *il = parse(argv[idx]);
+	if (!il) {
 		return 1;
-	printAll(il);
-	fprintf(stderr, "execute(): %f\n", execute(il, in, 3));
+	}
+	if (verbose) {
+		char *pc = printAll(il);
+		fprintf(stderr, "%s", pc);
+		free(pc);
+	}
+
+	double in[32];
+	memset(in, 0, sizeof(in));
+	int i;
+	for (++idx, i = 0; idx < argc && i < 32; ++idx, ++i)
+		in[i] = atof(argv[idx]);
+	fprintf(stderr, "%f\n", execute(il, in, 32));
 	freeInstrList(il);
-
-	freeInstrList(parse("(4 + #0)) / 8"));
-
-	freeInstrList(parse("(4 + #0) / idontexit(8)"));
 
 	return 0;
 }
