@@ -16,8 +16,28 @@ int main(int argc, char ** argv) {
 		verbose = 1;
 		++idx;
 	}
-	instrlist *il = parse(argv[idx]);
-	if (!il) {
+	const char *expr = argv[idx];
+	instrlist *il = parse(expr);
+	if (il->lastError != ERROR_SUCCESS) {
+		switch (il->lastError) {
+		case ERROR_SYNTAX:
+			fprintf(stderr, "Syntax error");
+			break;
+		case ERROR_FUNCTION_UNKNOWN:
+			fprintf(stderr, "Name of function unknown");
+			break;
+		case ERROR_SYMB_TOO_LONG:
+			fprintf(stderr, "Name of symbol too long");
+			break;
+		default:
+			fprintf(stderr, "Unknown error");
+			break;
+		}
+		int pos = il->lastErrorPos;
+		fprintf(stderr, " at '%c', position %d in '%s'\n", pos >= 0 && pos
+		        < strlen(expr) ? expr[pos] : '?', pos, expr);
+
+		freeInstrList(il);
 		return 1;
 	}
 	if (verbose) {
@@ -32,7 +52,7 @@ int main(int argc, char ** argv) {
 	for (++idx, i = 0; idx < argc && i < 32; ++idx, ++i)
 		in[i] = atof(argv[idx]);
 	fprintf(stderr, "%f\n", execute(il, in, 32));
-	freeInstrList(il);
 
+	freeInstrList(il);
 	return 0;
 }

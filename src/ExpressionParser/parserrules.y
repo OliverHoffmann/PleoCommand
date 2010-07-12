@@ -24,7 +24,7 @@
 	} s;
 }
 
-%token <i> FDD FDDD FDID
+%token <i> CONST FD FDD FDDD FDID
 %token <i> DIGIT
 %token <i> LTEQ GTEQ EQU NEQ AND OR
 %type <i> exp
@@ -37,9 +37,11 @@
 %left EQU NEQ
 %left '<' '>' LTEQ GTEQ
 %left '+' '-'
-%left '*' '/'
-%left NEG
+%left '*' '/' '%'
+%left '!'
+%left '#'
 %right '^'
+%left NEG
 
 %%
 
@@ -76,6 +78,10 @@ exp:
 	| exp EQU exp              { int pos = nextfree(); $$ = pos; addInstrIII(18, pos, $1, $3); }
 	| exp NEQ exp              { int pos = nextfree(); $$ = pos; addInstrIII(19, pos, $1, $3); }
 	| FDID '(' exp ',' exp ')' { int pos = nextfree(); $$ = pos; addInstrIIII(20, pos, $1, $3, $5); }
+	| exp '%' exp              { int pos = nextfree(); $$ = pos; addInstrIII(21, pos, $1, $3); }
+	| '!' exp                  { int pos = nextfree(); $$ = pos; addInstrII(22, pos, $2); }
+	| FD '(' ')'               { int pos = nextfree(); $$ = pos; addInstrII(23, pos, $1); }
+	| CONST                    { int pos = nextfree(); $$ = pos; addInstrII(24, pos, $1); }
 	| '(' exp ')'              { $$ = $2; }
 	;
 
