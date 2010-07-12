@@ -37,7 +37,7 @@ typedef struct instruction instruction;
 #define ERROR_SYMB_TOO_LONG 3
 
 struct instrlist {
-	int cnt, cap;
+	size_t cnt, cap;
 	instrexec* p;
 	int lastError;
 	int lastErrorPos;
@@ -59,9 +59,10 @@ struct function {
 };
 typedef struct function function;
 
-void resetfree();
+void resetfree(void);
 int yyparse(void);
 void yyerror(const char*);
+int yylex(void);
 
 void addInstrI(int idx, long long a1);
 void addInstrID(int idx, long long a1, double a2);
@@ -70,7 +71,6 @@ void addInstrIII(int idx, long long a1, long long a2, long long a3);
 void addInstrIIII(int idx, long long a1, long long a2, long long a3,
         long long a4);
 
-int getNextToken(int *res);
 instrlist *parse(const char *expr);
 void freeInstrList(instrlist *il);
 void printAll(instrlist *il);

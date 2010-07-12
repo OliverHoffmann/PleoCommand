@@ -26,11 +26,16 @@
 
 %token <i> FNCT
 %token <i> DIGIT
+%token <i> LTEQ GTEQ EQU NEQ AND OR
 %type <i> exp
 %type <s> nrint
 %type <d> nrdbl
 
 %left ','
+%left OR
+%left AND
+%left EQU NEQ
+%left '<' '>' LTEQ GTEQ
 %left '+' '-'
 %left '*' '/'
 %left NEG
@@ -47,7 +52,7 @@ nrint:
 	;
 
 nrdbl:
-	nrint '.' nrint { $$ = $1.val + $3.val / pow(10.0, $3.cnt); }
+	nrint '.' nrint { $$ = (double) $1.val + (double) $3.val / pow(10.0, $3.cnt); }
 	;
 
 exp:
@@ -62,24 +67,26 @@ exp:
 	| exp '/' exp              { int pos = nextfree(); $$ = pos; addInstrIII(8, pos, $1, $3); }
 	| exp '^' exp              { int pos = nextfree(); $$ = pos; addInstrIII(9, pos, $1, $3); }
 	| '-' exp %prec NEG        { int pos = nextfree(); $$ = pos; addInstrII(10, pos, $2); }
+	| exp LTEQ exp             { int pos = nextfree(); $$ = pos; addInstrIII(12, pos, $1, $3); } // 11 is RET
+	| exp GTEQ exp             { int pos = nextfree(); $$ = pos; addInstrIII(13, pos, $1, $3); }
+	| exp '<' exp              { int pos = nextfree(); $$ = pos; addInstrIII(14, pos, $1, $3); }
+	| exp '>' exp              { int pos = nextfree(); $$ = pos; addInstrIII(15, pos, $1, $3); }
+	| exp AND exp              { int pos = nextfree(); $$ = pos; addInstrIII(16, pos, $1, $3); }
+	| exp OR exp               { int pos = nextfree(); $$ = pos; addInstrIII(17, pos, $1, $3); }
+	| exp EQU exp              { int pos = nextfree(); $$ = pos; addInstrIII(18, pos, $1, $3); }
+	| exp NEQ exp              { int pos = nextfree(); $$ = pos; addInstrIII(19, pos, $1, $3); }
 	| '(' exp ')'              { $$ = $2; }
 	;
 
 %%
 
+/*
 int yylex(void) {
-	int res = getNextToken(&yylval.i);
-	switch (res) {
-	case -2:
-		return DIGIT;
-	case -3:
-		return FNCT;
-	default:
-		return res; 
-	}
+	return getNextToken(&yylval.i);
 }
+*/
 
-void yyerror(char const *str) {
+void yyerror(char const *str __attribute__ ((unused))) {
 	// will be handled handled in parse()
 }
 

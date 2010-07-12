@@ -1,5 +1,7 @@
 #include "exprparser.h"
 
+#include "parserrules.h"
+
 typedef int bool;
 #define TRUE 1
 #define FALSE  0
@@ -23,7 +25,7 @@ static bool parsing = FALSE;
 static bool executing = FALSE;
 
 static void setL(instrexec* ie) {
-	val[ie->args[0].i] = ie->args[1].i;
+	val[ie->args[0].i] = (double) ie->args[1].i;
 }
 
 static void setD(instrexec* ie) {
@@ -71,19 +73,59 @@ static void retD(instrexec* ie) {
 	output = val[ie->args[0].i];
 }
 
+static void loetD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] <= val[ie->args[2].i];
+}
+
+static void goetD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] >= val[ie->args[2].i];
+}
+
+static void ltD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] < val[ie->args[2].i];
+}
+
+static void gtD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] > val[ie->args[2].i];
+}
+
+static void andD(instrexec* ie) {
+	val[ie->args[0].i] = (int) val[ie->args[1].i] && (int) val[ie->args[2].i];
+}
+
+static void orD(instrexec* ie) {
+	val[ie->args[0].i] = (int) val[ie->args[1].i] || (int) val[ie->args[2].i];
+}
+
+static void equD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] == val[ie->args[2].i];
+}
+
+static void neqD(instrexec* ie) {
+	val[ie->args[0].i] = val[ie->args[1].i] != val[ie->args[2].i];
+}
+
 static instruction instrtable[] = { //
-        {&setL, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "SETL"}, //
-                {&setD, {SIG_INT, SIG_DBL, SIG_NON, SIG_NON}, "SETD"}, //
-                {&load, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "LOAD"}, //
-                {&fn1, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "FN1"}, //
-                {&fn2, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "FN2"}, //
-                {&addD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "ADD"}, //
-                {&subD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "SUB"}, //
-                {&mulD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "MUL"}, //
-                {&divD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "DIV"}, //
-                {&powD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "POW"}, //
-                {&negD, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "NEG"}, //
-                {&retD, {SIG_INT, SIG_NON, SIG_NON, SIG_NON}, "RET"}, //
+        {&setL, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "SETL"}, //           0
+                {&setD, {SIG_INT, SIG_DBL, SIG_NON, SIG_NON}, "SETD"}, //   1
+                {&load, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "LOAD"}, //   2
+                {&fn1, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "FN1"}, //     3
+                {&fn2, {SIG_INT, SIG_INT, SIG_INT, SIG_INT}, "FN2"}, //     4
+                {&addD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "ADD"}, //    5
+                {&subD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "SUB"}, //    6
+                {&mulD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "MUL"}, //    7
+                {&divD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "DIV"}, //    8
+                {&powD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "POW"}, //    9
+                {&negD, {SIG_INT, SIG_INT, SIG_NON, SIG_NON}, "NEG"}, //   10
+                {&retD, {SIG_INT, SIG_NON, SIG_NON, SIG_NON}, "RET"}, //   11
+                {&loetD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "LOET"}, // 12
+                {&goetD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "GOET"}, // 13
+                {&ltD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "LT"}, //     14
+                {&gtD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "GT"}, //     15
+                {&andD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "AND"}, //   16
+                {&orD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "OR"}, //     17
+                {&equD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "EQU"}, //   18
+                {&neqD, {SIG_INT, SIG_INT, SIG_INT, SIG_NON}, "NEQ"}, //   19
                 {0, {SIG_NON, SIG_NON, SIG_NON, SIG_NON}, ""} //
         };
 
@@ -154,7 +196,7 @@ instrlist *parse(const char *expr) {
 	if (res) {
 		if (!il->lastError)
 			il->lastError = ERROR_SYNTAX;
-		il->lastErrorPos += exprPos - expr - 1;
+		il->lastErrorPos += (int) (exprPos - expr - 1);
 		il->cnt = 0;
 	}
 	return il;
@@ -166,17 +208,17 @@ void freeInstrList(instrlist *il) {
 	free(il);
 }
 
-int getNextToken(int *res) {
+int yylex(void) {
 	char c;
 	while ((c = *exprPos++ ) && (c == ' ' || c == '\t')) {
 		// ignore spaces
 	}
 	if (!c)
-		return 0;
+		return 0; // end of stream
 
 	if (isdigit(c)) {
-		*res = c - '0';
-		return -2;
+		yylval.i = c - '0';
+		return DIGIT;
 	}
 
 	if (isalpha(c)) {
@@ -196,16 +238,58 @@ int getNextToken(int *res) {
 		buf[++i] = '\0';
 
 		function *fp = functable;
-		*res = 0;
+		yylval.i = 0;
 		while (*fp->fDD) {
 			if (!strcmp(fp->name, buf))
-				return -3;
-			++*res;
+				return FNCT;
+			++yylval.i;
 			++fp;
 		}
 		curInstrlist->lastError = ERROR_FUNCTION_UNKNOWN;
-		curInstrlist->lastErrorPos = -strlen(buf);
+		curInstrlist->lastErrorPos = -(int) strlen(buf);
 		return -1;
+	}
+
+	// look ahead to check whether we have to combine two tokens
+	switch (c) {
+	case '<':
+		if (*exprPos == '=') {
+			++exprPos;
+			return LTEQ;
+		}
+		break;
+	case '>':
+		if (*exprPos == '=') {
+			++exprPos;
+			return GTEQ;
+		}
+		break;
+	case '!':
+		if (*exprPos == '=') {
+			++exprPos;
+			return NEQ;
+		}
+		break;
+	case '=':
+		if (*exprPos == '=') {
+			++exprPos;
+			return EQU;
+		}
+		break;
+	case '&':
+		if (*exprPos == '&') {
+			++exprPos;
+			return AND;
+		}
+		break;
+	case '|':
+		if (*exprPos == '|') {
+			++exprPos;
+			return OR;
+		}
+		break;
+	default:
+		break;
 	}
 
 	// is a token
@@ -215,7 +299,7 @@ int getNextToken(int *res) {
 static void print(instrexec* ie) {
 	instruction *is = &instrtable[ie->idx];
 	fprintf(stderr, "%s", is->name);
-	int i;
+	size_t i;
 	for (i = 0; i < 4; ++i)
 		switch (is->sig[i]) {
 		case SIG_INT:
@@ -231,7 +315,7 @@ static void print(instrexec* ie) {
 }
 
 void printAll(instrlist *il) {
-	int i;
+	size_t i;
 	for (i = 0; i < il->cnt; ++i)
 		print(&il->p[i]);
 }
@@ -245,8 +329,9 @@ double execute(instrlist *il, double *in, int inCount) {
 	for (i = 0; i < inCount; ++i)
 		channelData[i] = *in++ ; //FIXME bounds in load() not checked
 	output = .0;
-	for (i = 0; i < il->cnt; ++i)
-		(*instrtable[il->p[i].idx].f)(&il->p[i]);
+	size_t j;
+	for (j = 0; j < il->cnt; ++j)
+		(*instrtable[il->p[j].idx].f)(&il->p[j]);
 	executing = FALSE;
 	return output;
 }
