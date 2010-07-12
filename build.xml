@@ -630,9 +630,9 @@
 				<isset property="buildok.win3" />
 			</and>
 		</condition>
-		<fail message="This script has be run again under Linux because some missing files have to be created under Linux."
+		<fail message="This script has be run again under Linux because some missing files have to be created under Linux. You may ignore this error if only Linux will be used."
 		      unless="buildok.linux" />
-		<fail message="This script has be run again under Windows because some missing files have to be created under Windows."
+		<fail message="This script has be run again under Windows because some missing files have to be created under Windows. You may ignore this error if only Windows will be used."
 		      unless="buildok.win" />
 	</target>
 
