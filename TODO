@@ -7,6 +7,8 @@ FIX "show detailed log" always disabled
 FIX keep old changelog if a new one could not be created
 FIX ErrorDialog shown even in non-GUI mode if GUIstatus is still unknown
 FIX empty Log queue on app exit if not already done
+FIX sanity check cache can be out of date after configuring a PipePart
+FIX partial updating of Diagram's graphic doesn't work
 ENH RandomGenerator: plotting
 ENH "Copy PipePart" in board
 ENH auto-save to selected pipe-file if any
@@ -17,6 +19,7 @@ ENH document which classes are immutable
 ENH display PipeParts in red if they permanently failed
 ENH blink PipeParts in red if they temporarily failed
 ENH add a NexusInput component
+ENH add a MatlabConverter component - maybe with http://code.google.com/p/matlabcontrol
 MOD make all Data timed Data before writing to Output
 MOD checkstyle: no exception handling in pipe's, only pass them thru
 MOD check terminology
