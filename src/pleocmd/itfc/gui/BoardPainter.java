@@ -513,7 +513,12 @@ final class BoardPainter {
 			final boolean hover, final Rectangle clip,
 			final PipePart currentPart, final boolean modifyable) {
 		final ImmutableRectangle rect = part.getGuiPosition();
-		if (!rect.intersects(clip)) return 0;
+		if (SHADOW_RECTS && SHADOW_DEPTH > 0) {
+			final Rectangle r = rect.createCopy();
+			r.width += SHADOW_DEPTH;
+			r.height += SHADOW_DEPTH;
+			if (!r.intersects(clip)) return 0;
+		} else if (!rect.intersects(clip)) return 0;
 
 		final Color outerClr;
 		if (saneConfigCache.get(part) == null)

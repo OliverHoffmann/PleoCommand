@@ -1,6 +1,5 @@
 FIX SingleJointMovement: don't move too fast !!!
 FIX "Application exited forcefully" still possible (see below)
-FIX clipping for shadows in board (Windows)
 FIX size of error dialog may be wrong (Windows)
 FIX changing zoom doesn't handle recalc. of border1 and border2
 FIX "show detailed log" always disabled
