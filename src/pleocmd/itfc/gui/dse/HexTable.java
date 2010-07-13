@@ -56,11 +56,11 @@ public abstract class HexTable extends JTable {
 	}
 
 	@Override
-	public HexTableModel getModel() {
+	public final HexTableModel getModel() {
 		return (HexTableModel) super.getModel();
 	}
 
-	public void updateColCount() {
+	public final void updateColCount() {
 		final int textWidth = (int) getFontMetrics(getFont()).getStringBounds(
 				"CC", getGraphics()).getWidth();
 		final int colWidth = textWidth + 5;

@@ -178,12 +178,13 @@ public abstract class ConfigValue {
 	 *            a {@link RunnableWithArgument} which is invoked on every GUI
 	 *            driven change of the content.
 	 */
-	public void setChangingContent(final RunnableWithArgument changingContent) {
+	public final void setChangingContent(
+			final RunnableWithArgument changingContent) {
 		this.changingContent = changingContent;
 	}
 
 	@SuppressWarnings("unchecked")
-	protected void invokeChangingContent(final Object... args) {
+	protected final void invokeChangingContent(final Object... args) {
 		if (changingContent != null) {
 			final Object res = changingContent.run(args);
 			if (res instanceof String)

@@ -15,7 +15,7 @@ final class PipeFlow {
 
 	private static final int FLOW_LEN = 4;
 
-	private final static Map<Integer, Integer> COLORS = new HashMap<Integer, Integer>();
+	private static final Map<Integer, Integer> COLORS = new HashMap<Integer, Integer>();
 
 	private final PipePart src;
 	private final PipePart dst;

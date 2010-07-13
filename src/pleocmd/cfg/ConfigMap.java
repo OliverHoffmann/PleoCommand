@@ -34,7 +34,7 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 	}
 
 	@Override
-	public Map<K, List<V>> getContent() {
+	public final Map<K, List<V>> getContent() {
 		return Collections.unmodifiableMap(content);
 	}
 

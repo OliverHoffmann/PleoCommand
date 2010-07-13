@@ -185,7 +185,7 @@ public final class StringValue extends Value {
 
 		int c, char2, char3;
 		int count = 0;
-		int chararr_count = 0;
+		int charArrCount = 0;
 
 		in.readFully(bytearr, 0, utflen);
 
@@ -193,7 +193,7 @@ public final class StringValue extends Value {
 			c = bytearr[count] & 0xff;
 			if (c > 127) break;
 			count++;
-			chararr[chararr_count++] = (char) c;
+			chararr[charArrCount++] = (char) c;
 		}
 
 		while (count < utflen) {
@@ -209,7 +209,7 @@ public final class StringValue extends Value {
 			case 7:
 				/* 0xxxxxxx */
 				count++;
-				chararr[chararr_count++] = (char) c;
+				chararr[charArrCount++] = (char) c;
 				break;
 			case 12:
 			case 13:
@@ -222,7 +222,7 @@ public final class StringValue extends Value {
 				if ((char2 & 0xC0) != 0x80)
 					throw new UTFDataFormatException(
 							"malformed input around byte " + count);
-				chararr[chararr_count++] = (char) ((c & 0x1F) << 6 | char2 & 0x3F);
+				chararr[charArrCount++] = (char) ((c & 0x1F) << 6 | char2 & 0x3F);
 				break;
 			case 14:
 				/* 1110 xxxx 10xx xxxx 10xx xxxx */
@@ -235,7 +235,7 @@ public final class StringValue extends Value {
 				if ((char2 & 0xC0) != 0x80 || (char3 & 0xC0) != 0x80)
 					throw new UTFDataFormatException(
 							"malformed input around byte " + (count - 1));
-				chararr[chararr_count++] = (char) ((c & 0x0F) << 12
+				chararr[charArrCount++] = (char) ((c & 0x0F) << 12
 						| (char2 & 0x3F) << 6 | (char3 & 0x3F) << 0);
 				break;
 			default:
@@ -245,7 +245,7 @@ public final class StringValue extends Value {
 			}
 		}
 		// The number of chars produced may be less than utflen
-		return new String(chararr, 0, chararr_count);
+		return new String(chararr, 0, charArrCount);
 	}
 
 	// copied from DataOutputStream (is not public there)

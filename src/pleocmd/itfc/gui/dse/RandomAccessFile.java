@@ -5,7 +5,7 @@ import java.io.DataOutput;
 import java.io.File;
 import java.io.FileNotFoundException;
 
-public class RandomAccessFile extends java.io.RandomAccessFile implements
+public final class RandomAccessFile extends java.io.RandomAccessFile implements
 		RandomAccess {
 
 	public RandomAccessFile(final File file) throws FileNotFoundException {

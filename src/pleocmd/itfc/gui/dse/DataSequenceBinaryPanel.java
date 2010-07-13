@@ -25,27 +25,27 @@ public abstract class DataSequenceBinaryPanel extends JPanel {
 
 	protected abstract void stateChanged();
 
-	public void updateState() {
+	public final void updateState() {
 		stateChanged();
 	}
 
-	public void freeResources() {
+	public final void freeResources() {
 		setTableToStream(null);
 	}
 
-	public void setTableToStream(final RandomAccess stream) {
+	public final void setTableToStream(final RandomAccess stream) {
 		table.getModel().setStream(stream);
 	}
 
-	public RandomAccess getTableStream() {
+	public final RandomAccess getTableStream() {
 		return table.getModel().getStream();
 	}
 
-	public boolean isModified() {
+	public final boolean isModified() {
 		return table.getModel().isModified();
 	}
 
-	public void resetModification() {
+	public final void resetModification() {
 		table.getModel().resetModification();
 	}
 

@@ -116,7 +116,7 @@ final class LogTableCellRenderer implements TableCellRenderer {
 				} else if ("html".equals(tag) || "/html".equals(tag)) {
 					// just ignore them silently
 				} else
-					Log.detail("Ignoring unknown tag %s", tag);
+					Log.detail("Ignoring unknown tag '%s'", tag);
 				break;
 			}
 			case '&': {
@@ -134,7 +134,7 @@ final class LogTableCellRenderer implements TableCellRenderer {
 				else if ("quot".equals(id))
 					sb.append('"');
 				else
-					Log.detail("Ignoring unknown &%s;", id);
+					Log.detail("Ignoring unknown &%s;", id); // CS_IGNORE
 				break;
 			}
 			default:

@@ -245,10 +245,8 @@ public final class DataQueue {
 	public synchronized List<Data> getAll() {
 		final List<Data> res = new ArrayList<Data>();
 		int i = readPos;
-		while (i != writePos) {
-			System.err.println(buffer[i]);
+		while (i != writePos)
 			i = (i + 1) % buffer.length;
-		}
 		if (closed) try {
 			res.add(Data.createFromAscii("QUEUE CLOSED"));
 		} catch (final IOException e) {

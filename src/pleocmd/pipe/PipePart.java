@@ -712,7 +712,7 @@ public abstract class PipePart extends StateHandling {
 				: null;
 	}
 
-	public PipePartFeedback getFeedback() {
+	public final PipePartFeedback getFeedback() {
 		return feedback;
 	}
 

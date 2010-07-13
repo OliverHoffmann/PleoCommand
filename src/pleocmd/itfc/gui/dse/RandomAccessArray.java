@@ -8,17 +8,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class RandomAccessArray implements RandomAccess {
+public final class RandomAccessArray implements RandomAccess {
 
-	byte[] ba;
+	private byte[] ba;
 
-	int pos;
+	private int pos;
 
-	int length;
+	private int length;
 
-	DataInput dataIn;
+	private final DataInput dataIn;
 
-	DataOutput dataOut;
+	private final DataOutput dataOut;
 
 	public RandomAccessArray(final InputStream in, final long length)
 			throws IOException {

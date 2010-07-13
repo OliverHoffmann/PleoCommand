@@ -165,8 +165,8 @@ public final class DataSequenceTriggerPanel extends JPanel {
 				return o1.compareTo(o2);
 			}
 		}));
-		Log.detail("Updating trigger model for map %s - last selected %s", map,
-				lastSelected);
+		Log.detail("Updating trigger model for map '%s' - last selected '%s'",
+				map, lastSelected);
 		triggerList.setSelectedValue(lastSelected, true);
 	}
 
@@ -177,7 +177,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 		if (name != null) {
 			try {
 				map.createContent(name);
-				Log.detail("Added new trigger %s to %s", name, map);
+				Log.detail("Added new trigger '%s' to '%s'", name, map);
 				modified();
 			} catch (final ConfigurationException e) {
 				Log.error(e);
@@ -195,8 +195,8 @@ public final class DataSequenceTriggerPanel extends JPanel {
 			if (name != null) {
 				try {
 					map.renameContent(trigger, name);
-					Log.detail("Renamed trigger %s to %s in %s", trigger, name,
-							map);
+					Log.detail("Renamed trigger '%s' to '%s' in '%s'", trigger,
+							name, map);
 					modified();
 				} catch (final ConfigurationException e) {
 					Log.error(e);
@@ -212,7 +212,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 	protected void removeSelectedTrigger() {
 		if (trigger != null) {
 			map.removeContent(trigger);
-			Log.detail("Removed trigger %s from  %s", trigger, map);
+			Log.detail("Removed trigger '%s' from  '%s'", trigger, map);
 			dsePanel.clear();
 			trigger = null;
 			updateTriggerModel();
@@ -234,7 +234,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 	}
 
 	public void externalChanged(final ConfigDataMap other) {
-		Log.detail("Replacing map %s with %s due to external change", map,
+		Log.detail("Replacing map '%s' with '%s' due to external change", map,
 				other);
 		map.assignFrom(other);
 		updateTriggerModel();

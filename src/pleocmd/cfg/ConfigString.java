@@ -113,7 +113,7 @@ public class ConfigString extends ConfigValue {
 		return res;
 	}
 
-	public void setContentGUI(final String content) {
+	public final void setContentGUI(final String content) {
 		internalMod = true;
 		try {
 			if (tc != null) tc.setText(content);
@@ -122,7 +122,7 @@ public class ConfigString extends ConfigValue {
 		}
 	}
 
-	public void clearContentGUI() {
+	public final void clearContentGUI() {
 		internalMod = true;
 		try {
 			if (tc != null) tc.setText("");
@@ -193,15 +193,15 @@ public class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public void setGUIEnabled(final boolean enabled) {
+	public final void setGUIEnabled(final boolean enabled) {
 		if (tc != null) tc.setEnabled(enabled);
 	}
 
-	protected JTextComponent getTc() {
+	protected final JTextComponent getTc() {
 		return tc;
 	}
 
-	protected boolean isInternalMod() {
+	protected final boolean isInternalMod() {
 		return internalMod;
 	}
 

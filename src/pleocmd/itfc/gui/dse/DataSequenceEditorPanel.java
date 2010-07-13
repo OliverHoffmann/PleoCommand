@@ -160,7 +160,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		});
 	}
 
-	protected void addFromInputHistory() {
+	protected final void addFromInputHistory() {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			final int offset = doc.getParagraphElement(
@@ -172,7 +172,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void addFromFile() {
+	protected final void addFromFile() {
 		final JFileChooser fc = new JFileChooser();
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileFilter() {
@@ -191,7 +191,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 			addSequenceFromFile(fc.getSelectedFile());
 	}
 
-	protected void addSequenceFromFile(final File fileToAdd) {
+	protected final void addSequenceFromFile(final File fileToAdd) {
 		try {
 			final StyledDocument doc = tpDataSequence.getStyledDocument();
 			int offset = doc.getParagraphElement(
@@ -215,7 +215,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void clear() {
+	protected final void clear() {
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
 		try {
 			doc.remove(0, doc.getLength());
@@ -224,7 +224,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void playSelected() {
+	protected final void playSelected() {
 		final String sel = tpDataSequence.getSelectedText();
 		if (sel != null) for (final String line : sel.split("\n"))
 			try {
@@ -236,7 +236,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 			}
 	}
 
-	protected void playAll() {
+	protected final void playAll() {
 		final String text = tpDataSequence.getText();
 		if (text != null) for (final String line : text.split("\n"))
 			try {
@@ -248,7 +248,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 			}
 	}
 
-	protected void play(final Data data) {
+	protected final void play(final Data data) {
 		if (playOutputList == null)
 			try {
 				String device = null;
@@ -288,7 +288,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void freeResources() {
+	protected final void freeResources() {
 		try {
 			if (playOutputList != null) for (final Output out : playOutputList)
 				out.close();
@@ -297,14 +297,14 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void addUndo(final UndoableEdit edit) {
+	protected final void addUndo(final UndoableEdit edit) {
 		if (edit.isSignificant()) {
 			tpUndoManager.addEdit(edit);
 			updateState();
 		}
 	}
 
-	protected void undo() {
+	protected final void undo() {
 		try {
 			tpUndoManager.undo();
 		} catch (final CannotUndoException e) {
@@ -312,7 +312,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected void redo() {
+	protected final void redo() {
 		try {
 			tpUndoManager.redo();
 		} catch (final CannotRedoException e) {
@@ -320,7 +320,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		}
 	}
 
-	protected List<Data> writeTextPaneToList() throws IOException,
+	protected final List<Data> writeTextPaneToList() throws IOException,
 			FormatException {
 		final List<Data> res = new ArrayList<Data>();
 		final BufferedReader in = new BufferedReader(new StringReader(
@@ -335,7 +335,8 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		return res;
 	}
 
-	public void writeTextPaneToWriter(final Writer out) throws IOException {
+	public final void writeTextPaneToWriter(final Writer out)
+			throws IOException {
 		final BufferedReader in = new BufferedReader(new StringReader(
 				tpDataSequence.getText()));
 		String line;
@@ -347,7 +348,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		out.flush();
 	}
 
-	protected void updateTextPaneFromList(final List<Data> dataList) {
+	protected final void updateTextPaneFromList(final List<Data> dataList) {
 		clear();
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
 		if (dataList != null)
@@ -362,7 +363,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		updateState();
 	}
 
-	public void updateTextPaneFromReader(final BufferedReader in)
+	public final void updateTextPaneFromReader(final BufferedReader in)
 			throws IOException {
 		clear();
 		final StyledDocument doc = tpDataSequence.getStyledDocument();
@@ -377,7 +378,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		updateState();
 	}
 
-	void updateErrorLabel(final String text) {
+	final void updateErrorLabel(final String text) {
 		if (text.equals(lblErrorFeedback.getText())) return;
 		lblErrorFeedback.setText(text);
 		Color.RGBtoHSB(255, 0, 0, null);
@@ -392,7 +393,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 
 	protected abstract void stateChanged();
 
-	protected void updateState() {
+	protected final void updateState() {
 		tpDataSequence.setEnabled(isEnabled());
 		btnCopyInput.setEnabled(MainFrame.the().getHistory().size() > 0);
 		btnAddFile.setEnabled(true);
@@ -403,19 +404,19 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		stateChanged();
 	}
 
-	protected JLabel getLblErrorFeedback() {
+	protected final JLabel getLblErrorFeedback() {
 		return lblErrorFeedback;
 	}
 
-	public UndoManager getTpUndoManager() {
+	public final UndoManager getTpUndoManager() {
 		return tpUndoManager;
 	}
 
-	public JTextPane getTpDataSequence() {
+	public final JTextPane getTpDataSequence() {
 		return tpDataSequence;
 	}
 
-	private class FadeTimerTask extends TimerTask {
+	private final class FadeTimerTask extends TimerTask {
 
 		private double cur0;
 		private double cur1;

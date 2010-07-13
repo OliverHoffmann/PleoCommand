@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 import javax.swing.table.AbstractTableModel;
@@ -25,7 +26,7 @@ public abstract class HexTableModel extends AbstractTableModel {
 
 	private RandomAccess stream;
 
-	private final TreeMap<Long, Color[]> map;
+	private final NavigableMap<Long, Color[]> map;
 
 	private boolean modified;
 
@@ -33,12 +34,12 @@ public abstract class HexTableModel extends AbstractTableModel {
 		map = new TreeMap<Long, Color[]>();
 	}
 
-	public void updateColumnCount(final int newColumnCount) {
+	public final void updateColumnCount(final int newColumnCount) {
 		columnCount = newColumnCount;
 		updateRowCount();
 	}
 
-	public void updateRowCount() {
+	public final void updateRowCount() {
 		long size;
 		try {
 			size = stream == null ? 0 : stream.length();
@@ -51,7 +52,7 @@ public abstract class HexTableModel extends AbstractTableModel {
 		}
 	}
 
-	public void setStream(final RandomAccess stream) {
+	public final void setStream(final RandomAccess stream) {
 		map.clear();
 		if (this.stream != null) try {
 			this.stream.close();
@@ -63,22 +64,22 @@ public abstract class HexTableModel extends AbstractTableModel {
 		resetModification();
 	}
 
-	public RandomAccess getStream() {
+	public final RandomAccess getStream() {
 		return stream;
 	}
 
 	@Override
-	public int getColumnCount() {
+	public final int getColumnCount() {
 		return columnCount;
 	}
 
 	@Override
-	public int getRowCount() {
+	public final int getRowCount() {
 		return rowCount;
 	}
 
 	@Override
-	public Cell getValueAt(final int rowIndex, final int columnIndex) {
+	public final Cell getValueAt(final int rowIndex, final int columnIndex) {
 		if (stream == null) return new Cell("", Color.BLACK);
 		final long pos = (long) rowIndex * columnCount + columnIndex;
 		Long startPos = map.floorKey(pos);
@@ -111,12 +112,13 @@ public abstract class HexTableModel extends AbstractTableModel {
 	}
 
 	@Override
-	public boolean isCellEditable(final int rowIndex, final int columnIndex) {
+	public final boolean isCellEditable(final int rowIndex,
+			final int columnIndex) {
 		return true;
 	}
 
 	@Override
-	public void setValueAt(final Object aValue, final int rowIndex,
+	public final void setValueAt(final Object aValue, final int rowIndex,
 			final int columnIndex) {
 		if (aValue instanceof Cell)
 			editing(((Cell) aValue).getString(), rowIndex, columnIndex);
@@ -166,13 +168,14 @@ public abstract class HexTableModel extends AbstractTableModel {
 		}
 	}
 
-	public boolean isModified() {
+	public final boolean isModified() {
 		return modified;
 	}
 
 	protected abstract void stateChanged();
 
-	void editing(final String value, final int rowIndex, final int columnIndex) {
+	final void editing(final String value, final int rowIndex,
+			final int columnIndex) {
 		final long pos = (long) rowIndex * columnCount + columnIndex;
 		try {
 			stream.seek(pos);
@@ -185,7 +188,7 @@ public abstract class HexTableModel extends AbstractTableModel {
 		update(pos);
 	}
 
-	public void resetModification() {
+	public final void resetModification() {
 		modified = false;
 		stateChanged();
 	}

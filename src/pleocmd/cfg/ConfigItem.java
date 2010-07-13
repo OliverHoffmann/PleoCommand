@@ -105,11 +105,11 @@ public class ConfigItem<E> extends ConfigValue {
 		if (cb != null) cb.setSelectedIndex(content);
 	}
 
-	public String getContentGUI() {
+	public final String getContentGUI() {
 		return cb == null ? content : (String) cb.getSelectedItem();
 	}
 
-	public void setContentGUI(final String content) {
+	public final void setContentGUI(final String content) {
 		internalMod = true;
 		try {
 			if (cb != null) cb.setSelectedItem(content);
@@ -118,7 +118,7 @@ public class ConfigItem<E> extends ConfigValue {
 		}
 	}
 
-	public void setContentIndexGUI(final int content) {
+	public final void setContentIndexGUI(final int content) {
 		internalMod = true;
 		try {
 			if (cb != null) cb.setSelectedIndex(content);
@@ -188,15 +188,15 @@ public class ConfigItem<E> extends ConfigValue {
 	}
 
 	@Override
-	public void setGUIEnabled(final boolean enabled) {
+	public final void setGUIEnabled(final boolean enabled) {
 		if (cb != null) cb.setEnabled(enabled);
 	}
 
-	protected JComboBox getCb() {
+	protected final JComboBox getCb() {
 		return cb;
 	}
 
-	protected boolean isInternalMod() {
+	protected final boolean isInternalMod() {
 		return internalMod;
 	}
 

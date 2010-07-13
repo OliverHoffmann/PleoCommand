@@ -6,11 +6,12 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-public class HexTableCellRenderer extends DefaultTableCellRenderer {
+public final class HexTableCellRenderer extends DefaultTableCellRenderer {
 
 	private static final long serialVersionUID = -7878467781606848084L;
 
 	public static class Cell {
+
 		private final String string;
 
 		private final Color color;
@@ -20,11 +21,11 @@ public class HexTableCellRenderer extends DefaultTableCellRenderer {
 			this.color = color;
 		}
 
-		public String getString() {
+		public final String getString() {
 			return string;
 		}
 
-		public Color getColor() {
+		public final Color getColor() {
 			return color;
 		}
 

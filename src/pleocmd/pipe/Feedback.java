@@ -162,6 +162,7 @@ abstract class Feedback {
 
 	@Override
 	public final synchronized String toString() {
+		// CS_IGNORE_BEGIN
 		if (startTime == 0 && stopTime == 0)
 			return String.format("Pipe %s", getCurrentRunningState());
 		return String.format("Pipe %s,%s encountered %d "
@@ -175,6 +176,7 @@ abstract class Feedback {
 				interruptionCount, dropCount, behindCountSignificant,
 				getBehindAverage(), behindMax, behindSum,
 				getAdditionalString2());
+		// CS_IGNORE_END
 	}
 
 	protected abstract String getAdditionalString1();

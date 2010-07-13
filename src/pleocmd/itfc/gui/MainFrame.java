@@ -208,7 +208,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 				} catch (final InterruptedException e) {
 					// just ignore
 				}
-				System.err.println("Application has not been shut down "
+				System.err.println("Application has not been shut down " // CS_IGNORE
 						+ "normally but has to be exited forcefully."
 						+ "Remaining threads are:");
 				ThreadGroup rootGroup = Thread.currentThread().getThreadGroup();
@@ -220,9 +220,9 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 					threads = new Thread[threads.length * 2];
 				for (final Thread t : threads)
 					if (t != null)
-						System.err.println(String.format("'%40s' daemon:%-5s "
+						System.err.println(String.format("'%40s' daemon:%-5s " // CS_IGNORE
 								+ "alive:%-5s interrupted:%-5s priority:%2d "
-								+ "state:%s", t.getName(), t.isDaemon(), t
+								+ "state:%s", t.getName(), t.isDaemon(), t // CS_IGNORE
 								.isAlive(), t.isInterrupted(), t.getPriority(),
 								t.getState()));
 				System.exit(0);

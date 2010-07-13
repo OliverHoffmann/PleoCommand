@@ -211,15 +211,15 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	@Override
-	public void setGUIEnabled(final boolean enabled) {
+	public final void setGUIEnabled(final boolean enabled) {
 		if (ta != null) ta.setEnabled(enabled);
 	}
 
-	protected JTextArea getTa() {
+	protected final JTextArea getTa() {
 		return ta;
 	}
 
-	protected boolean isInternalMod() {
+	protected final boolean isInternalMod() {
 		return internalMod;
 	}
 

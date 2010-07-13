@@ -13,6 +13,8 @@ import pleocmd.pipe.data.SingleFloatData;
 
 public final class RandomGeneratorInput extends Input { // NO_UCD
 
+	private static Random rand = new Random();
+
 	private final ConfigInt cfgUserData;
 	private final ConfigInt cfgSamplerate;
 	private final ConfigDouble cfgPeakPropbability;
@@ -120,7 +122,7 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 				value = 0;
 				step = 0;
 				if (Log.canLogDetail())
-					Log.detail("Switching to PeakPos %s with amp %f "
+					Log.detail("Switching to PeakPos '%s' with amp %f "
 							+ "and length %d, %d and %d => "
 							+ "peak-inc will be %f and %f", peakPos.toString(),
 							amp, grad0Len, peakLen, grad1Len, grad0Inc,
@@ -132,7 +134,7 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 			if (++step >= grad0Len) {
 				step = 0;
 				peakPos = PeakPos.OnPeak;
-				Log.detail("Switching to PeakPos %s", peakPos.toString());
+				Log.detail("Switching to PeakPos '%s'", peakPos.toString());
 			}
 			break;
 		case OnPeak:
@@ -140,14 +142,14 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 			if (++step >= peakLen) {
 				step = 0;
 				peakPos = PeakPos.Grad1;
-				Log.detail("Switching to PeakPos %s", peakPos.toString());
+				Log.detail("Switching to PeakPos '%s'", peakPos.toString());
 			}
 			break;
 		case Grad1:
 			d = value -= grad1Inc;
 			if (++step >= grad1Len) {
 				peakPos = PeakPos.NoPeak;
-				Log.detail("Switching to PeakPos %s", peakPos.toString());
+				Log.detail("Switching to PeakPos '%s'", peakPos.toString());
 			}
 			break;
 		default:
@@ -159,8 +161,6 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 		if (isVisualize()) plot(0, val);
 		return new SingleFloatData(val, cfgUserData.getContent(), null);
 	}
-
-	private static Random rand = new Random();
 
 	private static double rand11() {
 		return 1 - 2 * rand.nextDouble();

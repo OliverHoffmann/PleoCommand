@@ -12,9 +12,11 @@ import javax.swing.text.PlainDocument;
 
 import pleocmd.itfc.gui.dse.HexTableCellRenderer.Cell;
 
-public class HexTableCellEditor extends DefaultCellEditor {
+public final class HexTableCellEditor extends DefaultCellEditor {
 
-	final HexTableModel model;
+	private static final long serialVersionUID = -7011040614747253433L;
+
+	final HexTableModel model; // CS_IGNORE protected access, but final
 
 	public HexTableCellEditor(final HexTableModel model) {
 		super(new JTextField());
@@ -71,7 +73,5 @@ public class HexTableCellEditor extends DefaultCellEditor {
 			return new Cell((String) value, Color.BLACK);
 		return new Cell("", Color.BLACK);
 	}
-
-	private static final long serialVersionUID = -7011040614747253433L;
 
 }
