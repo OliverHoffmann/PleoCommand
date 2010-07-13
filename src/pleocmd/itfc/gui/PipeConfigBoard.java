@@ -76,6 +76,13 @@ final class PipeConfigBoard extends JPanel {
 	 */
 	private static final int GROW_LABEL_REDRAW = 14;
 
+	/**
+	 * Whether to snap components during drag&drop operations to an imaginary
+	 * raster.<br>
+	 * 0 for no raster, raster distance in pixel otherwise.
+	 */
+	private static final int SNAP_TO_GRID = 10;
+
 	private final Pipe pipe;
 
 	private final BoardPainter painter;
@@ -478,6 +485,10 @@ final class PipeConfigBoard extends JPanel {
 				public void run() {
 					final Rectangle r = pp.getGuiPosition().createCopy();
 					if (location != null) r.setLocation(location);
+					if (SNAP_TO_GRID > 0) {
+						r.x = r.x / SNAP_TO_GRID * SNAP_TO_GRID;
+						r.y = r.y / SNAP_TO_GRID * SNAP_TO_GRID;
+					}
 					getPainter().check(r, pp);
 					pp.setGuiPosition(r);
 					try {
@@ -571,8 +582,10 @@ final class PipeConfigBoard extends JPanel {
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
 			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
-			newPos.x = newPos.x / 10 * 10;
-			newPos.y = newPos.y / 10 * 10;
+			if (SNAP_TO_GRID > 0) {
+				newPos.x = newPos.x / SNAP_TO_GRID * SNAP_TO_GRID;
+				newPos.y = newPos.y / SNAP_TO_GRID * SNAP_TO_GRID;
+			}
 			painter.check(newPos, currentPart);
 			currentPart.setGuiPosition(newPos);
 			if (!checkPipeOrdering(null)) currentPart.setGuiPosition(orgPos);
