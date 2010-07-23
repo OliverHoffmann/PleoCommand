@@ -182,7 +182,7 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 
 		final ValueType[] types = new ValueType[32];
 		for (int i = 0; i < cnt; ++i)
-			types[i] = ValueType.values()[hdr >> i * 3 & 0x07];
+			types[i] = ValueType.values()[hdr >> (7 - i) * 3 & 0x07];
 
 		if ((flags & FLAG_RESERVED_MASK) != 0)
 			throw new FormatException(syntaxList, pos,
@@ -288,7 +288,7 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 		if (cnt > 8) flags |= FLAG_VERYLONG;
 		int hdr = (flags & 0x1F) << 27 | (cnt1 - 1 & 0x07) << 24;
 		for (int i = 0; i < cnt1; ++i)
-			hdr |= (getValues().get(i).getType().getID() & 0x07) << i * 3;
+			hdr |= (getValues().get(i).getType().getID() & 0x07) << (7 - i) * 3;
 		out.writeInt(hdr);
 		int pos = 0;
 		if (syntaxList != null) {

@@ -400,7 +400,7 @@ bool PleoCommandTCPIPTask::SendDataHeader(int fieldCount, prio_t prio,
 		flags |= FLAG_VERYLONG;
 	unsigned int header = (flags & 0x1F) << 27 | (cnt1 - 1 & 0x07) << 24;
 	for (int i = 0; i < cnt1; ++i)
-		header |= (m_fields[i].type & 0x07) << i * 3;
+		header |= (m_fields[i].type & 0x07) << (7 - i) * 3;
 	header = htonl(header);
 
 	// send header
