@@ -321,15 +321,25 @@ final class BoardPainter {
 		saneConfigCache = new HashMap<PipePart, String>();
 	}
 
-	public void paint(final Graphics g, final PipePart currentPart,
-			final PipePart underCursor,
-			final ImmutableRectangle currentConnection,
-			final PipePart currentConnectionsTarget,
-			final boolean currentConnectionValid,
-			final BoardAutoLayouter layouter, final boolean modifyable,
-			final Collection<PipeFlow> pipeflow) {
+	// CS_IGNORE_BEGIN class meant as struct
+
+	public static class PaintParameters {
+		public Graphics g;
+		public PipePart currentPart;
+		public PipePart underCursor;
+		public Rectangle currentConnection;
+		public PipePart currentConnectionsTarget;
+		public boolean currentConnectionValid;
+		public BoardAutoLayouter layouter;
+		public boolean modifyable;
+		public Collection<PipeFlow> pipeflow;
+	}
+
+	// CS_IGNORE_END
+
+	public void paint(final PaintParameters p) {
 		if (pipe == null || scale <= Double.MIN_NORMAL) return;
-		final Rectangle clip = g.getClipBounds();
+		final Rectangle clip = p.g.getClipBounds();
 		if (clip == null) return;
 		final BufferedImage img = new BufferedImage(clip.width, clip.height,
 				BufferedImage.TYPE_INT_RGB);
@@ -353,22 +363,23 @@ final class BoardPainter {
 		g2.fillRect(0, 0, clip.width, clip.height);
 		g2.translate(-clip.x, -clip.y);
 		g2.scale(scale, scale);
-		drawMovementHint(g2, currentPart);
+		drawMovementHint(g2, p.currentPart);
 		final long time1 = System.currentTimeMillis();
 
 		if (clip.x < border1) drawOrderingHint(g2);
 		final long time2 = System.currentTimeMillis();
 		drawSectionBorders(g2);
 		final long time3 = System.currentTimeMillis();
-		final int cnt4 = drawPipeParts(g2, clipOrg, currentPart, underCursor,
-				modifyable);
+		final int cnt4 = drawPipeParts(g2, clipOrg, p.currentPart,
+				p.underCursor, p.modifyable);
 		final long time4 = System.currentTimeMillis();
-		final int cnt5 = drawConnections(g2, clipOrg, currentPart,
-				currentConnection, underCursor, currentConnectionsTarget,
-				currentConnectionValid);
+		final int cnt5 = drawConnections(g2, clipOrg, p.currentPart,
+				p.currentConnection == null ? null : new ImmutableRectangle(
+						p.currentConnection), p.underCursor,
+				p.currentConnectionsTarget, p.currentConnectionValid);
 		final long time5 = System.currentTimeMillis();
-		drawAutoLayoutInfo(g2, layouter);
-		drawPipeFlow(g2, pipeflow);
+		drawAutoLayoutInfo(g2, p.layouter);
+		drawPipeFlow(g2, p.pipeflow);
 
 		if (PAINT_DEBUG) {
 			g2.translate(clip.x / scale, clip.y / scale);
@@ -379,7 +390,7 @@ final class BoardPainter {
 			drawDebugTime(g2, time5 - time4, cnt5, "Conn's", 5);
 		}
 
-		g.drawImage(img, clip.x, clip.y, null);
+		p.g.drawImage(img, clip.x, clip.y, null);
 	}
 
 	private void drawDebugTime(final Graphics2D g2, final long elapsed,

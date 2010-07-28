@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 import pleocmd.Log;
 import pleocmd.cfg.Configuration;
 import pleocmd.exc.ConfigurationException;
+import pleocmd.itfc.gui.BoardPainter.PaintParameters;
 import pleocmd.pipe.Pipe;
 
 public class PipePreviewLabel extends JLabel {
@@ -67,7 +68,10 @@ public class PipePreviewLabel extends JLabel {
 			painter.setBounds(width, height, false);
 			final Graphics g = img.getGraphics();
 			g.setClip(0, 0, width, height);
-			painter.paint(g, null, null, null, null, false, null, true, null);
+			final PaintParameters p = new PaintParameters();
+			p.g = g;
+			p.modifyable = true;
+			painter.paint(p);
 			setIcon(new ImageIcon(img));
 		}
 	}

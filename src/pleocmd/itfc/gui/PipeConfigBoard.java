@@ -52,6 +52,7 @@ import pleocmd.cfg.ConfigValue;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
 import pleocmd.exc.StateException;
+import pleocmd.itfc.gui.BoardPainter.PaintParameters;
 import pleocmd.itfc.gui.Layouter.Button;
 import pleocmd.itfc.gui.help.HelpLoader;
 import pleocmd.itfc.gui.icons.IconLoader;
@@ -85,6 +86,8 @@ final class PipeConfigBoard extends JPanel {
 
 	private final Pipe pipe;
 
+	private final PaintParameters p = new PaintParameters();
+
 	private final BoardPainter painter;
 
 	private final JPopupMenu menuInput;
@@ -113,31 +116,15 @@ final class PipeConfigBoard extends JPanel {
 
 	private Point lastMenuLocation;
 
-	private PipePart currentPart;
-
-	private Rectangle currentConnection;
-
-	private PipePart currentConnectionsTarget;
-
-	private boolean currentConnectionValid;
-
-	private PipePart underCursor;
-
 	private Point handlePoint;
 
 	private Icon currentIcon;
 
 	private boolean delayedReordering;
 
-	private BoardAutoLayouter layouter;
-
 	private Thread layoutThread;
 
-	private boolean modifyable;
-
 	private boolean closed;
-
-	private Collection<PipeFlow> pipeflow;
 
 	public PipeConfigBoard(final Pipe pipe) {
 		this.pipe = pipe;
@@ -223,10 +210,8 @@ final class PipeConfigBoard extends JPanel {
 
 	@Override
 	protected void paintComponent(final Graphics g) {
-		painter.paint(g, currentPart, underCursor,
-				currentConnection == null ? null : new ImmutableRectangle(
-						currentConnection), currentConnectionsTarget,
-				currentConnectionValid, layouter, modifyable, pipeflow);
+		p.g = g;
+		painter.paint(p);
 	}
 
 	private JPopupMenu createMenu(final String name,
@@ -356,10 +341,11 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void removeCurrentConnection() {
-		if (hasCurrentPart() && currentConnectionsTarget != null
+		if (hasCurrentPart() && p.currentConnectionsTarget != null
 				&& ensureModifyable()) {
 			try {
-				currentPart.disconnectFromPipePart(currentConnectionsTarget);
+				p.currentPart
+						.disconnectFromPipePart(p.currentConnectionsTarget);
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connection");
 			}
@@ -371,11 +357,11 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void removeCurrentPartsConnections() {
 		if (hasCurrentPart() && ensureModifyable()) {
-			final Set<PipePart> copy = new HashSet<PipePart>(currentPart
+			final Set<PipePart> copy = new HashSet<PipePart>(p.currentPart
 					.getConnectedPipeParts());
 			try {
 				for (final PipePart pp : copy)
-					currentPart.disconnectFromPipePart(pp);
+					p.currentPart.disconnectFromPipePart(pp);
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connections");
 			}
@@ -389,24 +375,24 @@ final class PipeConfigBoard extends JPanel {
 		if (hasCurrentPart() && ensureModifyable()) {
 			try {
 				for (final PipePart srcPP : painter.getSet())
-					if (srcPP.getConnectedPipeParts().contains(currentPart))
-						srcPP.disconnectFromPipePart(currentPart);
+					if (srcPP.getConnectedPipeParts().contains(p.currentPart))
+						srcPP.disconnectFromPipePart(p.currentPart);
 			} catch (final StateException e) {
 				Log.error(e, "Cannot delete connections");
 			}
-			painter.getSet().remove(currentPart);
+			painter.getSet().remove(p.currentPart);
 			try {
-				if (currentPart instanceof Input)
-					getPipe().removeInput((Input) currentPart);
-				else if (currentPart instanceof Converter)
-					getPipe().removeConverter((Converter) currentPart);
-				else if (currentPart instanceof Output)
-					getPipe().removeOutput((Output) currentPart);
+				if (p.currentPart instanceof Input)
+					getPipe().removeInput((Input) p.currentPart);
+				else if (p.currentPart instanceof Converter)
+					getPipe().removeConverter((Converter) p.currentPart);
+				else if (p.currentPart instanceof Output)
+					getPipe().removeOutput((Output) p.currentPart);
 				else
 					throw new InternalException(
-							"Invalid sub-class of PipePart '%s'", currentPart);
+							"Invalid sub-class of PipePart '%s'", p.currentPart);
 			} catch (final StateException e) {
-				Log.error(e, "Cannot remove PipePart '%s'", currentPart);
+				Log.error(e, "Cannot remove PipePart '%s'", p.currentPart);
 			}
 			resetCurrentPart();
 			painter.updateSaneConfigCache();
@@ -415,9 +401,9 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void configureCurrentPart(final boolean onlyIfNoIcon) {
-		if (hasCurrentPart() && !currentPart.getGuiConfigs().isEmpty()
+		if (hasCurrentPart() && !p.currentPart.getGuiConfigs().isEmpty()
 				&& (!onlyIfNoIcon || currentIcon == null) && ensureModifyable()) {
-			createConfigureDialog("Configure", currentPart, null);
+			createConfigureDialog("Configure", p.currentPart, null);
 			repaint();
 		}
 	}
@@ -429,7 +415,7 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void toggleDiagram() {
 		if (hasCurrentPart())
-			currentPart.setVisualize(!currentPart.isVisualize());
+			p.currentPart.setVisualize(!p.currentPart.isVisualize());
 	}
 
 	protected void clearBoard() {
@@ -449,7 +435,7 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void layoutBoard() {
 		if (layoutThread != null) return;
-		layouter = new BoardAutoLayouter(this);
+		p.layouter = new BoardAutoLayouter(this);
 		layoutThread = new Thread() {
 			@Override
 			public void run() {
@@ -462,9 +448,9 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void layoutThreadRun() {
 		try {
-			layouter.start();
+			p.layouter.start();
 		} finally {
-			layouter = null;
+			p.layouter = null;
 			layoutThread = null;
 			if (!closed) {
 				updateState();
@@ -518,7 +504,7 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void replacePipePart(final Class<? extends PipePart> part) {
-		if (!ensureModifyable() || currentPart == null) return;
+		if (!ensureModifyable() || p.currentPart == null) return;
 		try {
 			final PipePart pp = part.newInstance();
 			createConfigureDialog("Replace With", pp, new Runnable() {
@@ -573,22 +559,23 @@ final class PipeConfigBoard extends JPanel {
 	 */
 	protected void mouseDragged(final Point ps) {
 		if (!hasCurrentPart() || handlePoint == null) return;
-		final Point p = getOriginal(ps);
-		if (currentConnection == null) {
+		final Point pOrg = getOriginal(ps);
+		if (p.currentConnection == null) {
 			// move pipe-part
-			final Rectangle orgPos = currentPart.getGuiPosition().createCopy();
+			final Rectangle orgPos = p.currentPart.getGuiPosition()
+					.createCopy();
 			final Rectangle newPos = new Rectangle(orgPos);
 			Rectangle clip = new Rectangle(orgPos);
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
-			newPos.setLocation(p.x - handlePoint.x, p.y - handlePoint.y);
+			newPos.setLocation(pOrg.x - handlePoint.x, pOrg.y - handlePoint.y);
 			if (SNAP_TO_GRID > 0) {
 				newPos.x = newPos.x / SNAP_TO_GRID * SNAP_TO_GRID;
 				newPos.y = newPos.y / SNAP_TO_GRID * SNAP_TO_GRID;
 			}
-			painter.check(newPos, currentPart);
-			currentPart.setGuiPosition(newPos);
-			if (!checkPipeOrdering(null)) currentPart.setGuiPosition(orgPos);
+			painter.check(newPos, p.currentPart);
+			p.currentPart.setGuiPosition(newPos);
+			if (!checkPipeOrdering(null)) p.currentPart.setGuiPosition(orgPos);
 			clip = clip.union(newPos);
 			unionConnectionTargets(clip);
 			unionConnectionSources(clip);
@@ -600,35 +587,35 @@ final class PipeConfigBoard extends JPanel {
 		} else {
 			// move connector instead of pipe-part
 			if (!ensureModifyable()) return;
-			if (currentConnectionsTarget != null) {
+			if (p.currentConnectionsTarget != null) {
 				try {
-					currentPart
-							.disconnectFromPipePart(currentConnectionsTarget);
+					p.currentPart
+							.disconnectFromPipePart(p.currentConnectionsTarget);
 				} catch (final StateException e) {
 					Log.error(e, "Cannot delete connection");
 				}
 				if (painter.updateSaneConfigCache()) repaint();
-				currentConnectionsTarget = null;
+				p.currentConnectionsTarget = null;
 			}
 
-			final Rectangle r = currentPart.getGuiPosition().createCopy()
-					.union(currentConnection);
+			final Rectangle r = p.currentPart.getGuiPosition().createCopy()
+					.union(p.currentConnection);
 
-			currentConnection.setLocation(p.x - handlePoint.x, p.y
+			p.currentConnection.setLocation(pOrg.x - handlePoint.x, pOrg.y
 					- handlePoint.y);
-			currentConnection.setSize(0, 0);
-			painter.check(currentConnection, null);
-			currentConnectionValid = false;
+			p.currentConnection.setSize(0, 0);
+			painter.check(p.currentConnection, null);
+			p.currentConnectionValid = false;
 			for (final PipePart pp : painter.getSet())
 				if (pp.getGuiPosition().contains(
-						currentConnection.getLocation())) {
-					currentConnectionValid = currentPart
+						p.currentConnection.getLocation())) {
+					p.currentConnectionValid = p.currentPart
 							.isConnectionAllowed(pp);
 					break;
 				}
 			mouseMoved(ps);
 
-			Rectangle2D.union(r, currentConnection, r);
+			Rectangle2D.union(r, p.currentConnection, r);
 			// need to take care of labels
 			r.grow(GROW_LABEL_REDRAW, GROW_LABEL_REDRAW);
 			scaleRect(r);
@@ -638,18 +625,18 @@ final class PipeConfigBoard extends JPanel {
 
 	private void unionConnectionSources(final Rectangle r) {
 		for (final PipePart srcPP : painter.getSet())
-			if (srcPP.getConnectedPipeParts().contains(currentPart))
+			if (srcPP.getConnectedPipeParts().contains(p.currentPart))
 				unionConnection(r, srcPP);
 	}
 
 	private void unionConnectionTargets(final Rectangle r) {
-		for (final PipePart trgPP : currentPart.getConnectedPipeParts())
+		for (final PipePart trgPP : p.currentPart.getConnectedPipeParts())
 			unionConnection(r, trgPP);
 	}
 
 	private void unionConnection(final Rectangle r, final PipePart pp) {
 		final Point pt = new Point();
-		BoardPainter.calcConnectorPositions(currentPart.getGuiPosition(), pp
+		BoardPainter.calcConnectorPositions(p.currentPart.getGuiPosition(), pp
 				.getGuiPosition(), null, pt);
 		Rectangle2D.union(r, new Rectangle(pt.x, pt.y, 0, 0), r);
 	}
@@ -661,20 +648,20 @@ final class PipeConfigBoard extends JPanel {
 	 *            current cursor position (scaled to screen)
 	 */
 	protected void mouseMoved(final Point ps) {
-		final Point p = getOriginal(ps);
+		final Point porg = getOriginal(ps);
 		PipePart found = null;
 		for (final PipePart pp : painter.getSet())
-			if (pp.getGuiPosition().contains(p)) {
+			if (pp.getGuiPosition().contains(porg)) {
 				found = pp;
 				break;
 			}
-		if (underCursor != found) {
+		if (p.underCursor != found) {
 			// TODO FIX remove if-clause above once hover is per icon
-			if (underCursor != null)
-				repaint(scaleRect(underCursor.getGuiPosition().createCopy()));
-			underCursor = found;
-			if (underCursor != null)
-				repaint(scaleRect(underCursor.getGuiPosition().createCopy()));
+			if (p.underCursor != null)
+				repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
+			p.underCursor = found;
+			if (p.underCursor != null)
+				repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
 		}
 	}
 
@@ -696,17 +683,17 @@ final class PipeConfigBoard extends JPanel {
 		resetCurrentPart();
 
 		// check all pipe-parts
-		final Point p = getOriginal(pscr);
+		final Point porg = getOriginal(pscr);
 		for (final PipePart pp : painter.getSet())
-			if (pp.getGuiPosition().contains(p)) {
-				currentPart = pp;
-				final Object res = BoardPainter.getPipePartElement(pp, p);
+			if (pp.getGuiPosition().contains(porg)) {
+				p.currentPart = pp;
+				final Object res = BoardPainter.getPipePartElement(pp, porg);
 				if (res instanceof Icon)
 					currentIcon = (Icon) res;
 				else if (res instanceof Point)
 					handlePoint = (Point) res;
 				else {
-					currentConnection = new Rectangle(p.x, p.y, 0, 0);
+					p.currentConnection = new Rectangle(porg.x, porg.y, 0, 0);
 					handlePoint = new Point(0, 0);
 				}
 				return;
@@ -719,13 +706,13 @@ final class PipeConfigBoard extends JPanel {
 				final Point pt = new Point();
 				BoardPainter.calcConnectorPositions(srcPP.getGuiPosition(),
 						trgPP.getGuiPosition(), ps, pt);
-				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, p.x, p.y) < LINE_CLICK_DIST
+				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, porg.x, porg.y) < LINE_CLICK_DIST
 						|| BoardPainter.getArrowPolygon(ps.x, ps.y, pt.x, pt.y)
-								.contains(p)) {
-					currentPart = srcPP;
-					currentConnection = new Rectangle(p.x, p.y, 0, 0);
-					currentConnectionsTarget = trgPP;
-					handlePoint = new Point(p.x - pt.x, p.y - pt.y);
+								.contains(pt)) {
+					p.currentPart = srcPP;
+					p.currentConnection = new Rectangle(porg.x, porg.y, 0, 0);
+					p.currentConnectionsTarget = trgPP;
+					handlePoint = new Point(porg.x - pt.x, porg.y - pt.y);
 					return;
 				}
 			}
@@ -740,14 +727,14 @@ final class PipeConfigBoard extends JPanel {
 	 */
 	protected void releaseCurrent() {
 		// invoked on click or when a drag&drop operation is finished
-		if (currentConnection != null && currentConnectionsTarget == null
+		if (p.currentConnection != null && p.currentConnectionsTarget == null
 				&& ensureModifyable()) {
-			final Point p = new Point(currentConnection.getLocation());
+			final Point pOrg = new Point(p.currentConnection.getLocation());
 			for (final PipePart pp : painter.getSet())
-				if (pp.getGuiPosition().contains(p)
-						&& currentPart.isConnectionAllowed(pp)) {
+				if (pp.getGuiPosition().contains(pOrg)
+						&& p.currentPart.isConnectionAllowed(pp)) {
 					try {
-						currentPart.connectToPipePart(pp);
+						p.currentPart.connectToPipePart(pp);
 					} catch (final StateException e) {
 						Log.error(e, "Cannot create connection");
 					}
@@ -864,24 +851,24 @@ final class PipeConfigBoard extends JPanel {
 	protected void showMenu(final JPopupMenu menu, final Component invoker,
 			final int x, final int y) {
 		final MenuElement[] items = menu.getSubElements();
-		((AbstractButton) items[idxMenuAdd]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuAdd]).setEnabled(p.modifyable
 				&& !hasCurrentPart());
-		((AbstractButton) items[idxMenuRepl]).setEnabled(modifyable
+		((AbstractButton) items[idxMenuRepl]).setEnabled(p.modifyable
 				&& hasCurrentPart());
-		((AbstractButton) items[idxMenuConfPart]).setEnabled(modifyable
-				&& hasCurrentPart() && currentConnection == null
-				&& !currentPart.getGuiConfigs().isEmpty());
-		((AbstractButton) items[idxMenuDelPart]).setEnabled(modifyable
-				&& hasCurrentPart() && currentConnection == null);
-		((AbstractButton) items[idxMenuDelPartConn]).setEnabled(modifyable
-				&& hasCurrentPart() && currentConnection == null
-				&& !currentPart.getConnectedPipeParts().isEmpty());
-		((AbstractButton) items[idxMenuDelConn]).setEnabled(modifyable
-				&& currentConnection != null);
+		((AbstractButton) items[idxMenuConfPart]).setEnabled(p.modifyable
+				&& hasCurrentPart() && p.currentConnection == null
+				&& !p.currentPart.getGuiConfigs().isEmpty());
+		((AbstractButton) items[idxMenuDelPart]).setEnabled(p.modifyable
+				&& hasCurrentPart() && p.currentConnection == null);
+		((AbstractButton) items[idxMenuDelPartConn]).setEnabled(p.modifyable
+				&& hasCurrentPart() && p.currentConnection == null
+				&& !p.currentPart.getConnectedPipeParts().isEmpty());
+		((AbstractButton) items[idxMenuDelConn]).setEnabled(p.modifyable
+				&& p.currentConnection != null);
 		((AbstractButton) items[idxMenuToggleDgr]).setEnabled(hasCurrentPart());
 		((AbstractButton) items[idxMenuToggleDgr]).setSelected(hasCurrentPart()
-				&& currentPart.isVisualize());
-		((AbstractButton) items[idxMenuClearBoard]).setEnabled(modifyable
+				&& p.currentPart.isVisualize());
+		((AbstractButton) items[idxMenuClearBoard]).setEnabled(p.modifyable
 				&& !hasCurrentPart());
 		((AbstractButton) items[idxMenuLayoutBoard])
 				.setEnabled(!hasCurrentPart() && layoutThread == null);
@@ -1021,13 +1008,13 @@ final class PipeConfigBoard extends JPanel {
 
 	@Override
 	public String getToolTipText(final MouseEvent event) {
-		if (underCursor == null) return null;
+		if (p.underCursor == null) return null;
 		final StringBuilder sb = new StringBuilder("<html><b>");
-		sb.append(safeHTMLString(underCursor.getName()));
+		sb.append(safeHTMLString(p.underCursor.getName()));
 		sb.append("</b><p>");
-		sb.append(safeHTMLString(underCursor.getDescription()));
+		sb.append(safeHTMLString(p.underCursor.getDescription()));
 		sb.append("<table border=1>");
-		for (final ConfigValue v : underCursor.getGuiConfigs()) {
+		for (final ConfigValue v : p.underCursor.getGuiConfigs()) {
 			sb.append("<tr><td align=right>");
 			sb.append(safeHTMLString(v.getLabel()));
 			sb.append("</td><td align=left>");
@@ -1035,14 +1022,14 @@ final class PipeConfigBoard extends JPanel {
 			sb.append("</td></tr>");
 		}
 		sb.append("</table>");
-		final String sc = painter.getSaneConfigCache().get(underCursor);
+		final String sc = painter.getSaneConfigCache().get(p.underCursor);
 		if (sc != null) {
 			sb.append("<p color=red><b>Bad configuration:</b><br>");
 			sb.append(safeHTMLString(sc));
 			sb.append("</p>");
 		}
 		sb.append("<p color=blue><b>Statistics:</b><br>");
-		sb.append(underCursor.getFeedback().getHTMLTable());
+		sb.append(p.underCursor.getFeedback().getHTMLTable());
 		sb.append("</p>");
 		sb.append("</html>");
 		return sb.toString();
@@ -1051,19 +1038,19 @@ final class PipeConfigBoard extends JPanel {
 	public void updateState() {
 		final boolean modifNow = !MainFrame.the().isPipeRunning()
 				&& layoutThread == null && !closed;
-		if (modifyable ^ modifNow) {
-			modifyable = modifNow;
+		if (p.modifyable ^ modifNow) {
+			p.modifyable = modifNow;
 			if (delayedReordering) checkPipeOrdering(null);
 			repaint();
 		}
 	}
 
 	private boolean ensureModifyable() {
-		if (!modifyable)
+		if (!p.modifyable)
 			Log.error("Configuration board is read-only as "
 					+ "the Pipe or the Auto-Layouter is currently "
 					+ "running.");
-		return modifyable;
+		return p.modifyable;
 	}
 
 	public void setZoom(final double zoom) {
@@ -1094,34 +1081,34 @@ final class PipeConfigBoard extends JPanel {
 	public void closed() {
 		closed = true;
 		updateState();
-		if (layoutThread != null && layouter != null) {
-			layouter.interrupt();
+		if (layoutThread != null && p.layouter != null) {
+			p.layouter.interrupt();
 			layoutThread.interrupt();
 		}
 	}
 
 	public boolean hasCurrentPart() {
-		return currentPart != null;
+		return p.currentPart != null;
 	}
 
 	public void resetCurrentTransients() {
 		currentIcon = null;
 		handlePoint = null;
-		currentConnection = null;
-		currentConnectionValid = false;
+		p.currentConnection = null;
+		p.currentConnectionValid = false;
 	}
 
 	public void resetCurrentPart() {
-		currentPart = null;
+		p.currentPart = null;
 		currentIcon = null;
 		handlePoint = null;
 		resetCurrentConnection();
 	}
 
 	public void resetCurrentConnection() {
-		currentConnection = null;
-		currentConnectionsTarget = null;
-		currentConnectionValid = false;
+		p.currentConnection = null;
+		p.currentConnectionsTarget = null;
+		p.currentConnectionValid = false;
 	}
 
 	public BoardPainter getPainter() {
@@ -1129,11 +1116,11 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	public PipePart getCurrentPart() {
-		return currentPart;
+		return p.currentPart;
 	}
 
 	void setPipeflow(final Collection<PipeFlow> pipeflow) {
-		this.pipeflow = pipeflow;
+		p.pipeflow = pipeflow;
 	}
 
 }
