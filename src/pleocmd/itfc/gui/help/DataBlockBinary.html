@@ -22,31 +22,31 @@
       <TR>
         <TD valign="top">0x01</TD>
 
-        <TD>Priorität vorhanden</TD>
+        <TD valign="top">Priorität vorhanden</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x02</TD>
 
-        <TD>Zeitstempel vorhanden</TD>
+        <TD valign="top">Zeitstempel vorhanden</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x04</TD>
 
-        <TD>Extra-Langer Datenblock</TD>
+        <TD valign="top">Extra-Langer Datenblock</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x08</TD>
 
-        <TD>Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
+        <TD valign="top">Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x10</TD>
 
-        <TD>Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
+        <TD valign="top">Reserviert - Darf nicht gesetzt sein (kann für Erweiterungen verwendet werden)</TD>
       </TR>
     </TBODY>
   </TABLE><BR>
@@ -59,52 +59,52 @@
       <TR>
         <TD valign="top">0x00</TD>
 
-        <TD>8 Bit Ganzzahl (mit Vorzeichen)</TD>
+        <TD valign="top">8 Bit Ganzzahl (mit Vorzeichen)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x01</TD>
 
-        <TD>32 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
+        <TD valign="top">32 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x02</TD>
 
-        <TD>64 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
+        <TD valign="top">64 Bit Ganzzahl (mit Vorzeichen) (*1)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x03</TD>
 
-        <TD>32 Bit Fließkomma (*2)</TD>
+        <TD valign="top">32 Bit Fließkomma (*2)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x04</TD>
 
-        <TD>64 Bit Fließkomma (*2)</TD>
+        <TD valign="top">64 Bit Fließkomma (*2)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x05</TD>
 
-        <TD>UTF-8 kodierte Zeichenfolge (2 Byte (*1) (ohne Vorzeichen) für die Länge (in Byte), danach ein bis drei
-        Byte pro Zeichen)</TD>
+        <TD valign="top">UTF-8 kodierte Zeichenfolge (2 Byte (*1) (ohne Vorzeichen) für die Länge (in Byte), danach ein
+        bis drei Byte pro Zeichen)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x06</TD>
 
-        <TD>Nullterminierte ASCII kodierte Zeichenfolge (ein Byte pro Zeichen, beendet bei erstem Null-Byte, wird als
-        ISO-8859-1 in einen Java String konvertiert)</TD>
+        <TD valign="top">Nullterminierte ASCII kodierte Zeichenfolge (ein Byte pro Zeichen, beendet bei erstem
+        Null-Byte, wird als ISO-8859-1 in einen Java String konvertiert)</TD>
       </TR>
 
       <TR>
         <TD valign="top">0x07</TD>
 
-        <TD>Vier Byte (*1) Länge (kein Vorzeichen) + beliebige Daten (für Erweiterungen - es existiert kein Konverter,
-        welcher mit diesem Datentyp direkt arbeiten kann)</TD>
+        <TD valign="top">Vier Byte (*1) Länge (kein Vorzeichen) + beliebige Daten (für Erweiterungen - es existiert
+        kein Konverter, welcher mit diesem Datentyp direkt arbeiten kann)</TD>
       </TR>
     </TBODY>
   </TABLE><BR>
@@ -115,21 +115,21 @@
       <TR>
         <TD valign="top">Priorität</TD>
 
-        <TD>Ein Byte mit Vorzeichen. Gültiger Wertebereich ist -99 bis 99.</TD>
+        <TD valign="top">Ein Byte mit Vorzeichen. Gültiger Wertebereich ist -99 bis 99.</TD>
       </TR>
 
       <TR>
         <TD valign="top">Zeitstempel</TD>
 
-        <TD>Vier Byte (*1) ohne Vorzeichen. Einheit ist in Millisekunden.</TD>
+        <TD valign="top">Vier Byte (*1) ohne Vorzeichen. Einheit ist in Millisekunden.</TD>
       </TR>
 
       <TR>
         <TD valign="top">Extra-Lang</TD>
 
-        <TD>Zehn Byte, die ersten fünf Bit enthalten die tatsächliche Anzahl an Feldern: 0x00 bis 0x1F für 1 bis 32
-        Felder (*3). Anschließend folgen 24 * drei Bit für die Typen der Felder Nummer 9 bis 32. Insgesamt werden 77
-        Bits ausgewertet, die letzten drei werden ignoriert.</TD>
+        <TD valign="top">Zehn Byte, die ersten fünf Bit enthalten die tatsächliche Anzahl an Feldern: 0x00 bis 0x1F für
+        1 bis 32 Felder (*3). Anschließend folgen 24 * drei Bit für die Typen der Felder Nummer 9 bis 32. Insgesamt
+        werden 77 Bits ausgewertet, die letzten drei werden ignoriert.</TD>
       </TR>
     </TBODY>
   </TABLE><BR>
@@ -140,20 +140,20 @@
       <TR>
         <TD valign="top">(*1)</TD>
 
-        <TD>Das höchstwertigste Byte zuerst (big-endian)</TD>
+        <TD valign="top">Das höchstwertigste Byte zuerst (big-endian)</TD>
       </TR>
 
       <TR>
         <TD valign="top">(*2)</TD>
 
-        <TD>Zahlen müssen der IEEE 754 Norm in big-endian entsprechen</TD>
+        <TD valign="top">Zahlen müssen der IEEE 754 Norm in big-endian entsprechen</TD>
       </TR>
 
       <TR>
         <TD valign="top">(*3)</TD>
 
-        <TD>Die Felderanzahl im Header muss auf das Maximum 0x07 gesetzt sein. Datenblöcke mit Extra-Lang-Bit obwohl
-        nur 8 Felder oder weniger ist erlaubt (siehe zweites Beispiel).<BR></TD>
+        <TD valign="top">Die Felderanzahl im Header muss auf das Maximum 0x07 gesetzt sein. Datenblöcke mit
+        Extra-Lang-Bit obwohl nur 8 Felder oder weniger ist erlaubt (siehe zweites Beispiel).<BR></TD>
       </TR>
     </TBODY>
   </TABLE><BR>
