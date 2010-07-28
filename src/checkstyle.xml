@@ -18,7 +18,7 @@
 		<!-- Annotations -->
 
 		<!-- Block Checks -->
-		<module name="AvoidNestedBlocks" />
+		<!-- <module name="AvoidNestedBlocks" /> -->
 
 		<!-- Class Design -->
 		<module name="VisibilityModifier" />
@@ -90,7 +90,7 @@
 		</module>
 		<!-- <module name="CyclomaticComplexity" /> -->
 		<module name="NPathComplexity">
-			<property name="max" value="256" />
+			<property name="max" value="1024" />
 		</module>
 		<!-- <module name="JavaNCSS" /> -->
 
@@ -170,7 +170,7 @@
 
 		<!-- Size Violations -->
 		<module name="ExecutableStatementCount">
-			<property name="max" value="30" />
+			<property name="max" value="50" />
 		</module>
 		<!-- <module name="MethodLength" /> -->
 		<module name="AnonInnerLength" >
