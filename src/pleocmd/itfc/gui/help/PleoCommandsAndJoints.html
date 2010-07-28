@@ -1,0 +1,331 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Wichtigste Pleo-Kommandos und alle Joint-Nummern</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Wichtigste Pleo-Kommandos</H1>Ausschnitt der für Pleo vorhandenen Kommandos (alle weiteren befinden sich in "Pleo
+  Monitor.pdf" des PleoDevelopmentKit aus dem Ordner ext/dev):
+
+  <TABLE summary="Kommandos für Pleo">
+    <TR>
+      <TH>Kommando &lt;Pflicht&gt; [&lt;Optional&gt;]</TH>
+
+      <TH>Beschreibung</TH>
+    </TR>
+
+    <TR>
+      <TD valign="top">APP UNLOAD</TD>
+
+      <TD valign="top">Stoppt das interne Verhalten von Pleo.<BR>
+      Sollte zur Initialisierung einmal ausgeführt werden.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">JOINT ANGLE &lt;ID&gt; &lt;Winkel&gt; [&lt;Wartezeit&gt;] [&lt;Zielzeit&gt;]</TD>
+
+      <TD valign="top">Bewegt einen Motor zu einem bestimmten Winkel und wartet bis dieser in Position ist.<BR>
+      IDs siehe folgende Tabelle.<BR>
+      Wartezeit ist maximale Zeit, die Pleo auf Erreichen des Zielwinkels wartet.<BR>
+      Zielzeit ist gewünschte Zeit bis zum Erreichen des Zielwinkels.<BR>
+      Zeiten in ms.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">JOINT MOVE &lt;ID&gt; &lt;Winkel&gt;</TD>
+
+      <TD valign="top">Bewegt einen Motor zu einem bestimmten Winkel ohne zu warten.<BR>
+      IDs siehe folgende Tabelle.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">JOINT NEUTRAL</TD>
+
+      <TD valign="top">Bewegt alle Motoren in Neutralstellung.<BR>
+      Sollte zur Initialisierung nach APP UNLOAD einmal ausgeführt werden.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">MOTION PLAY &lt;Name&gt;</TD>
+
+      <TD valign="top">Name ist normalerweise Dateiname einer Motion auf der SD-Karte oder im internen Speicher.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">MOTION SPEED &lt;Prozent&gt;</TD>
+
+      <TD valign="top">Beschleunigt oder bremst die Abspielgeschwindigkeit der aktuellen und aller folgenden
+      Motions.<BR>
+      100 ist Normalgeschwindigkeit.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">SOUND PLAY &lt;Name&gt;</TD>
+
+      <TD valign="top">Name ist normalerweise Dateiname eines Sounds auf der SD-Karte oder im internen Speicher.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">SOUND SPEED &lt;Prozent&gt;</TD>
+
+      <TD valign="top">Beschleunigt oder bremst die Abspielgeschwindigkeit der aktuellen und aller folgenden
+      Sounds.<BR>
+      100 ist Normalgeschwindigkeit.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">SOUND VOLUME &lt;Prozent&gt;</TD>
+
+      <TD valign="top">Erhöht oder reduziert die Lautstärke der aktuellen und aller folgenden Sounds.<BR>
+      100 ist Normalwert.</TD>
+    </TR>
+  </TABLE>
+
+  <H1>Wichtigste Joint-Nummern</H1>Folgende Nummern für Pleo's Motoren sind aktuell definiert:
+
+  <TABLE summary="Joint Nummern für Pleo">
+    <TR>
+      <TH>ID</TH>
+
+      <TH>Name</TH>
+
+      <TH>°Min</TH>
+
+      <TH>°Max</TH>
+
+      <TH>°Fein</TH>
+
+      <TH>°/Sek</TH>
+    </TR>
+
+    <TR>
+      <TD valign="top">0</TD>
+
+      <TD valign="top">Rechte Schulter</TD>
+
+      <TD valign="top">-30</TD>
+
+      <TD valign="top">55</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">30</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">1</TD>
+
+      <TD valign="top">Rechter Ellenbogen</TD>
+
+      <TD valign="top">0</TD>
+
+      <TD valign="top">90</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">70</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">2</TD>
+
+      <TD valign="top">Linke Schulter</TD>
+
+      <TD valign="top">-30</TD>
+
+      <TD valign="top">55</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">30</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">3</TD>
+
+      <TD valign="top">Linker Ellenbogen</TD>
+
+      <TD valign="top">0</TD>
+
+      <TD valign="top">90</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">70</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">4</TD>
+
+      <TD valign="top">Linke Hüfte</TD>
+
+      <TD valign="top">-45</TD>
+
+      <TD valign="top">40</TD>
+
+      <TD valign="top">10</TD>
+
+      <TD valign="top">?</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">5</TD>
+
+      <TD valign="top">Linkes Knie</TD>
+
+      <TD valign="top">-70</TD>
+
+      <TD valign="top">0</TD>
+
+      <TD valign="top">2</TD>
+
+      <TD valign="top">50</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">6</TD>
+
+      <TD valign="top">Rechte Hüfte</TD>
+
+      <TD valign="top">-45</TD>
+
+      <TD valign="top">40</TD>
+
+      <TD valign="top">10</TD>
+
+      <TD valign="top">?</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">7</TD>
+
+      <TD valign="top">Rechtes Knie</TD>
+
+      <TD valign="top">-70</TD>
+
+      <TD valign="top">0</TD>
+
+      <TD valign="top">2</TD>
+
+      <TD valign="top">50</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">8</TD>
+
+      <TD valign="top">Torso</TD>
+
+      <TD valign="top">-15</TD>
+
+      <TD valign="top">15</TD>
+
+      <TD valign="top">2</TD>
+
+      <TD valign="top">20</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">9</TD>
+
+      <TD valign="top">Schwanz horizontal</TD>
+
+      <TD valign="top">-90</TD>
+
+      <TD valign="top">90</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">200</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">10</TD>
+
+      <TD valign="top">Schwanz vertikal</TD>
+
+      <TD valign="top">-90</TD>
+
+      <TD valign="top">90</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">200</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">11</TD>
+
+      <TD valign="top">Nacken horizontal</TD>
+
+      <TD valign="top">-65</TD>
+
+      <TD valign="top">55</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">?</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">12</TD>
+
+      <TD valign="top">Nacken vertikal</TD>
+
+      <TD valign="top">-75</TD>
+
+      <TD valign="top">75</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">40</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">13</TD>
+
+      <TD valign="top">Augen</TD>
+
+      <TD valign="top">25</TD>
+
+      <TD valign="top">85</TD>
+
+      <TD valign="top">1</TD>
+
+      <TD valign="top">220</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">13</TD>
+
+      <TD valign="top">Mund</TD>
+
+      <TD valign="top">-80</TD>
+
+      <TD valign="top">-30</TD>
+
+      <TD valign="top">20</TD>
+
+      <TD valign="top">220</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">14</TD>
+
+      <TD valign="top" colspan="5">Virtueller Joint: Transition (siehe Pleo Handbuch)</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">15</TD>
+
+      <TD valign="top" colspan="5">Virtueller Joint: Sound (siehe Pleo Handbuch)</TD>
+    </TR>
+  </TABLE>(Stand: Firmware 1.1)
+</BODY>
+</HTML>
