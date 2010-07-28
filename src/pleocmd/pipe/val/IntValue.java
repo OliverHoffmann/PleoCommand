@@ -103,6 +103,16 @@ public final class IntValue extends Value {
 	}
 
 	@Override
+	public void compact() {
+		if (val >= Byte.MIN_VALUE && val <= Byte.MAX_VALUE)
+			changeType(ValueType.Int8);
+		else if (val >= Integer.MIN_VALUE && val <= Integer.MAX_VALUE)
+			changeType(ValueType.Int32);
+		else
+			changeType(ValueType.Int64);
+	}
+
+	@Override
 	public boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof IntValue)) return false;

@@ -272,6 +272,10 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 	public void writeToBinary(final DataOutput out,
 			final List<Syntax> syntaxList) throws IOException {
 		Log.detail("Writing Data to binary output stream");
+
+		for (final Value value : getValues())
+			value.compact();
+
 		final int cnt = getValues().size();
 		final int cnt1 = Math.min(8, cnt);
 		if (cnt == 0)

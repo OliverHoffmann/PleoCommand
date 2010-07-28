@@ -16,7 +16,7 @@ import pleocmd.pipe.data.Data;
  */
 public abstract class Value {
 
-	private final ValueType type;
+	private ValueType type;
 
 	/**
 	 * Creates a new {@link Value}.
@@ -35,6 +35,18 @@ public abstract class Value {
 	 */
 	public final ValueType getType() {
 		return type;
+	}
+
+	/**
+	 * Changes the {@link ValueType} without changing the value itself.<br>
+	 * Only used during implementations of {@link #compact()}.
+	 * 
+	 * @param newType
+	 *            new {@link ValueType} - must be compatible with the current
+	 *            one !!!
+	 */
+	protected final void changeType(final ValueType newType) {
+		type = newType;
 	}
 
 	// CS_IGNORE_BEGIN This 4 methods need to be overridable
@@ -178,5 +190,9 @@ public abstract class Value {
 
 	@Override
 	public abstract int hashCode();
+
+	public void compact() {
+		// do nothing
+	}
 
 }

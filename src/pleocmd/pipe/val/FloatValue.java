@@ -107,6 +107,15 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
+	public void compact() {
+		if (val >= Float.MIN_VALUE && val <= Float.MAX_VALUE
+				&& Math.abs(val - (float) val) < Double.MIN_NORMAL)
+			changeType(ValueType.Float32);
+		else
+			changeType(ValueType.Float64);
+	}
+
+	@Override
 	public boolean equals(final Object o) {
 		if (o == this) return true;
 		if (!(o instanceof FloatValue)) return false;
