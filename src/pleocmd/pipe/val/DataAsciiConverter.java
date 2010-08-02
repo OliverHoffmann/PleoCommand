@@ -273,32 +273,40 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		getValues().add(val);
 	}
 
-	public void writeToAscii(final DataOutput out, final boolean writeLF)
-			throws IOException {
+	public void writeToAscii(final DataOutput out, final boolean writeLF,
+			final List<Syntax> syntaxList) throws IOException {
 		Log.detail("Writing Data to ASCII output stream");
-		writeFlags(out);
+		int pos = writeFlags(out, syntaxList);
 
 		boolean first = true;
 		for (final Value value : getValues()) {
 			// write delimiter if needed
 			if (!first) {
+				if (syntaxList != null)
+					syntaxList.add(new Syntax(Type.FieldDelim, pos));
 				out.writeByte(' ');
 				out.writeByte('|');
 				out.writeByte(' ');
+				pos += 3;
 			}
 			first = false;
 
 			final boolean hex = value.mustWriteAsciiAsHex();
 			// write the field type identifier (and modifier if needed)
 			if (hex) {
+				if (syntaxList != null)
+					syntaxList.add(new Syntax(Type.TypeIdent, pos));
 				out.writeByte(Value.getAsciiTypeChar(value));
 				out.writeByte('x');
 				out.writeByte(':');
 				out.writeByte(' ');
+				pos += 4;
 			}
 
 			// write the field content in decimal or hex
 			if (hex) {
+				if (syntaxList != null)
+					syntaxList.add(new Syntax(Type.HexField, pos));
 				final ByteArrayOutputStream hexOut = new ByteArrayOutputStream();
 				value.writeToAscii(new DataOutputStream(hexOut));
 				final byte[] ba = hexOut.toByteArray();
@@ -306,37 +314,71 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 					out.write(HEX_TABLE[b >> 4 & 0x0F]);
 					out.write(HEX_TABLE[b & 0x0F]);
 				}
-			} else
-				value.writeToAscii(out);
+				pos += ba.length * 2;
+			} else {
+				if (syntaxList != null) switch (value.getType()) {
+				case Float32:
+				case Float64:
+					syntaxList.add(new Syntax(Type.FloatField, pos));
+					break;
+				case Int8:
+				case Int32:
+				case Int64:
+					syntaxList.add(new Syntax(Type.IntField, pos));
+					break;
+				case NullTermString:
+				case UTFString:
+					syntaxList.add(new Syntax(Type.StringField, pos));
+					break;
+				case Data:
+					syntaxList.add(new Syntax(Type.DataField, pos));
+					break;
+				}
+				pos += value.writeToAscii(out);
+			}
 		}
 
 		// write the final block delimiter
 		if (writeLF) out.writeByte('\n');
 	}
 
-	private void writeFlags(final DataOutput out) throws IOException {
+	private int writeFlags(final DataOutput out, final List<Syntax> syntaxList)
+			throws IOException {
+		int pos = 0;
 		if (getPriority() == Data.PRIO_DEFAULT && getTime() == Data.TIME_NOTIME)
-			return;
+			return pos;
+		if (syntaxList != null) syntaxList.add(new Syntax(Type.Flags, pos));
 		out.writeByte('[');
 		out.writeByte(' ');
+		pos += 2;
 		if (getPriority() != Data.PRIO_DEFAULT) {
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagPrio, pos));
 			out.writeByte('P');
 			if (getPriority() < 0) out.writeByte('-');
 			out.writeByte('0' + Math.abs(getPriority()) / 10);
 			out.writeByte('0' + Math.abs(getPriority()) % 10);
 			out.writeByte(' ');
+			pos += getPriority() < 0 ? 5 : 4;
 		}
 		if (getTime() != Data.TIME_NOTIME) {
+			if (syntaxList != null)
+				syntaxList.add(new Syntax(Type.FlagTime, pos));
 			out.writeByte('T');
 			final boolean inSec = getTime() % 1000 == 0;
 			final long val = inSec ? getTime() / 1000 : getTime();
-			out.write(String.valueOf(val).getBytes("ISO-8859-1"));
+			final byte[] ba = String.valueOf(val).getBytes("ISO-8859-1");
+			out.write(ba);
 			if (!inSec) out.write('m');
 			out.write('s');
 			out.writeByte(' ');
+			pos += ba.length + (inSec ? 3 : 4);
 		}
+		if (syntaxList != null) syntaxList.add(new Syntax(Type.Flags, pos));
 		out.writeByte(']');
 		out.writeByte(' ');
+		pos += 2;
+		return pos;
 	}
 
 	private void parseFlags(final DataInput in) throws IOException,

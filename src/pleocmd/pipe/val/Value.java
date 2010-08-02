@@ -167,7 +167,7 @@ public abstract class Value {
 	 */
 	abstract void readFromAscii(final byte[] in, int len) throws IOException;
 
-	abstract void writeToAscii(DataOutput out) throws IOException;
+	abstract int writeToAscii(DataOutput out) throws IOException;
 
 	@Override
 	public abstract String toString();

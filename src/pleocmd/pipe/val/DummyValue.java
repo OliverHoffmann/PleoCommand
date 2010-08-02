@@ -35,7 +35,7 @@ public final class DummyValue extends Value {
 	}
 
 	@Override
-	void writeToAscii(final DataOutput out) {
+	int writeToAscii(final DataOutput out) {
 		throw new UnsupportedOperationException("This is a dummy value");
 	}
 

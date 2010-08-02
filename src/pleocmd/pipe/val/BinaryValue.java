@@ -56,8 +56,9 @@ final class BinaryValue extends Value {
 	}
 
 	@Override
-	public void writeToAscii(final DataOutput out) throws IOException {
+	public int writeToAscii(final DataOutput out) throws IOException {
 		out.write(val);
+		return val.length;
 	}
 
 	@Override

@@ -71,8 +71,10 @@ public final class FloatValue extends Value {
 	}
 
 	@Override
-	void writeToAscii(final DataOutput out) throws IOException {
-		out.write(String.valueOf(val).getBytes("US-ASCII"));
+	int writeToAscii(final DataOutput out) throws IOException {
+		final byte[] ba = String.valueOf(val).getBytes("US-ASCII");
+		out.write(ba);
+		return ba.length;
 	}
 
 	@Override

@@ -52,17 +52,15 @@ public final class ConsoleOutput extends Output {
 		Data root;
 		switch (cfgType.getEnum()) {
 		case Ascii:
-			Log.consoleOut(data.asString());
+			printAscii(data);
 			break;
 		case Binary: {
 			printBinary(data);
 			break;
 		}
 		case AsciiOriginal:
-			if (lastRoot != (root = data.getRoot())) {
-				lastRoot = root;
-				Log.consoleOut(root.asString());
-			}
+			if (lastRoot != (root = data.getRoot()))
+				printAscii(lastRoot = root);
 			break;
 		case BinaryOriginal:
 			if (lastRoot != (root = data.getRoot()))
@@ -98,6 +96,27 @@ public final class ConsoleOutput extends Output {
 			Log.consoleOut2(out.toString("ISO-8859-1"), sb.toString());
 		} else
 			Log.consoleOut(out.toString("ISO-8859-1"));
+	}
+
+	private static void printAscii(final Data data) throws IOException {
+		if (MainFrame.hasGUI()) {
+			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+			final List<Syntax> syntaxList = new ArrayList<Syntax>();
+			data.writeToAscii(new DataOutputStream(out), false, syntaxList);
+			// html like formatting, no real xml code here
+			final StringBuilder sb = new StringBuilder(out.toString());
+			sb.insert(0, "<html>");
+			int o = 6;
+			for (final Syntax sy : syntaxList) {
+				final Color c = sy.getType().getColor();
+				sb.insert(sy.getPosition() + o, String.format(
+						"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(),
+						c.getBlue()));
+				o += 20;
+			}
+			Log.consoleOut2(data.asString(), sb.toString());
+		} else
+			Log.consoleOut(data.asString());
 	}
 
 	public static String help(final HelpKind kind) { // NO_UCD

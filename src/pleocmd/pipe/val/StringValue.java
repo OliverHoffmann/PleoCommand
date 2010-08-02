@@ -111,8 +111,10 @@ public final class StringValue extends Value {
 	}
 
 	@Override
-	void writeToAscii(final DataOutput out) throws IOException {
-		out.write(val.getBytes("ISO-8859-1"));
+	int writeToAscii(final DataOutput out) throws IOException {
+		final byte[] ba = val.getBytes("ISO-8859-1");
+		out.write(ba);
+		return ba.length;
 	}
 
 	@Override

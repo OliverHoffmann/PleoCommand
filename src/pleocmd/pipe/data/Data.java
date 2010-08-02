@@ -431,7 +431,27 @@ public class Data extends AbstractList<Value> {
 	 */
 	public final void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
-		new DataAsciiConverter(this).writeToAscii(out, writeLF);
+		new DataAsciiConverter(this).writeToAscii(out, writeLF, null);
+	}
+
+	/**
+	 * Writes this {@link Data} to a {@link DataOutput}.
+	 * 
+	 * @param out
+	 *            the {@link DataOutput} to which this {@link Data} will be
+	 *            written in ISO-8859-1 encoding
+	 * @param writeLF
+	 *            if a line-feed should be appended
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements created during
+	 *            printing - may be <b>null</b>
+	 * @throws IOException
+	 *             if writing to {@link DataOutput} failed
+	 * @see DataAsciiConverter
+	 */
+	public final void writeToAscii(final DataOutput out, final boolean writeLF,
+			final List<Syntax> syntaxList) throws IOException {
+		new DataAsciiConverter(this).writeToAscii(out, writeLF, syntaxList);
 	}
 
 	public final String asString() {
