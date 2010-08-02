@@ -67,6 +67,7 @@ import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.PipePartDetection;
+import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -478,30 +479,23 @@ final class PipeConfigBoard extends JPanel {
 		if (!filePNG.getName().contains("."))
 			filePNG = new File(filePNG.getPath() + ".png");
 
-		// fc.resetChoosableFileFilters();
-		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
-		// "Export Part 2: HTML", "html"));
-		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
-		// "Export Part 2: Latex", "tex"));
-		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
-		// "Export Part 2: Text", "txt"));
-		// fc.setSelectedFile(new File(filePNG.getPath().replace(".png", "")));
-		// fc.setFileFilter(fc.getChoosableFileFilters()[1]);
-		// if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
-		// File fileTXT = fc.getSelectedFile();
-		// if (!fileTXT.getName().contains(".")
-		// && fc.getFileFilter() instanceof FileNameExtensionFilter)
-		// fileTXT = new File(fileTXT.getPath()
-		// + "."
-		// + ((FileNameExtensionFilter) fc.getFileFilter())
-		// .getExtensions()[0]);
-
-		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
-				"txt")));
-		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
-				"html")));
-		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
-				"tex")));
+		fc.resetChoosableFileFilters();
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Export Part 2: HTML", "html"));
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Export Part 2: Latex", "tex"));
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Export Part 2: Text", "txt"));
+		fc.setSelectedFile(new File(filePNG.getPath().replace(".png", "")));
+		fc.setFileFilter(fc.getChoosableFileFilters()[1]);
+		if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+		File fileTXT = fc.getSelectedFile();
+		if (!fileTXT.getName().contains(".")
+				&& fc.getFileFilter() instanceof FileNameExtensionFilter)
+			fileTXT = new File(fileTXT.getPath()
+					+ "."
+					+ ((FileNameExtensionFilter) fc.getFileFilter())
+							.getExtensions()[0]);
 	}
 
 	private void exportBoardToFile(final File filePNG, final File fileTXT) {
@@ -533,7 +527,7 @@ final class PipeConfigBoard extends JPanel {
 						+ "alt=\"Image of the Board\"><br>", pipe.getTitle(),
 						filePNG.getName()));
 			else if (fileTXT.getPath().endsWith(".tex"))
-				out.write(String.format("\\section{%s}\n\n\\imageOwn{%s}"
+				out.write(String.format("\\subsection{%s}\n\n\\imageOwn{%s}"
 						+ "{%s}{Overview for the Pipe: %s}"
 						+ "{width=\\textwidth}\n", pipe.getTitle(), filePNG
 						.getName().replace(".png", ""), pipe.getTitle(), pipe
@@ -1281,8 +1275,13 @@ final class PipeConfigBoard extends JPanel {
 	private static String getPipePartInfoLatex(final PipePart pp,
 			final BoardPainter bp) {
 		final StringBuilder sb = new StringBuilder("");
-		sb.append(String.format("\n\\subsection{%s}\n\n", safeTexString(pp
-				.getName())));
+		String icoName = PipePartDetection.callHelp(pp.getClass(),
+				HelpKind.Icon);
+		if (icoName == null)
+			icoName = pp.getClass().getSimpleName() + "-icon.png";
+		sb.append(String.format("\n\\subsubsection{\\protect\\mbox{\\protect"
+				+ "\\includegraphics[width=5mm]{%s}} %s}\n\n", icoName.replace(
+				".png", ""), safeTexString(pp.getName())));
 		sb.append(safeTexString(pp.getDescription()));
 		sb.append("\n\n");
 		sb.append("\\begin{tabular}{p{0.25\\textwidth} | "
