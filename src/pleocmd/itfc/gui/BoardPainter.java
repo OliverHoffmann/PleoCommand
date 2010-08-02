@@ -896,12 +896,14 @@ final class BoardPainter {
 	void addToSet(final PipePart pp, final Graphics g, final boolean allowMoving) {
 		set.add(pp);
 		if (allowMoving) {
+			final int txtWidth = Math.max((int) g.getFontMetrics()
+					.getStringBounds(pp.getName(), g).getWidth(), (int) g
+					.getFontMetrics().getStringBounds(pp.getShortConfigDescr(),
+							g).getWidth());
 			final Rectangle r = pp.getGuiPosition().createCopy();
 			r.height = g.getFontMetrics().getHeight() + ICON_WIDTH + 2;
 			r.width = Math.min(MAX_RECT_WIDTH, Math.max(ICON_WIDTH * ICON_MAX,
-					(int) g.getFontMetrics().getStringBounds(pp.getName(), g)
-							.getWidth()
-							+ r.height * 2));
+					txtWidth + r.height * 2));
 			check(r, pp);
 			pp.setGuiPosition(r);
 		}
