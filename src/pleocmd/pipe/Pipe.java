@@ -107,9 +107,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private final DataQueue dataQueue = new DataQueue();
 
-	private int inputPosition;
-
-	private Thread thrInput;
+	private final List<Thread> thrsInput = new ArrayList<Thread>();
 
 	private Thread thrOutput;
 
@@ -429,15 +427,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	@Override
 	protected void close0() throws PipeException {
 		synchronized (this) {
-			if (thrInput != null || thrOutput != null)
+			if (!thrsInput.isEmpty() || thrOutput != null)
 				throw new PipeException(this, false,
 						"Background threads are still alive");
 		}
 		Log.detail("Closing all input");
-		for (int i = inputPosition; i < inputList.size(); ++i)
-			if (!ignoredInputs.contains(inputList.get(i))
-					&& inputList.get(i).getState() == State.Initialized)
-				inputList.get(i).tryClose();
+		for (final PipePart pp : inputList)
+			if (!ignoredInputs.contains(pp)
+					&& pp.getState() == State.Initialized) pp.tryClose();
 		Log.detail("Closing all converter");
 		for (final PipePart pp : converterList)
 			if (!ignoredConverter.contains(pp)
@@ -446,7 +443,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		for (final PipePart pp : outputList)
 			if (!ignoredOutputs.contains(pp)
 					&& pp.getState() == State.Initialized) pp.tryClose();
-		inputPosition = 0;
 		ignoredInputs.clear();
 		ignoredConverter.clear();
 		ignoredOutputs.clear();
@@ -480,17 +476,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			return;
 		}
 		dataQueue.resetCache();
-		thrInput = new Thread("Pipe-Input-Thread") {
-			@Override
-			public void run() {
-				try {
-					runInputThread();
-				} catch (final Throwable t) { // CS_IGNORE
-					Log.error(t, "Input-Thread died");
-					getFeedback().addError(t, true);
-				}
-			}
-		};
+		assert thrsInput.isEmpty();
+		createNewInputThread(new ArrayList<Input>(inputList));
 		thrOutput = new Thread("Pipe-Output-Thread") {
 			@Override
 			public void run() {
@@ -504,27 +491,63 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		};
 		feedback.started();
 		thrOutput.start();
-		thrInput.start();
+		thrsInput.get(0).start();
 
 		Log.detail("Started waiting for threads");
 		while (thrOutput.isAlive())
 			Thread.sleep(100);
 		Log.detail("Output Thread no longer alive");
-		for (int i = 0; i < 30 && thrInput.isAlive(); ++i)
-			Thread.sleep(100); // wait 3 seconds
-		if (thrInput.isAlive()) {
-			Log.error("Input-Thread still alive but Output-Thread died");
-			inputThreadInterruped = true;
-			thrInput.interrupt();
-			while (thrInput.isAlive())
-				Thread.sleep(100);
+		// wait up to 3 seconds ...
+		int remThrCnt = Integer.MAX_VALUE;
+		for (int i = 0; i < 30 && remThrCnt > 0; ++i) {
+			Thread.sleep(100);
+			synchronized (this) {
+				remThrCnt = thrsInput.size();
+			}
 		}
+		// ... then interrupt remaining input threads ...
+		if (remThrCnt > 0) {
+			Log.error("%d Input-Thread(s) still alive but "
+					+ "Output-Thread died", remThrCnt);
+			inputThreadInterruped = true;
+			synchronized (this) {
+				for (final Thread thr : thrsInput)
+					thr.interrupt();
+			}
+			while (true) {
+				synchronized (this) {
+					if (thrsInput.isEmpty()) break;
+				}
+				Thread.sleep(100);
+			}
+		}
+		// .. and wait till they finally finished
 		Log.detail("Input Thread no longer alive");
 		feedback.stopped();
-		thrInput = null;
+		assert thrsInput.isEmpty();
 		thrOutput = null;
 		close();
 		Log.info("Pipe finished and closed");
+	}
+
+	public Thread createNewInputThread(final List<Input> inputSubList) {
+		synchronized (this) {
+			for (final Input in : inputSubList)
+				in.incThreadReferenceCounter();
+		}
+		final Thread thr = new Thread("Pipe-Input-Thread") {
+			@Override
+			public void run() {
+				try {
+					runInputThread(inputSubList);
+				} catch (final Throwable t) { // CS_IGNORE
+					Log.error(t, "Input-Thread died");
+					getFeedback().addError(t, true);
+				}
+			}
+		};
+		thrsInput.add(thr);
+		return thr;
 	}
 
 	/**
@@ -543,12 +566,20 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		Log.info("Aborting pipe");
 		inputThreadInterruped = true;
 		initPhaseInterrupted = true;
-		if (thrInput != null) thrInput.interrupt();
+		synchronized (this) {
+			for (final Thread thr : thrsInput)
+				thr.interrupt();
+		}
 		dataQueue.close();
 		if (thrOutput != null) thrOutput.interrupt();
 		Log.detail("Waiting for accepted abort in threads");
-		while (pipeInitializing || thrInput != null || thrOutput != null)
+		while (true) {
+			synchronized (this) {
+				if (!pipeInitializing && thrsInput.isEmpty()
+						&& thrOutput == null) break;
+			}
 			Thread.sleep(100);
+		}
 		Log.info("Pipe successfully aborted");
 	}
 
@@ -561,7 +592,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been closed during looping
 	 */
-	protected void runInputThread() throws IOException {
+	protected void runInputThread(final List<Input> inputSubList)
+			throws IOException {
 		inputThreadInterruped = false;
 		try {
 			Log.info("Input-Thread started");
@@ -573,17 +605,20 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				}
 
 				// read next data block ...
-				final Data data = getFromInput();
+				final Data data = getFromInput(inputSubList);
 				if (data == null) break; // marks end of all inputs
 
 				// ... and convert it
 				convertDataToDataList(data);
 			}
 		} finally {
+			synchronized (this) {
+				if (!thrsInput.remove(Thread.currentThread()))
+					Log.error("Internal error: "
+							+ "Input-Thread not found in thread-list");
+				if (thrsInput.isEmpty()) dataQueue.close();
+			}
 			Log.info("Input-Thread finished");
-			Log.detail("Read %d data blocks from input", feedback
-					.getDataInputCount());
-			dataQueue.close();
 		}
 	}
 
@@ -676,22 +711,21 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * @return a new {@link Data} or <b>null</b> if no {@link Input} in the list
 	 *         has any more available {@link Data}
 	 */
-	private Data getFromInput() {
+	private Data getFromInput(final List<Input> inputSubList) {
 		Log.detail("Reading one data block from input");
 		Input in;
 		while (true) {
 			if (inputThreadInterruped) return null;
-			assert inputPosition <= inputList.size();
-			if (inputPosition >= inputList.size()) {
-				Log.detail("Finished InputList: %d of %d", inputPosition,
-						inputList.size());
+			if (inputSubList.isEmpty()) {
+				Log.detail("Finished InputList");
 				return null;
 			}
-			in = inputList.get(inputPosition);
+			in = inputSubList.get(0);
 			if (ignoredInputs.contains(in)) {
 				Log.detail("Skipping input '%s' which failed "
 						+ "in config/init phase", in);
-				++inputPosition;
+				inputSubList.remove(0);
+				in.decThreadReferenceCounter();
 				continue;
 			}
 			Log.detail("Trying input '%s'", in);
@@ -709,8 +743,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 				feedback.addError(e, e.isPermanent());
 				if (e.isPermanent()) {
 					Log.info("Skipping no longer working input '%s'", in);
-					in.tryClose();
-					++inputPosition;
+					removeFromInputList(inputSubList, in);
 				} else
 					Log.info("Skipping one data block from input '%s'", in);
 				// try next data block / try from next input
@@ -726,10 +759,14 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			// no more data available in this Input, so
 			// switch to the next one
 			Log.info("Switching to next input");
-			in.tryClose();
-			++inputPosition;
-			// try data block from next input
+			removeFromInputList(inputSubList, in);
 		}
+	}
+
+	private void removeFromInputList(final List<Input> inputSubList,
+			final Input in) {
+		inputSubList.remove(0);
+		if (in.decThreadReferenceCounter() == 0) in.tryClose();
 	}
 
 	/**
@@ -953,7 +990,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			feedback.addError(e, false);
 			Log.info("Skipping output '%s' for one data block '%s'", out, data);
 		}
-		feedback.incDataOutputCount();
+		feedback.incDataOutputCount(data.getPriority() >= Data.PRIO_DEFAULT);
 		return true;
 	}
 
@@ -974,7 +1011,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		inputList.clear();
 		converterList.clear();
 		outputList.clear();
-		assert inputPosition == 0;
 		assert ignoredInputs.isEmpty();
 		assert ignoredConverter.isEmpty();
 		assert ignoredOutputs.isEmpty();

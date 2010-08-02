@@ -19,6 +19,8 @@ public final class PipeFeedback extends Feedback {
 
 	private int dataOutputCount;
 
+	private long lastNormalDataOutput;
+
 	PipeFeedback() {
 		String s1;
 		assert (s1 = new Throwable().getStackTrace()[1].getClassName())
@@ -54,8 +56,13 @@ public final class PipeFeedback extends Feedback {
 		++dataConvertedCount;
 	}
 
-	synchronized void incDataOutputCount() {
+	synchronized void incDataOutputCount(final boolean isNormalData) {
 		++dataOutputCount;
+		if (isNormalData) lastNormalDataOutput = System.currentTimeMillis();
+	}
+
+	public synchronized long getLastNormalDataOutput() {
+		return lastNormalDataOutput;
 	}
 
 	@Override

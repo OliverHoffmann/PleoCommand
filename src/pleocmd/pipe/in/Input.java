@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import pleocmd.exc.InputException;
 import pleocmd.exc.StateException;
+import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
 import pleocmd.pipe.data.Data;
 
@@ -11,6 +12,8 @@ import pleocmd.pipe.data.Data;
  * @author oliver
  */
 public abstract class Input extends PipePart {
+
+	private int threadReferenceCounter;
 
 	@Override
 	protected void configure1() throws InputException, IOException {
@@ -52,5 +55,27 @@ public abstract class Input extends PipePart {
 	}
 
 	protected abstract Data readData0() throws InputException, IOException;
+
+	/**
+	 * Increment the thread-reference counter (number of input threads which
+	 * will be using this Input).<br>
+	 * Should only be used from {@link Pipe}.
+	 * 
+	 * @return new reference counter
+	 */
+	public int incThreadReferenceCounter() {
+		return ++threadReferenceCounter;
+	}
+
+	/**
+	 * Decrement the thread-reference counter (number of input threads which
+	 * will be using this Input).<br>
+	 * Should only be used from {@link Pipe}.
+	 * 
+	 * @return new reference counter
+	 */
+	public int decThreadReferenceCounter() {
+		return ++threadReferenceCounter;
+	}
 
 }
