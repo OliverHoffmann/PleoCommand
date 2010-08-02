@@ -2,7 +2,6 @@ package pleocmd.cfg;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,7 +11,8 @@ import java.util.Map.Entry;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 
-public abstract class ConfigMap<K, V> extends ConfigValue {
+public abstract class ConfigMap<K extends Comparable<? super K>, V> extends
+		ConfigValue {
 
 	private final Map<K, List<V>> content;
 
@@ -25,11 +25,11 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 		return Collections.unmodifiableSet(content.keySet());
 	}
 
-	public final List<K> getAllKeysSorted(final Comparator<? super K> comp) {
+	public final List<K> getAllKeysSorted() {
 		final List<K> list = new ArrayList<K>(content.size());
 		for (final K k : content.keySet())
 			list.add(k);
-		Collections.sort(list, comp);
+		Collections.sort(list);
 		return list;
 	}
 
@@ -123,18 +123,28 @@ public abstract class ConfigMap<K, V> extends ConfigValue {
 
 	@Override
 	public final String asString() {
-		final StringBuilder sb = new StringBuilder("[");
-		for (final Entry<K, List<V>> entry : content.entrySet()) {
-			sb.append(convertKey(entry.getKey()));
-			sb.append(": ");
-			sb.append(entry.getValue().size());
-			sb.append("x, ");
+		final StringBuilder sb = new StringBuilder("");
+		for (final K key : getAllKeysSorted()) {
+			sb.append(convertKey(key));
+			sb.append(" => ");
+			final List<V> vals = getContent(key);
+			if (vals.isEmpty())
+				sb.append("<empty>");
+			else if (vals.size() <= 1)
+				sb.append(convertValue(vals.get(0)));
+			else {
+				sb.append("{");
+				for (final V val : vals) {
+					sb.append(convertValue(val));
+					sb.append(", ");
+				}
+				sb.deleteCharAt(sb.length() - 1);
+				sb.deleteCharAt(sb.length() - 1);
+				sb.append("}");
+			}
+			sb.append("\n");
 		}
-		if (!content.isEmpty()) {
-			sb.deleteCharAt(sb.length() - 1);
-			sb.deleteCharAt(sb.length() - 1);
-		}
-		sb.append("]");
+		if (!content.isEmpty()) sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}
 

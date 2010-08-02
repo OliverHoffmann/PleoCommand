@@ -1,7 +1,6 @@
 package pleocmd.itfc.gui.dse;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -159,12 +158,7 @@ public final class DataSequenceTriggerPanel extends JPanel {
 
 	protected void updateTriggerModel() {
 		final Object lastSelected = trigger;
-		triggerModel.set(map.getAllKeysSorted(new Comparator<String>() {
-			@Override
-			public int compare(final String o1, final String o2) {
-				return o1.compareTo(o2);
-			}
-		}));
+		triggerModel.set(map.getAllKeysSorted());
 		Log.detail("Updating trigger model for map '%s' - last selected '%s'",
 				map, lastSelected);
 		triggerList.setSelectedValue(lastSelected, true);
