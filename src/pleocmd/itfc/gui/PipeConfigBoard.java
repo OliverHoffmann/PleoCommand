@@ -1277,7 +1277,7 @@ final class PipeConfigBoard extends JPanel {
 				HelpKind.Icon);
 		if (icoName == null)
 			icoName = pp.getClass().getSimpleName() + "-icon.png";
-		sb.append(String.format("\n\\subsubsection{\\protect\\mbox{\\protect"
+		sb.append(String.format("\n\\subsubsection*{\\protect\\mbox{\\protect"
 				+ "\\includegraphics[width=5mm]{%s}} %s}\n\n", icoName.replace(
 				".png", ""), StringManip.safeTex(pp.getName())));
 		sb.append(StringManip.safeTex(pp.getDescription()));
