@@ -18,9 +18,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.awt.image.FilteredImageSource;
 import java.awt.image.ImageFilter;
 import java.awt.image.RGBImageFilter;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -36,6 +42,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -45,6 +52,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 import javax.swing.SwingConstants;
 import javax.swing.ToolTipManager;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.ImmutableRectangle;
 import pleocmd.Log;
@@ -113,6 +121,8 @@ final class PipeConfigBoard extends JPanel {
 	private int idxMenuClearBoard;
 
 	private int idxMenuLayoutBoard;
+
+	private int idxMenuExportBoard;
 
 	private Point lastMenuLocation;
 
@@ -333,6 +343,17 @@ final class PipeConfigBoard extends JPanel {
 		});
 		menu.add(itemLayoutBoard);
 
+		idxMenuExportBoard = menu.getSubElements().length;
+		final JMenuItem itemExportBoard = new JMenuItem("Export The Board ...",
+				IconLoader.getIcon("board-export"));
+		itemExportBoard.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(final ActionEvent e) {
+				exportBoard();
+			}
+		});
+		menu.add(itemExportBoard);
+
 		return menu;
 	}
 
@@ -444,6 +465,109 @@ final class PipeConfigBoard extends JPanel {
 		};
 		updateState();
 		layoutThread.start();
+	}
+
+	protected void exportBoard() {
+		final JFileChooser fc = new JFileChooser();
+		fc.setAcceptAllFileFilterUsed(false);
+		fc.addChoosableFileFilter(new FileNameExtensionFilter(
+				"Export Part 1: Image", "png"));
+		if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+
+		File filePNG = fc.getSelectedFile();
+		if (!filePNG.getName().contains("."))
+			filePNG = new File(filePNG.getPath() + ".png");
+
+		// fc.resetChoosableFileFilters();
+		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
+		// "Export Part 2: HTML", "html"));
+		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
+		// "Export Part 2: Latex", "tex"));
+		// fc.addChoosableFileFilter(new FileNameExtensionFilter(
+		// "Export Part 2: Text", "txt"));
+		// fc.setSelectedFile(new File(filePNG.getPath().replace(".png", "")));
+		// fc.setFileFilter(fc.getChoosableFileFilters()[1]);
+		// if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) return;
+		// File fileTXT = fc.getSelectedFile();
+		// if (!fileTXT.getName().contains(".")
+		// && fc.getFileFilter() instanceof FileNameExtensionFilter)
+		// fileTXT = new File(fileTXT.getPath()
+		// + "."
+		// + ((FileNameExtensionFilter) fc.getFileFilter())
+		// .getExtensions()[0]);
+
+		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
+				"txt")));
+		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
+				"html")));
+		exportBoardToFile(filePNG, new File(filePNG.getPath().replace("png",
+				"tex")));
+	}
+
+	private void exportBoardToFile(final File filePNG, final File fileTXT) {
+		try {
+			// export the image
+			final BoardPainter bp = new BoardPainter();
+			BufferedImage img = new BufferedImage(1, 1,
+					BufferedImage.TYPE_INT_RGB);
+			bp.setPipe(pipe, img.getGraphics(), false);
+			final Dimension pref = bp.getPreferredSize();
+			img = new BufferedImage(pref.width, pref.height,
+					BufferedImage.TYPE_INT_RGB);
+			bp.setBounds(pref.width, pref.height, false);
+			final Graphics g = img.getGraphics();
+			g.setClip(0, 0, pref.width, pref.height);
+			final PaintParameters pprm = new PaintParameters();
+			// TODO activate once fields in BoardPainter are no longer static
+			// bp.setBackground(new Color(255, 255, 255, 255));
+			pprm.g = g;
+			pprm.modifyable = true;
+			bp.paint(pprm);
+			ImageIO.write(img, "png", filePNG);
+
+			// export the text
+			final BufferedWriter out = new BufferedWriter(new FileWriter(
+					fileTXT));
+			if (fileTXT.getPath().endsWith(".html"))
+				out.write(String.format("<html><h1>%s</h1><br><img src=\"%s\" "
+						+ "alt=\"Image of the Board\"><br>", pipe.getTitle(),
+						filePNG.getName()));
+			else if (fileTXT.getPath().endsWith(".tex"))
+				out.write(String.format("\\section{%s}\n\n\\imageOwn{%s}"
+						+ "{%s}{Overview for the Pipe: %s}"
+						+ "{width=\\textwidth}\n", pipe.getTitle(), filePNG
+						.getName().replace(".png", ""), pipe.getTitle(), pipe
+						.getTitle()));
+			else {
+				out.write(pipe.getTitle());
+				out.write('\n');
+				for (int i = pipe.getTitle().length(); i > 0; --i)
+					out.write('=');
+				out.write(String.format("\nFor an image of the "
+						+ "board see '%s'\n\n", filePNG.getName()));
+			}
+
+			for (final PipePart pp : pipe.getInputList())
+				exportPipePart(out, pp, bp, fileTXT);
+			for (final PipePart pp : pipe.getConverterList())
+				exportPipePart(out, pp, bp, fileTXT);
+			for (final PipePart pp : pipe.getOutputList())
+				exportPipePart(out, pp, bp, fileTXT);
+			out.close();
+		} catch (final IOException e) {
+			Log.error(e, "Cannot export board");
+		}
+	}
+
+	private static void exportPipePart(final BufferedWriter out,
+			final PipePart pp, final BoardPainter bp, final File file)
+			throws IOException {
+		if (file.getPath().endsWith(".html"))
+			out.write(getPipePartInfoHTML(pp, bp));
+		else if (file.getPath().endsWith(".tex"))
+			out.write(getPipePartInfoLatex(pp, bp));
+		else
+			out.write(getPipePartInfoASCII(pp, bp));
 	}
 
 	protected void layoutThreadRun() {
@@ -872,6 +996,8 @@ final class PipeConfigBoard extends JPanel {
 				&& !hasCurrentPart());
 		((AbstractButton) items[idxMenuLayoutBoard])
 				.setEnabled(!hasCurrentPart() && layoutThread == null);
+		((AbstractButton) items[idxMenuExportBoard])
+				.setEnabled(!hasCurrentPart());
 		menu.show(invoker, x, y);
 	}
 
@@ -1002,37 +1128,10 @@ final class PipeConfigBoard extends JPanel {
 		return true;
 	}
 
-	private static String safeHTMLString(final String s) {
-		return s.replace("<", "&lt;").replace("\n", "<br>");
-	}
-
 	@Override
 	public String getToolTipText(final MouseEvent event) {
 		if (p.underCursor == null) return null;
-		final StringBuilder sb = new StringBuilder("<html><b>");
-		sb.append(safeHTMLString(p.underCursor.getName()));
-		sb.append("</b><p>");
-		sb.append(safeHTMLString(p.underCursor.getDescription()));
-		sb.append("<table border=1>");
-		for (final ConfigValue v : p.underCursor.getGuiConfigs()) {
-			sb.append("<tr><td align=right>");
-			sb.append(safeHTMLString(v.getLabel()));
-			sb.append("</td><td align=left>");
-			sb.append(safeHTMLString(v.asString()));
-			sb.append("</td></tr>");
-		}
-		sb.append("</table>");
-		final String sc = painter.getSaneConfigCache().get(p.underCursor);
-		if (sc != null) {
-			sb.append("<p color=red><b>Bad configuration:</b><br>");
-			sb.append(safeHTMLString(sc));
-			sb.append("</p>");
-		}
-		sb.append("<p color=blue><b>Statistics:</b><br>");
-		sb.append(p.underCursor.getFeedback().getHTMLTable());
-		sb.append("</p>");
-		sb.append("</html>");
-		return sb.toString();
+		return getPipePartInfoHTML(p.underCursor, painter);
 	}
 
 	public void updateState() {
@@ -1123,4 +1222,114 @@ final class PipeConfigBoard extends JPanel {
 		p.pipeflow = pipeflow;
 	}
 
+	private static String getPipePartInfoASCII(final PipePart pp,
+			final BoardPainter bp) {
+		final StringBuilder sb = new StringBuilder("");
+		sb.append(pp.getName());
+		sb.append("\n\t");
+		sb.append(pp.getDescription());
+		sb.append("\n");
+		for (final ConfigValue v : pp.getGuiConfigs()) {
+			sb.append("\t");
+			sb.append(v.getLabel());
+			sb.append("\t");
+			sb.append(v.asString().replace("\n", "\n\t\t"));
+			sb.append("\n");
+		}
+		sb.append("\n");
+		final String sc = bp.getSaneConfigCache().get(pp);
+		if (sc != null) {
+			sb.append("\tBad configuration:\n\t");
+			sb.append(sc.replace("\n", "\n\t"));
+		}
+		return sb.toString();
+	}
+
+	private static String getPipePartInfoHTML(final PipePart pp,
+			final BoardPainter bp) {
+		final StringBuilder sb = new StringBuilder("<html><b>");
+		sb.append(safeHTMLString(pp.getName()));
+		sb.append("</b><p>");
+		sb.append(safeHTMLString(pp.getDescription()));
+		sb.append("<table border=1>");
+		for (final ConfigValue v : pp.getGuiConfigs()) {
+			sb.append("<tr><td align=right>");
+			sb.append(safeHTMLString(v.getLabel()));
+			sb.append("</td><td align=left>");
+			sb.append(safeHTMLString(v.asString()));
+			sb.append("</td></tr>");
+		}
+		sb.append("</table>");
+		final String sc = bp.getSaneConfigCache().get(pp);
+		if (sc != null) {
+			sb.append("<p style=\"color:red\"><b>Bad configuration:</b><br>");
+			sb.append(safeHTMLString(sc));
+			sb.append("</p>");
+		}
+		sb.append("<p style=\"color:blue\"><b>Statistics:</b><br>");
+		sb.append(pp.getFeedback().getHTMLTable());
+		sb.append("</p>");
+		sb.append("</html>");
+		return sb.toString();
+	}
+
+	private static String safeHTMLString(final String s) {
+		return s.replace("<", "&lt;").replace(">", "&gt;")
+				.replace("\n", "<br>");
+	}
+
+	private static String getPipePartInfoLatex(final PipePart pp,
+			final BoardPainter bp) {
+		final StringBuilder sb = new StringBuilder("");
+		sb.append(String.format("\n\\subsection{%s}\n\n", safeTexString(pp
+				.getName())));
+		sb.append(safeTexString(pp.getDescription()));
+		sb.append("\n\n");
+		sb.append("\\begin{tabular}{p{0.25\\textwidth} | "
+				+ "p{0.75\\textwidth}}\n");
+		// sb.append("\\hline\n");
+		for (final ConfigValue v : pp.getGuiConfigs()) {
+			sb.append(safeTexString(v.getLabel()));
+			sb.append(" & ");
+			sb.append(safeTexString(v.asString()).replace("\n", "\n & "));
+			sb.append(" \\\\\n");
+			// sb.append(" \\\\ \\hline\n");
+		}
+		sb.append("\\end{tabular}\\\\\n");
+		final String sc = bp.getSaneConfigCache().get(pp);
+		if (sc != null) {
+			sb.append("\\textcolor{red}{Bad configuration:\\\\\n");
+			sb.append(safeTexString(sc));
+			sb.append("\n}\n");
+		}
+		return sb.toString();
+	}
+
+	private static String safeTexString(final String s) {
+		final StringBuilder sb = new StringBuilder();
+		for (final char c : s.toCharArray())
+			switch (c) {
+			case '{':
+				sb.append("\\textbraceleft{}");
+				break;
+			case '}':
+				sb.append("\\textbraceright{}");
+				break;
+			case '\\':
+				sb.append("\\textbackslash{}");
+				break;
+			case '&':
+				sb.append("\\&");
+				break;
+			case '\n':
+				sb.append("\\\\\n");
+				break;
+			case '\"':
+				sb.append("''");
+				break;
+			default:
+				sb.append(c);
+			}
+		return sb.toString();
+	}
 }

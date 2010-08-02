@@ -43,12 +43,12 @@ final class BoardPainter {
 	/**
 	 * Background color.
 	 */
-	private static final Color BACKGROUND = Color.LIGHT_GRAY;
+	private static final Color BACKGROUND = new Color(220, 220, 220);
 
 	/**
 	 * Color for target-area which doesn't involve a reordering of the Pipe.
 	 */
-	private static final Color MOVEMENT_HINT = new Color(192, 208, 192);
+	private static final Color MOVEMENT_HINT = new Color(220, 240, 220);
 
 	// Drawing of section borders
 
