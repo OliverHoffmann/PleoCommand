@@ -56,6 +56,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.ImmutableRectangle;
 import pleocmd.Log;
+import pleocmd.StringManip;
 import pleocmd.cfg.ConfigValue;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
@@ -1244,22 +1245,22 @@ final class PipeConfigBoard extends JPanel {
 	private static String getPipePartInfoHTML(final PipePart pp,
 			final BoardPainter bp) {
 		final StringBuilder sb = new StringBuilder("<html><b>");
-		sb.append(safeHTMLString(pp.getName()));
+		sb.append(StringManip.safeHTML(pp.getName()));
 		sb.append("</b><p>");
-		sb.append(safeHTMLString(pp.getDescription()));
+		sb.append(StringManip.safeHTML(pp.getDescription()));
 		sb.append("<table border=1>");
 		for (final ConfigValue v : pp.getGuiConfigs()) {
 			sb.append("<tr><td align=right>");
-			sb.append(safeHTMLString(v.getLabel()));
+			sb.append(StringManip.safeHTML(v.getLabel()));
 			sb.append("</td><td align=left>");
-			sb.append(safeHTMLString(v.asString()));
+			sb.append(StringManip.safeHTML(v.asString()));
 			sb.append("</td></tr>");
 		}
 		sb.append("</table>");
 		final String sc = bp.getSaneConfigCache().get(pp);
 		if (sc != null) {
 			sb.append("<p style=\"color:red\"><b>Bad configuration:</b><br>");
-			sb.append(safeHTMLString(sc));
+			sb.append(StringManip.safeHTML(sc));
 			sb.append("</p>");
 		}
 		sb.append("<p style=\"color:blue\"><b>Statistics:</b><br>");
@@ -1267,11 +1268,6 @@ final class PipeConfigBoard extends JPanel {
 		sb.append("</p>");
 		sb.append("</html>");
 		return sb.toString();
-	}
-
-	private static String safeHTMLString(final String s) {
-		return s.replace("<", "&lt;").replace(">", "&gt;")
-				.replace("\n", "<br>");
 	}
 
 	private static String getPipePartInfoLatex(final PipePart pp,
@@ -1283,16 +1279,16 @@ final class PipeConfigBoard extends JPanel {
 			icoName = pp.getClass().getSimpleName() + "-icon.png";
 		sb.append(String.format("\n\\subsubsection{\\protect\\mbox{\\protect"
 				+ "\\includegraphics[width=5mm]{%s}} %s}\n\n", icoName.replace(
-				".png", ""), safeTexString(pp.getName())));
-		sb.append(safeTexString(pp.getDescription()));
+				".png", ""), StringManip.safeTex(pp.getName())));
+		sb.append(StringManip.safeTex(pp.getDescription()));
 		sb.append("\n\n");
 		sb.append("\\begin{tabular}{p{0.25\\textwidth} | "
 				+ "p{0.75\\textwidth}}\n");
 		// sb.append("\\hline\n");
 		for (final ConfigValue v : pp.getGuiConfigs()) {
-			sb.append(safeTexString(v.getLabel()));
+			sb.append(StringManip.safeTex(v.getLabel()));
 			sb.append(" & ");
-			sb.append(safeTexString(v.asString()).replace("\n", "\n & "));
+			sb.append(StringManip.safeTex(v.asString()).replace("\n", "\n & "));
 			sb.append(" \\\\\n");
 			// sb.append(" \\\\ \\hline\n");
 		}
@@ -1300,37 +1296,10 @@ final class PipeConfigBoard extends JPanel {
 		final String sc = bp.getSaneConfigCache().get(pp);
 		if (sc != null) {
 			sb.append("\\textcolor{red}{Bad configuration:\\\\\n");
-			sb.append(safeTexString(sc));
+			sb.append(StringManip.safeTex(sc));
 			sb.append("\n}\n");
 		}
 		return sb.toString();
 	}
 
-	private static String safeTexString(final String s) {
-		final StringBuilder sb = new StringBuilder();
-		for (final char c : s.toCharArray())
-			switch (c) {
-			case '{':
-				sb.append("\\textbraceleft{}");
-				break;
-			case '}':
-				sb.append("\\textbraceright{}");
-				break;
-			case '\\':
-				sb.append("\\textbackslash{}");
-				break;
-			case '&':
-				sb.append("\\&");
-				break;
-			case '\n':
-				sb.append("\\\\\n");
-				break;
-			case '\"':
-				sb.append("''");
-				break;
-			default:
-				sb.append(c);
-			}
-		return sb.toString();
-	}
 }

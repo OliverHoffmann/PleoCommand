@@ -5,11 +5,14 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.table.AbstractTableModel;
 
 import pleocmd.Log;
+import pleocmd.StringManip;
 
 public final class LogTableModel extends AbstractTableModel {
 
@@ -96,12 +99,57 @@ public final class LogTableModel extends AbstractTableModel {
 	public void writeToFile(final File file) throws IOException {
 		final FileWriter out = new FileWriter(file);
 		try {
-			for (final Log log : list) {
-				out.write(log.toString());
-				out.write("\n");
-			}
+			if (file.getPath().endsWith(".html"))
+				writeToHTMLFile(out);
+			else if (file.getPath().endsWith(".tex"))
+				writeToTexFile(out);
+			else
+				writeToAsciiFile(out);
 		} finally {
 			out.close();
+		}
+	}
+
+	private void writeToHTMLFile(final FileWriter out) throws IOException {
+		out.write("<html>\n");
+		out.write("<body>\n");
+		out.write("<table border=0>\n");
+		for (final Log log : list) {
+			out.write(String.format("<tr style=\"color:%s\">", log
+					.getTypeHTMLColor()));
+			out.write(log.toHTMLString());
+			out.write("</tr>\n");
+		}
+		out.write("</table>\n");
+		out.write("</body>\n");
+		out.write("</html>\n");
+	}
+
+	private void writeToTexFile(final FileWriter out) throws IOException {
+		final Set<String> colorNames = new HashSet<String>();
+		final StringBuilder sb = new StringBuilder();
+		sb.append("\\begin{tabular}{p{0.2\\textwidth} | p{0.1\\textwidth} "
+				+ "| p{0.3\\textwidth} | p{0.4\\textwidth}}\n");
+		for (final Log log : list) {
+			sb.append(log.toTexString(colorNames));
+			sb.append("\\\\\n");
+		}
+		sb.append("\\end{tabular}\\\\\n");
+
+		for (final String cn : colorNames) {
+			final Color c = StringManip.hexToColor(cn
+					.substring("PleoCommandColor".length()));
+			out.write(String.format("\\definecolor{%s}{RGB}{%d,%d,%d}\n", cn, c
+					.getRed(), c.getGreen(), c.getBlue()));
+		}
+		out.write("\n\n");
+		out.write(sb.toString());
+	}
+
+	private void writeToAsciiFile(final FileWriter out) throws IOException {
+		for (final Log log : list) {
+			out.write(log.toString());
+			out.write("\n");
 		}
 	}
 

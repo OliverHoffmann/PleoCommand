@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigString;
@@ -196,6 +197,27 @@ public final class Log {
 	}
 
 	/**
+	 * @return a {@link String} with an HTML color code matching the
+	 *         {@link Type} of this log entry.
+	 * @see #getType()
+	 */
+	public String getTypeHTMLColor() {
+		switch (type) {
+		case Detail:
+			return "gray";
+		case Info:
+			return "blue";
+		case Warn:
+			return "#A06400";// dark orange
+		case Error:
+			return "red";
+		case Console:
+		default:
+			return "black";
+		}
+	}
+
+	/**
 	 * @return the time (with milliseconds - no date), from {@link #getTime()}
 	 *         formatted as a {@link String}
 	 */
@@ -228,7 +250,24 @@ public final class Log {
 	@Override
 	public String toString() {
 		return String.format("%s %s %-50s %s", getFormattedTime(),
-				getTypeShortString(), caller, msg.replace("\n", "\n" + SPACES));
+				getTypeShortString(), caller, StringManip.removePseudoHTML(msg)
+						.replace("\n", "\n" + SPACES));
+	}
+
+	public String toHTMLString() {
+		return String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
+				StringManip.safeHTML(getFormattedTime()), StringManip
+						.safeHTML(getTypeShortString()), StringManip
+						.safeHTML(caller.toString()), StringManip
+						.convertPseudoToRealHTML(msg));
+	}
+
+	public String toTexString(final Set<String> colorNames) {
+		return String.format("%s & %s & %s & %s", StringManip
+				.safeTex(getFormattedTime()), StringManip
+				.safeTex(getTypeShortString()), StringManip.safeTex(caller
+				.toString()), StringManip.convertPseudoHTMLToTex(msg,
+				colorNames).replace("\n", "\n & & & "));
 	}
 
 	private static StackTraceElement getCallerSTE(final int stepsBack) {

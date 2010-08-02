@@ -101,11 +101,19 @@ final class MainLogPanel extends JPanel {
 		fc.setAcceptAllFileFilterUsed(false);
 		fc.addChoosableFileFilter(new FileNameExtensionFilter("ASCII Logfile",
 				"log"));
+		fc.addChoosableFileFilter(new FileNameExtensionFilter("HTML Logfile",
+				"html"));
+		fc.addChoosableFileFilter(new FileNameExtensionFilter("Latex Logfile",
+				"tex"));
 		if (fc.showSaveDialog(this) == JFileChooser.APPROVE_OPTION)
 			try {
 				File file = fc.getSelectedFile();
-				if (!file.getName().contains("."))
-					file = new File(file.getPath() + ".log");
+				if (!file.getName().contains(".")
+						&& fc.getFileFilter() instanceof FileNameExtensionFilter)
+					file = new File(file.getPath()
+							+ "."
+							+ ((FileNameExtensionFilter) fc.getFileFilter())
+									.getExtensions()[0]);
 				logModel.writeToFile(file);
 			} catch (final IOException exc) {
 				Log.error(exc);

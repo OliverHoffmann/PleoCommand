@@ -1,6 +1,5 @@
 package pleocmd.itfc.gui.log;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 
@@ -17,6 +16,7 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 import pleocmd.Log;
+import pleocmd.StringManip;
 
 final class LogTableCellRenderer implements TableCellRenderer {
 
@@ -105,14 +105,8 @@ final class LogTableCellRenderer implements TableCellRenderer {
 					StyleConstants.setItalic(style, true);
 				} else if (tag.startsWith("font color=#")) {
 					style = sd.addStyle(null, style);
-					try {
-						StyleConstants.setForeground(style, new Color(Integer
-								.valueOf(tag.substring(12, 14), 16), Integer
-								.valueOf(tag.substring(14, 16), 16), Integer
-								.valueOf(tag.substring(16, 18), 16)));
-					} catch (final NumberFormatException e) {
-						StyleConstants.setForeground(style, Color.RED);
-					}
+					StyleConstants.setForeground(style, StringManip
+							.hexToColor(tag.substring(12)));
 				} else if ("html".equals(tag) || "/html".equals(tag)) {
 					// just ignore them silently
 				} else
