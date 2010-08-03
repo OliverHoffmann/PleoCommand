@@ -76,6 +76,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		mainLogPanel = new MainLogPanel();
 		pipe = new Pipe(Configuration.getMain());
 		hasGUI = true;
+		Log.setMinLogType(Log.getMinLogType());
 		Log.setGUIStatusKnown();
 		mainInputPanel = new MainInputPanel();
 		mainPipePanel = new MainPipePanel();
