@@ -32,10 +32,10 @@ public final class StringManip {
 		for (final char c : s.toCharArray()) {
 			switch (c) {
 			case '{':
-				sb.append("\\textbraceleft{}");
+				sb.append("\\{");
 				break;
 			case '}':
-				sb.append("\\textbraceright{}");
+				sb.append("\\}");
 				break;
 			case '[':
 				sb.append("\\lbrack{}");
@@ -50,7 +50,7 @@ public final class StringManip {
 				sb.append(onlyPart ? "&" : "\\&");
 				break;
 			case '$':
-				sb.append("\\textdollar{}");
+				sb.append("\\$");
 				break;
 			case '\n':
 				sb.append("\\\\\n");
@@ -60,6 +60,9 @@ public final class StringManip {
 				break;
 			case '.':
 				sb.append("\"\".");
+				break;
+			case '_':
+				sb.append("\\_");
 				break;
 			case ' ':
 				sb.append(last == ' ' || last == '{' || // 
