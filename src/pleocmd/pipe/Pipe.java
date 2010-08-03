@@ -121,6 +121,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private final Configuration config;
 
+	private Thread mainInputThread;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 * 
@@ -491,6 +493,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		};
 		feedback.started();
 		thrOutput.start();
+		mainInputThread = thrsInput.get(0);
 		thrsInput.get(0).start();
 
 		Log.detail("Started waiting for threads");
@@ -525,6 +528,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		Log.detail("Input Thread no longer alive");
 		feedback.stopped();
 		assert thrsInput.isEmpty();
+		assert mainInputThread == null;
 		thrOutput = null;
 		close();
 		Log.info("Pipe finished and closed");
@@ -613,6 +617,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			}
 		} finally {
 			synchronized (this) {
+				if (Thread.currentThread() == mainInputThread)
+					mainInputThread = null;
 				if (!thrsInput.remove(Thread.currentThread()))
 					Log.error("Internal error: "
 							+ "Input-Thread not found in thread-list");
@@ -1174,5 +1180,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (res.contains(".")) res = res.substring(0, res.lastIndexOf('.'));
 		if (cfgModifiedSinceSave.getContent()) res += " [modified]";
 		return res;
+	}
+
+	public boolean isMainInputThreadFinished() {
+		return mainInputThread == null;
 	}
 }
