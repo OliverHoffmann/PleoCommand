@@ -19,7 +19,7 @@ final class LogTableStyledCell {
 	public LogTableStyledCell(final String text, final boolean multiLine,
 			final Color foreground, final Color background, final boolean bold,
 			final boolean italic) {
-		this.text = text;
+		this.text = text == null ? "" : text;
 		this.multiLine = multiLine;
 		this.foreground = foreground;
 		this.background = background;
