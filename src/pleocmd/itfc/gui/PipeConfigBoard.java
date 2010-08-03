@@ -1,6 +1,7 @@
 package pleocmd.itfc.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -515,11 +516,20 @@ final class PipeConfigBoard extends JPanel {
 			final Graphics g = img.getGraphics();
 			g.setClip(0, 0, pref.width, pref.height);
 			final PaintParameters pprm = new PaintParameters();
-			// TODO activate once fields in BoardPainter are no longer static
-			// bp.setBackground(new Color(255, 255, 255, 255));
 			pprm.g = g;
 			pprm.modifyable = true;
-			bp.paint(pprm);
+			final Color old1 = BoardConfiguration.CFG_BACKGROUND.getContent();
+			final Color old2 = BoardConfiguration.CFG_RECT_BACKGROUND
+					.getContent();
+			try {
+				BoardConfiguration.CFG_BACKGROUND.setContent(Color.WHITE);
+				BoardConfiguration.CFG_RECT_BACKGROUND.setContent(new Color(
+						245, 245, 255));
+				bp.paint(pprm);
+			} finally {
+				BoardConfiguration.CFG_BACKGROUND.setContent(old1);
+				BoardConfiguration.CFG_RECT_BACKGROUND.setContent(old2);
+			}
 			ImageIO.write(img, "png", filePNG);
 
 			// export the text
