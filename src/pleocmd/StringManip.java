@@ -30,10 +30,10 @@ public final class StringManip {
 				sb.append("\\textbraceright{}");
 				break;
 			case '[':
-				sb.append(onlyPart ? "[" : "\\verb+[+");
+				sb.append("\\lbrack{}");
 				break;
 			case ']':
-				sb.append(onlyPart ? "]" : "\\verb+]+");
+				sb.append("\\rbrack{}");
 				break;
 			case '\\':
 				sb.append("\\textbackslash{}");
@@ -55,7 +55,7 @@ public final class StringManip {
 				break;
 			case ' ':
 				sb.append(last == ' ' || last == '{' || // 
-						last == '>' ? "\\textvisiblespace{}" : " ");
+						last == '>' ? "\\thinspace{}" : " ");
 				break;
 			default:
 				sb.append(c);
