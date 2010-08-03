@@ -50,7 +50,12 @@ public final class Log {
 		 * The standard output is captured via this {@link Type} in GUI mode.<br>
 		 * Will not be used in console mode.
 		 */
-		Console
+		ConsoleOutput,
+		/**
+		 * The standard input is represented via this {@link Type} in GUI mode.<br>
+		 * Will not be used in console mode.
+		 */
+		ConsoleInput
 	}
 
 	private static final ConfigString CFG_TIMEFORMAT = new ConfigString(
@@ -103,8 +108,13 @@ public final class Log {
 			else
 				queuedLogs.add(this);
 			break;
-		case Console:
+		case ConsoleOutput:
 			System.out.println(msg); // CS_IGNORE
+			if (MainFrame.hasGUI())
+				MainFrame.the().addLog(this);
+			else if (!quiStatusKnown) queuedLogs.add(this);
+			break;
+		case ConsoleInput:
 			if (MainFrame.hasGUI())
 				MainFrame.the().addLog(this);
 			else if (!quiStatusKnown) queuedLogs.add(this);
@@ -186,7 +196,8 @@ public final class Log {
 			return new Color(160, 100, 0); // dark orange
 		case Error:
 			return Color.RED;
-		case Console:
+		case ConsoleOutput:
+		case ConsoleInput:
 		default:
 			return Color.BLACK;
 		}
@@ -207,7 +218,8 @@ public final class Log {
 			return "#A06400";// dark orange
 		case Error:
 			return "red";
-		case Console:
+		case ConsoleOutput:
+		case ConsoleInput:
 		default:
 			return "black";
 		}
@@ -228,7 +240,8 @@ public final class Log {
 			return "orange";
 		case Error:
 			return "red";
-		case Console:
+		case ConsoleOutput:
+		case ConsoleInput:
 		default:
 			return "black";
 		}
@@ -257,7 +270,7 @@ public final class Log {
 			return "WRN";
 		case Error:
 			return "ERR";
-		case Console:
+		case ConsoleOutput:
 			return ">  ";
 		default:
 			return "!?!";
@@ -465,8 +478,8 @@ public final class Log {
 	}
 
 	/**
-	 * Creates a new message of {@link Type#Console} which will be printed to
-	 * standard output <b>and</b> send to the GUI.
+	 * Creates a new message of {@link Type#ConsoleOutput} which will be printed
+	 * to standard output <b>and</b> send to the GUI.
 	 * 
 	 * @param msg
 	 *            the message - interpreted as a format string (like in
@@ -477,12 +490,12 @@ public final class Log {
 	 *            be zero)
 	 */
 	public static void consoleOut(final String msg, final Object... args) {
-		msg(Type.Console, null, getCallerSTE(2), msg, null, args);
+		msg(Type.ConsoleOutput, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
-	 * Creates a new message of {@link Type#Console} which will be printed to
-	 * standard output <b>and</b> send to the GUI.
+	 * Creates a new message of {@link Type#ConsoleOutput} which will be printed
+	 * to standard output <b>and</b> send to the GUI.
 	 * 
 	 * @param msgStdOut
 	 *            the message - interpreted as a format string (like in
@@ -500,7 +513,23 @@ public final class Log {
 	 */
 	public static void consoleOut2(final String msgStdOut, final String msgGUI,
 			final Object... args) {
-		msg(Type.Console, null, getCallerSTE(2), msgStdOut, msgGUI, args);
+		msg(Type.ConsoleOutput, null, getCallerSTE(2), msgStdOut, msgGUI, args);
+	}
+
+	/**
+	 * Creates a new message of {@link Type#ConsoleInput} which will be send to
+	 * the GUI and represents a message from standard input.
+	 * 
+	 * @param msg
+	 *            the message - interpreted as a format string (like in
+	 *            {@link String#format(String, Object...)}) if any arguments are
+	 *            given or just used as is otherwise.
+	 * @param args
+	 *            arbitrary number of arguments for the format string (may also
+	 *            be zero)
+	 */
+	public static void consoleIn(final String msg, final Object... args) {
+		msg(Type.ConsoleInput, null, getCallerSTE(2), msg, null, args);
 	}
 
 	/**
@@ -579,21 +608,22 @@ public final class Log {
 	 * <td>only errors will be processed</td>
 	 * </tr>
 	 * <tr>
-	 * <td>{@link Type#Console}</td>
+	 * <td>{@link Type#ConsoleOutput}</td>
 	 * <td>no messages will be processed</td>
 	 * </tr>
 	 * </table>
 	 * <p>
-	 * Note that messages of {@link Type#Console} are treated as wrapped
-	 * standard output and not as normal messages and are therefore always be
-	 * processed even if minLogType is set to {@link Type#Console}.
+	 * Note that messages of {@link Type#ConsoleOutput} and
+	 * {@link Type#ConsoleInput} are treated as wrapped standard output and not
+	 * as normal messages and are therefore always be processed even if
+	 * minLogType is set to {@link Type#ConsoleOutput}.
 	 * 
 	 * @param minLogType
 	 *            true if {@link Type#Detail} will be processed
 	 */
 	public static void setMinLogType(final Type minLogType) {
 		if (minLogType.ordinal() < Type.Detail.ordinal()
-				|| minLogType.ordinal() > Type.Console.ordinal())
+				|| minLogType.ordinal() > Type.ConsoleOutput.ordinal())
 			throw new IllegalArgumentException("Invalid value for minLogType");
 		cfgMinLogType.setEnum(minLogType);
 		minLogTypeKnown = true;

@@ -1,7 +1,15 @@
 package pleocmd;
 
 import java.awt.Color;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
+
+import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Syntax;
 
 public final class StringManip {
 
@@ -195,6 +203,43 @@ public final class StringManip {
 		} catch (final NumberFormatException e) {
 			return Color.RED;
 		}
+	}
+
+	public static String printSyntaxHighlightedAscii(final Data data)
+			throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
+		final List<Syntax> syntaxList = new ArrayList<Syntax>();
+		data.writeToAscii(new DataOutputStream(out), false, syntaxList);
+		// html like formatting, no real xml code here
+		final StringBuilder sb = new StringBuilder(out.toString());
+		sb.insert(0, "<html>");
+		int o = 6;
+		for (final Syntax sy : syntaxList) {
+			final Color c = sy.getType().getColor();
+			sb.insert(sy.getPosition() + o, String.format(
+					"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(), c
+							.getBlue()));
+			o += 20;
+		}
+		return sb.toString();
+	}
+
+	public static String printSyntaxHighlightedBinary(final Data data)
+			throws IOException {
+		final StringBuilder sb = new StringBuilder();
+		final List<Syntax> syntaxList = new ArrayList<Syntax>();
+		data.writeToBinary(sb, syntaxList);
+		// html like formatting, no real xml code here
+		sb.insert(0, "<html>");
+		int o = 6;
+		for (final Syntax sy : syntaxList) {
+			final Color c = sy.getType().getColor();
+			sb.insert(sy.getPosition() + o, String.format(
+					"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(), c
+							.getBlue()));
+			o += 20;
+		}
+		return sb.toString();
 	}
 
 }

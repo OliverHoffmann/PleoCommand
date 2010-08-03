@@ -2,13 +2,18 @@ package pleocmd.pipe.in;
 
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import pleocmd.Log;
 import pleocmd.StandardInput;
+import pleocmd.StringManip;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.exc.FormatException;
 import pleocmd.exc.InputException;
 import pleocmd.exc.InternalException;
 import pleocmd.pipe.data.Data;
+import pleocmd.pipe.val.Syntax;
 
 public final class ConsoleInput extends Input {
 
@@ -37,19 +42,24 @@ public final class ConsoleInput extends Input {
 	@Override
 	protected Data readData0() throws InputException, IOException {
 		if (StandardInput.the().available() <= 0) return null;
+		final List<Syntax> syntaxList = new ArrayList<Syntax>();
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			try {
-				return Data.createFromAscii(new DataInputStream(StandardInput
-						.the()));
+				final Data data = Data.createFromAscii(new DataInputStream(
+						StandardInput.the()), syntaxList);
+				Log.consoleIn(StringManip.printSyntaxHighlightedAscii(data));
+				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
 						"Cannot read from console");
 			}
 		case Binary:
 			try {
-				return Data.createFromBinary(new DataInputStream(StandardInput
-						.the()));
+				final Data data = Data.createFromBinary(new DataInputStream(
+						StandardInput.the()), syntaxList);
+				Log.consoleIn(StringManip.printSyntaxHighlightedBinary(data));
+				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
 						"Cannot read from console");
