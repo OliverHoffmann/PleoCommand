@@ -1282,7 +1282,7 @@ final class PipeConfigBoard extends JPanel {
 				".png", ""), StringManip.safeTex(pp.getName())));
 		sb.append(StringManip.safeTex(pp.getDescription()));
 		sb.append("\n\n");
-		sb.append("\\begin{tabular}{p{0.25\\textwidth} | "
+		sb.append("\\begin{longtable}{p{0.25\\textwidth} | "
 				+ "p{0.75\\textwidth}}\n");
 		// sb.append("\\hline\n");
 		for (final ConfigValue v : pp.getGuiConfigs()) {
@@ -1292,7 +1292,7 @@ final class PipeConfigBoard extends JPanel {
 			sb.append(" \\\\\n");
 			// sb.append(" \\\\ \\hline\n");
 		}
-		sb.append("\\end{tabular}\\\\\n");
+		sb.append("\\end{longtable}\n");
 		final String sc = bp.getSaneConfigCache().get(pp);
 		if (sc != null) {
 			sb.append("\\textcolor{red}{Bad configuration:\\\\\n");
