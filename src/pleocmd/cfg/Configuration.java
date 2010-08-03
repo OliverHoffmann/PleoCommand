@@ -93,13 +93,12 @@ public final class Configuration {
 
 	public static synchronized Configuration getMain() {
 		if (mainConfig == null) {
-			final Configuration cfg = new Configuration();
+			mainConfig = new Configuration();
 			try {
-				cfg.readFromDefaultFile();
+				mainConfig.readFromDefaultFile();
 			} catch (final ConfigurationException e) {
 				Log.error(e);
 			}
-			mainConfig = cfg;
 		}
 		return mainConfig;
 	}
