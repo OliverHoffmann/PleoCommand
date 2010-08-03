@@ -107,9 +107,11 @@ public final class PleoRXTXOutput extends Output {
 							}
 						});
 					} catch (final TimeoutException e) {
-						MainFrame.the().updateStatusLabel(this, "ERROR");
+						MainFrame.the().updateStatusLabel(PleoRXTXOutput.this,
+								"ERROR");
 					} catch (final IOException e) {
-						MainFrame.the().updateStatusLabel(this, "ERROR");
+						MainFrame.the().updateStatusLabel(PleoRXTXOutput.this,
+								"ERROR");
 					}
 					try {
 						Thread.sleep(5000);
