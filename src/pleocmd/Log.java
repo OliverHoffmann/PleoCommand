@@ -271,7 +271,9 @@ public final class Log {
 		case Error:
 			return "ERR";
 		case ConsoleOutput:
-			return ">  ";
+			return "OUT";
+		case ConsoleInput:
+			return "IN ";
 		default:
 			return "!?!";
 		}
