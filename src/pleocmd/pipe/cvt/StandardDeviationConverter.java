@@ -2,6 +2,7 @@ package pleocmd.pipe.cvt;
 
 import java.util.List;
 
+import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConverterException;
 import pleocmd.itfc.gui.dgr.DiagramDataSet;
@@ -79,7 +80,20 @@ public final class StandardDeviationConverter extends Converter { // NO_UCD
 		values2[valPos] = val - avg;
 		valPos = (valPos + 1) % values.length;
 		if (valPos == 0) feeded = true; // at least one loop now
-		val = feeded ? sum2 / values.length : 0;
+
+		if (Double.isInfinite(sum) || Double.isNaN(sum)
+				|| Double.isInfinite(sum2) || Double.isNaN(sum2)) {
+			Log.warn("Average (square) sum exceeded range of "
+					+ "Double data type => Resetting");
+			sum = .0;
+			sum2 = .0;
+			valPos = 0;
+			feeded = false;
+		}
+
+		if (!feeded) return emptyList();
+
+		val = sum2 / values.length;
 		if (isVisualize()) plot(0, val);
 		return asList(SingleFloatData.create(val, data));
 	}
