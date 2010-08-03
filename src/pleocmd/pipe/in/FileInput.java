@@ -11,6 +11,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.RunnableWithArgument;
+import pleocmd.StringManip;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.ConfigPath.PathType;
@@ -122,14 +123,22 @@ public final class FileInput extends Input { // NO_UCD
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			try {
-				return Data.createFromAscii(in);
+				final Data data = Data.createFromAscii(in);
+				if (Log.canLogDetail())
+					Log.detail("<html>Read from file: %s", StringManip
+							.printSyntaxHighlightedAscii(data));
+				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
 						"Cannot read from file");
 			}
 		case Binary:
 			try {
-				return Data.createFromBinary(in);
+				final Data data = Data.createFromBinary(in);
+				if (Log.canLogDetail())
+					Log.detail("<html>Read from file: %s", StringManip
+							.printSyntaxHighlightedBinary(data));
+				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
 						"Cannot read from file");

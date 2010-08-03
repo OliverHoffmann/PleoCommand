@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import pleocmd.Log;
+import pleocmd.StringManip;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.FormatException;
@@ -94,7 +95,11 @@ public final class TcpIpInput extends Input { // NO_UCD
 			in = new DataInputStream(socket.getInputStream());
 		}
 		try {
-			return new MultiFloatData(Data.createFromBinary(in));
+			final Data data = Data.createFromBinary(in);
+			if (Log.canLogDetail())
+				Log.detail("<html>Read from TCP/IP: %s", StringManip
+						.printSyntaxHighlightedBinary(data));
+			return new MultiFloatData(data);
 		} catch (final FormatException e) {
 			throw new InputException(this, false, e, "Cannot read from TCP/IP");
 		} catch (final IOException e) {
