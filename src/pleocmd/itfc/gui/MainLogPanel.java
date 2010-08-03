@@ -68,7 +68,7 @@ final class MainLogPanel extends JPanel {
 				});
 		lay.addSpacer();
 		// checkbox state will later be set to the correct value
-		cbShowDetail = new JCheckBox("Show detailed log", true);
+		cbShowDetail = new JCheckBox("Show detailed log", false);
 		cbShowDetail.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
