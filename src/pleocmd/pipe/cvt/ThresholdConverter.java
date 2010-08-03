@@ -265,6 +265,9 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 			return "The value which will be send if the current one is "
 					+ "above the threshold - if this is 0, the current "
 					+ "one itself will be sent";
+		case Config5:
+			return "If true, a boolean value (true for above, false for below) "
+					+ "will be returned instead of the float from the fields above";
 		default:
 			return null;
 		}
