@@ -11,6 +11,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import pleocmd.Log;
 import pleocmd.RunnableWithArgument;
+import pleocmd.StringManip;
 import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.ConfigPath;
 import pleocmd.cfg.ConfigPath.PathType;
@@ -118,20 +119,32 @@ public final class FileOutput extends Output { // NO_UCD
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			data.writeToAscii(out, true);
+			if (Log.canLogDetail())
+				Log.detail("<html>Written to file: %s", StringManip
+						.printSyntaxHighlightedAscii(data));
 			break;
 		case Binary:
 			data.writeToBinary(out);
+			if (Log.canLogDetail())
+				Log.detail("<html>Written to file: %s", StringManip
+						.printSyntaxHighlightedBinary(data));
 			break;
 		case AsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				root.writeToAscii(out, true);
+				if (Log.canLogDetail())
+					Log.detail("<html>Written to file: %s", StringManip
+							.printSyntaxHighlightedAscii(root));
 			}
 			break;
 		case BinaryOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				root.writeToBinary(out);
+				if (Log.canLogDetail())
+					Log.detail("<html>Written to file: %s", StringManip
+							.printSyntaxHighlightedBinary(root));
 			}
 			break;
 		case PleoMonitorCommands:

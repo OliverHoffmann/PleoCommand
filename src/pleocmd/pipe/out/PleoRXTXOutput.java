@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import java.util.concurrent.TimeoutException;
 
 import pleocmd.Log;
+import pleocmd.StringManip;
 import pleocmd.api.PleoCommunication;
 import pleocmd.cfg.ConfigItem;
 import pleocmd.exc.ConfigurationException;
@@ -164,6 +165,9 @@ public final class PleoRXTXOutput extends Output {
 			IOException {
 		if (!CommandData.isCommandData(data, "PMC")) return false;
 		synchronized (this) {
+			if (Log.canLogInfo())
+				Log.info("<html>Sent to Pleo: "
+						+ StringManip.printSyntaxHighlightedAscii(data));
 			pc.send(CommandData.getArgument(data));
 			try {
 				Log.consoleOut(pc.readAnswer());
@@ -198,7 +202,7 @@ public final class PleoRXTXOutput extends Output {
 		} catch (final NoClassDefFoundError e) {
 			return "RXTX not available";
 		} catch (final IOException e) {
-			return String.format("Device %s does not exist", cfgDevice
+			return String.format("Device '%s' does not exist", cfgDevice
 					.getContent());
 		}
 		return null;
