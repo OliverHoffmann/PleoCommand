@@ -62,18 +62,14 @@ public final class Log {
 	private static ConfigEnum<Type> cfgMinLogType = new ConfigEnum<Type>(
 			"Minimal Log-Type", Type.Detail);
 
+	private static ConfigString cfgExportColumns = new ConfigString(
+			"Columns To Export", "TYSM");
+
 	private static boolean minLogTypeKnown;
 
 	private static boolean quiStatusKnown;
 
 	private static List<Log> queuedLogs = new ArrayList<Log>(128);
-
-	/**
-	 * Needed to inline next line after a line-break when writing messages to a
-	 * plain {@link String}. Number of spaces must fit to format specificier in
-	 * {@link #toString()} and the length of the {@link #DATE_FORMATTER}.
-	 */
-	private static final String SPACES = String.format("%68s", "");
 
 	static {
 		// must be *after* declaration of all static fields !!!
@@ -218,6 +214,27 @@ public final class Log {
 	}
 
 	/**
+	 * @return a {@link String} with an Latex color code matching the
+	 *         {@link Type} of this log entry.
+	 * @see #getType()
+	 */
+	public String getTypeTexColor() {
+		switch (type) {
+		case Detail:
+			return "gray";
+		case Info:
+			return "blue";
+		case Warn:
+			return "orange";
+		case Error:
+			return "red";
+		case Console:
+		default:
+			return "black";
+		}
+	}
+
+	/**
 	 * @return the time (with milliseconds - no date), from {@link #getTime()}
 	 *         formatted as a {@link String}
 	 */
@@ -249,25 +266,96 @@ public final class Log {
 
 	@Override
 	public String toString() {
-		return String.format("%s %s %-50s %s", getFormattedTime(),
-				getTypeShortString(), caller, StringManip.removePseudoHTML(msg)
-						.replace("\n", "\n" + SPACES));
+		final StringBuilder sb = new StringBuilder();
+		final String ec = getExportColumns();
+		if (ec.contains("T")) {
+			if (sb.length() > 0) sb.append(' ');
+			sb.append(getFormattedTime());
+		}
+		if (ec.contains("Y")) {
+			if (sb.length() > 0) sb.append(' ');
+			sb.append(getTypeShortString());
+		}
+		if (ec.contains("S")) {
+			if (sb.length() > 0) sb.append(' ');
+			final String s = caller.toString();
+			sb.append(String.format("%-50s", s.substring(0, Math.min(50, s
+					.length()))));
+		}
+		if (ec.contains("M")) {
+			if (sb.length() > 0) sb.append(' ');
+			final StringBuilder sb2 = new StringBuilder();
+			for (int i = 0; i < sb.length(); ++i)
+				sb2.append(' ');
+			sb.append(StringManip.removePseudoHTML(msg).replace("\n",
+					"\n" + sb2.toString()));
+		}
+		return sb.toString();
 	}
 
 	public String toHTMLString() {
-		return String.format("<td>%s</td><td>%s</td><td>%s</td><td>%s</td>",
-				StringManip.safeHTML(getFormattedTime()), StringManip
-						.safeHTML(getTypeShortString()), StringManip
-						.safeHTML(caller.toString()), StringManip
-						.convertPseudoToRealHTML(msg));
+		final StringBuilder sb = new StringBuilder();
+		final String ec = getExportColumns();
+		if (ec.contains("T")) {
+			sb.append("<td>");
+			sb.append(StringManip.safeHTML(getFormattedTime()));
+			sb.append("</td>");
+		}
+		if (ec.contains("Y")) {
+			sb.append("<td>");
+			sb.append(StringManip.safeHTML(getTypeShortString()));
+			sb.append("</td>");
+		}
+		if (ec.contains("S")) {
+			sb.append("<td>");
+			sb.append(StringManip.safeHTML(caller.toString()));
+			sb.append("</td>");
+		}
+		if (ec.contains("M")) {
+			sb.append("<td>");
+			sb.append(StringManip.convertPseudoToRealHTML(msg));
+			sb.append("</td>");
+		}
+		return sb.toString();
 	}
 
 	public String toTexString(final Set<String> colorNames) {
-		return String.format("%s & %s & %s & %s", StringManip
-				.safeTex(getFormattedTime()), StringManip
-				.safeTex(getTypeShortString()), StringManip.safeTex(caller
-				.toString()), StringManip.convertPseudoHTMLToTex(msg,
-				colorNames).replace("\n", "\n & & & "));
+		final StringBuilder sb = new StringBuilder();
+		final String ec = getExportColumns();
+		int cnt = 0;
+		if (ec.contains("T")) {
+			if (sb.length() > 0) sb.append(" & ");
+			sb.append(String.format("\\textcolor{%s}{", getTypeTexColor()));
+			sb.append(StringManip.safeTex(getFormattedTime()));
+			sb.append("}");
+			++cnt;
+		}
+		if (ec.contains("Y")) {
+			if (sb.length() > 0) sb.append(" & ");
+			sb.append(String.format("\\textcolor{%s}{", getTypeTexColor()));
+			sb.append(StringManip.safeTex(getTypeShortString()));
+			sb.append("}");
+			++cnt;
+		}
+		if (ec.contains("S")) {
+			if (sb.length() > 0) sb.append(" & ");
+			sb.append(String.format("\\textcolor{%s}{", getTypeTexColor()));
+			sb.append(StringManip.safeTex(caller.toString()));
+			sb.append("}");
+			++cnt;
+		}
+		if (ec.contains("M")) {
+			if (sb.length() > 0) sb.append(" & ");
+			sb.append(String.format("\\textcolor{%s}{", getTypeTexColor()));
+			final StringBuilder sb2 = new StringBuilder("}\\\\\n ");
+			for (int i = 0; i < cnt; ++i)
+				sb2.append("& ");
+			sb2.append(String.format("\\textcolor{%s}{", getTypeTexColor()));
+			sb.append(StringManip.convertPseudoHTMLToTex(msg, colorNames)
+					.replace("\\\\\n", sb2.toString()));
+			sb.append("}");
+		}
+		return sb.toString();
 	}
 
 	private static StackTraceElement getCallerSTE(final int stepsBack) {
@@ -543,6 +631,17 @@ public final class Log {
 	}
 
 	/**
+	 * The columns of the LogTable, which should be exported with the to...
+	 * methods. Must contains characters 'T', 'Y', 'S' and 'M' for Time, Type,
+	 * Source and Message.
+	 * 
+	 * @return a String with one or more of "TYSM"
+	 */
+	public static String getExportColumns() {
+		return cfgExportColumns.getContent().toUpperCase();
+	}
+
+	/**
 	 * @param type
 	 *            one of the log {@link Type}s
 	 * @return true if messages of the given {@link Type} can be logged
@@ -593,7 +692,8 @@ public final class Log {
 		@Override
 		@SuppressWarnings("synthetic-access")
 		public Group getSkeleton(final String groupName) {
-			return new Group(groupName).add(CFG_TIMEFORMAT).add(cfgMinLogType);
+			return new Group(groupName).add(CFG_TIMEFORMAT).add(cfgMinLogType)
+					.add(cfgExportColumns);
 		}
 
 		@Override

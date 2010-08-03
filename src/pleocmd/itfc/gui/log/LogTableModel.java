@@ -127,15 +127,36 @@ public final class LogTableModel extends AbstractTableModel {
 
 	private void writeToTexFile(final FileWriter out) throws IOException {
 		final Set<String> colorNames = new HashSet<String>();
-		final StringBuilder sb = new StringBuilder();
-		sb.append("\\begin{tabular}{p{0.2\\textwidth} | p{0.1\\textwidth} "
-				+ "| p{0.3\\textwidth} | p{0.4\\textwidth}}\n");
+		final String ec = Log.getExportColumns();
+		final StringBuilder sb = new StringBuilder("\\begin{longtable}{");
+		double sum = 0;
+		if (ec.contains("T")) sum += 2;
+		if (ec.contains("Y")) sum += 1;
+		if (ec.contains("S")) sum += 3;
+		if (ec.contains("M")) sum += 4;
+		if (ec.contains("T")) {
+			if (sb.length() > 18) sb.append(" | ");
+			sb.append(String.format("p{%f\\textwidth}", 2 / sum));
+		}
+		if (ec.contains("Y")) {
+			if (sb.length() > 18) sb.append(" | ");
+			sb.append(String.format("p{%f\\textwidth}", 1 / sum));
+		}
+		if (ec.contains("S")) {
+			if (sb.length() > 18) sb.append(" | ");
+			sb.append(String.format("p{%f\\textwidth}", 3 / sum));
+		}
+		if (ec.contains("M")) {
+			if (sb.length() > 18) sb.append(" | ");
+			sb.append(String.format("p{%f\\textwidth}", 4 / sum));
+		}
+		sb.append("}\n");
 		for (final Log log : list) {
 			sb.append(log.toTexString(colorNames));
 			sb.append("\\\\\n");
 		}
-		sb.append("\\end{tabular}\\\\\n");
-
+		sb.append("\\end{longtable}\n");
+		out.write("\\definecolor{orange}{RGB}{160,100,0}\n");
 		for (final String cn : colorNames) {
 			final Color c = StringManip.hexToColor(cn
 					.substring("PleoCommandColor".length()));

@@ -20,7 +20,8 @@ public final class StringManip {
 
 	public static String safeTex(final String s, final boolean onlyPart) {
 		final StringBuilder sb = new StringBuilder();
-		for (final char c : s.toCharArray())
+		char last = '\0';
+		for (final char c : s.toCharArray()) {
 			switch (c) {
 			case '{':
 				sb.append("\\textbraceleft{}");
@@ -52,9 +53,15 @@ public final class StringManip {
 			case '.':
 				sb.append("\"\".");
 				break;
+			case ' ':
+				sb.append(last == ' ' || last == '{' || // 
+						last == '>' ? "\\textvisiblespace{}" : " ");
+				break;
 			default:
 				sb.append(c);
 			}
+			last = c;
+		}
 		return sb.toString();
 	}
 
