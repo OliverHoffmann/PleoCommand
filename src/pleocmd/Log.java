@@ -1,18 +1,11 @@
 package pleocmd;
 
 import java.awt.Color;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import pleocmd.cfg.ConfigEnum;
-import pleocmd.cfg.ConfigString;
-import pleocmd.cfg.Configuration;
-import pleocmd.cfg.ConfigurationInterface;
-import pleocmd.cfg.Group;
-import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.ErrorDialog;
 import pleocmd.itfc.gui.MainFrame;
 
@@ -58,28 +51,11 @@ public final class Log {
 		ConsoleInput
 	}
 
-	private static final ConfigString CFG_TIMEFORMAT = new ConfigString(
-			"Time Format", "HH:mm:ss.SSS");
-
-	private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat(
-			CFG_TIMEFORMAT.getContent());
-
-	private static ConfigEnum<Type> cfgMinLogType = new ConfigEnum<Type>(
-			"Minimal Log-Type", Type.Detail);
-
-	private static ConfigString cfgExportColumns = new ConfigString(
-			"Columns To Export", "TYSM");
-
 	private static boolean minLogTypeKnown;
 
 	private static boolean quiStatusKnown;
 
 	private static List<Log> queuedLogs = new ArrayList<Log>(128);
-
-	static {
-		// must be *after* declaration of all static fields !!!
-		new LogConfig();
-	}
 
 	private final Type type;
 
@@ -252,7 +228,7 @@ public final class Log {
 	 *         formatted as a {@link String}
 	 */
 	public String getFormattedTime() {
-		return DATE_FORMATTER.format(new Date(time));
+		return LogConfig.DATE_FORMATTER.format(new Date(time));
 	}
 
 	/**
@@ -381,7 +357,7 @@ public final class Log {
 	/**
 	 * Prints messages to the GUI's log, if any, or to the standard error
 	 * otherwise if their {@link #type} is not "lower" than the
-	 * {@link #cfgMinLogType}.<br>
+	 * {@link LogConfig#CFG_MIN_LOG_TYPE}.<br>
 	 * Always prints messages of type Console to the standard output (instead of
 	 * standard error) no matter if a GUI exists or not.
 	 * 
@@ -406,7 +382,7 @@ public final class Log {
 	private static void msg(final Type type, final Throwable throwable,
 			final StackTraceElement caller, final String msg,
 			final String msgAlt, final Object... args) {
-		if (type.ordinal() >= cfgMinLogType.getEnum().ordinal()) {
+		if (type.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum().ordinal()) {
 			final String msgStr = args.length == 0 ? msg : String.format(msg,
 					args);
 			final String msgAltStr = msgAlt == null || args.length == 0 ? msgAlt
@@ -627,7 +603,7 @@ public final class Log {
 		if (minLogType.ordinal() < Type.Detail.ordinal()
 				|| minLogType.ordinal() > Type.ConsoleOutput.ordinal())
 			throw new IllegalArgumentException("Invalid value for minLogType");
-		cfgMinLogType.setEnum(minLogType);
+		LogConfig.CFG_MIN_LOG_TYPE.setEnum(minLogType);
 		minLogTypeKnown = true;
 		processQueue();
 	}
@@ -659,7 +635,7 @@ public final class Log {
 	 *         "lower" types will be ignored.
 	 */
 	public static Type getMinLogType() {
-		return cfgMinLogType.getEnum();
+		return LogConfig.CFG_MIN_LOG_TYPE.getEnum();
 	}
 
 	/**
@@ -670,7 +646,7 @@ public final class Log {
 	 * @return a String with one or more of "TYSM"
 	 */
 	public static String getExportColumns() {
-		return cfgExportColumns.getContent().toUpperCase();
+		return LogConfig.CFG_EXPORT_COLUMNS.getContent().toUpperCase();
 	}
 
 	/**
@@ -679,79 +655,39 @@ public final class Log {
 	 * @return true if messages of the given {@link Type} can be logged
 	 */
 	public static boolean canLog(final Type type) {
-		return type.ordinal() >= cfgMinLogType.getEnum().ordinal();
+		return type.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum().ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Detail} can be logged
 	 */
 	public static boolean canLogDetail() {
-		return Type.Detail.ordinal() >= cfgMinLogType.getEnum().ordinal();
+		return Type.Detail.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum()
+				.ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Info} can be logged
 	 */
 	public static boolean canLogInfo() {
-		return Type.Info.ordinal() >= cfgMinLogType.getEnum().ordinal();
+		return Type.Info.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum()
+				.ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Warn} can be logged
 	 */
 	public static boolean canLogWarning() {
-		return Type.Warn.ordinal() >= cfgMinLogType.getEnum().ordinal();
+		return Type.Warn.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum()
+				.ordinal();
 	}
 
 	/**
 	 * @return true if messages of {@link Type#Error} can be logged
 	 */
 	public static boolean canLogError() {
-		return Type.Error.ordinal() >= cfgMinLogType.getEnum().ordinal();
-	}
-
-	private static class LogConfig implements ConfigurationInterface {
-
-		LogConfig() {
-			try {
-				Configuration.getMain().registerConfigurableObject(this,
-						getClass().getSimpleName());
-			} catch (final ConfigurationException e) {
-				Log.error(e);
-			}
-		}
-
-		@Override
-		@SuppressWarnings("synthetic-access")
-		public Group getSkeleton(final String groupName) {
-			return new Group(groupName).add(CFG_TIMEFORMAT).add(cfgMinLogType)
-					.add(cfgExportColumns);
-		}
-
-		@Override
-		public void configurationAboutToBeChanged() {
-			// nothing to do
-		}
-
-		@Override
-		public void configurationRead() {
-			// nothing to do
-		}
-
-		@Override
-		@SuppressWarnings("synthetic-access")
-		public void configurationChanged(final Group group) {
-			DATE_FORMATTER.applyPattern(CFG_TIMEFORMAT.getContent());
-			if (MainFrame.hasGUI()) MainFrame.the().updateState();
-			setMinLogType(getMinLogType());
-		}
-
-		@Override
-		public List<Group> configurationWriteback() {
-			return Configuration
-					.asList(getSkeleton(getClass().getSimpleName()));
-		}
-
+		return Type.Error.ordinal() >= LogConfig.CFG_MIN_LOG_TYPE.getEnum()
+				.ordinal();
 	}
 
 }
