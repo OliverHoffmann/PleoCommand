@@ -41,7 +41,10 @@ public final class ConsoleInput extends Input {
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		if (StandardInput.the().available() <= 0) return null;
+		if (StandardInput.the().available() <= 0) {
+			Log.info("End Of Stream in Console-Input");
+			return null;
+		}
 		final List<Syntax> syntaxList = new ArrayList<Syntax>();
 		switch (cfgType.getEnum()) {
 		case Ascii:

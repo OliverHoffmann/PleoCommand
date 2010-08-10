@@ -119,7 +119,10 @@ public final class FileInput extends Input { // NO_UCD
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		if (in.available() <= 0) return null;
+		if (in.available() <= 0) {
+			Log.info("End Of File in File-Input");
+			return null;
+		}
 		switch (cfgType.getEnum()) {
 		case Ascii:
 			try {

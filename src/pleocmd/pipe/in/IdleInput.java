@@ -84,7 +84,10 @@ public final class IdleInput extends Input { // NO_UCD
 
 		// as we only create background data, we should exit
 		// ourself once the main input thread has been closed.
-		if (getPipe().isMainInputThreadFinished()) return null;
+		if (getPipe().isMainInputThreadFinished()) {
+			Log.info("Ending Idle-Input as Main-Input-Thread closed");
+			return null;
+		}
 
 		try {
 			final long now = System.currentTimeMillis();

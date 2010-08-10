@@ -610,7 +610,10 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 				// read next data block ...
 				final Data data = getFromInput(inputSubList);
-				if (data == null) break; // marks end of all inputs
+				if (data == null) {
+					Log.info("No more Inputs");
+					break; // marks end of all inputs
+				}
 
 				// ... and convert it
 				convertDataToDataList(data);

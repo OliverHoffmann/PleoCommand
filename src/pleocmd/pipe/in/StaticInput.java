@@ -96,7 +96,10 @@ public final class StaticInput extends Input { // NO_UCD
 
 	@Override
 	protected Data readData0() throws InputException, IOException {
-		if (in.available() <= 0) return null;
+		if (in.available() <= 0) {
+			Log.info("End Of List in Static-Input");
+			return null;
+		}
 		try {
 			return Data.createFromAscii(in);
 		} catch (final FormatException e) {
