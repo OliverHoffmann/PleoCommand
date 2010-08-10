@@ -428,6 +428,7 @@ final class PipeConfigBoard extends JPanel {
 		if (hasCurrentPart() && !p.currentPart.getGuiConfigs().isEmpty()
 				&& (!onlyIfNoIcon || currentIcon == null) && ensureModifyable()) {
 			createConfigureDialog("Configure", p.currentPart, null);
+			painter.recalculatePipePartWidth(p.currentPart, getGraphics());
 			repaint();
 		}
 	}

@@ -706,21 +706,29 @@ final class BoardPainter {
 	void addToSet(final PipePart pp, final Graphics g, final boolean allowMoving) {
 		set.add(pp);
 		if (allowMoving) {
-			final int txtWidth = Math.max((int) g.getFontMetrics()
-					.getStringBounds(pp.getName(), g).getWidth(), (int) g
-					.getFontMetrics().getStringBounds(pp.getShortConfigDescr(),
-							g).getWidth());
 			final Rectangle r = pp.getGuiPosition().createCopy();
 			r.height = g.getFontMetrics().getHeight()
 					+ BoardConfiguration.CFG_ICON_WIDTH.getContent() + 2;
-			r.width = Math.min(BoardConfiguration.CFG_MAX_RECT_WIDTH
-					.getContent(), Math.max(BoardConfiguration.CFG_ICON_WIDTH
-					.getContent()
-					* BoardConfiguration.CFG_ICON_MAX.getContent(), txtWidth
-					+ r.height * 2));
+			r.width = 0;
 			check(r, pp);
 			pp.setGuiPosition(r);
+			recalculatePipePartWidth(pp, g);
 		}
+	}
+
+	final void recalculatePipePartWidth(final PipePart pp, final Graphics g) {
+		final String label = BoardConfiguration.CFG_DRAW_SHORTCONFIG
+				.getContent() ? pp.getShortConfigDescr() : pp.getName();
+		final int txtWidth = (int) (g.getFontMetrics()
+				.getStringBounds(label, g).getWidth() + 0.99);
+		final Rectangle r = pp.getGuiPosition().createCopy();
+		r.width = Math.min(BoardConfiguration.CFG_MAX_RECT_WIDTH.getContent(),
+				Math.max(BoardConfiguration.CFG_ICON_WIDTH.getContent()
+						* BoardConfiguration.CFG_ICON_MAX.getContent(),
+						txtWidth + r.height * 2));
+		r.width = r.width / 10 * 10;
+		check(r, pp);
+		pp.setGuiPosition(r);
 	}
 
 	public Set<PipePart> getSet() {
