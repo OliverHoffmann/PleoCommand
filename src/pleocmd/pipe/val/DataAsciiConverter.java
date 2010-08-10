@@ -148,7 +148,16 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		index = -1;
 		while (true) {
 			++index;
-			final byte b = in.readByte();
+			final byte b;
+			try {
+				b = in.readByte();
+			} catch (final IOException e) {
+				parseValue(getValues().isEmpty());
+				// this was the end of the data block
+				trimValues();
+				Log.detail("Finished parsing an ASCII Data object");
+				return;
+			}
 			switch (b) {
 			case '\n':
 				parseValue(getValues().isEmpty());
