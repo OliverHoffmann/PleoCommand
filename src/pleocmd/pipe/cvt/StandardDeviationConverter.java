@@ -1,6 +1,8 @@
 package pleocmd.pipe.cvt;
 
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigInt;
@@ -13,12 +15,20 @@ public final class StandardDeviationConverter extends Converter { // NO_UCD
 
 	private final ConfigInt cfgTimeFrameLength;
 
-	private double sum; // sum of all x_i, where i = 0..m_timeFrame
-	private double sum2; // sum of all (x_i - avg), where i = 0..m_timeFrame
-	private int valPos; // position in ring buffer m_val
-	private double[] values; // ring buffer for m_sum
-	private double[] values2; // ring buffer for m_sum2
-	private boolean feeded; // first round or enough data?
+	// CS_IGNORE_BEGIN class meant as struct
+
+	public static class Params {
+		public double sum; // sum of all x_i, where i = 0..m_timeFrame
+		public double sum2; // sum of all (x_i - avg), where i = 0..m_timeFrame
+		public int valPos; // position in ring buffer m_val
+		public double[] values; // ring buffer for m_sum
+		public double[] values2; // ring buffer for m_sum2
+		public boolean feeded; // first round or enough data?
+	}
+
+	// CS_IGNORE_END
+
+	private final Map<Integer, Params> map = new Hashtable<Integer, Params>();
 
 	public StandardDeviationConverter() {
 		addConfig(cfgTimeFrameLength = new ConfigInt("Length of Time-Frame",
@@ -28,18 +38,12 @@ public final class StandardDeviationConverter extends Converter { // NO_UCD
 
 	@Override
 	protected void init0() {
-		sum = .0;
-		sum2 = .0;
-		valPos = 0;
-		values = new double[cfgTimeFrameLength.getContent()];
-		values2 = new double[cfgTimeFrameLength.getContent()];
-		feeded = false;
+		map.clear();
 	}
 
 	@Override
 	protected void close0() {
-		values = null; // make garbage collector happy
-		values2 = null; // make garbage collector happy
+		map.clear(); // make garbage collector happy
 	}
 
 	@Override
@@ -69,31 +73,38 @@ public final class StandardDeviationConverter extends Converter { // NO_UCD
 	protected List<Data> convert0(final Data data) throws ConverterException {
 		if (!SingleFloatData.isSingleFloatData(data)) return null;
 		double val = SingleFloatData.getValue(data);
-		final double avg = sum / values.length;
-		if (feeded) {
-			sum -= values[valPos];
-			sum2 -= values2[valPos];
+		Params p = map.get(SingleFloatData.getUser(data));
+		if (p == null) {
+			p = new Params();
+			p.values = new double[cfgTimeFrameLength.getContent()];
+			p.values2 = new double[cfgTimeFrameLength.getContent()];
+			map.put((int) SingleFloatData.getUser(data), p);
 		}
-		sum += val;
-		sum2 += val - avg;
-		values[valPos] = val;
-		values2[valPos] = val - avg;
-		valPos = (valPos + 1) % values.length;
-		if (valPos == 0) feeded = true; // at least one loop now
+		final double avg = p.sum / p.values.length;
+		if (p.feeded) {
+			p.sum -= p.values[p.valPos];
+			p.sum2 -= p.values2[p.valPos];
+		}
+		p.sum += val;
+		p.sum2 += val - avg;
+		p.values[p.valPos] = val;
+		p.values2[p.valPos] = val - avg;
+		p.valPos = (p.valPos + 1) % p.values.length;
+		if (p.valPos == 0) p.feeded = true; // at least one loop now
 
-		if (Double.isInfinite(sum) || Double.isNaN(sum)
-				|| Double.isInfinite(sum2) || Double.isNaN(sum2)) {
+		if (Double.isInfinite(p.sum) || Double.isNaN(p.sum)
+				|| Double.isInfinite(p.sum2) || Double.isNaN(p.sum2)) {
 			Log.warn("Average (square) sum exceeded range of "
 					+ "Double data type => Resetting");
-			sum = .0;
-			sum2 = .0;
-			valPos = 0;
-			feeded = false;
+			p.sum = .0;
+			p.sum2 = .0;
+			p.valPos = 0;
+			p.feeded = false;
 		}
 
-		if (!feeded) return emptyList();
+		if (!p.feeded) return emptyList();
 
-		val = sum2 / values.length;
+		val = p.sum2 / p.values.length;
 		if (isVisualize()) plot(0, val);
 		return asList(SingleFloatData.create(val, data));
 	}
