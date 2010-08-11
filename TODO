@@ -1,43 +1,44 @@
 FIX SingleJointMovement: don't move too fast !!!
-FIX "Application exited forcefully" still possible (see below)
+FIX sanity check cache can be out of date after configuring a PipePart !!!
+FIX partial updating of Diagram's graphic doesn't work !!!
 FIX size of error dialog may be wrong (Windows)
 FIX changing zoom doesn't handle recalc. of border1 and border2
-FIX "show detailed log" always disabled
-FIX keep old changelog if a new one could not be created
-FIX ErrorDialog shown even in non-GUI mode if GUIstatus is still unknown
+FIX build: keep old changelog if a new one could not be created
+FIX "Application exited forcefully" still possible (see below)
+FIX ErrorDialog shown even in non-GUI mode if GUIstatus is still unknown (still?)
 FIX empty Log queue on app exit if not already done
-FIX sanity check cache can be out of date after configuring a PipePart
-FIX partial updating of Diagram's graphic doesn't work
+ENH SingleCommandConverter: missing Syntax Highlighting in cfgCommand (and others) !!!
+ENH auto-save to selected pipe-file if any !!!
+ENH CommandLine must support PipePart Configuration !!!
 ENH RandomGenerator: plotting
+ENH Board: Comments, ConnectorPoints (*1)
+ENH display PipeParts in red if they permanently failed
+ENH blink PipeParts in red if they temporarily failed
 ENH "Copy PipePart" in board
-ENH auto-save to selected pipe-file if any
 ENH Null-Output
+ENH add a NexusInput component
+ENH add a MatlabConverter component - maybe with http://code.google.com/p/matlabcontrol
+ENH support Drag&Drop in Diagram
+ENH DataAsciiConverter: Add special parsing for quoted strings ?
 ENH add javadoc
 ENH more Log.debug
 ENH document which classes are immutable
-ENH display PipeParts in red if they permanently failed
-ENH blink PipeParts in red if they temporarily failed
-ENH add a NexusInput component
-ENH add a MatlabConverter component - maybe with http://code.google.com/p/matlabcontrol
 MOD make all Data timed Data before writing to Output
 MOD checkstyle: no exception handling in pipe's, only pass them thru
-MOD check terminology
-MOD combine History and DataSequenceEditorPanel?
 MOD remove SingleChannel and add its ability directly to the board?
 
 
-Application has not been shut down normally but has to be exited forcefully.Remaining threads are:
-'                       Reference Handler' daemon:true  alive:true  interrupted:false priority:10 state:WAITING
-'                               Finalizer' daemon:true  alive:true  interrupted:false priority: 8 state:WAITING
-'                       Signal Dispatcher' daemon:true  alive:true  interrupted:false priority: 9 state:RUNNABLE
-'                         Java2D Disposer' daemon:true  alive:true  interrupted:false priority:10 state:WAITING
-'                              TimerQueue' daemon:true  alive:true  interrupted:false priority: 5 state:TIMED_WAITING
-'                                AWT-XAWT' daemon:true  alive:true  interrupted:false priority: 6 state:RUNNABLE
-'                            AWT-Shutdown' daemon:false alive:true  interrupted:false priority: 5 state:WAITING
-'                        AWT-EventQueue-0' daemon:false alive:true  interrupted:false priority: 6 state:WAITING
-'                         LogTable-Update' daemon:true  alive:true  interrupted:false priority: 6 state:WAITING
-'             Pipe Thumbnail Update Timer' daemon:true  alive:true  interrupted:false priority: 6 state:WAITING
-'                           DestroyJavaVM' daemon:false alive:true  interrupted:false priority: 5 state:RUNNABLE
-'                         ErrorLabelTimer' daemon:true  alive:true  interrupted:false priority: 6 state:WAITING
-'                    Fallback Exit Thread' daemon:true  alive:true  interrupted:false priority: 6 state:RUNNABLE
-Experimental:  JNI_OnLoad called.
+
+*1)
+|---------------|
+|				|
+|---------------|
+		|
+	   \|/					|-----------|
+		*------------------>|			|
+		|					|-----------|
+		|
+	   \|/
+|---------------|
+|				|
+|---------------|
