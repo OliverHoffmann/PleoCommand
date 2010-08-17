@@ -205,7 +205,26 @@ public abstract class PipePart extends StateHandling {
 	 *         initialize if it would be initialized with it's current
 	 *         configuration.
 	 */
-	public abstract String isConfigurationSane();
+	protected abstract String isConfigurationSane();
+
+	/**
+	 * @return <b>null</b> if everything is all-right or a {@link String}
+	 *         describing why this {@link PipePart} will probably fail to
+	 *         initialize if it would be initialized with it's current
+	 *         configuration.
+	 */
+	public final String isCachedConfigSane() {
+		if (sanityCache == null) {
+			sanityCache = isConfigurationSane();
+			if (sanityCache == null) sanityCache = "";
+		}
+		return sanityCache;
+	}
+
+	public final void configValuesChanged() {
+		sanityCache = null;
+		shortConfigDescr = null;
+	}
 
 	/**
 	 * Tries to call {@link #configure()} and writes an error message to the
@@ -269,8 +288,7 @@ public abstract class PipePart extends StateHandling {
 
 	@Override
 	protected final void configure0() throws PipeException, IOException {
-		sanityCache = null;
-		shortConfigDescr = null;
+		configValuesChanged();
 		configure1();
 	}
 
@@ -635,11 +653,8 @@ public abstract class PipePart extends StateHandling {
 			sbError.append("An Output-PipePart cannot be reached\n");
 		if (!validConns)
 			sbError.append("One or more invalid connections attached\n");
-		if (sanityCache == null) {
-			sanityCache = isConfigurationSane();
-			if (sanityCache == null) sanityCache = "";
-		}
-		if (!sanityCache.isEmpty()) sbError.append(sanityCache + "\n");
+		final String scc = isCachedConfigSane();
+		if (!scc.isEmpty()) sbError.append(scc + "\n");
 		if (sbError.length() == 0)
 			sane.put(this, null);
 		else {

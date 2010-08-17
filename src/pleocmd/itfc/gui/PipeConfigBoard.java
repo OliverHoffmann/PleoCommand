@@ -1134,9 +1134,10 @@ final class PipeConfigBoard extends JPanel {
 		if (!ensureModifyable()) return false;
 		for (final ConfigValue v : pp.getGuiConfigs())
 			v.setFromGUIComponents();
+		pp.configValuesChanged();
 		if (painter.updateSaneConfigCache()) repaint();
-		final String cfgRes = pp.isConfigurationSane();
-		if (cfgRes != null) {
+		final String cfgRes = pp.isCachedConfigSane();
+		if (cfgRes != null && !cfgRes.isEmpty()) {
 			Log.warn("Configuration is invalid: %s", cfgRes);
 			if (JOptionPane.showOptionDialog(dlg, String.format(
 					"Configuration is invalid: %s%s", cfgRes,
