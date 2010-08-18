@@ -22,7 +22,7 @@ package pleocmd.pipe.cvt;
 import java.io.IOException;
 import java.util.List;
 
-import pleocmd.cfg.ConfigString;
+import pleocmd.cfg.ConfigDataBlock;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.FormatException;
 import pleocmd.pipe.data.Data;
@@ -30,10 +30,10 @@ import pleocmd.pipe.data.SingleBoolData;
 
 public final class SingleCommandConverter extends Converter { // NO_UCD
 
-	private final ConfigString cfgCommand;
+	private final ConfigDataBlock cfgCommand;
 
 	public SingleCommandConverter() {
-		addConfig(cfgCommand = new ConfigString("Command",
+		addConfig(cfgCommand = new ConfigDataBlock("Command",
 				"PMC|MOTION PLAY foo"));
 		constructed();
 	}

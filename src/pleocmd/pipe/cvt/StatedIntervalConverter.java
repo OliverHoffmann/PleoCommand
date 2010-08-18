@@ -22,6 +22,7 @@ package pleocmd.pipe.cvt;
 import java.io.IOException;
 import java.util.List;
 
+import pleocmd.cfg.ConfigDataBlock;
 import pleocmd.cfg.ConfigString;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.FormatException;
@@ -32,16 +33,16 @@ import pleocmd.pipe.data.SingleFloatData;
 
 public final class StatedIntervalConverter extends Converter { // NO_UCD
 
-	private final ConfigString cfgCommand1;
-	private final ConfigString cfgCommand2;
+	private final ConfigDataBlock cfgCommand1;
+	private final ConfigDataBlock cfgCommand2;
 
 	private double sum;
 	private int nextCommand;
 
 	public StatedIntervalConverter() {
-		addConfig(cfgCommand1 = new ConfigString("Command 1",
-				"PMC|JOINT MOVE 0 0"));
-		addConfig(cfgCommand2 = new ConfigString(
+		addConfig(cfgCommand1 = new ConfigDataBlock("Command 1",
+				"PMC|MOTION PLAY foo"));
+		addConfig(cfgCommand2 = new ConfigDataBlock(
 				"Command 2 (alternating, optional)", ""));
 		constructed();
 	}
