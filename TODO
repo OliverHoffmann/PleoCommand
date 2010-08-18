@@ -1,4 +1,3 @@
-FIX size of error dialog may be wrong (Windows)
 FIX in zoom mode, some area hints and the section borders are not drawn correctly
 FIX "Application exited forcefully" still possible
 FIX ErrorDialog shown even in non-GUI mode if GUIstatus is still unknown (still?)

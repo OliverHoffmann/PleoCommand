@@ -164,6 +164,7 @@ public final class ErrorDialog extends JDialog implements
 			mc.getMostRecent().setText(
 					String.format("%d more from the same caller",
 							mc.getCount() - 5));
+			resizeDialog();
 			return;
 		}
 
@@ -208,11 +209,17 @@ public final class ErrorDialog extends JDialog implements
 		});
 
 		++errorCount;
+		resizeDialog();
+	}
+
+	private void resizeDialog() {
+		pack();
 		final Dimension pref = getPreferredSize();
-		if (errorCount > 5) {
+		if (errorCount > 5) // only adapt width but keep height if already 5
+			// messages displayed
 			pref.height = getHeight();
+		if (spErrorPanel.getVerticalScrollBar().isVisible())
 			pref.width += spErrorPanel.getVerticalScrollBar().getWidth();
-		}
 		setSize(pref);
 		setLocationRelativeTo(null);
 		if (!isVisible()) setVisible(true);
