@@ -38,12 +38,11 @@ import pleocmd.pipe.val.Syntax.Type;
 
 final class DataSequenceView extends PlainView {
 
-	private final DataSequenceEditorPanel panel;
+	private final UpdateErrorInterface uei;
 
-	public DataSequenceView(final Element elem,
-			final DataSequenceEditorPanel panel) {
+	public DataSequenceView(final Element elem, final UpdateErrorInterface uei) {
 		super(elem);
-		this.panel = panel;
+		this.uei = uei;
 	}
 
 	@Override
@@ -66,7 +65,7 @@ final class DataSequenceView extends PlainView {
 		try {
 			Data.createFromAscii(wholeLine, syntaxList);
 		} catch (final Throwable t) {
-			panel.updateErrorLabel(t.getMessage());
+			uei.updateErrorLabel(t.getMessage());
 		}
 
 		int curX = xp;

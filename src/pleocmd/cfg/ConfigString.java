@@ -174,7 +174,7 @@ public class ConfigString extends ConfigValue {
 	}
 
 	@Override
-	public final String getIdentifier() {
+	public String getIdentifier() {
 		return null;
 	}
 
@@ -188,12 +188,6 @@ public class ConfigString extends ConfigValue {
 	public boolean insertGUIComponents(final Layouter lay) {
 		tc = multiLine ? new JTextArea(content, 5, 20) : new JTextField(
 				content, 20);
-		tc.getDocument().addUndoableEditListener(new UndoableEditListener() {
-			@Override
-			public void undoableEditHappened(final UndoableEditEvent e) {
-				if (!isInternalMod()) invokeChangingContent(getTc().getText());
-			}
-		});
 		if (multiLine) {
 			final JScrollPane sp = new JScrollPane(tc);
 			lay.addWholeLine(sp, true);
@@ -220,6 +214,16 @@ public class ConfigString extends ConfigValue {
 
 	protected final JTextComponent getTc() {
 		return tc;
+	}
+
+	protected final void setTc(final JTextComponent tc) {
+		this.tc = tc;
+		tc.getDocument().addUndoableEditListener(new UndoableEditListener() {
+			@Override
+			public void undoableEditHappened(final UndoableEditEvent e) {
+				if (!isInternalMod()) invokeChangingContent(getTc().getText());
+			}
+		});
 	}
 
 	protected final boolean isInternalMod() {

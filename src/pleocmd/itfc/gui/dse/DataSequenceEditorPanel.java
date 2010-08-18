@@ -67,7 +67,8 @@ import pleocmd.pipe.out.Output;
 import pleocmd.pipe.out.PleoRXTXOutput;
 import pleocmd.pipe.out.PrintType;
 
-public abstract class DataSequenceEditorPanel extends JPanel {
+public abstract class DataSequenceEditorPanel extends JPanel implements
+		UpdateErrorInterface {
 
 	private static final long serialVersionUID = -3019900508373635307L;
 
@@ -397,7 +398,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		updateState();
 	}
 
-	final void updateErrorLabel(final String text) {
+	public final void updateErrorLabel(final String text) {
 		if (text.equals(lblErrorFeedback.getText())) return;
 		lblErrorFeedback.setText(text);
 		Color.RGBtoHSB(255, 0, 0, null);
@@ -405,8 +406,9 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		final Color trg = lblErrorFeedback.getBackground();
 		lblErrorFeedback.setForeground(src);
 		if (errorLabelTimerTask != null) errorLabelTimerTask.cancel();
-		errorLabelTimerTask = new FadeTimerTask(src.getRed(), src.getGreen(),
-				src.getBlue(), trg.getRed(), trg.getGreen(), trg.getBlue());
+		errorLabelTimerTask = new FadeTimerTask(lblErrorFeedback, src.getRed(),
+				src.getGreen(), src.getBlue(), trg.getRed(), trg.getGreen(),
+				trg.getBlue());
 		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
 	}
 
@@ -435,8 +437,9 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		return tpDataSequence;
 	}
 
-	private final class FadeTimerTask extends TimerTask {
+	public static final class FadeTimerTask extends TimerTask {
 
+		private final JLabel label;
 		private double cur0;
 		private double cur1;
 		private double cur2;
@@ -445,8 +448,9 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 		private final double inc2;
 		private int steps;
 
-		FadeTimerTask(final int src0, final int src1, final int src2,
-				final int trg0, final int trg1, final int trg2) {
+		FadeTimerTask(final JLabel label, final int src0, final int src1,
+				final int src2, final int trg0, final int trg1, final int trg2) {
+			this.label = label;
 			cur0 = src0;
 			cur1 = src1;
 			cur2 = src2;
@@ -460,8 +464,7 @@ public abstract class DataSequenceEditorPanel extends JPanel {
 			cur0 = Math.min(255, Math.max(0, cur0 + inc0));
 			cur1 = Math.min(255, Math.max(0, cur1 + inc1));
 			cur2 = Math.min(255, Math.max(0, cur2 + inc2));
-			getLblErrorFeedback().setForeground(
-					new Color((int) cur0, (int) cur1, (int) cur2));
+			label.setForeground(new Color((int) cur0, (int) cur1, (int) cur2));
 			if (++steps == 10) cancel();
 		}
 

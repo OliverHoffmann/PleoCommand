@@ -152,6 +152,8 @@ public abstract class ConfigValue {
 
 		if ("color".equals(identifier)) return new ConfigColor(label);
 
+		if ("datablock".equals(identifier)) return new ConfigDataBlock(label);
+
 		if ("list".equals(identifier))
 			return new ConfigCollection<String>(label, Type.List) {
 				@Override
