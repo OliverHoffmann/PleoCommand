@@ -231,7 +231,7 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void assignFromPipe() {
 		painter.setBounds(getWidth(), getHeight(), false);
-		painter.setPipe(getPipe(), getGraphics(), true);
+		painter.setPipe(getPipe(), getGraphics(), false);
 		updatePrefBounds();
 		repaint();
 	}
