@@ -32,8 +32,12 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 
 	private static final int ANGLE_UNDEFINED = 1000000;
 
+	// Time to wait (in ms) after the joint-movement should have been finished
+	private static final int ADDITIONAL_WAIT = 500;
+
 	private final ConfigInt cfgJointNumber;
 	private final ConfigInt cfgMinAngleMovement;
+	private final ConfigInt cfgMovementSpeed;
 
 	private long currentAngle;
 
@@ -41,6 +45,8 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 		addConfig(cfgJointNumber = new ConfigInt("Joint-Number", 9, 0, 13));
 		addConfig(cfgMinAngleMovement = new ConfigInt("Minimal Angle-Movement",
 				3, 0, 50));
+		addConfig(cfgMovementSpeed = new ConfigInt("Maximal Movement Speed",
+				180, 1, 1000));
 		constructed();
 	}
 
@@ -79,10 +85,17 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 		final long val = Math.round(SingleFloatData.getValue(data));
 		if (Math.abs(currentAngle - val) < cfgMinAngleMovement.getContent())
 			return emptyList(); // ignore small movements
+
+		// convert degree / sec in ms for <val> degree_delta
+		final int delta = (int) Math.abs(val
+				- (currentAngle == ANGLE_UNDEFINED ? 0 : currentAngle));
+		final int wait = 1000 * delta / cfgMovementSpeed.getContent();
+
 		currentAngle = val;
 		if (isVisualize()) plot(0, val);
-		return asList(new CommandData("PMC", String.format("JOINT MOVE %d %d",
-				cfgJointNumber.getContent(), val), data));
+		return asList(new CommandData("PMC", String.format(
+				"JOINT ANGLE %d %d %d %d", cfgJointNumber.getContent(), val,
+				wait + ADDITIONAL_WAIT, wait), data));
 	}
 
 	public static String help(final HelpKind kind) {
@@ -90,12 +103,15 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 		case Name:
 			return "Single Joint Movement";
 		case Description:
-			return "Produces a JOINT MOVE command for the Pleo for one joint "
+			return "Produces a JOINT ANGLE command for the Pleo for one joint "
 					+ "based on the data in a single channel";
 		case Config1:
 			return "Number of Pleo joint (motor) to move";
 		case Config2:
-			return "Minimal angle; all movements below this will be ignored";
+			return "Minimal delta of angle in degree; all movements smaller than "
+					+ "this value will be ignored";
+		case Config3:
+			return "Maximal allowed movement speed for the joint (in degree / s)";
 		default:
 			return null;
 		}
