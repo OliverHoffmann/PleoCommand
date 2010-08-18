@@ -198,21 +198,22 @@ public final class Diagram extends JPanel {
 
 	@Override
 	protected synchronized void paintComponent(final Graphics g) {
-		final Rectangle clip = g.getClipBounds();
-		final BufferedImage img = new BufferedImage(clip.width, clip.height,
+		final int areaWidth = getWidth();
+		final int areaHeight = getHeight();
+		final BufferedImage img = new BufferedImage(areaWidth, areaHeight,
 				BufferedImage.TYPE_INT_RGB);
 		final Graphics2D g2 = img.createGraphics();
 		originalTransform = g2.getTransform();
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
-		g2.setClip(0, 0, clip.width, clip.height);
+		g2.setClip(0, 0, areaWidth, areaHeight);
 		g2.setColor(backgroundColor);
-		g2.fillRect(0, 0, clip.width, clip.height);
+		g2.fillRect(0, 0, areaWidth, areaHeight);
 		g2.setFont(getFont().deriveFont(10f));
 
 		// cache y-axis dimension
 		final int unitHeight = g2.getFontMetrics().getHeight();
-		final int h = getHeight() - 1 - unitHeight - BORDER;
+		final int h = areaHeight - 1 - unitHeight - BORDER;
 		yAxis.updateCache(h);
 
 		// cache x-axis dimension
@@ -223,10 +224,10 @@ public final class Diagram extends JPanel {
 				String.format("%.2f %s", yAxis.getCachedMaxVisUnit(), yAxis
 						.getUnitName()));
 		final int unitWidth = Math.max(unitWidth1, unitWidth2);
-		final int w = getWidth() - 1 - unitWidth - BORDER;
+		final int w = areaWidth - 1 - unitWidth - BORDER;
 		xAxis.updateCache(w);
 
-		g2.translate(unitWidth, getHeight() - unitHeight);
+		g2.translate(unitWidth, areaHeight - unitHeight);
 		g2.scale(1, -1);
 
 		// draw x and y axis
@@ -295,7 +296,7 @@ public final class Diagram extends JPanel {
 					.stringWidth(ds.getLabel()));
 		legendWidth += 4;
 		g2.setTransform(originalTransform);
-		g2.translate(getWidth() - BORDER - legendWidth + 1, BORDER + 1);
+		g2.translate(areaWidth - BORDER - legendWidth + 1, BORDER + 1);
 		final Rectangle legendRect = new Rectangle(0, 0, legendWidth,
 				legendHeight);
 		g2.setPaint(new Color(backgroundColor.getRed(), backgroundColor
@@ -315,7 +316,7 @@ public final class Diagram extends JPanel {
 			++idx;
 		}
 
-		g.drawImage(img, clip.x, clip.y, null);
+		g.drawImage(img, 0, 0, null);
 	}
 
 	private void drawText(final Graphics2D g2, final Rectangle bounds,
