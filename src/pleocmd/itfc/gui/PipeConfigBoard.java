@@ -857,9 +857,7 @@ final class PipeConfigBoard extends JPanel {
 				final Point pt = new Point();
 				BoardPainter.calcConnectorPositions(srcPP.getGuiPosition(),
 						trgPP.getGuiPosition(), ps, pt);
-				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, porg.x, porg.y) < LINE_CLICK_DIST
-						|| BoardPainter.getArrowPolygon(ps.x, ps.y, pt.x, pt.y)
-								.contains(pt)) {
+				if (Line2D.ptSegDistSq(ps.x, ps.y, pt.x, pt.y, porg.x, porg.y) < LINE_CLICK_DIST) {
 					p.currentPart = srcPP;
 					p.currentConnection = new Rectangle(porg.x, porg.y, 0, 0);
 					p.currentConnectionsTarget = trgPP;
