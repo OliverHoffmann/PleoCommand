@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JTextPane;
 
@@ -35,6 +36,7 @@ public class DataBlockField extends JTextPane implements UpdateErrorInterface {
 		setFont(getFont().deriveFont(Font.BOLD));
 		setText(data);
 		errorLabel.setForeground(Color.RED);
+		setBorder(BorderFactory.createEtchedBorder());
 	}
 
 	@Override
