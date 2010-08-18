@@ -15,9 +15,10 @@ public class DataBlockField extends JTextPane implements UpdateErrorInterface {
 
 	private static final long serialVersionUID = 6442009735721513493L;
 
-	private final JLabel errorLabel;
+	private static final Timer ERR_LBL_TIMER = new Timer("Error-Label Timer",
+			true);
 
-	private final Timer errorLabelTimer = new Timer("ErrorLabelTimer", true);
+	private final JLabel errorLabel;
 
 	private TimerTask errorLabelTimerTask;
 
@@ -49,7 +50,7 @@ public class DataBlockField extends JTextPane implements UpdateErrorInterface {
 		errorLabelTimerTask = new FadeTimerTask(errorLabel, src.getRed(), src
 				.getGreen(), src.getBlue(), trg.getRed(), trg.getGreen(), trg
 				.getBlue());
-		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
+		ERR_LBL_TIMER.schedule(errorLabelTimerTask, 1000, 100);
 	}
 
 }

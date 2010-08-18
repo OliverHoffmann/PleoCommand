@@ -49,7 +49,8 @@ public final class MainPipePanel extends JPanel {
 
 	private final JButton btnLoad;
 
-	private final Timer updateTimer;
+	private static final Timer UPDATE_TIMER = new Timer(
+			"Pipe Thumbnail Update Timer", true);
 
 	private TimerTask updateTimerTask;
 
@@ -59,7 +60,6 @@ public final class MainPipePanel extends JPanel {
 
 	public MainPipePanel() {
 		final Layouter lay = new Layouter(this);
-		updateTimer = new Timer("Pipe Thumbnail Update Timer", true);
 
 		pipeLabel = new JLabel();
 		lay.addWholeLine(pipeLabel, false);
@@ -198,7 +198,7 @@ public final class MainPipePanel extends JPanel {
 			}
 		};
 		Log.detail("Scheduling a thumbnail update in 1000 ms");
-		updateTimer.schedule(updateTimerTask, 1000);
+		UPDATE_TIMER.schedule(updateTimerTask, 1000);
 	}
 
 	public PipeFlowVisualization getPipeFlowVisualization() {

@@ -41,11 +41,12 @@ public final class LogTable extends JTable {
 
 	private static final long serialVersionUID = -8728774076766042538L;
 
+	private static final Timer LOG_TIMER = new Timer("LogTable-Update Timer",
+			true);
+
 	private LogTableModel logModel;
 
 	private int minRowHeight;
-
-	private final Timer timer = new Timer("LogTable-Update", true);
 
 	private TimerTask updateTask;
 
@@ -94,7 +95,7 @@ public final class LogTable extends JTable {
 			}
 		};
 		Log.detail("Scheduling a LogTable update in 200 ms");
-		timer.schedule(updateTask, 200);
+		LOG_TIMER.schedule(updateTask, 200);
 	}
 
 	public void setLogModel(final LogTableModel logModel) {

@@ -72,6 +72,9 @@ public abstract class DataSequenceEditorPanel extends JPanel implements
 
 	private static final long serialVersionUID = -3019900508373635307L;
 
+	private final static Timer ERR_LBL_TIMER = new Timer("Error-Label Timer",
+			true);
+
 	private final JTextPane tpDataSequence;
 
 	private final UndoManager tpUndoManager;
@@ -91,8 +94,6 @@ public abstract class DataSequenceEditorPanel extends JPanel implements
 	private List<Output> playOutputList;
 
 	private final JLabel lblErrorFeedback;
-
-	private final Timer errorLabelTimer = new Timer("ErrorLabelTimer", true);
 
 	private TimerTask errorLabelTimerTask;
 
@@ -409,7 +410,7 @@ public abstract class DataSequenceEditorPanel extends JPanel implements
 		errorLabelTimerTask = new FadeTimerTask(lblErrorFeedback, src.getRed(),
 				src.getGreen(), src.getBlue(), trg.getRed(), trg.getGreen(),
 				trg.getBlue());
-		errorLabelTimer.schedule(errorLabelTimerTask, 1000, 100);
+		ERR_LBL_TIMER.schedule(errorLabelTimerTask, 1000, 100);
 	}
 
 	protected abstract void stateChanged();
