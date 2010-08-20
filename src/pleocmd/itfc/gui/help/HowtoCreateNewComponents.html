@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Howto: Neue Komponenten erstellen</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Howto: Neue Komponenten erstellen</H1>
+
+  <OL>
+    <LI>Eine bereits vorhandene Komponente als Vorlage verwenden bzw. neue Klasse mit Input, Converter oder Output
+    Klasse als Superklasse erstellen.<BR>
+    Input-Komponenten müssen in pleocmd.pipe.in liegen<BR>
+    Konverter-Komponenten müssen in pleocmd.pipe.cvt liegen<BR>
+    Output-Komponenten müssen in pleocmd.pipe.out liegen<BR></LI>
+
+    <LI>Abstrakte Methoden anpassen bzw. implementieren</LI>
+
+    <LI><CODE>public static String help(final HelpKind kind)</CODE> anpassen bzw. hinzufügen</LI>
+
+    <LI>Optional: Hilfedatei mit Klassenname plus ".html" in src/pleocmd/itfc/gui/help erstellen</LI>
+
+    <LI>Optional: Bild (etwa 250 x 150 Pixel) für Konfigurations-Dialog mit Klassenname plus "-cfg.png" in
+    src/pleocmd/itfc/gui/icons erstellen</LI>
+
+    <LI>Optional: Icon (maximal 32 x 32 Pixel) für Board mit Klassenname plus "-icon.png" in src/pleocmd/itfc/gui/icons
+    erstellen</LI>
+
+    <LI>Entweder: PleoCommand neu bauen (<STRONG>ant dist</STRONG> ausführen)<BR>
+    Oder: Unter Beibehaltung obiger Ordnerstruktur alle neu erstellten Dateien in ein .jar Archiv schreiben und dieses
+    im dist/ Ordner ablegen für automatisches Einbinden, ohne dass PleoCommand neu gebaut werden muss.</LI>
+  </OL>
+</BODY>
+</HTML>
