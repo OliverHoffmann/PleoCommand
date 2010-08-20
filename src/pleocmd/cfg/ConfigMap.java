@@ -168,7 +168,7 @@ public abstract class ConfigMap<K extends Comparable<? super K>, V> extends
 	}
 
 	@Override
-	final void setFromString(final String string) {
+	public final void setFromString(final String string) {
 		throw new UnsupportedOperationException();
 	}
 

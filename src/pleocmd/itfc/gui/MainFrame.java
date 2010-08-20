@@ -252,7 +252,7 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		thr.start();
 	}
 
-	protected synchronized void startPipeThread() {
+	public synchronized void startPipeThread() {
 		if (isPipeRunning())
 			throw new IllegalStateException("Pipe-Thread already running");
 		pipeThread = new Thread("Pipe-Thread") {

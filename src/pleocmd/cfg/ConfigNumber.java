@@ -114,7 +114,8 @@ abstract class ConfigNumber<E extends Number> extends ConfigValue {
 	}
 
 	@Override
-	final void setFromString(final String string) throws ConfigurationException {
+	public final void setFromString(final String string)
+			throws ConfigurationException {
 		try {
 			setContent(valueOf(string));
 		} catch (final NumberFormatException e) {

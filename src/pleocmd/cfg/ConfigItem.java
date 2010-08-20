@@ -156,7 +156,8 @@ public class ConfigItem<E> extends ConfigValue {
 	}
 
 	@Override
-	final void setFromString(final String string) throws ConfigurationException {
+	public final void setFromString(final String string)
+			throws ConfigurationException {
 		setContent(string);
 	}
 

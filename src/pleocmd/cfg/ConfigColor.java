@@ -92,7 +92,8 @@ public class ConfigColor extends ConfigValue {
 	}
 
 	@Override
-	final void setFromString(final String string) throws ConfigurationException {
+	public final void setFromString(final String string)
+			throws ConfigurationException {
 		final int idx1 = string.indexOf(',');
 		final int idx2 = string.indexOf(',', idx1 + 1);
 		final int idx3 = string.indexOf(',', idx2 + 1);

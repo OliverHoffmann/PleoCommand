@@ -50,6 +50,7 @@ import pleocmd.exc.StateException;
 import pleocmd.itfc.gui.MainFrame;
 import pleocmd.itfc.gui.MainPipePanel;
 import pleocmd.itfc.gui.PipeFlowVisualization;
+import pleocmd.pipe.PipePart.HelpKind;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.data.Data;
 import pleocmd.pipe.data.DataQueue;
@@ -1207,4 +1208,81 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	public boolean isMainInputThreadFinished() {
 		return mainInputThread == null;
 	}
+
+	/**
+	 * Returns the the {@link PipePart} with the given name. If there are more
+	 * than one or none, <b>null</b> will be returned.
+	 * 
+	 * @param part
+	 *            the full name of a {@link PipePart} as returned from
+	 *            {@link HelpKind#Name}
+	 * @return {@link PipePart} or <b>null</b>
+	 */
+	public PipePart findByName(final String part) {
+		PipePart res = null;
+		for (final PipePart pp : getInputList())
+			if (pp.getName().equals(part)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		for (final PipePart pp : getConverterList())
+			if (pp.getName().equals(part)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		for (final PipePart pp : getOutputList())
+			if (pp.getName().equals(part)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		return res;
+	}
+
+	/**
+	 * Returns the the {@link PipePart} with the given simple class name. If
+	 * there are more than one or none, <b>null</b> will be returned.
+	 * 
+	 * @param className
+	 *            the simple name of a {@link PipePart}'s class
+	 * @return {@link PipePart} or <b>null</b>
+	 */
+	public PipePart findByClassName(final String className) {
+		PipePart res = null;
+		for (final PipePart pp : getInputList())
+			if (pp.getClass().getSimpleName().equals(className)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		for (final PipePart pp : getConverterList())
+			if (pp.getClass().getSimpleName().equals(className)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		for (final PipePart pp : getOutputList())
+			if (pp.getClass().getSimpleName().equals(className)) {
+				if (res != null) return null;
+				res = pp;
+			}
+		return res;
+	}
+
+	/**
+	 * Returns the the {@link PipePart} with the given UID. If there is none,
+	 * <b>null</b> will be returned.
+	 * 
+	 * @param uid
+	 *            the UID of a {@link PipePart} as returned from
+	 *            {@link PipePart#getUID()}
+	 * @return {@link PipePart} or <b>null</b>
+	 */
+	public PipePart findByUID(final long uid) {
+		for (final PipePart pp : getInputList())
+			if (pp.getUID() == uid) return pp;
+		for (final PipePart pp : getConverterList())
+			if (pp.getUID() == uid) return pp;
+		for (final PipePart pp : getOutputList())
+			if (pp.getUID() == uid) return pp;
+		return null;
+	}
+
 }

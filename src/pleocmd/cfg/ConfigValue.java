@@ -75,7 +75,7 @@ public abstract class ConfigValue {
 
 	public abstract String asString();
 
-	abstract void setFromString(final String string)
+	public abstract void setFromString(final String string)
 			throws ConfigurationException;
 
 	abstract List<String> asStrings();

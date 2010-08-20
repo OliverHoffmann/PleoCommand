@@ -153,7 +153,8 @@ public final class ConfigPath extends ConfigValue {
 	}
 
 	@Override
-	void setFromString(final String string) throws ConfigurationException {
+	public void setFromString(final String string)
+			throws ConfigurationException {
 		setContent(new File(string));
 	}
 

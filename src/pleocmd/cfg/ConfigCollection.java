@@ -161,7 +161,8 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	}
 
 	@Override
-	final void setFromString(final String string) throws ConfigurationException {
+	public final void setFromString(final String string)
+			throws ConfigurationException {
 		final List<E> list = new ArrayList<E>();
 		final StringTokenizer st = new StringTokenizer(string, "\n");
 		while (st.hasMoreTokens())
