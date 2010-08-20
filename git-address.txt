@@ -1,0 +1,4 @@
+readonly (git):		git://github.com/OliverHoffmann/PleoCommand.git
+readonly (http):	http://github.com/OliverHoffmann/PleoCommand
+read+write (http):	https://OliverHoffmann@github.com/OliverHoffmann/PleoCommand.git
+read+write (ssh):	git@github.com:OliverHoffmann/PleoCommand.git
