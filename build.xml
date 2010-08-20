@@ -346,6 +346,22 @@
 		</copy>
 	</target>
 
+	<target name="_buildVersion">
+		<echo message="Writing GIT revision and date" />
+		<exec executable="${src}/write-git-version.sh"
+		      dir="${basedir}"
+		      failonerror="true"
+		      osfamily="unix">
+			<arg value="${src}/pleocmd/itfc/cli/Version.java" />
+		</exec>
+		<exec executable="${src}/write-git-version.bat"
+		      dir="${basedir}"
+		      failonerror="true"
+		      osfamily="windows">
+			<arg value="${src}/pleocmd/itfc/cli/Version.java" />
+		</exec>
+	</target>
+
 	<target name="_buildJava">
 		<javac srcdir="${src}"
 		       destdir="${bin}"
@@ -494,6 +510,7 @@
 	        description="Builds Java, C and C++ sourcecode from src/ (creates bin/)">
 		<mkdir dir="${bin}" />
 		<antcall target="_buildCopy" />
+		<antcall target="_buildVersion" />
 		<antcall target="_buildJava" />
 		<antcall target="_buildCAndCPP" />
 		<antcall target="_buildChangelog" />

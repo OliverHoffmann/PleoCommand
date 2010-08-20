@@ -1,4 +1,5 @@
 /bin
 /dist
 /ext
+src/pleocmd/itfc/cli/Version.java
 .ant-targets-build.xml
