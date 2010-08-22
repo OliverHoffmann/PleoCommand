@@ -1,9 +1,7 @@
 FIX in zoom mode, some area hints and the section borders are not drawn correctly
 FIX "Application exited forcefully" still possible
-FIX ErrorDialog shown even in non-GUI mode if GUIstatus is still unknown (still?)
 FIX empty Log queue on app exit if not already done (still?)
-ENH SingleCommandConverter: missing Syntax Highlighting in cfgCommand (and others) !!!
-ENH CommandLine must support PipePart Configuration !!!
+ENH ExpressionConverter: missing Syntax Highlighting
 ENH auto-save configuration
 ENH RandomGenerator: plotting
 ENH Board: Comments, ConnectorPoints (*1)
