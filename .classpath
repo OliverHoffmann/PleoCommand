@@ -2,12 +2,17 @@
 <classpath>
 	<classpathentry excluding="**/*.odg|BCI2000Source/|ExpressionParser/|PleoCommand.ico|TCPIP-Simulator/|checkstyle.xml|ext/|motions/|pleocommand|suppressions.xml|svnlog.xsl|tidy-all-html.sh|ugobe-projects/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/usr/share/junit-4/lib/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="ext/build/hamcrest-core.jar"/>
 	<classpathentry kind="lib" path="src/ext/rt/RXTXcomm.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="PleoCommand/dist"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="/usr/share/junit-4/lib/junit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
