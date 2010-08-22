@@ -1,0 +1,91 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<HTML>
+<HEAD>
+  <META name="generator" content="HTML Tidy for Linux (vers 25 March 2009), see www.w3.org">
+  <META name="generator" content="Bluefish 2.0.0">
+  <META content="text/html; charset=utf-8" http-equiv="Content-Type">
+
+  <TITLE>Kommandozeilen Argumente</TITLE>
+</HEAD>
+
+<BODY>
+  <H1>Kommandozeilen Argumente</H1>
+
+  <TABLE summary="Argumente">
+    <TR>
+      <TH>Argument (lang)</TH>
+
+      <TH>Argument (kurz)</TH>
+
+      <TH>Beschreibung</TH>
+    </TR>
+
+    <TR>
+      <TD valign="top">--detailed</TD>
+
+      <TD valign="top">-d</TD>
+
+      <TD valign="top">Gibt detaillierte (Debugging) Informationen aus.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">--help</TD>
+
+      <TD valign="top">-h -?</TD>
+
+      <TD valign="top">Gibt diese Hilfe aus.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">--version</TD>
+
+      <TD valign="top">-V</TD>
+
+      <TD valign="top">Gibt Versionsnummer und Copyright aus.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">--gui</TD>
+
+      <TD valign="top">-g</TD>
+
+      <TD valign="top">Startet die graphische Benutzeroberfläche und zeigt Fehlermeldungen im Fehler-Dialog an
+      (Standard, falls keinerlei Argumente angegeben wurden).</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">&lt;PCA-Datei&gt;</TD>
+
+      <TD valign="top"></TD>
+
+      <TD valign="top">Lädt eine zuvor über die GUI gespeicherte Pipe und führt diese aus, nachdem alle weiteren
+      Argumente ausgewertet wurden.<BR>
+      Nach der Datei aufgeführte Argumente wie --configure wirken sich auf die geladene Pipe aus. Weitere PCA-Dateien
+      überschreiben die vorhergehenden und führen keine zusätzliche Pipe aus.</TD>
+    </TR>
+
+    <TR>
+      <TD valign="top">--configure</TD>
+
+      <TD valign="top">-c</TD>
+
+      <TD valign="top">Ändert die Konfiguration der aktuell geladenen Pipe.<BR>
+      Syntax: &lt;Name der Komponente&gt;:&lt;Bezeichner&gt;:&lt;Wert&gt; oder &lt;UID der
+      Komponente&gt;:&lt;Bezeichner&gt;:&lt;Wert&gt;.<BR>
+      Falls der Name der Komponente nicht eindeutig oder unbekannt ist, wird eine Fehlermeldung ausgegeben.<BR>
+      Falls die UID ungültig oder unbekannt ist, wird eine Fehlermeldung ausgegeben.<BR>
+      Falls der Bezeichner der Komponente unbekannt ist, wird eine Fehlermeldung ausgegeben.<BR>
+      Falls der Wert ungültig ist, wird eine Fehlermeldung ausgegeben.</TD>
+    </TR>
+  </TABLE><BR>
+  Beispiele:<BR>
+  Eine Pipe in der GUI ausführen:<BR>
+  pleocommand MyPipe.pca --gui<BR>
+  Eine Pipe auf der Konsole mit Debugging Informationen ausführen:<BR>
+  pleocommand MyPipe.pca --detailed<BR>
+  Eine Pipe auf der Konsole ausführen, aber zuvor deren Konfiguration anpassen:<BR>
+  pleocommand MyPipe.pca --c=TcpIpInput:Port:1234 --c=TcpIpInput:"Read-Timeout (sec):60"
+</BODY>
+</HTML>

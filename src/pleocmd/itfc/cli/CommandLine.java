@@ -151,8 +151,11 @@ public final class CommandLine {
 				.println("\t\tMust be specified after the PCA file. Syntax is:");
 		System.err.println("\t\t<Name of PipePart>:<Label>:<Value> OR");
 		System.err.println("\t\t<UID of PipePart>:<Label>:<Value> ");
-		System.err.println("\t\tIf the name of the PipePart is not unique, "
-				+ "an error will be thrown.");
+		System.err.println("\t\tIf the name of the PipePart is unknown or "
+				+ "not unique, an error will be thrown.");
+		System.err
+				.println("\t\tIf the UID of the PipePart is invalid or unknown, "
+						+ "an error will be thrown.");
 		System.err.println("\t\tIf the label is unknown, "
 				+ "an error will be thrown.");
 		System.err.println("\t\tIf the value is invalid, "
@@ -198,13 +201,18 @@ public final class CommandLine {
 		final String label = cfg.substring(idx1 + 1, idx2).trim();
 		final String value = cfg.substring(idx2 + 1).trim();
 
+		long uid;
+		try {
+			uid = Long.parseLong(part);
+		} catch (final NumberFormatException e) {
+			uid = Long.MIN_VALUE;
+		}
 		final PipePart pp;
-		if (part.toUpperCase().startsWith("<UID>")) {
-			final long uid = Long.parseLong(part.substring(5));
+		if (uid != Long.MIN_VALUE) {
 			pp = getPipe().findByUID(uid);
 			if (pp == null)
 				throw new IllegalArgumentException(String.format(
-						"Cannot find PipePart with uid %d in '%s'", uid,
+						"Cannot find PipePart with UID %d in '%s'", uid,
 						getPipe()));
 		} else {
 			pp = getPipe().findByClassName(part);
@@ -228,5 +236,4 @@ public final class CommandLine {
 		}
 
 	}
-
 }
