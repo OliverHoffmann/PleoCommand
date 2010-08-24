@@ -138,20 +138,16 @@ final class BoardPainter {
 		g2.fillRect(0, 0, clip.width, clip.height);
 		g2.translate(-clip.x, -clip.y);
 		g2.scale(scale, scale);
-		drawMovementHint(g2, p.currentPart);
+		drawMovementHint(g2, p);
 		final long time1 = System.currentTimeMillis();
 
 		if (clip.x < border1) drawOrderingHint(g2);
 		final long time2 = System.currentTimeMillis();
 		drawSectionBorders(g2);
 		final long time3 = System.currentTimeMillis();
-		final int cnt4 = drawPipeParts(g2, clipOrg, p.currentPart,
-				p.underCursor, p.modifyable, p.currentIcon);
+		final int cnt4 = drawPipeParts(g2, p, clipOrg);
 		final long time4 = System.currentTimeMillis();
-		final int cnt5 = drawConnections(g2, clipOrg, p.currentPart,
-				p.currentConnection == null ? null : new ImmutableRectangle(
-						p.currentConnection), p.underCursor,
-				p.currentConnectionsTarget, p.currentConnectionValid);
+		final int cnt5 = drawConnections(g2, p, clipOrg);
 		final long time5 = System.currentTimeMillis();
 		drawAutoLayoutInfo(g2, p.layouter);
 		drawPipeFlow(g2, p.pipeflow);
@@ -179,26 +175,25 @@ final class BoardPainter {
 		g2.setFont(f);
 	}
 
-	private void drawMovementHint(final Graphics2D g2,
-			final PipePart currentPart) {
+	private void drawMovementHint(final Graphics2D g2, final PaintParameters p) {
 		final List<? extends PipePart> list;
 		final int x0;
 		final int x1;
-		if (currentPart instanceof Input) {
+		if (p.currentPart instanceof Input) {
 			list = pipe.getInputList();
 			x0 = 0;
 			x1 = border1;
-		} else if (currentPart instanceof Converter) {
+		} else if (p.currentPart instanceof Converter) {
 			list = pipe.getConverterList();
 			x0 = border1;
 			x1 = border2;
-		} else if (currentPart instanceof Output) {
+		} else if (p.currentPart instanceof Output) {
 			list = pipe.getOutputList();
 			x0 = border2;
 			x1 = (int) (bounds.width / scale);
 		} else
 			return;
-		final int idx = list.indexOf(currentPart);
+		final int idx = list.indexOf(p.currentPart);
 		final PipePart before = idx > 0 ? list.get(idx - 1) : null;
 		final PipePart after = idx < list.size() - 1 ? list.get(idx + 1) : null;
 
@@ -229,15 +224,15 @@ final class BoardPainter {
 		final int ch = th + ah;
 		final int ow = (int) ((w - cw) / 2);
 		final int oh = (int) ((h - ch) / 2);
-		final Polygon p = new Polygon();
-		p.addPoint(ow + aw, oh);
-		p.addPoint(ow + aw + tw, oh);
-		p.addPoint(ow + aw + tw, oh + th);
-		p.addPoint(ow + aw + tw + aw, oh + th);
-		p.addPoint(ow + aw + tw / 2, oh + th + ah);
-		p.addPoint(ow, oh + th);
-		p.addPoint(ow + aw, oh + th);
-		p.addPoint(ow + aw, oh);
+		final Polygon poly = new Polygon();
+		poly.addPoint(ow + aw, oh);
+		poly.addPoint(ow + aw + tw, oh);
+		poly.addPoint(ow + aw + tw, oh + th);
+		poly.addPoint(ow + aw + tw + aw, oh + th);
+		poly.addPoint(ow + aw + tw / 2, oh + th + ah);
+		poly.addPoint(ow, oh + th);
+		poly.addPoint(ow + aw, oh + th);
+		poly.addPoint(ow + aw, oh);
 
 		if (BoardConfiguration.CFG_SHADOW_ORDERHINT.getContent()
 				&& BoardConfiguration.CFG_SHADOW_DEPTH.getContent() > 0) {
@@ -245,12 +240,12 @@ final class BoardPainter {
 			g2.translate(BoardConfiguration.CFG_SHADOW_DEPTH.getContent(),
 					BoardConfiguration.CFG_SHADOW_DEPTH.getContent());
 			g2.setColor(BoardConfiguration.CFG_SHADOW_COLOR.getContent());
-			g2.fillPolygon(p);
+			g2.fillPolygon(poly);
 			g2.setTransform(at);
 		}
 
 		g2.setColor(BoardConfiguration.CFG_ORDER_HINT_BACK.getContent());
-		g2.fillPolygon(p);
+		g2.fillPolygon(poly);
 	}
 
 	private void drawSectionBorders(final Graphics2D g2) {
@@ -262,29 +257,23 @@ final class BoardPainter {
 		g2.drawLine(border2, 0, border2, h);
 	}
 
-	private int drawPipeParts(final Graphics2D g2, final Rectangle clip,
-			final PipePart currentPart, final PipePart underCursor,
-			final boolean modifyable, final Icon curIcon) {
+	private int drawPipeParts(final Graphics2D g2, final PaintParameters p,
+			final Rectangle clip) {
 		int cnt = 0;
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set)
-			cnt += drawPipePart(g2, pp, pp == underCursor, clip, currentPart,
-					modifyable, curIcon);
+			cnt += drawPipePart(g2, p, pp, clip);
 		return cnt;
 	}
 
-	private int drawConnections(final Graphics2D g2, final Rectangle clip,
-			final PipePart currentPart,
-			final ImmutableRectangle currentConnection,
-			final PipePart underCursor,
-			final PipePart currentConnectionsTarget,
-			final boolean currentConnectionValid) {
+	private int drawConnections(final Graphics2D g2, final PaintParameters p,
+			final Rectangle clip) {
 		int cnt = 0;
 		for (final PipePart src : set)
 			for (final PipePart trg : src.getConnectedPipeParts()) {
-				final boolean sel = currentPart == src
-						&& currentConnectionsTarget == trg;
+				final boolean sel = p.currentPart == src
+						&& p.currentConnectionsTarget == trg;
 				if (saneConfigCache.get(src) == null)
 					g2.setColor(sel ? BoardConfiguration.CFG_CONNECTION_SEL_OK
 							.getContent()
@@ -297,20 +286,20 @@ final class BoardPainter {
 				cnt += drawConnection(g2, src.getGuiPosition(),
 						trg.getGuiPosition(), src, trg, clip);
 			}
-		if (currentConnection != null && currentConnectionsTarget == null) {
-			g2.setColor(currentConnectionValid ? BoardConfiguration.CFG_CONNECTION_SEL_OK
+		if (p.currentConnection != null && p.currentConnectionsTarget == null) {
+			g2.setColor(p.currentConnectionValid ? BoardConfiguration.CFG_CONNECTION_SEL_OK
 					.getContent() : BoardConfiguration.CFG_CONNECTION_SEL_BAD
 					.getContent());
-			cnt += drawConnection(g2, currentPart.getGuiPosition(),
-					currentConnection, currentPart, underCursor, clip);
+			cnt += drawConnection(g2, p.currentPart.getGuiPosition(),
+					new ImmutableRectangle(p.currentConnection), p.currentPart,
+					p.underCursor, clip);
 		}
 		return cnt;
 	}
 
-	private int drawPipePart(final Graphics2D g2, final PipePart part,
-			final boolean hover, final Rectangle clip,
-			final PipePart currentPart, final boolean modifyable,
-			final Icon curIcon) {
+	private int drawPipePart(final Graphics2D g2, final PaintParameters p,
+			final PipePart part, final Rectangle clip) {
+		final boolean hover = part == p.underCursor;
 		final ImmutableRectangle rect = part.getGuiPosition();
 		if (BoardConfiguration.CFG_SHADOW_RECTS.getContent()
 				&& BoardConfiguration.CFG_SHADOW_DEPTH.getContent() > 0) {
@@ -322,11 +311,11 @@ final class BoardPainter {
 
 		final Color outerClr;
 		if (saneConfigCache.get(part) == null)
-			outerClr = part == currentPart ? BoardConfiguration.CFG_OUTER_SEL_OK
+			outerClr = part == p.currentPart ? BoardConfiguration.CFG_OUTER_SEL_OK
 					.getContent() : BoardConfiguration.CFG_OUTER_OK
 					.getContent();
 		else
-			outerClr = part == currentPart ? BoardConfiguration.CFG_OUTER_SEL_BAD
+			outerClr = part == p.currentPart ? BoardConfiguration.CFG_OUTER_SEL_BAD
 					.getContent() : BoardConfiguration.CFG_OUTER_BAD
 					.getContent();
 
@@ -355,7 +344,7 @@ final class BoardPainter {
 			inner.grow(-BoardConfiguration.CFG_ICON_WIDTH.getContent()
 					- BoardConfiguration.CFG_INNER_WIDTH.getContent(),
 					-BoardConfiguration.CFG_INNER_HEIGHT.getContent());
-			g2.setColor(modifyable ? BoardConfiguration.CFG_INNER_MODIFIABLE
+			g2.setColor(p.modifyable ? BoardConfiguration.CFG_INNER_MODIFIABLE
 					.getContent() : BoardConfiguration.CFG_INNER_READONLY
 					.getContent());
 			g2.fill(inner);
@@ -391,12 +380,13 @@ final class BoardPainter {
 				(float) (rect.getY() + sb.getHeight()));
 
 		// draw clickable icons
-		drawIcon(g2, hover && curIcon == ICON_CONF, rect, ICON_CONF,
-				BoardConfiguration.CFG_ICON_CONF_POS.getContent(), !modifyable
-						|| part.getGuiConfigs().isEmpty(), false, modifyable);
-		drawIcon(g2, hover && curIcon == ICON_DGR, rect, ICON_DGR,
+		drawIcon(g2, hover && p.currentIcon == ICON_CONF, rect, ICON_CONF,
+				BoardConfiguration.CFG_ICON_CONF_POS.getContent(),
+				!p.modifyable || part.getGuiConfigs().isEmpty(), false,
+				p.modifyable);
+		drawIcon(g2, hover && p.currentIcon == ICON_DGR, rect, ICON_DGR,
 				BoardConfiguration.CFG_ICON_DGR_POS.getContent(), false,
-				part.isVisualize(), modifyable);
+				part.isVisualize(), p.modifyable);
 
 		// restore old clip
 		g2.setClip(shape);
