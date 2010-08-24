@@ -83,12 +83,17 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 		// Save current pipe's configuration
 		saveCurrentPipe();
 
-		sldZoom = new JSlider(-100, 100, 0);
+		sldZoom = new JSlider(-75, 45, 0);
 		sldZoom.setMinimumSize(new Dimension(150, sldZoom.getHeight()));
+		sldZoom.setMajorTickSpacing(75);
+		sldZoom.setMinorTickSpacing(15);
+		sldZoom.setPaintTicks(true);
 		sldZoom.setToolTipText("Zoom the Pipe Configuration Board");
 		sldZoom.addChangeListener(new ChangeListener() {
 			@Override
+			@SuppressWarnings("synthetic-access")
 			public void stateChanged(final ChangeEvent e) {
+				if (Math.abs(sldZoom.getValue()) < 4) sldZoom.setValue(0);
 				setCurrentZoom();
 			}
 		});
