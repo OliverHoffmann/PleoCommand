@@ -150,8 +150,6 @@ final class PipeConfigBoard extends JPanel {
 
 	private Point handlePoint;
 
-	private Icon currentIcon;
-
 	private boolean delayedReordering;
 
 	private Thread layoutThread;
@@ -445,7 +443,8 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void configureCurrentPart(final boolean onlyIfNoIcon) {
 		if (hasCurrentPart() && !p.currentPart.getGuiConfigs().isEmpty()
-				&& (!onlyIfNoIcon || currentIcon == null) && ensureModifyable()) {
+				&& (!onlyIfNoIcon || p.currentIcon == null)
+				&& ensureModifyable()) {
 			createConfigureDialog("Configure", p.currentPart, null);
 			painter.recalculatePipePartWidth(p.currentPart, getGraphics());
 			repaint();
@@ -453,8 +452,9 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	protected void checkIconClicked() {
-		if (currentIcon == BoardPainter.ICON_CONF) configureCurrentPart(false);
-		if (currentIcon == BoardPainter.ICON_DGR) toggleDiagram();
+		if (p.currentIcon == BoardPainter.ICON_CONF)
+			configureCurrentPart(false);
+		if (p.currentIcon == BoardPainter.ICON_DGR) toggleDiagram();
 	}
 
 	protected void toggleDiagram() {
@@ -805,16 +805,15 @@ final class PipeConfigBoard extends JPanel {
 		for (final PipePart pp : painter.getSet())
 			if (pp.getGuiPosition().contains(porg)) {
 				found = pp;
+				final Object res = BoardPainter.getPipePartElement(pp, porg);
+				p.currentIcon = res instanceof Icon ? (Icon) res : null;
 				break;
 			}
-		if (p.underCursor != found) {
-			// TODO FIX remove if-clause above once hover is per icon
-			if (p.underCursor != null)
-				repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
-			p.underCursor = found;
-			if (p.underCursor != null)
-				repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
-		}
+		if (p.underCursor != null)
+			repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
+		p.underCursor = found;
+		if (p.underCursor != null)
+			repaint(scaleRect(p.underCursor.getGuiPosition().createCopy()));
 	}
 
 	/**
@@ -841,7 +840,7 @@ final class PipeConfigBoard extends JPanel {
 				p.currentPart = pp;
 				final Object res = BoardPainter.getPipePartElement(pp, porg);
 				if (res instanceof Icon)
-					currentIcon = (Icon) res;
+					p.currentIcon = (Icon) res;
 				else if (res instanceof Point)
 					handlePoint = (Point) res;
 				else {
@@ -1218,15 +1217,15 @@ final class PipeConfigBoard extends JPanel {
 	}
 
 	public void resetCurrentTransients() {
-		currentIcon = null;
 		handlePoint = null;
 		p.currentConnection = null;
 		p.currentConnectionValid = false;
+		p.currentIcon = null;
 	}
 
 	public void resetCurrentPart() {
 		p.currentPart = null;
-		currentIcon = null;
+		p.currentIcon = null;
 		handlePoint = null;
 		resetCurrentConnection();
 	}

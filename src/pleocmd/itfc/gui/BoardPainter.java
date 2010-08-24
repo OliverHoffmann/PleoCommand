@@ -104,6 +104,7 @@ final class BoardPainter {
 		public Rectangle currentConnection;
 		public PipePart currentConnectionsTarget;
 		public boolean currentConnectionValid;
+		public Icon currentIcon;
 		public BoardAutoLayouter layouter;
 		public boolean modifyable;
 		public Collection<PipeFlow> pipeflow;
@@ -145,7 +146,7 @@ final class BoardPainter {
 		drawSectionBorders(g2);
 		final long time3 = System.currentTimeMillis();
 		final int cnt4 = drawPipeParts(g2, clipOrg, p.currentPart,
-				p.underCursor, p.modifyable);
+				p.underCursor, p.modifyable, p.currentIcon);
 		final long time4 = System.currentTimeMillis();
 		final int cnt5 = drawConnections(g2, clipOrg, p.currentPart,
 				p.currentConnection == null ? null : new ImmutableRectangle(
@@ -263,13 +264,13 @@ final class BoardPainter {
 
 	private int drawPipeParts(final Graphics2D g2, final Rectangle clip,
 			final PipePart currentPart, final PipePart underCursor,
-			final boolean modifyable) {
+			final boolean modifyable, final Icon curIcon) {
 		int cnt = 0;
 		g2.setStroke(new BasicStroke(1, BasicStroke.CAP_SQUARE,
 				BasicStroke.JOIN_BEVEL, 0, null, 0));
 		for (final PipePart pp : set)
 			cnt += drawPipePart(g2, pp, pp == underCursor, clip, currentPart,
-					modifyable);
+					modifyable, curIcon);
 		return cnt;
 	}
 
@@ -308,7 +309,8 @@ final class BoardPainter {
 
 	private int drawPipePart(final Graphics2D g2, final PipePart part,
 			final boolean hover, final Rectangle clip,
-			final PipePart currentPart, final boolean modifyable) {
+			final PipePart currentPart, final boolean modifyable,
+			final Icon curIcon) {
 		final ImmutableRectangle rect = part.getGuiPosition();
 		if (BoardConfiguration.CFG_SHADOW_RECTS.getContent()
 				&& BoardConfiguration.CFG_SHADOW_DEPTH.getContent() > 0) {
@@ -389,11 +391,10 @@ final class BoardPainter {
 				(float) (rect.getY() + sb.getHeight()));
 
 		// draw clickable icons
-		// TODO ENH hover should be per icon here
-		drawIcon(g2, hover, rect, ICON_CONF,
+		drawIcon(g2, hover && curIcon == ICON_CONF, rect, ICON_CONF,
 				BoardConfiguration.CFG_ICON_CONF_POS.getContent(), !modifyable
 						|| part.getGuiConfigs().isEmpty(), false, modifyable);
-		drawIcon(g2, hover, rect, ICON_DGR,
+		drawIcon(g2, hover && curIcon == ICON_DGR, rect, ICON_DGR,
 				BoardConfiguration.CFG_ICON_DGR_POS.getContent(), false,
 				part.isVisualize(), modifyable);
 
