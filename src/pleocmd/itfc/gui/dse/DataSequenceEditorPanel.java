@@ -399,6 +399,7 @@ public abstract class DataSequenceEditorPanel extends JPanel implements
 		updateState();
 	}
 
+	@Override
 	public final void updateErrorLabel(final String text) {
 		if (text.equals(lblErrorFeedback.getText())) return;
 		lblErrorFeedback.setText(text);

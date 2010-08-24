@@ -81,7 +81,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 * 30 => valid string<br>
 	 * 40 => invalid
 	 */
-	private static final int[] TYPE_AUTODETECT_TABLE = { // 
+	private static final int[] TYPE_AUTODETECT_TABLE = { //
 	/**//**/40, 40, 40, 40, 40, 40, 40, 40, // 00 - 07
 			40, 30, 40, 40, 40, 40, 40, 40, // 08 - 0F
 			40, 40, 40, 40, 40, 40, 40, 40, // 10 - 17
@@ -137,10 +137,13 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 	 * 
 	 * @param data
 	 *            {@link Data} to read from
+	 * @param syntaxList
+	 *            an (empty) list which receives all elements found during
+	 *            parsing - may be <b>null</b>
 	 */
-	public DataAsciiConverter(final Data data) {
+	public DataAsciiConverter(final Data data, final List<Syntax> syntaxList) {
 		super(data);
-		syntaxList = null;
+		this.syntaxList = syntaxList;
 	}
 
 	/**
@@ -288,23 +291,23 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 			try {
 				val.readFromAscii(buf2, buf2.length);
 			} catch (final Throwable t) {
-				throw new FormatException(syntaxList, index - orgbuflen, t
-						.getMessage());
+				throw new FormatException(syntaxList, index - orgbuflen,
+						t.getMessage());
 			}
 		} else
 			try {
 				val.readFromAscii(buf, buflen);
 			} catch (final Throwable t) {
-				throw new FormatException(syntaxList, index - orgbuflen, t
-						.getMessage());
+				throw new FormatException(syntaxList, index - orgbuflen,
+						t.getMessage());
 			}
 		getValues().add(val);
 	}
 
-	public void writeToAscii(final DataOutput out, final boolean writeLF,
-			final List<Syntax> syntaxList) throws IOException {
+	public void writeToAscii(final DataOutput out, final boolean writeLF)
+			throws IOException {
 		Log.detail("Writing Data to ASCII output stream");
-		int pos = writeFlags(out, syntaxList);
+		int pos = writeFlags(out);
 
 		boolean first = true;
 		for (final Value value : getValues()) {
@@ -370,8 +373,7 @@ public final class DataAsciiConverter extends AbstractDataConverter {
 		if (writeLF) out.writeByte('\n');
 	}
 
-	private int writeFlags(final DataOutput out, final List<Syntax> syntaxList)
-			throws IOException {
+	private int writeFlags(final DataOutput out) throws IOException {
 		int pos = 0;
 		if (getPriority() == Data.PRIO_DEFAULT && getTime() == Data.TIME_NOTIME)
 			return pos;

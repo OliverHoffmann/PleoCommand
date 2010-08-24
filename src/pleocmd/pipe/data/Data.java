@@ -361,8 +361,9 @@ public class Data extends AbstractList<Value> {
 	public static Data createFromAscii(final String string) throws IOException,
 			FormatException {
 		return new DataAsciiConverter(
-				new DataInputStream(new ByteArrayInputStream((string + '\n')
-						.getBytes("ISO-8859-1"))), null).createDataFromFields();
+				new DataInputStream(new ByteArrayInputStream(
+						(string + '\n').getBytes("ISO-8859-1"))), null)
+				.createDataFromFields();
 	}
 
 	/**
@@ -386,8 +387,8 @@ public class Data extends AbstractList<Value> {
 	public static Data createFromAscii(final String string,
 			final List<Syntax> syntaxList) throws IOException, FormatException {
 		return new DataAsciiConverter(
-				new DataInputStream(new ByteArrayInputStream((string + '\n')
-						.getBytes("ISO-8859-1"))), syntaxList)
+				new DataInputStream(new ByteArrayInputStream(
+						(string + '\n').getBytes("ISO-8859-1"))), syntaxList)
 				.createDataFromFields();
 	}
 
@@ -471,7 +472,7 @@ public class Data extends AbstractList<Value> {
 	 */
 	public final void writeToAscii(final DataOutput out, final boolean writeLF)
 			throws IOException {
-		new DataAsciiConverter(this).writeToAscii(out, writeLF, null);
+		new DataAsciiConverter(this, null).writeToAscii(out, writeLF);
 	}
 
 	/**
@@ -491,7 +492,7 @@ public class Data extends AbstractList<Value> {
 	 */
 	public final void writeToAscii(final DataOutput out, final boolean writeLF,
 			final List<Syntax> syntaxList) throws IOException {
-		new DataAsciiConverter(this).writeToAscii(out, writeLF, syntaxList);
+		new DataAsciiConverter(this, syntaxList).writeToAscii(out, writeLF);
 	}
 
 	public final String asString() {

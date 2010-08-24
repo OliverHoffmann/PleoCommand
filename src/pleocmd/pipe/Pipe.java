@@ -29,17 +29,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import pleocmd.Log;
 import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigInt;
 import pleocmd.cfg.ConfigPath;
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.cfg.Configuration;
 import pleocmd.cfg.ConfigurationInterface;
 import pleocmd.cfg.Group;
-import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.ConverterException;
 import pleocmd.exc.InputException;
@@ -613,6 +613,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * {@link Converter} and puts it into the {@link DataQueue} in a loop until
 	 * all {@link Input}s have finished or the thread gets interrupted.
 	 * 
+	 * @param inputSubList
+	 *            the list of {@link Input}s for this Input-Thread
 	 * @throws IOException
 	 *             if the {@link DataQueue} has been closed during looping
 	 */
@@ -692,8 +694,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			}
 		} finally {
 			Log.info("Output-Thread finished");
-			Log.detail("Sent %d data blocks to output", feedback
-					.getDataOutputCount());
+			Log.detail("Sent %d data blocks to output",
+					feedback.getDataOutputCount());
 		}
 	}
 
@@ -720,12 +722,12 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		if (significant)
 			// TODO MOD only warn for the first in dataList?
 			Log.warn("Output of '%s' is %d ms behind (should have been "
-					+ "executed at '%s')", data, -delta, DATE_FORMATTER
-					.format(new Date(execTime)));
+					+ "executed at '%s')", data, -delta,
+					DATE_FORMATTER.format(new Date(execTime)));
 		else if (Log.canLog(Log.Type.Detail))
 			Log.detail("Output of '%s' is %d ms behind (should have been "
-					+ "executed at '%s')", data, -delta, DATE_FORMATTER
-					.format(new Date(execTime)));
+					+ "executed at '%s')", data, -delta,
+					DATE_FORMATTER.format(new Date(execTime)));
 		return true;
 	}
 
@@ -737,6 +739,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 * If there are no more available {@link Input}s, <b>null</b> will be
 	 * returned.
 	 * 
+	 * @param inputSubList
+	 *            the list of {@link Input}s for the current Input-Thread
 	 * @return a new {@link Data} or <b>null</b> if no {@link Input} in the list
 	 *         has any more available {@link Data}
 	 */
@@ -963,8 +967,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	 *            {@link Data} to write
 	 */
 	private void writeDataToAllOutputs(final Data data) {
-		Log.detail("Writing data block '%s' to %d output(s)", data, outputList
-				.size());
+		Log.detail("Writing data block '%s' to %d output(s)", data,
+				outputList.size());
 		boolean foundOne = false;
 		for (final PipePart trg : data.getOrigin().getConnectedPipeParts())
 			if (trg instanceof Output && !ignoredOutputs.contains(trg))
@@ -1048,9 +1052,9 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	@Override
 	public Group getSkeleton(final String groupName) {
 		if (groupName.equals(getClass().getSimpleName()))
-			return new Group(groupName).add(cfgMaxBehind).add(
-					cfgOutputInitOverhead).add(cfgOverheadReductionTime).add(
-					cfgLastSaveFile).add(cfgModifiedSinceSave);
+			return new Group(groupName).add(cfgMaxBehind)
+					.add(cfgOutputInitOverhead).add(cfgOverheadReductionTime)
+					.add(cfgLastSaveFile).add(cfgModifiedSinceSave);
 		final String prefix = getClass().getSimpleName() + ":";
 		if (!groupName.startsWith(prefix))
 			throw new InternalException("Wrong groupName for "
@@ -1128,8 +1132,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 			}
 		} else if (!group.getName().equals(getClass().getSimpleName()))
 		// this may occur if getSkeleton() returned null due to an error
-			// only detail here because getSkeleton() should have already
-			// printed some warning or error
+		// only detail here because getSkeleton() should have already
+		// printed some warning or error
 			Log.detail("Cannot handle unknown group '%s'", group.getName());
 	}
 

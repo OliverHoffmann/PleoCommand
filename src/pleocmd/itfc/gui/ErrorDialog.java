@@ -286,10 +286,12 @@ public final class ErrorDialog extends JDialog implements
 		}
 	}
 
+	@Override
 	public Group getSkeleton(final String groupName) {
 		return new Group(groupName).add(cfgSuppressed);
 	}
 
+	@Override
 	public void configurationAboutToBeChanged() {
 		// nothing to do
 	}
@@ -299,10 +301,12 @@ public final class ErrorDialog extends JDialog implements
 		// nothing to do
 	}
 
+	@Override
 	public void configurationChanged(final Group group) {
 		// nothing to do
 	}
 
+	@Override
 	public List<Group> configurationWriteback() {
 		return Configuration.asList(getSkeleton(getClass().getSimpleName()));
 	}
