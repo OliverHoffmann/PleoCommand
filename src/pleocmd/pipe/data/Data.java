@@ -93,7 +93,7 @@ public class Data extends AbstractList<Value> {
 
 	private final byte priority;
 
-	private final long time;
+	private long time;
 
 	/**
 	 * Creates a new {@link Data} object where all fields can be set
@@ -539,6 +539,24 @@ public class Data extends AbstractList<Value> {
 		res = res * 31 + priority;
 		res = res * 31 + (int) (time ^ time >>> 32);
 		return res;
+	}
+
+	/**
+	 * Store the current time if the data block itself currently has no
+	 * timestamp and we are at least 2 ms past the last data block.
+	 * 
+	 * @param pipe
+	 *            the currently running {@link Pipe}.
+	 * @param lastTime
+	 *            the time when the last data block has been processed by the
+	 *            {@link Pipe}.
+	 * @return the current time of the {@link Pipe}.
+	 */
+	public long rememberTime(final Pipe pipe, final long lastTime) {
+		final long elapsed = pipe.getFeedback().getElapsed();
+		if (time == Data.TIME_NOTIME && elapsed >= lastTime + 2)
+			time = elapsed;
+		return elapsed;
 	}
 
 }

@@ -143,6 +143,8 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 
 	private Thread mainInputThread;
 
+	private long lastTime;
+
 	/**
 	 * Creates a new {@link Pipe}.
 	 * 
@@ -623,6 +625,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		inputThreadInterruped = false;
 		try {
 			Log.info("Input-Thread started");
+			lastTime = 0;
 			while (!inputThreadInterruped) {
 				try {
 					ensureInitialized();
@@ -767,6 +770,7 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 					feedback.incDataInputCount();
 					// found a valid data block
 					res.setOrigin(in);
+					lastTime = res.rememberTime(this, lastTime);
 					return res;
 				}
 			} catch (final InputException e) {
