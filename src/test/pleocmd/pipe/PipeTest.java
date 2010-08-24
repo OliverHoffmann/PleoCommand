@@ -177,10 +177,6 @@ public class PipeTest extends Testcases {
 		in2.connectToPipePart(out1);
 		fb = testSimplePipe(p, -1, -1, 1, 0, 1, 0, 1, 0, 0, 0);
 
-		Log.consoleOut("Test error handling (converter fails)");
-		Log.consoleOut("TODO");
-		// TODO ENH converter fails => output unconverted
-
 		Log.consoleOut("Test error handling (sole output fails)");
 		final File tmpFile = File.createTempFile("PipeTest", null);
 		p.reset();

@@ -234,15 +234,4 @@ public final class ConfigurationTest extends Testcases {
 		assertValue(cfg, "group", "next", "5");
 	}
 
-	@Test
-	public void testRegistering() {
-		// register object A with one group
-
-		// register object B with two groups
-
-		// unregister object A
-
-		// TODO ENH ConfigurationTest
-	}
-
 }
