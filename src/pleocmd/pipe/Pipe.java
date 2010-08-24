@@ -720,7 +720,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 		data.getOrigin().getFeedback().incBehindCount(-delta, significant);
 		feedback.incBehindCount(-delta, significant);
 		if (significant)
-			// TODO MOD only warn for the first in dataList?
 			Log.warn("Output of '%s' is %d ms behind (should have been "
 					+ "executed at '%s')", data, -delta,
 					DATE_FORMATTER.format(new Date(execTime)));
@@ -824,7 +823,6 @@ public final class Pipe extends StateHandling implements ConfigurationInterface 
 	private void putIntoOutputQueue(final Data data) throws IOException {
 		// if time-to-wait is positive we wait here before we are
 		// forced to immediately drop a data block or clear the queue
-		// TODO SPEED wait here only if needed
 		if (data.getTime() != Data.TIME_NOTIME) {
 			final long execTime = feedback.getStartTime() + data.getTime();
 			final long delta = execTime - System.currentTimeMillis()
