@@ -139,8 +139,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	public final void setContentGUI(final Collection<? extends E> content) {
 		internalMod = true;
 		try {
-			if (ta != null) ta.setText(content.toString());
-			// FIXME same as below
+			if (ta != null) ta.setText(contentAsStringNL(content));
 		} finally {
 			internalMod = false;
 		}
@@ -158,6 +157,16 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 	@Override
 	public final String asString() {
 		return content.toString();
+	}
+
+	private final String contentAsStringNL(final Collection<? extends E> cont) {
+		final StringBuffer sb = new StringBuffer();
+		for (final E item : cont) {
+			sb.append(item.toString());
+			sb.append('\n');
+		}
+		if (sb.length() > 0) sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
 	}
 
 	@Override
@@ -209,7 +218,7 @@ public abstract class ConfigCollection<E> extends ConfigValue {
 
 	@Override
 	public final boolean insertGUIComponents(final Layouter lay) {
-		ta = new JTextArea(asString(), 5, 20); // FIXME should be asStrings()
+		ta = new JTextArea(contentAsStringNL(content), 5, 20);
 		ta.getDocument().addUndoableEditListener(new UndoableEditListener() {
 			@Override
 			public void undoableEditHappened(final UndoableEditEvent e) {
