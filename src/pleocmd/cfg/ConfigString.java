@@ -91,8 +91,8 @@ public class ConfigString extends ConfigValue {
 		if (content == null) throw new NullPointerException("content");
 		if (!multiLine && content.contains("\n"))
 			throw new ConfigurationException("content contains line-feeds");
-		final String s = content.endsWith("\n") ? content.substring(0, content
-				.length() - 1) : content;
+		final String s = content.endsWith("\n") ? content.substring(0,
+				content.length() - 1) : content;
 		checkValidString(s, multiLine);
 		this.content = s;
 		if (tc != null) tc.setText(s);

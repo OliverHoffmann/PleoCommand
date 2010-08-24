@@ -160,15 +160,13 @@ public final class Group {
 				} catch (final ConfigurationException e) {
 					Log.error("Cannot assign to '%s', because the value "
 							+ "in '%s' is invalid: '%s'. Using default "
-							+ "value '%s' instead.", vt.getLabel(), src.name, e
-							.getMessage(), vt.asString());
+							+ "value '%s' instead.", vt.getLabel(), src.name,
+							e.getMessage(), vt.asString());
 				}
 		}
 		for (final ConfigValue vs : src.valueMap.values())
 			if (!valueMap.containsKey(vs.getLabel()))
-				Log
-						.error("Ignoring unknown value '%s' of group '%s'", vs,
-								name);
+				Log.error("Ignoring unknown value '%s' of group '%s'", vs, name);
 	}
 
 	@Override

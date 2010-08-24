@@ -84,7 +84,7 @@ public final class StringManip {
 				sb.append("\\_");
 				break;
 			case ' ':
-				sb.append(last == ' ' || last == '{' || // 
+				sb.append(last == ' ' || last == '{' || //
 						last == '>' ? "\\thinspace{}" : " ");
 				break;
 			default:
@@ -219,9 +219,9 @@ public final class StringManip {
 
 	public static Color hexToColor(final String hex) {
 		try {
-			return new Color(Integer.valueOf(hex.substring(0, 2), 16), Integer
-					.valueOf(hex.substring(2, 4), 16), Integer.valueOf(hex
-					.substring(4, 6), 16));
+			return new Color(Integer.valueOf(hex.substring(0, 2), 16),
+					Integer.valueOf(hex.substring(2, 4), 16), Integer.valueOf(
+							hex.substring(4, 6), 16));
 		} catch (final NumberFormatException e) {
 			return Color.RED;
 		}
@@ -238,9 +238,10 @@ public final class StringManip {
 		int o = 6;
 		for (final Syntax sy : syntaxList) {
 			final Color c = sy.getType().getColor();
-			sb.insert(sy.getPosition() + o, String.format(
-					"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(), c
-							.getBlue()));
+			sb.insert(
+					sy.getPosition() + o,
+					String.format("<font color=#%02X%02X%02X>", c.getRed(),
+							c.getGreen(), c.getBlue()));
 			o += 20;
 		}
 		return sb.toString();
@@ -256,9 +257,10 @@ public final class StringManip {
 		int o = 6;
 		for (final Syntax sy : syntaxList) {
 			final Color c = sy.getType().getColor();
-			sb.insert(sy.getPosition() + o, String.format(
-					"<font color=#%02X%02X%02X>", c.getRed(), c.getGreen(), c
-							.getBlue()));
+			sb.insert(
+					sy.getPosition() + o,
+					String.format("<font color=#%02X%02X%02X>", c.getRed(),
+							c.getGreen(), c.getBlue()));
 			o += 20;
 		}
 		return sb.toString();

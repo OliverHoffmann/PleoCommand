@@ -49,9 +49,9 @@ public class DataBlockField extends JTextPane implements UpdateErrorInterface {
 		final Color trg = errorLabel.getBackground();
 		errorLabel.setForeground(src);
 		if (errorLabelTimerTask != null) errorLabelTimerTask.cancel();
-		errorLabelTimerTask = new FadeTimerTask(errorLabel, src.getRed(), src
-				.getGreen(), src.getBlue(), trg.getRed(), trg.getGreen(), trg
-				.getBlue());
+		errorLabelTimerTask = new FadeTimerTask(errorLabel, src.getRed(),
+				src.getGreen(), src.getBlue(), trg.getRed(), trg.getGreen(),
+				trg.getBlue());
 		ERR_LBL_TIMER.schedule(errorLabelTimerTask, 1000, 100);
 	}
 

@@ -33,7 +33,7 @@ public final class StringValue extends Value {
 
 	static final ValueType RECOMMENDED_TYPE = ValueType.NullTermString;
 
-	private static final int[] ASCII_TABLE = { // 
+	private static final int[] ASCII_TABLE = { //
 	/**//**/0, 0, 0, 0, 0, 0, 0, 0, // 00 - 07
 			0, 0, 0, 0, 0, 0, 0, 0, // 08 - 0F
 			0, 0, 0, 0, 0, 0, 0, 0, // 10 - 17

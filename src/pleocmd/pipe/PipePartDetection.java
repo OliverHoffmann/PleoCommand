@@ -159,15 +159,15 @@ public final class PipePartDetection {
 		try {
 			final JarFile jar = new JarFile(new File(jarPath));
 			final Enumeration<JarEntry> content = jar.entries();
-			Log.detail("Archive '%s' contains %d entries", jar.getName(), jar
-					.size());
+			Log.detail("Archive '%s' contains %d entries", jar.getName(),
+					jar.size());
 
 			while (content.hasMoreElements()) {
 				final JarEntry entry = content.nextElement();
 				final String name = entry.getName();
 				if (name.startsWith(jarPrefix)) {
-					final Class<E> cls = loadClass(pkg, name.substring(name
-							.lastIndexOf('/') + 1));
+					final Class<E> cls = loadClass(pkg,
+							name.substring(name.lastIndexOf('/') + 1));
 					if (cls != null) list.add(cls);
 				}
 			}
@@ -260,8 +260,8 @@ public final class PipePartDetection {
 		try {
 			final PipePart pp = cpp.newInstance();
 			final int ci1 = HelpKind.Config1.ordinal();
-			final int ciL = Math.min(ci1 + pp.getGuiConfigs().size(), HelpKind
-					.values().length);
+			final int ciL = Math.min(ci1 + pp.getGuiConfigs().size(),
+					HelpKind.values().length);
 			for (int i = ci1; i < ciL; ++i)
 				checkString(cpp, HelpKind.values()[i], res);
 			for (int i = ciL; i < ci1 + pp.getGuiConfigs().size(); ++i)

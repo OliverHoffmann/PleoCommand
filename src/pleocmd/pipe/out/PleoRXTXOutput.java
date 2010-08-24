@@ -51,8 +51,8 @@ public final class PleoRXTXOutput extends Output {
 		try {
 			tmp = new ConfigItem<String>("Device", "", getAllDeviceNames());
 		} catch (final UnsatisfiedLinkError e) {
-			Log.error(e, "Cannot find external library in '%s'", System
-					.getProperty("java.library.path"));
+			Log.error(e, "Cannot find external library in '%s'",
+					System.getProperty("java.library.path"));
 			tmp = new ConfigItem<String>("Device", "", new ArrayList<String>());
 		}
 		addConfig(cfgDevice = tmp);
@@ -79,8 +79,8 @@ public final class PleoRXTXOutput extends Output {
 
 	@Override
 	protected void init0() throws IOException, OutputException {
-		Log.detail("Initializing PleoRXTXOutput for device '%s'", cfgDevice
-				.getContent());
+		Log.detail("Initializing PleoRXTXOutput for device '%s'",
+				cfgDevice.getContent());
 		try {
 			pc = new PleoCommunication(PleoCommunication.getPort(cfgDevice
 					.getContent()));
@@ -161,8 +161,8 @@ public final class PleoRXTXOutput extends Output {
 
 	@Override
 	protected void close0() {
-		Log.detail("Closing PleoRXTXOutput '%s' for device '%s'", pc, cfgDevice
-				.getContent());
+		Log.detail("Closing PleoRXTXOutput '%s' for device '%s'", pc,
+				cfgDevice.getContent());
 		synchronized (this) {
 			pc.close();
 			pc = null;
@@ -223,8 +223,8 @@ public final class PleoRXTXOutput extends Output {
 		} catch (final NoClassDefFoundError e) {
 			return "RXTX not available";
 		} catch (final IOException e) {
-			return String.format("Device '%s' does not exist", cfgDevice
-					.getContent());
+			return String.format("Device '%s' does not exist",
+					cfgDevice.getContent());
 		}
 		return null;
 	}

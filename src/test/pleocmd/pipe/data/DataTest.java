@@ -130,8 +130,8 @@ public final class DataTest extends Testcases {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data.writeToBinary(new DataOutputStream(out));
 
-		final ByteArrayInputStream in = new ByteArrayInputStream(out
-				.toByteArray());
+		final ByteArrayInputStream in = new ByteArrayInputStream(
+				out.toByteArray());
 		final Data newData = Data.createFromBinary(new DataInputStream(in));
 		assertEquals(data, newData);
 	}
@@ -141,8 +141,8 @@ public final class DataTest extends Testcases {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data.writeToAscii(new DataOutputStream(out), true);
 
-		final ByteArrayInputStream in = new ByteArrayInputStream(out
-				.toByteArray());
+		final ByteArrayInputStream in = new ByteArrayInputStream(
+				out.toByteArray());
 		final Data newData = Data.createFromAscii(new DataInputStream(in));
 		assertEquals(data, newData);
 	}

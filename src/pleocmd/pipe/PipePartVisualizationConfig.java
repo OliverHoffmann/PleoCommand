@@ -25,8 +25,8 @@ import pleocmd.cfg.ConfigEnum;
 import pleocmd.cfg.Group;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.dgr.Diagram;
-import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 import pleocmd.itfc.gui.dgr.DiagramAxis.AxisScale;
+import pleocmd.itfc.gui.dgr.PipeVisualizationDialog;
 
 final class PipePartVisualizationConfig {
 

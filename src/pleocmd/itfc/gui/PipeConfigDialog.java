@@ -99,8 +99,8 @@ final class PipeConfigDialog extends JDialog implements ConfigurationInterface,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,
 				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS), true);
 
-		lay.addButton(Button.Help, Layouter.help(this, getClass()
-				.getSimpleName()));
+		lay.addButton(Button.Help,
+				Layouter.help(this, getClass().getSimpleName()));
 		lay.add(sldZoom, false);
 		lay.addSpacer();
 		btnSave = lay.addButton(Button.SaveTo,

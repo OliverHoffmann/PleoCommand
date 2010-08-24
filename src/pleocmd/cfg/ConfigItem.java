@@ -118,8 +118,8 @@ public class ConfigItem<E> extends ConfigValue {
 			throw new IndexOutOfBoundsException(String.format(
 					"New content %d for '%s' must be between 0 "
 							+ "and %d for '%s'", content, getLabel(),
-					identifiers.size() - 1, Arrays.toString(identifiers
-							.toArray())));
+					identifiers.size() - 1,
+					Arrays.toString(identifiers.toArray())));
 		this.content = identifiers.get(content);
 		if (cb != null) cb.setSelectedIndex(content);
 	}

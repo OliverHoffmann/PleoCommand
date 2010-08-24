@@ -41,8 +41,8 @@ import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.AutoDisposableWindow;
 import pleocmd.itfc.gui.HelpDialog;
 import pleocmd.itfc.gui.Layouter;
-import pleocmd.itfc.gui.MainFrame;
 import pleocmd.itfc.gui.Layouter.Button;
+import pleocmd.itfc.gui.MainFrame;
 
 public final class DataFileBinaryDialog extends JDialog implements
 		ConfigurationInterface, AutoDisposableWindow {
@@ -89,8 +89,8 @@ public final class DataFileBinaryDialog extends JDialog implements
 		};
 		lay.addWholeLine(dsbPanel, true);
 
-		btnHelp = lay.addButton(Button.Help, Layouter.help(this, getClass()
-				.getSimpleName()));
+		btnHelp = lay.addButton(Button.Help,
+				Layouter.help(this, getClass().getSimpleName()));
 		btnSave = lay.addButton(Button.SaveTo, "Save the content to a file",
 				new Runnable() {
 					@Override

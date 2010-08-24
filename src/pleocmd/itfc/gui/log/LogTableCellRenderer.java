@@ -124,8 +124,8 @@ final class LogTableCellRenderer implements TableCellRenderer {
 					StyleConstants.setItalic(style, true);
 				} else if (tag.startsWith("font color=#")) {
 					style = sd.addStyle(null, style);
-					StyleConstants.setForeground(style, StringManip
-							.hexToColor(tag.substring(12)));
+					StyleConstants.setForeground(style,
+							StringManip.hexToColor(tag.substring(12)));
 				} else if ("html".equals(tag) || "/html".equals(tag)) {
 					// just ignore them silently
 				} else

@@ -205,8 +205,10 @@ public final class DiagramAxis {
 		final double visibleUnits = availPixels / cachedPixelPerUnit;
 		cachedMinVisUnit = cachedMinUnit + offset;
 		cachedMaxVisUnit = cachedMinVisUnit + visibleUnits;
-		cachedUnitsPerGrid = Math.max(1, (int) (Diagram.MIN_GRID_DELTA
-				* Math.max(subsPerUnit, 1) / cachedPixelPerUnit));
+		cachedUnitsPerGrid = Math
+				.max(1,
+						(int) (Diagram.MIN_GRID_DELTA
+								* Math.max(subsPerUnit, 1) / cachedPixelPerUnit));
 		cachedPixelPerGrid = cachedPixelPerUnit * cachedUnitsPerGrid;
 		cachedPixelPerSubGrid = subsPerUnit > 1 ? cachedPixelPerGrid
 				/ subsPerUnit : 0;
@@ -256,8 +258,8 @@ public final class DiagramAxis {
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				final String newMin = JOptionPane.showInputDialog(String
-						.format("New Minimum Of %s-Axis", getAxisName()),
+				final String newMin = JOptionPane.showInputDialog(
+						String.format("New Minimum Of %s-Axis", getAxisName()),
 						getCachedMinUnit());
 				if (newMin != null) setMin(Double.valueOf(newMin));
 			}
@@ -275,8 +277,8 @@ public final class DiagramAxis {
 		item.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
-				final String newMax = JOptionPane.showInputDialog(String
-						.format("New Maximum Of %s-Axis", getAxisName()),
+				final String newMax = JOptionPane.showInputDialog(
+						String.format("New Maximum Of %s-Axis", getAxisName()),
 						getCachedMaxUnit());
 				if (newMax != null) setMax(Double.valueOf(newMax));
 			}

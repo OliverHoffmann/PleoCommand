@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import pleocmd.Log.Type;
 import pleocmd.itfc.gui.ErrorDialog;
 import pleocmd.itfc.gui.MainFrame;
 
@@ -149,8 +150,9 @@ public final class Log {
 	 *         this log entry.
 	 */
 	public String getFormattedCaller() {
-		return String.format("%s.%s()", caller.getClassName().replaceFirst(
-				"^.*\\.([^.]*)$", "$1"), caller.getMethodName());
+		return String.format("%s.%s()",
+				caller.getClassName().replaceFirst("^.*\\.([^.]*)$", "$1"),
+				caller.getMethodName());
 	}
 
 	/**
@@ -289,8 +291,8 @@ public final class Log {
 		if (ec.contains("S")) {
 			if (sb.length() > 0) sb.append(' ');
 			final String s = caller.toString();
-			sb.append(String.format("%-50s", s.substring(0, Math.min(50, s
-					.length()))));
+			sb.append(String.format("%-50s",
+					s.substring(0, Math.min(50, s.length()))));
 		}
 		if (ec.contains("M")) {
 			if (sb.length() > 0) sb.append(' ');

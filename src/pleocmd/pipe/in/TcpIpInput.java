@@ -116,8 +116,8 @@ public final class TcpIpInput extends Input { // NO_UCD
 		try {
 			final Data data = Data.createFromBinary(in);
 			if (Log.canLogDetail())
-				Log.detail("<html>Read from TCP/IP: %s", StringManip
-						.printSyntaxHighlightedBinary(data));
+				Log.detail("<html>Read from TCP/IP: %s",
+						StringManip.printSyntaxHighlightedBinary(data));
 			return new MultiFloatData(data);
 		} catch (final FormatException e) {
 			throw new InputException(this, false, e, "Cannot read from TCP/IP");

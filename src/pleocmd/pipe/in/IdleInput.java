@@ -78,9 +78,9 @@ public final class IdleInput extends Input { // NO_UCD
 
 	@Override
 	protected String getShortConfigDescr0() {
-		return String.format("[P%02d] %dms + %dms * %.2f", cfgPriority
-				.getContent(), cfgDelayIdle.getContent(), cfgDelayRepeat
-				.getContent(), cfgProbability.getContent());
+		return String.format("[P%02d] %dms + %dms * %.2f",
+				cfgPriority.getContent(), cfgDelayIdle.getContent(),
+				cfgDelayRepeat.getContent(), cfgProbability.getContent());
 	}
 
 	@Override
@@ -123,9 +123,9 @@ public final class IdleInput extends Input { // NO_UCD
 		final long idle = last
 				- getPipe().getFeedback().getLastNormalDataOutput();
 		return new SingleBoolData(idle > cfgDelayIdle.getContent()
-				&& Math.random() < cfgProbability.getContent(), cfgUserData
-				.getContent(), null, cfgPriority.getContent().byteValue(),
-				Data.TIME_NOTIME);
+				&& Math.random() < cfgProbability.getContent(),
+				cfgUserData.getContent(), null, cfgPriority.getContent()
+						.byteValue(), Data.TIME_NOTIME);
 	}
 
 	public static String help(final HelpKind kind) {

@@ -134,8 +134,8 @@ public final class LogTableModel extends AbstractTableModel {
 		out.write("<body>\n");
 		out.write("<table border=0>\n");
 		for (final Log log : list) {
-			out.write(String.format("<tr style=\"color:%s\">", log
-					.getTypeHTMLColor()));
+			out.write(String.format("<tr style=\"color:%s\">",
+					log.getTypeHTMLColor()));
 			out.write(log.toHTMLString());
 			out.write("</tr>\n");
 		}
@@ -179,8 +179,8 @@ public final class LogTableModel extends AbstractTableModel {
 		for (final String cn : colorNames) {
 			final Color c = StringManip.hexToColor(cn
 					.substring("PleoCommandColor".length()));
-			out.write(String.format("\\definecolor{%s}{RGB}{%d,%d,%d}\n", cn, c
-					.getRed(), c.getGreen(), c.getBlue()));
+			out.write(String.format("\\definecolor{%s}{RGB}{%d,%d,%d}\n", cn,
+					c.getRed(), c.getGreen(), c.getBlue()));
 		}
 		out.write("\n\n");
 		out.write(sb.toString());

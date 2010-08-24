@@ -28,10 +28,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import pleocmd.ImmutableRectangle;
 import pleocmd.pipe.PipePart;
@@ -267,8 +267,8 @@ final class BoardAutoLayouter {
 				// Parts which are involved in many intersections will
 				// get a slightly higher priority
 				final Double v0 = candidateValues.get(e.getKey());
-				final double v = v0 == null ? 1.0 : Math.max(0.01, Math.min(
-						1.0, v0));
+				final double v = v0 == null ? 1.0 : Math.max(0.01,
+						Math.min(1.0, v0));
 				expandPart(bal, e.getKey(), e.getValue(), Math.random(), 0, v);
 				expandPart(bal, e.getKey(), e.getValue(), -Math.random(), 0, v);
 				expandPart(bal, e.getKey(), e.getValue(), 0, Math.random(), v);
@@ -319,8 +319,8 @@ final class BoardAutoLayouter {
 				for (final PipePart ppTrg : e.getKey().getConnectedPipeParts()) {
 					final Point ps = new Point();
 					final Point pt = new Point();
-					BoardPainter.calcConnectorPositions(e.getValue(), parts
-							.get(ppTrg), ps, pt);
+					BoardPainter.calcConnectorPositions(e.getValue(),
+							parts.get(ppTrg), ps, pt);
 					final Line2D line = new Line2D.Float(ps, pt);
 					for (final ConnLine conn : conns) {
 						final Line2D line2 = conn.getLine();
@@ -397,9 +397,8 @@ final class BoardAutoLayouter {
 		}
 
 		private double getDistance(final ImmutableRectangle r1, final Line2D l2) {
-			return Math.log(l2.ptLineDist(r1.getX() + r1.getWidth() / 2, r1
-					.getY()
-					+ r1.getHeight() / 2));
+			return Math.log(l2.ptLineDist(r1.getX() + r1.getWidth() / 2,
+					r1.getY() + r1.getHeight() / 2));
 		}
 
 		private void check(final Rectangle r, final PipePart pp) {
@@ -443,9 +442,7 @@ final class BoardAutoLayouter {
 					} else if (y0 > y1) {
 						if (r.y + r.height + i.height > yMax)
 							// move up instead of down
-							r
-									.translate(0, i.height - r.height
-											- rO.getHeight());
+							r.translate(0, i.height - r.height - rO.getHeight());
 						else
 							r.translate(0, i.height); // move down
 					} else if (r.y - i.height < yMin)

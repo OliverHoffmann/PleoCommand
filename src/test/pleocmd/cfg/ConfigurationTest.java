@@ -132,8 +132,8 @@ public final class ConfigurationTest extends Testcases {
 			cfg.setContent("Illegal\nLine:\n}\nCannot\nParse");
 			fail("ConfigurationException not thrown");
 		} catch (final ConfigurationException e) {
-			assertTrue(e.toString(), e.getMessage().contains(
-					"no line must equal"));
+			assertTrue(e.toString(),
+					e.getMessage().contains("no line must equal"));
 		}
 
 	}
@@ -182,9 +182,11 @@ public final class ConfigurationTest extends Testcases {
 
 	private void assertValue(final Configuration cfg, final String group,
 			final String label, final String content) {
-		assertEquals("Content of value in group is wrong:", content, cfg
-				.getGroupUnassignedSafe(group).get(label,
-						new ConfigString(label, false)).asString());
+		assertEquals(
+				"Content of value in group is wrong:",
+				content,
+				cfg.getGroupUnassignedSafe(group)
+						.get(label, new ConfigString(label, false)).asString());
 	}
 
 	@Test

@@ -89,8 +89,8 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
 		if (ds != null)
-			ds.setLabel(String.format("Random [0-%s]", cfgMaxAmplitude
-					.getContent()));
+			ds.setLabel(String.format("Random [0-%s]",
+					cfgMaxAmplitude.getContent()));
 	}
 
 	@Override
@@ -127,15 +127,15 @@ public final class RandomGeneratorInput extends Input { // NO_UCD
 				peakPos = PeakPos.Grad0;
 				amp = rand11() * cfgMaxAmplitude.getContent();
 				final double samplesPerMS = cfgSamplerate.getContent() / 1000.0;
-				peakLen = Math.max(1, (int) rand0N(cfgMaxPeakLength
-						.getContent()
-						* samplesPerMS));
-				grad0Len = Math.max(1, (int) rand0N(cfgMaxGrad0Length
-						.getContent()
-						* samplesPerMS));
-				grad1Len = Math.max(1, (int) rand0N(cfgMaxGrad1Length
-						.getContent()
-						* samplesPerMS));
+				peakLen = Math.max(1,
+						(int) rand0N(cfgMaxPeakLength.getContent()
+								* samplesPerMS));
+				grad0Len = Math.max(1,
+						(int) rand0N(cfgMaxGrad0Length.getContent()
+								* samplesPerMS));
+				grad1Len = Math.max(1,
+						(int) rand0N(cfgMaxGrad1Length.getContent()
+								* samplesPerMS));
 				grad0Inc = amp / grad0Len;
 				grad1Inc = amp / grad1Len;
 				value = 0;

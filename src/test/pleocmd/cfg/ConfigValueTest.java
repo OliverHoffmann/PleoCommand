@@ -35,6 +35,7 @@ import pleocmd.Log;
 import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigCollection;
+import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigDataMap;
 import pleocmd.cfg.ConfigDouble;
 import pleocmd.cfg.ConfigEnum;
@@ -43,10 +44,9 @@ import pleocmd.cfg.ConfigItem;
 import pleocmd.cfg.ConfigLong;
 import pleocmd.cfg.ConfigMap;
 import pleocmd.cfg.ConfigPath;
+import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.cfg.ConfigString;
 import pleocmd.cfg.ConfigValue;
-import pleocmd.cfg.ConfigCollection.Type;
-import pleocmd.cfg.ConfigPath.PathType;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.itfc.gui.Layouter;
 import test.pleocmd.Testcases;
@@ -302,8 +302,10 @@ public final class ConfigValueTest extends Testcases {
 				ConfigString.class);
 		compareIdentifier(new ConfigDouble("foo"), ConfigDouble.class);
 		compareIdentifier(new ConfigInt("foo"), ConfigInt.class);
-		compareIdentifier(new ConfigItem<String>("foo", true, Arrays
-				.asList(new String[] { "FOO" })), ConfigString.class);
+		compareIdentifier(
+				new ConfigItem<String>("foo", true,
+						Arrays.asList(new String[] { "FOO" })),
+				ConfigString.class);
 		compareIdentifier(new ConfigLong("foo"), ConfigLong.class);
 		compareIdentifier(new ConfigPath("foo", PathType.Directory),
 				ConfigPath.class);

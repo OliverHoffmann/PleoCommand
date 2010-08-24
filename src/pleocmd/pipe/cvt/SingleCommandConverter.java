@@ -58,8 +58,8 @@ public final class SingleCommandConverter extends Converter { // NO_UCD
 		if (!SingleBoolData.isSingleBoolData(data)) return null;
 		if (!SingleBoolData.getValue(data)) return emptyList();
 		try {
-			return asList(new Data(Data
-					.createFromAscii(cfgCommand.getContent()), data));
+			return asList(new Data(
+					Data.createFromAscii(cfgCommand.getContent()), data));
 		} catch (final IOException e) {
 			throw new ConverterException(this, true, e, "Invalid command");
 		} catch (final FormatException e) {

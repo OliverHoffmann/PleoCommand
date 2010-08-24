@@ -240,8 +240,8 @@ public final class DataBinaryConverter extends AbstractDataConverter {
 			in.readFully(ba);
 			cnt = (ba[0] >> 3 & 0x1F) + 1; // first 5 bits (MSB)
 			// 24 * 3 bits following
-			Log.detail("VeryLong-Bytes are '%s'", DataAsciiConverter
-					.toHexString(ba, 10));
+			Log.detail("VeryLong-Bytes are '%s'",
+					DataAsciiConverter.toHexString(ba, 10));
 			int bp = 4;
 			for (int i = 8; i < cnt; ++i) {
 				final int b0 = getBit(ba, ++bp) ? 4 : 0;

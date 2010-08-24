@@ -52,13 +52,13 @@ public final class StandardInputTest extends Testcases {
 			Log.consoleOut("Starting test loop for StandardInput '%s'",
 					StandardInput.the());
 			StandardInput.the().put(buf0);
-			Log.consoleOut("Put bytes into StandardInput '%s'", StandardInput
-					.the());
+			Log.consoleOut("Put bytes into StandardInput '%s'",
+					StandardInput.the());
 			assertEquals(buf0.length, StandardInput.the().available());
 			Log.consoleOut("Checked available bytes");
 			StandardInput.the().read(buf1);
-			Log.consoleOut("Read bytes from StandardInput '%s'", StandardInput
-					.the());
+			Log.consoleOut("Read bytes from StandardInput '%s'",
+					StandardInput.the());
 			assertArrayEquals(buf0, buf1);
 
 			StandardInput.the().close();

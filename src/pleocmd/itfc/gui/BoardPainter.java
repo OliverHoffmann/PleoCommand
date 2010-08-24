@@ -285,25 +285,21 @@ final class BoardPainter {
 				final boolean sel = currentPart == src
 						&& currentConnectionsTarget == trg;
 				if (saneConfigCache.get(src) == null)
-					g2
-							.setColor(sel ? BoardConfiguration.CFG_CONNECTION_SEL_OK
-									.getContent()
-									: BoardConfiguration.CFG_CONNECTION_OK
-											.getContent());
+					g2.setColor(sel ? BoardConfiguration.CFG_CONNECTION_SEL_OK
+							.getContent()
+							: BoardConfiguration.CFG_CONNECTION_OK.getContent());
 				else
 					g2.setColor(sel ? BoardConfiguration.CFG_CONNECTION_SEL_BAD
 							.getContent()
 							: BoardConfiguration.CFG_CONNECTION_BAD
 									.getContent());
-				cnt += drawConnection(g2, src.getGuiPosition(), trg
-						.getGuiPosition(), src, trg, clip);
+				cnt += drawConnection(g2, src.getGuiPosition(),
+						trg.getGuiPosition(), src, trg, clip);
 			}
 		if (currentConnection != null && currentConnectionsTarget == null) {
-			g2
-					.setColor(currentConnectionValid ? BoardConfiguration.CFG_CONNECTION_SEL_OK
-							.getContent()
-							: BoardConfiguration.CFG_CONNECTION_SEL_BAD
-									.getContent());
+			g2.setColor(currentConnectionValid ? BoardConfiguration.CFG_CONNECTION_SEL_OK
+					.getContent() : BoardConfiguration.CFG_CONNECTION_SEL_BAD
+					.getContent());
 			cnt += drawConnection(g2, currentPart.getGuiPosition(),
 					currentConnection, currentPart, underCursor, clip);
 		}
@@ -325,12 +321,12 @@ final class BoardPainter {
 		final Color outerClr;
 		if (saneConfigCache.get(part) == null)
 			outerClr = part == currentPart ? BoardConfiguration.CFG_OUTER_SEL_OK
-					.getContent()
-					: BoardConfiguration.CFG_OUTER_OK.getContent();
+					.getContent() : BoardConfiguration.CFG_OUTER_OK
+					.getContent();
 		else
 			outerClr = part == currentPart ? BoardConfiguration.CFG_OUTER_SEL_BAD
-					.getContent()
-					: BoardConfiguration.CFG_OUTER_BAD.getContent();
+					.getContent() : BoardConfiguration.CFG_OUTER_BAD
+					.getContent();
 
 		if (BoardConfiguration.CFG_SHADOW_RECTS.getContent()
 				&& BoardConfiguration.CFG_SHADOW_DEPTH.getContent() > 0) {
@@ -349,8 +345,7 @@ final class BoardPainter {
 		rect.draw(g2);
 
 		final String s = BoardConfiguration.CFG_DRAW_SHORTCONFIG.getContent() ? part
-				.getShortConfigDescr()
-				: part.getName();
+				.getShortConfigDescr() : part.getName();
 		final Rectangle2D sb = g2.getFontMetrics().getStringBounds(s, g2);
 
 		if (hover) {
@@ -371,34 +366,36 @@ final class BoardPainter {
 		// draw main icon
 		Icon mainIcon = part.getIcon();
 		if (mainIcon == null) {
-			final BufferedImage img = new BufferedImage(rect.getHeight(), rect
-					.getHeight(), BufferedImage.TYPE_INT_ARGB);
+			final BufferedImage img = new BufferedImage(rect.getHeight(),
+					rect.getHeight(), BufferedImage.TYPE_INT_ARGB);
 			final Icon cfgImage = part.getConfigImage();
 			if (cfgImage instanceof ImageIcon) {
 				final Graphics2D g = img.createGraphics();
 				g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
 						RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-				g.drawImage(((ImageIcon) cfgImage).getImage(), 0, 0, rect
-						.getHeight(), rect.getHeight(), null);
+				g.drawImage(((ImageIcon) cfgImage).getImage(), 0, 0,
+						rect.getHeight(), rect.getHeight(), null);
 				mainIcon = new ImageIcon(img);
 			} else
 				mainIcon = IconLoader.getMissingIcon();
 		}
-		mainIcon.paintIcon(null, g2, rect.getX(), rect.getY()
-				+ (rect.getHeight() - mainIcon.getIconHeight()) / 2);
+		mainIcon.paintIcon(null, g2, rect.getX(),
+				rect.getY() + (rect.getHeight() - mainIcon.getIconHeight()) / 2);
 
 		// draw name of PipePart
 		g2.setColor(outerClr);
-		g2.drawString(s, (float) (rect.getX() + (rect.getWidth() - sb
-				.getWidth()) / 2), (float) (rect.getY() + sb.getHeight()));
+		g2.drawString(s,
+				(float) (rect.getX() + (rect.getWidth() - sb.getWidth()) / 2),
+				(float) (rect.getY() + sb.getHeight()));
 
 		// draw clickable icons
 		// TODO ENH hover should be per icon here
 		drawIcon(g2, hover, rect, ICON_CONF,
 				BoardConfiguration.CFG_ICON_CONF_POS.getContent(), !modifyable
 						|| part.getGuiConfigs().isEmpty(), false, modifyable);
-		drawIcon(g2, hover, rect, ICON_DGR, BoardConfiguration.CFG_ICON_DGR_POS
-				.getContent(), false, part.isVisualize(), modifyable);
+		drawIcon(g2, hover, rect, ICON_DGR,
+				BoardConfiguration.CFG_ICON_DGR_POS.getContent(), false,
+				part.isVisualize(), modifyable);
 
 		// restore old clip
 		g2.setClip(shape);
@@ -443,11 +440,9 @@ final class BoardPainter {
 		if (ico == null) ico = icon;
 		ico.paintIcon(null, g2, b.x, b.y);
 		if (hover)
-			g2
-					.setColor(selected ? BoardConfiguration.CFG_ICON_OUTLINE_SEL_HOVER
-							.getContent()
-							: BoardConfiguration.CFG_ICON_OUTLINE_HOVER
-									.getContent());
+			g2.setColor(selected ? BoardConfiguration.CFG_ICON_OUTLINE_SEL_HOVER
+					.getContent() : BoardConfiguration.CFG_ICON_OUTLINE_HOVER
+					.getContent());
 		else
 			g2.setColor(selected ? BoardConfiguration.CFG_ICON_OUTLINE_SEL
 					.getContent() : BoardConfiguration.CFG_ICON_OUTLINE
@@ -476,10 +471,16 @@ final class BoardPainter {
 			g2.drawLine(srcPoint.x, srcPoint.y, trgPoint.x, trgPoint.y);
 			g2.fillPolygon(arrow);
 			drawConnectorLabel(g2, srcPoint.x, srcPoint.y, trgPoint.x,
-					trgPoint.y, BoardConfiguration.CFG_SHADOW_CONNECTIONS_LABEL
+					trgPoint.y,
+					BoardConfiguration.CFG_SHADOW_CONNECTIONS_LABEL
 							.getContent() ? src.getOutputDescription() : "");
-			drawConnectorLabel(g2, trgPoint.x, trgPoint.y, srcPoint.x,
-					srcPoint.y, trg == null
+			drawConnectorLabel(
+					g2,
+					trgPoint.x,
+					trgPoint.y,
+					srcPoint.x,
+					srcPoint.y,
+					trg == null
 							|| !BoardConfiguration.CFG_SHADOW_CONNECTIONS_LABEL
 									.getContent() ? "" : trg
 							.getInputDescription());
@@ -625,23 +626,29 @@ final class BoardPainter {
 		// tip
 		polygon.addPoint(tx, ty);
 		// wing 1
-		polygon.addPoint(tx
-				+ xCor(BoardConfiguration.CFG_CONN_ARROW_HEAD.getContent(),
-						d + .5), ty
-				+ yCor(BoardConfiguration.CFG_CONN_ARROW_HEAD.getContent(),
-						d + .5));
+		polygon.addPoint(
+				tx
+						+ xCor(BoardConfiguration.CFG_CONN_ARROW_HEAD
+								.getContent(), d + .5),
+				ty
+						+ yCor(BoardConfiguration.CFG_CONN_ARROW_HEAD
+								.getContent(), d + .5));
 		// on line
-		polygon.addPoint(tx
-				+ xCor(BoardConfiguration.CFG_CONN_ARROW_WING.getContent(), d),
+		polygon.addPoint(
+				tx
+						+ xCor(BoardConfiguration.CFG_CONN_ARROW_WING
+								.getContent(), d),
 				ty
 						+ yCor(BoardConfiguration.CFG_CONN_ARROW_WING
 								.getContent(), d));
 		// wing 2
-		polygon.addPoint(tx
-				+ xCor(BoardConfiguration.CFG_CONN_ARROW_HEAD.getContent(),
-						d - .5), ty
-				+ yCor(BoardConfiguration.CFG_CONN_ARROW_HEAD.getContent(),
-						d - .5));
+		polygon.addPoint(
+				tx
+						+ xCor(BoardConfiguration.CFG_CONN_ARROW_HEAD
+								.getContent(), d - .5),
+				ty
+						+ yCor(BoardConfiguration.CFG_CONN_ARROW_HEAD
+								.getContent(), d - .5));
 		// back to tip, close polygon
 		polygon.addPoint(tx, ty);
 		return polygon;
@@ -799,8 +806,8 @@ final class BoardPainter {
 	public void setBounds(final int width, final int height,
 			final boolean allowMoving) {
 		bounds.setSize(width, height);
-		border1 = Math.min(width
-				/ BoardConfiguration.CFG_SECTION_FRAG.getContent(),
+		border1 = Math.min(
+				width / BoardConfiguration.CFG_SECTION_FRAG.getContent(),
 				BoardConfiguration.CFG_MAX_RECT_WIDTH.getContent()
 						+ BoardConfiguration.CFG_SECTION_SPACE.getContent());
 		border2 = width - border1;

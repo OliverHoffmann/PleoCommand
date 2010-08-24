@@ -183,10 +183,10 @@ final class MainInputPanel extends JPanel {
 	 *            -1 to move upwards and +1 to move downwards
 	 */
 	private void moveInHistory(final int direction) {
-		final int idx = Math.max(0, Math.min(historyListModel.getSize(),
-				historyIndex));
-		setConsoleInput(Math.max(0, Math.min(historyListModel.getSize(), idx
-				+ direction)));
+		final int idx = Math.max(0,
+				Math.min(historyListModel.getSize(), historyIndex));
+		setConsoleInput(Math.max(0,
+				Math.min(historyListModel.getSize(), idx + direction)));
 	}
 
 	/**

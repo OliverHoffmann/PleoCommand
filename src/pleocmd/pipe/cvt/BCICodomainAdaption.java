@@ -126,8 +126,8 @@ public final class BCICodomainAdaption extends Converter { // NO_UCD
 	@Override
 	protected String getShortConfigDescr0() {
 		return String.format("[%s-%s]=>[%s-%s]", cfgSourceMin.asString(),
-				cfgSourceMax.asString(), cfgTargetMin.asString(), cfgTargetMax
-						.asString());
+				cfgSourceMax.asString(), cfgTargetMin.asString(),
+				cfgTargetMax.asString());
 	}
 
 	@Override

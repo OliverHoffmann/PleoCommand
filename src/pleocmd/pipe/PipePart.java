@@ -36,10 +36,10 @@ import pleocmd.Log;
 import pleocmd.cfg.ConfigBoolean;
 import pleocmd.cfg.ConfigBounds;
 import pleocmd.cfg.ConfigCollection;
+import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.cfg.ConfigLong;
 import pleocmd.cfg.ConfigValue;
 import pleocmd.cfg.Group;
-import pleocmd.cfg.ConfigCollection.Type;
 import pleocmd.exc.ConfigurationException;
 import pleocmd.exc.InternalException;
 import pleocmd.exc.PipeException;
@@ -154,8 +154,8 @@ public abstract class PipePart extends StateHandling {
 		visualizationConfig = new PipePartVisualizationConfig(this, group);
 		group.add(cfgVisualize = new ConfigBoolean("Visualization", false));
 
-		immutableGUIPosition = new ImmutableRectangle(cfgGuiPosition
-				.getContent());
+		immutableGUIPosition = new ImmutableRectangle(
+				cfgGuiPosition.getContent());
 
 	}
 

@@ -126,8 +126,8 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 		lay.addWholeLine(splitPane, true);
 
-		btnHelp = lay.addButton(Button.Help, Layouter.help(this, getClass()
-				.getSimpleName()));
+		btnHelp = lay.addButton(Button.Help,
+				Layouter.help(this, getClass().getSimpleName()));
 		lblStatus = new JLabel("...", SwingConstants.CENTER);
 		lay.add(lblStatus, true);
 		btnExit = lay.addButton("Exit", "application-exit",

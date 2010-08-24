@@ -32,8 +32,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import pleocmd.Log;
 import pleocmd.exc.ConfigurationException;
@@ -143,8 +143,8 @@ public final class Configuration {
 	 */
 	public void registerConfigurableObject(final ConfigurationInterface co,
 			final Set<String> groupNames) throws ConfigurationException {
-		Log.detail("Register '%s' with '%s' to '%s'", co, groupNames, super
-				.toString());
+		Log.detail("Register '%s' with '%s' to '%s'", co, groupNames,
+				super.toString());
 		if (configObjects.contains(co))
 			throw new IllegalStateException("Already registered");
 		for (final String groupName : groupNames)
@@ -164,10 +164,10 @@ public final class Configuration {
 		// concurrent modification is possible if one of co's methods call
 		// registerConfigurableObject() again, so we have to split into feed and
 		// keep lists first
-		final List<Group> groupsKeep = new ArrayList<Group>(groupsUnassigned
-				.size());
-		final List<Group> groupsFeed = new ArrayList<Group>(groupsUnassigned
-				.size());
+		final List<Group> groupsKeep = new ArrayList<Group>(
+				groupsUnassigned.size());
+		final List<Group> groupsFeed = new ArrayList<Group>(
+				groupsUnassigned.size());
 		for (final Group group : groupsUnassigned)
 			if (groupNames.contains(group.getName()))
 				groupsFeed.add(group);
@@ -397,12 +397,12 @@ public final class Configuration {
 			else
 				value.setFromStrings(readList(in, nr));
 		} catch (final ConfigurationException e) {
-			Log.warn("Failed to read value '%s' from '%s': '%s'", label, group
-					.getName(), e.getMessage());
+			Log.warn("Failed to read value '%s' from '%s': '%s'", label,
+					group.getName(), e.getMessage());
 		}
 		if (isUnknown)
-			Log.error("Ignoring unknown value '%s' of group '%s'", value, group
-					.getName());
+			Log.error("Ignoring unknown value '%s' of group '%s'", value,
+					group.getName());
 		else
 			group.set(value);
 	}

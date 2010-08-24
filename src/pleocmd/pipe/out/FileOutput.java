@@ -108,8 +108,8 @@ public final class FileOutput extends Output { // NO_UCD
 
 	@Override
 	protected void init0() throws IOException {
-		Log.detail("Opening file '%s' for output of type '%s'", cfgFile
-				.getContent(), cfgType.getEnum());
+		Log.detail("Opening file '%s' for output of type '%s'",
+				cfgFile.getContent(), cfgType.getEnum());
 		out = new DataOutputStream(new FileOutputStream(cfgFile.getContent()));
 	}
 
@@ -139,22 +139,22 @@ public final class FileOutput extends Output { // NO_UCD
 		case Ascii:
 			data.writeToAscii(out, true);
 			if (Log.canLogDetail())
-				Log.detail("<html>Written to file: %s", StringManip
-						.printSyntaxHighlightedAscii(data));
+				Log.detail("<html>Written to file: %s",
+						StringManip.printSyntaxHighlightedAscii(data));
 			break;
 		case Binary:
 			data.writeToBinary(out);
 			if (Log.canLogDetail())
-				Log.detail("<html>Written to file: %s", StringManip
-						.printSyntaxHighlightedBinary(data));
+				Log.detail("<html>Written to file: %s",
+						StringManip.printSyntaxHighlightedBinary(data));
 			break;
 		case AsciiOriginal:
 			if (lastRoot != (root = data.getRoot())) {
 				lastRoot = root;
 				root.writeToAscii(out, true);
 				if (Log.canLogDetail())
-					Log.detail("<html>Written to file: %s", StringManip
-							.printSyntaxHighlightedAscii(root));
+					Log.detail("<html>Written to file: %s",
+							StringManip.printSyntaxHighlightedAscii(root));
 			}
 			break;
 		case BinaryOriginal:
@@ -162,8 +162,8 @@ public final class FileOutput extends Output { // NO_UCD
 				lastRoot = root;
 				root.writeToBinary(out);
 				if (Log.canLogDetail())
-					Log.detail("<html>Written to file: %s", StringManip
-							.printSyntaxHighlightedBinary(root));
+					Log.detail("<html>Written to file: %s",
+							StringManip.printSyntaxHighlightedBinary(root));
 			}
 			break;
 		case PleoMonitorCommands:
@@ -200,8 +200,8 @@ public final class FileOutput extends Output { // NO_UCD
 		if (isConnected())
 			for (final Input in : getPipe().getInputList())
 				if (in instanceof FileInput
-						&& ((FileInput) in).getCfgFile().getContent().equals(
-								file))
+						&& ((FileInput) in).getCfgFile().getContent()
+								.equals(file))
 					return String.format(
 							"Same file has already been specified by '%s'", in);
 
@@ -209,8 +209,8 @@ public final class FileOutput extends Output { // NO_UCD
 			return file.canWrite() ? null : String.format(
 					"Cannot write to '%s'", file);
 		return file.getParentFile() != null && file.getParentFile().canWrite() ? null
-				: String.format("Cannot create a file in '%s'", file
-						.getParentFile());
+				: String.format("Cannot create a file in '%s'",
+						file.getParentFile());
 	}
 
 	@Override

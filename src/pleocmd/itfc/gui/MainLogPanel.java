@@ -129,10 +129,11 @@ final class MainLogPanel extends JPanel {
 				File file = fc.getSelectedFile();
 				if (!file.getName().contains(".")
 						&& fc.getFileFilter() instanceof FileNameExtensionFilter)
-					file = new File(file.getPath()
-							+ "."
-							+ ((FileNameExtensionFilter) fc.getFileFilter())
-									.getExtensions()[0]);
+					file = new File(
+							file.getPath()
+									+ "."
+									+ ((FileNameExtensionFilter) fc
+											.getFileFilter()).getExtensions()[0]);
 				logModel.writeToFile(file);
 			} catch (final IOException exc) {
 				Log.error(exc);

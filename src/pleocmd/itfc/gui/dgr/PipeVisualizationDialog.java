@@ -73,8 +73,8 @@ public final class PipeVisualizationDialog extends JDialog implements
 		// Add DataSets
 		dataSets = new ArrayList<DiagramDataSet>(dataSetCount);
 		for (int i = 0; i < dataSetCount; ++i) {
-			final DiagramDataSet ds = new DiagramDataSet(diagram, String
-					.format("#%d", i + 1));
+			final DiagramDataSet ds = new DiagramDataSet(diagram,
+					String.format("#%d", i + 1));
 			ds.setValuePerUnitX(1000);
 			dataSets.add(ds);
 		}
@@ -139,8 +139,8 @@ public final class PipeVisualizationDialog extends JDialog implements
 
 		// make sure that the number of DataSets is correct
 		while (dataSetCount > dataSets.size()) {
-			final DiagramDataSet ds = new DiagramDataSet(diagram, String
-					.format("#%d", dataSets.size() + 1));
+			final DiagramDataSet ds = new DiagramDataSet(diagram,
+					String.format("#%d", dataSets.size() + 1));
 			ds.setValuePerUnitX(1000);
 			dataSets.add(ds);
 		}

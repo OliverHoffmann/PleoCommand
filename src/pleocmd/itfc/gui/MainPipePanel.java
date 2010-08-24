@@ -114,8 +114,8 @@ public final class MainPipePanel extends JPanel {
 		Log.detail("GUI-Frame starts configuration");
 		if (cfgDialog == null) {
 			cfgDialog = new PipeConfigDialog(MainFrame.the().getPipe());
-			pipeFlowVisualization = new PipeFlowVisualization(cfgDialog
-					.getBoard());
+			pipeFlowVisualization = new PipeFlowVisualization(
+					cfgDialog.getBoard());
 		} else
 			cfgDialog.toFront();
 	}

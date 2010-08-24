@@ -96,16 +96,16 @@ public final class ConsoleOutput extends Output {
 		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 		data.writeToBinary(new DataOutputStream(out));
 		if (MainFrame.hasGUI())
-			Log.consoleOut2(out.toString("ISO-8859-1"), StringManip
-					.printSyntaxHighlightedBinary(data));
+			Log.consoleOut2(out.toString("ISO-8859-1"),
+					StringManip.printSyntaxHighlightedBinary(data));
 		else
 			Log.consoleOut(out.toString("ISO-8859-1"));
 	}
 
 	private static void printAscii(final Data data) throws IOException {
 		if (MainFrame.hasGUI())
-			Log.consoleOut2(data.asString(), StringManip
-					.printSyntaxHighlightedAscii(data));
+			Log.consoleOut2(data.asString(),
+					StringManip.printSyntaxHighlightedAscii(data));
 		else
 			Log.consoleOut(data.asString());
 	}

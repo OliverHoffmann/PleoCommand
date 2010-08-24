@@ -39,8 +39,8 @@ public final class ExpressionParser {
 			try {
 				System.loadLibrary("ExprParser");
 			} catch (final UnsatisfiedLinkError e) {
-				Log.error(e, "Cannot find external library in '%s'", System
-						.getProperty("java.library.path"));
+				Log.error(e, "Cannot find external library in '%s'",
+						System.getProperty("java.library.path"));
 			}
 		}
 

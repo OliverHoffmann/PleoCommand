@@ -92,8 +92,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 	 */
 	public PleoCommunication(final CommPortIdentifier portID) {
 		this.portID = portID;
-		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(), portID
-				.getCurrentOwner());
+		Log.detail("Bound to port '%s' owned by '%s'", portID.getName(),
+				portID.getCurrentOwner());
 	}
 
 	/**
@@ -129,8 +129,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 		close();
 		Log.detail("Connecting");
 		try {
-			port = (SerialPort) portID.open("PleoCommand", CFG_OPEN_TIMEOUT
-					.getContent());
+			port = (SerialPort) portID.open("PleoCommand",
+					CFG_OPEN_TIMEOUT.getContent());
 		} catch (final PortInUseException e) {
 			throw new IOException("Port already in use");
 		}
@@ -225,7 +225,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 			if (++cnt % 4 == 0)
 				Log.detail("Waiting for answer since %d ms - got %d chars yet",
 						wait, inBuffer.length());
-			if (wait > CFG_ANSWER_TIMEOUT.getContent()) //
+			if (wait > CFG_ANSWER_TIMEOUT.getContent())
+				//
 				// no response within a few seconds =>
 				// handle as unexpected end of received data
 				throw new TimeoutException(String.format(
@@ -238,8 +239,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 				return null;
 			}
 		}
-		Log.detail("Received answer with a length of %d chars", inBuffer
-				.length());
+		Log.detail("Received answer with a length of %d chars",
+				inBuffer.length());
 		return inBuffer.toString();
 	}
 
@@ -316,12 +317,12 @@ public final class PleoCommunication implements SerialPortEventListener {
 			return String.format("'%s' with %d %d %d %d @ "
 					+ "EOI %d flowctrl %d in_size %d out_size %d "
 					+ "parity_err %d rcv_framing %d rcv_trshld %d "
-					+ "rcv_timeout %d", port, port.getBaudRate(), port
-					.getDataBits(), port.getStopBits(), port.getParity(), port
-					.getEndOfInputChar(), port.getFlowControlMode(), port
-					.getInputBufferSize(), port.getOutputBufferSize(), port
-					.getParityErrorChar(), port.getReceiveFramingByte(), port
-					.getReceiveThreshold(), port.getReceiveTimeout());
+					+ "rcv_timeout %d", port, port.getBaudRate(),
+					port.getDataBits(), port.getStopBits(), port.getParity(),
+					port.getEndOfInputChar(), port.getFlowControlMode(),
+					port.getInputBufferSize(), port.getOutputBufferSize(),
+					port.getParityErrorChar(), port.getReceiveFramingByte(),
+					port.getReceiveThreshold(), port.getReceiveTimeout());
 		} catch (final UnsupportedCommOperationException e) {
 			Log.error(e);
 			return "[Exception while fetching port information]";
@@ -343,8 +344,8 @@ public final class PleoCommunication implements SerialPortEventListener {
 		@Override
 		@SuppressWarnings("synthetic-access")
 		public Group getSkeleton(final String groupName) {
-			return new Group(groupName).add(CFG_OPEN_TIMEOUT).add(
-					CFG_ANSWER_TIMEOUT).add(CFG_BAUDRATE);
+			return new Group(groupName).add(CFG_OPEN_TIMEOUT)
+					.add(CFG_ANSWER_TIMEOUT).add(CFG_BAUDRATE);
 		}
 
 		@Override

@@ -109,11 +109,11 @@ public final class StatedIntervalConverter extends Converter { // NO_UCD
 		try {
 			return new Data(Data.createFromAscii(cfg.getContent()), parent);
 		} catch (final IOException e) {
-			throw new ConverterException(this, true, e, "Invalid %s", cfg
-					.getLabel());
+			throw new ConverterException(this, true, e, "Invalid %s",
+					cfg.getLabel());
 		} catch (final FormatException e) {
-			throw new ConverterException(this, true, e, "Invalid %s", cfg
-					.getLabel());
+			throw new ConverterException(this, true, e, "Invalid %s",
+					cfg.getLabel());
 		}
 	}
 

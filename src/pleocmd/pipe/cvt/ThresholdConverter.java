@@ -193,11 +193,15 @@ public final class ThresholdConverter extends Converter { // NO_UCD
 
 	@Override
 	protected String getShortConfigDescr0() {
-		return String.format("|>%s±%s| => %s : %s", cfgThreshold.asString(),
-				String.valueOf(cfgMarginalArea.getContent() / 2), cfgReturnBool
-						.getContent() ? "false" : cfgValueBelow.asString(),
-				cfgReturnBool.getContent() ? "true" : cfgValueAbove
-						.getContent() > 0 ? cfgValueAbove.asString() : "<cur>");
+		return String
+				.format("|>%s±%s| => %s : %s",
+						cfgThreshold.asString(),
+						String.valueOf(cfgMarginalArea.getContent() / 2),
+						cfgReturnBool.getContent() ? "false" : cfgValueBelow
+								.asString(),
+						cfgReturnBool.getContent() ? "true" : cfgValueAbove
+								.getContent() > 0 ? cfgValueAbove.asString()
+								: "<cur>");
 	}
 
 	@Override

@@ -87,8 +87,8 @@ import pleocmd.itfc.gui.help.HelpLoader;
 import pleocmd.itfc.gui.icons.IconLoader;
 import pleocmd.pipe.Pipe;
 import pleocmd.pipe.PipePart;
-import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.PipePart.HelpKind;
+import pleocmd.pipe.PipePartDetection;
 import pleocmd.pipe.cvt.Converter;
 import pleocmd.pipe.in.Input;
 import pleocmd.pipe.out.Output;
@@ -310,8 +310,8 @@ final class PipeConfigBoard extends JPanel {
 
 		idxMenuDelPartConn = menu.getSubElements().length;
 		final JMenuItem itemDelPartConn = new JMenuItem(
-				"Delete Connections Of This PipePart", IconLoader
-						.getIcon("del-connection-all"));
+				"Delete Connections Of This PipePart",
+				IconLoader.getIcon("del-connection-all"));
 		itemDelPartConn.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(final ActionEvent e) {
@@ -400,8 +400,8 @@ final class PipeConfigBoard extends JPanel {
 
 	protected void removeCurrentPartsConnections() {
 		if (hasCurrentPart() && ensureModifyable()) {
-			final Set<PipePart> copy = new HashSet<PipePart>(p.currentPart
-					.getConnectedPipeParts());
+			final Set<PipePart> copy = new HashSet<PipePart>(
+					p.currentPart.getConnectedPipeParts());
 			try {
 				for (final PipePart pp : copy)
 					p.currentPart.disconnectFromPipePart(pp);
@@ -514,10 +514,11 @@ final class PipeConfigBoard extends JPanel {
 		File fileTXT = fc.getSelectedFile();
 		if (!fileTXT.getName().contains(".")
 				&& fc.getFileFilter() instanceof FileNameExtensionFilter)
-			fileTXT = new File(fileTXT.getPath()
-					+ "."
-					+ ((FileNameExtensionFilter) fc.getFileFilter())
-							.getExtensions()[0]);
+			fileTXT = new File(
+					fileTXT.getPath()
+							+ "."
+							+ ((FileNameExtensionFilter) fc.getFileFilter())
+									.getExtensions()[0]);
 
 		exportBoardToFile(filePNG, fileTXT);
 	}
@@ -787,8 +788,8 @@ final class PipeConfigBoard extends JPanel {
 
 	private void unionConnection(final Rectangle r, final PipePart pp) {
 		final Point pt = new Point();
-		BoardPainter.calcConnectorPositions(p.currentPart.getGuiPosition(), pp
-				.getGuiPosition(), null, pt);
+		BoardPainter.calcConnectorPositions(p.currentPart.getGuiPosition(),
+				pp.getGuiPosition(), null, pt);
 		Rectangle2D.union(r, new Rectangle(pt.x, pt.y, 0, 0), r);
 	}
 
@@ -1080,8 +1081,8 @@ final class PipeConfigBoard extends JPanel {
 		}
 
 		final String helpFile = pp.getHelpFile();
-		final JButton btnHelp = lb.addButton(Button.Help, Layouter.help(dlg,
-				helpFile));
+		final JButton btnHelp = lb.addButton(Button.Help,
+				Layouter.help(dlg, helpFile));
 		btnHelp.setEnabled(HelpLoader.isHelpAvailable(helpFile));
 		lb.addSpacer();
 		dlg.getRootPane().setDefaultButton(
@@ -1307,8 +1308,8 @@ final class PipeConfigBoard extends JPanel {
 		if (icoName == null)
 			icoName = pp.getClass().getSimpleName() + "-icon.png";
 		sb.append(String.format("\n\\subsubsection*{\\protect\\mbox{\\protect"
-				+ "\\includegraphics[width=5mm]{%s}} %s}\n\n", icoName.replace(
-				".png", ""), StringManip.safeTex(pp.getName())));
+				+ "\\includegraphics[width=5mm]{%s}} %s}\n\n",
+				icoName.replace(".png", ""), StringManip.safeTex(pp.getName())));
 		sb.append(StringManip.safeTex(pp.getDescription()));
 		sb.append("\n\n");
 		sb.append("\\begin{longtable}{p{0.25\\textwidth} | "

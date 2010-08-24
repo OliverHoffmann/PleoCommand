@@ -80,8 +80,8 @@ public final class ConfigBounds extends ConfigValue {
 	@Override
 	public String asString() {
 		return String.format("%d, %d / %d x %d", (int) content.getX(),
-				(int) content.getY(), (int) content.getWidth(), (int) content
-						.getHeight());
+				(int) content.getY(), (int) content.getWidth(),
+				(int) content.getHeight());
 	}
 
 	@Override
@@ -93,10 +93,10 @@ public final class ConfigBounds extends ConfigValue {
 			final int index3 = string.indexOf('x');
 			if (index1 == -1 || index2 < index1 || index3 < index2)
 				throw new ConfigurationException("Invalid format: '%s'", string);
-			setContent(new Rectangle(Integer.valueOf(string
-					.substring(0, index1).trim()), Integer.valueOf(string
-					.substring(index1 + 1, index2).trim()), Integer
-					.valueOf(string.substring(index2 + 1, index3).trim()),
+			setContent(new Rectangle(
+					Integer.valueOf(string.substring(0, index1).trim()),
+					Integer.valueOf(string.substring(index1 + 1, index2).trim()),
+					Integer.valueOf(string.substring(index2 + 1, index3).trim()),
 					Integer.valueOf(string.substring(index3 + 1).trim())));
 		} catch (final NumberFormatException e) {
 			throw new ConfigurationException("Invalid number in '%s'", string);

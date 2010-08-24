@@ -106,8 +106,8 @@ public final class ErrorDialog extends JDialog implements
 		lay.addWholeLine(spErrorPanel, true);
 		spErrorPanel.setBorder(null);
 
-		lay.addButton(Button.Help, Layouter.help(this, getClass()
-				.getSimpleName()));
+		lay.addButton(Button.Help,
+				Layouter.help(this, getClass().getSimpleName()));
 		lay.addSpacer();
 		lay.addButton("Reset", "edit-clear",
 				"Clear the list of suppressed error messages", new Runnable() {

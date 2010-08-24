@@ -59,8 +59,8 @@ public final class SingleJointMovement extends Converter { // NO_UCD
 	protected void initVisualize0() {
 		final DiagramDataSet ds = getVisualizeDataSet(0);
 		if (ds != null)
-			ds.setLabel(String.format("Angle for Joint %d", cfgJointNumber
-					.getContent()));
+			ds.setLabel(String.format("Angle for Joint %d",
+					cfgJointNumber.getContent()));
 	}
 
 	@Override

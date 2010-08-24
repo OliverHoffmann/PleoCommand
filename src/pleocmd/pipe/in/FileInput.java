@@ -147,8 +147,8 @@ public final class FileInput extends Input { // NO_UCD
 			try {
 				final Data data = Data.createFromAscii(in);
 				if (Log.canLogDetail())
-					Log.detail("<html>Read from file: %s", StringManip
-							.printSyntaxHighlightedAscii(data));
+					Log.detail("<html>Read from file: %s",
+							StringManip.printSyntaxHighlightedAscii(data));
 				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
@@ -158,8 +158,8 @@ public final class FileInput extends Input { // NO_UCD
 			try {
 				final Data data = Data.createFromBinary(in);
 				if (Log.canLogDetail())
-					Log.detail("<html>Read from file: %s", StringManip
-							.printSyntaxHighlightedBinary(data));
+					Log.detail("<html>Read from file: %s",
+							StringManip.printSyntaxHighlightedBinary(data));
 				return data;
 			} catch (final FormatException e) {
 				throw new InputException(this, false, e,
@@ -194,11 +194,10 @@ public final class FileInput extends Input { // NO_UCD
 		if (isConnected())
 			for (final Output out : getPipe().getOutputList())
 				if (out instanceof FileOutput
-						&& ((FileOutput) out).getCfgFile().getContent().equals(
-								file))
+						&& ((FileOutput) out).getCfgFile().getContent()
+								.equals(file))
 					return String
-							.format(
-									"Same file has already been specified by '%s'",
+							.format("Same file has already been specified by '%s'",
 									out);
 
 		return file.canRead() ? null : String.format("Cannot read from '%s'",

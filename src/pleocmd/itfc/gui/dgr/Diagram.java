@@ -218,11 +218,11 @@ public final class Diagram extends JPanel {
 
 		// cache x-axis dimension
 		final int unitWidth1 = g2.getFontMetrics().stringWidth(
-				String.format("%.2f %s", yAxis.getCachedMinVisUnit(), yAxis
-						.getUnitName()));
+				String.format("%.2f %s", yAxis.getCachedMinVisUnit(),
+						yAxis.getUnitName()));
 		final int unitWidth2 = g2.getFontMetrics().stringWidth(
-				String.format("%.2f %s", yAxis.getCachedMaxVisUnit(), yAxis
-						.getUnitName()));
+				String.format("%.2f %s", yAxis.getCachedMaxVisUnit(),
+						yAxis.getUnitName()));
 		final int unitWidth = Math.max(unitWidth1, unitWidth2);
 		final int w = areaWidth - 1 - unitWidth - BORDER;
 		xAxis.updateCache(w);
@@ -383,8 +383,8 @@ public final class Diagram extends JPanel {
 		drawText(g2, vertical ? new Rectangle(-unitSpace, (int) begin,
 				unitSpace, (int) unitSize) : new Rectangle((int) begin,
 				-unitSpace, (int) unitSize, unitSpace), vertical ? AlignH.Right
-				: AlignH.Center, vertical ? AlignV.Center : AlignV.Top, String
-				.format("%.2f %s", val, unitName));
+				: AlignH.Center, vertical ? AlignV.Center : AlignV.Top,
+				String.format("%.2f %s", val, unitName));
 	}
 
 	private void drawAxis(final Graphics2D g2, final DiagramAxis axis,
@@ -399,8 +399,8 @@ public final class Diagram extends JPanel {
 			unitPen.assignTo(g2);
 			final double pos = axis.unitToPixel(u);
 			drawAxisLine(g2, vertical, pos, axisThickness);
-			drawAxisText(g2, vertical, pos, unitSpace, ppg, u, axis
-					.getUnitName());
+			drawAxisText(g2, vertical, pos, unitSpace, ppg, u,
+					axis.getUnitName());
 			if (ppsg >= MIN_GRID_DELTA) {
 				subUnitPen.assignTo(g2);
 				for (int s = 1; s < spu; ++s)

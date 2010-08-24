@@ -88,8 +88,8 @@ public final class BoolConverter extends Converter { // NO_UCD
 
 	@Override
 	protected String getShortConfigDescr0() {
-		return String.format("%s %s?", cfgComparator.asString(), cfgConstant
-				.asString());
+		return String.format("%s %s?", cfgComparator.asString(),
+				cfgConstant.asString());
 	}
 
 	@Override

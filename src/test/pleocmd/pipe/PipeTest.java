@@ -86,12 +86,12 @@ public class PipeTest extends Testcases {
 				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
 				+ "SC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\nSC|FAIL\n"
 				+ "[P05]SC|ECHO|HighPrio\n", -1, -1, 23, 0, -1, 0, 0, 1, -1, 0);
-		assertTrue("Expected 1 output and 22 drops (slow computer) or "
-				+ "2 outputs and 21 drops (fast computer): ", fb
-				.getDataOutputCount() == 2
-				&& fb.getDropCount() == 21
-				|| fb.getDataOutputCount() == 1
-				&& fb.getDropCount() == 22);
+		assertTrue(
+				"Expected 1 output and 22 drops (slow computer) or "
+						+ "2 outputs and 21 drops (fast computer): ",
+				fb.getDataOutputCount() == 2 && fb.getDropCount() == 21
+						|| fb.getDataOutputCount() == 1
+						&& fb.getDropCount() == 22);
 
 		Log.consoleOut("Test timed execution (need to wait)");
 		fb = testSimplePipe(
@@ -247,22 +247,22 @@ public class PipeTest extends Testcases {
 			assertEquals("Temporary Error Count is wrong: ", tempErr, fb
 					.getTemporaryErrors().size());
 		if (intrCnt != -1)
-			assertEquals("Interrupt Count is wrong: ", intrCnt, fb
-					.getInterruptionCount());
+			assertEquals("Interrupt Count is wrong: ", intrCnt,
+					fb.getInterruptionCount());
 		if (dropCnt != -1)
 			assertEquals("Drop Count is wrong: ", dropCnt, fb.getDropCount());
 		if (behindCnt != -1)
-			assertEquals("Behind Count is wrong: ", behindCnt, fb
-					.getSignificantBehindCount());
+			assertEquals("Behind Count is wrong: ", behindCnt,
+					fb.getSignificantBehindCount());
 		if (dataIn != -1)
-			assertEquals("Data Input Count is wrong: ", dataIn, fb
-					.getDataInputCount());
+			assertEquals("Data Input Count is wrong: ", dataIn,
+					fb.getDataInputCount());
 		if (dataCvt != -1)
-			assertEquals("Data Conversion Count is wrong: ", dataCvt, fb
-					.getDataConvertedCount());
+			assertEquals("Data Conversion Count is wrong: ", dataCvt,
+					fb.getDataConvertedCount());
 		if (dataOut != -1)
-			assertEquals("Data Output Count is wrong: ", dataOut, fb
-					.getDataOutputCount());
+			assertEquals("Data Output Count is wrong: ", dataOut,
+					fb.getDataOutputCount());
 		if (minTime != -1)
 			assertTrue("Took not long enough", fb.getElapsed() >= minTime);
 		if (maxTime != -1)

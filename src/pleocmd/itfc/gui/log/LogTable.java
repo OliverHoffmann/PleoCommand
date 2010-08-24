@@ -132,8 +132,8 @@ public final class LogTable extends JTable {
 		final PrintWriter pw = new PrintWriter(sw);
 		bt.printStackTrace(pw); // CS_IGNORE
 		pw.flush();
-		return String.format("<html>%s</html>", sw.toString().replace("<",
-				"&lt;").replace("\n", "<br>"));
+		return String.format("<html>%s</html>",
+				sw.toString().replace("<", "&lt;").replace("\n", "<br>"));
 	}
 
 	protected void updateRowHeights() {
@@ -142,8 +142,8 @@ public final class LogTable extends JTable {
 		minRowHeight = prepareRenderer(getCellRenderer(0, 0), 0, 0)
 				.getPreferredSize().height;
 		for (int i = getRowCount() - 1; i >= 0; --i)
-			setRowHeight(i, 2 + Math.max(minRowHeight, prepareRenderer(tcr, i,
-					3).getPreferredSize().height));
+			setRowHeight(i, 2 + Math.max(minRowHeight,
+					prepareRenderer(tcr, i, 3).getPreferredSize().height));
 	}
 
 	public void addLog(final Log log) {
@@ -158,8 +158,9 @@ public final class LogTable extends JTable {
 		if (minRowHeight == 0)
 			minRowHeight = prepareRenderer(getCellRenderer(0, 0), 0, 0)
 					.getPreferredSize().height;
-		setRowHeight(row, 2 + Math.max(minRowHeight, prepareRenderer(
-				getCellRenderer(row, 3), row, 3).getPreferredSize().height));
+		setRowHeight(row, 2 + Math.max(minRowHeight,
+				prepareRenderer(getCellRenderer(row, 3), row, 3)
+						.getPreferredSize().height));
 
 		EventQueue.invokeLater(new Runnable() {
 			@Override
