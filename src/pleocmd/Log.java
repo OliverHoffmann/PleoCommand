@@ -25,7 +25,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import pleocmd.Log.Type;
 import pleocmd.itfc.gui.ErrorDialog;
 import pleocmd.itfc.gui.MainFrame;
 
