@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -54,6 +56,9 @@ import pleocmd.pipe.PipePartDetection;
 public final class MainFrame extends JFrame implements ConfigurationInterface {
 
 	private static final long serialVersionUID = 7174844214646208915L;
+
+	private static final Timer AUTOSAVE_TIMER = new Timer(
+			"Configuration AutoSave Timer", true);
 
 	private static MainFrame guiFrame;
 
@@ -151,6 +156,18 @@ public final class MainFrame extends JFrame implements ConfigurationInterface {
 		Log.detail("GUI-Frame created");
 
 		PipePartDetection.checkStaticValidity();
+
+		AUTOSAVE_TIMER.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				Log.detail("Auto-Saving configuration");
+				try {
+					Configuration.getMain().writeToDefaultFile();
+				} catch (final ConfigurationException e) {
+					Log.error(e);
+				}
+			}
+		}, 10000, 10000);
 	}
 
 	public void showModalGUI() {

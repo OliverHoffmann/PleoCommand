@@ -141,8 +141,9 @@ public final class Configuration {
 	 * @throws ConfigurationException
 	 *             if reading or writing to default file fails
 	 */
-	public void registerConfigurableObject(final ConfigurationInterface co,
-			final Set<String> groupNames) throws ConfigurationException {
+	public synchronized void registerConfigurableObject(
+			final ConfigurationInterface co, final Set<String> groupNames)
+			throws ConfigurationException {
 		Log.detail("Register '%s' with '%s' to '%s'", co, groupNames,
 				super.toString());
 		if (configObjects.contains(co))
@@ -208,8 +209,9 @@ public final class Configuration {
 	 * @throws ConfigurationException
 	 *             if reading or writing to default file fails
 	 */
-	public void registerConfigurableObject(final ConfigurationInterface co,
-			final String groupName) throws ConfigurationException {
+	public synchronized void registerConfigurableObject(
+			final ConfigurationInterface co, final String groupName)
+			throws ConfigurationException {
 		final Set<String> set = new HashSet<String>(1);
 		set.add(groupName);
 		registerConfigurableObject(co, set);
@@ -226,8 +228,8 @@ public final class Configuration {
 	 * @throws ConfigurationException
 	 *             if writing back configuration changes to default file fails
 	 */
-	public void unregisterConfigurableObject(final ConfigurationInterface co)
-			throws ConfigurationException {
+	public synchronized void unregisterConfigurableObject(
+			final ConfigurationInterface co) throws ConfigurationException {
 		Log.detail("Unregister '%s' from '%s'", co, super.toString());
 		if (!configObjects.contains(co))
 			throw new IllegalStateException("Not registered");
@@ -247,15 +249,17 @@ public final class Configuration {
 		configObjects.remove(co);
 	}
 
-	public void readFromDefaultFile() throws ConfigurationException {
+	public synchronized void readFromDefaultFile()
+			throws ConfigurationException {
 		readFromFile(DEFAULT_CONFIG_FILE);
 	}
 
-	public void readFromFile(final File file) throws ConfigurationException {
+	public synchronized void readFromFile(final File file)
+			throws ConfigurationException {
 		readFromFile(file, null);
 	}
 
-	public void readFromFile(final File file,
+	public synchronized void readFromFile(final File file,
 			final ConfigurationInterface coOnly) throws ConfigurationException {
 		try {
 			final BufferedReader in = new BufferedReader(new FileReader(file));
@@ -269,7 +273,7 @@ public final class Configuration {
 		}
 	}
 
-	public void readFromReader(final BufferedReader in,
+	public synchronized void readFromReader(final BufferedReader in,
 			final ConfigurationInterface coOnly) throws ConfigurationException,
 			IOException {
 		Log.detail("Reading configuration");
@@ -423,16 +427,17 @@ public final class Configuration {
 				"Missing line with '}' for end of value list");
 	}
 
-	public void writeToDefaultFile() throws ConfigurationException {
+	public synchronized void writeToDefaultFile() throws ConfigurationException {
 		writeToFile(DEFAULT_CONFIG_FILE);
 	}
 
-	public void writeToFile(final File file) throws ConfigurationException {
+	public synchronized void writeToFile(final File file)
+			throws ConfigurationException {
 		writeToFile(file, null);
 	}
 
-	public void writeToFile(final File file, final ConfigurationInterface coOnly)
-			throws ConfigurationException {
+	public synchronized void writeToFile(final File file,
+			final ConfigurationInterface coOnly) throws ConfigurationException {
 		try {
 			final FileWriter out = new FileWriter(file);
 			try {
@@ -445,7 +450,7 @@ public final class Configuration {
 		}
 	}
 
-	public void writeToWriter(final Writer out,
+	public synchronized void writeToWriter(final Writer out,
 			final ConfigurationInterface coOnly) throws IOException {
 		Log.detail("Writing configuration");
 		if (coOnly == null)
@@ -514,7 +519,7 @@ public final class Configuration {
 	}
 
 	@Override
-	public String toString() {
+	public synchronized String toString() {
 		final StringBuilder sb = new StringBuilder("Configuration");
 		sb.append(" Registered configurable objects: ");
 		sb.append(configObjects.toString());
@@ -531,31 +536,31 @@ public final class Configuration {
 		return res;
 	}
 
-	public List<Group> getGroupsUnassigned() {
+	public synchronized List<Group> getGroupsUnassigned() {
 		return Collections.unmodifiableList(groupsUnassigned);
 	}
 
-	public Group getGroupUnassigned(final String name) {
+	public synchronized Group getGroupUnassigned(final String name) {
 		for (final Group g : groupsUnassigned)
 			if (g.getName().equals(name)) return g;
 		return null;
 	}
 
-	public Group getGroupUnassignedSafe(final String name) {
+	public synchronized Group getGroupUnassignedSafe(final String name) {
 		for (final Group g : groupsUnassigned)
 			if (g.getName().equals(name)) return g;
 		return new Group(name);
 	}
 
-	public Map<String, ConfigurationInterface> getGroupsRegistered() {
+	public synchronized Map<String, ConfigurationInterface> getGroupsRegistered() {
 		return Collections.unmodifiableMap(groupsRegistered);
 	}
 
-	public Set<ConfigurationInterface> getConfigObjects() {
+	public synchronized Set<ConfigurationInterface> getConfigObjects() {
 		return Collections.unmodifiableSet(configObjects);
 	}
 
-	public boolean removeUnassignedGroup(final String name) {
+	public synchronized boolean removeUnassignedGroup(final String name) {
 		for (final Group g : groupsUnassigned)
 			if (g.getName().equals(name)) {
 				groupsUnassigned.remove(g);
@@ -564,7 +569,7 @@ public final class Configuration {
 		return false;
 	}
 
-	public boolean removeUnassignedGroup(final Group g) {
+	public synchronized boolean removeUnassignedGroup(final Group g) {
 		return groupsUnassigned.remove(g);
 	}
 
