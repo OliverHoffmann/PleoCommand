@@ -1,36 +1,28 @@
-FIX in zoom mode, some area hints and the section borders are not drawn correctly
-FIX "Application exited forcefully" still possible
-FIX empty Log queue on app exit if not already done (still?)
-ENH ExpressionConverter: missing Syntax Highlighting
-ENH auto-save configuration
-ENH RandomGenerator: plotting
-ENH Board: Comments, ConnectorPoints (*1)
-ENH display PipeParts in red if they permanently failed
-ENH blink PipeParts in red if they temporarily failed
-ENH "Copy PipePart" in board
-ENH Null-Output
-ENH add a NexusInput component
-ENH add a MatlabConverter component - maybe with http://code.google.com/p/matlabcontrol
-ENH support Drag&Drop in Diagram, allow user to combine diagrams in one window
-ENH DataAsciiConverter: Add special parsing for quoted strings ?
-ENH add javadoc
-ENH more Log.debug
-ENH document which classes are immutable
-MOD make all Data timed Data before writing to Output !!!
-MOD checkstyle: no exception handling in pipe's, only pass them thru
+FIX in high zoom mode, area hints and right section border are not drawn correctly
+FIX "Application exited forcefully" sometimes possible (still?)
 
+ENH ExpressionConverter: add Syntax Highlighting
+ENH Board: add Comments (*1)
+ENH Board: add ConnectorJoints (*1)
+ENH Board: display PipeParts in red if they permanently failed
+ENH Board: blink PipeParts in red if they temporarily failed
+ENH Board: add context-menu entry "Duplicate PipePart"
+ENH PipePart: add Null-Output
+ENH PipePart: add a NexusInput component
+ENH PipePart: add a MatlabConverter component - maybe with http://code.google.com/p/matlabcontrol
+ENH Diagram: allow user to combine multiple diagrams in one window
 
 
 *1)
-|---------------|
-|				|
-|---------------|
+|---------------|          /-------\
+|		In		| <------- |Comment|
+|---------------|          \-------/
 		|
 	   \|/					|-----------|
-		*------------------>|			|
+		*------------------>|	Out	2	|
 		|					|-----------|
 		|
 	   \|/
 |---------------|
-|				|
+|		Out 1	|
 |---------------|
